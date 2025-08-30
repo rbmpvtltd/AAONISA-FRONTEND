@@ -14,10 +14,10 @@
 //   );
 // }
 
-import VideoUploader from "@/src/components/video-uploader";
 import { Link } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   Image,
@@ -26,6 +26,7 @@ import {
   TouchableOpacity,
   View
 } from "react-native";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/Ionicons";
 
 
@@ -183,31 +184,34 @@ const HomePage: React.FC = () => {
 
   return (
     // <SafeAreaView style={{ flex: 1 }}>
-    // <FlatList
-    //   data={photos}
-    //   keyExtractor={(item) => item.id.toString()}
-    //   renderItem={renderItem}
-    //   pagingEnabled
-    //   snapToAlignment="start"
-    //   decelerationRate="fast"
-    //   onEndReached={fetchPhotos}
-    //   onEndReachedThreshold={0.7}
-    //   ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
-    //   initialNumToRender={5}
-    //   maxToRenderPerBatch={5}
-    //   windowSize={5}
-    //   removeClippedSubviews
-    //   getItemLayout={(_, index) => ({
-    //     length: ITEM_HEIGHT,
-    //     offset: ITEM_HEIGHT * index,
-    //     index,
-    //   })}
-    // />
+    <GestureHandlerRootView>
+
+      <FlatList
+        data={photos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        pagingEnabled
+        snapToAlignment="start"
+        decelerationRate="fast"
+        onEndReached={fetchPhotos}
+        onEndReachedThreshold={0.7}
+        ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={5}
+        removeClippedSubviews
+        getItemLayout={(_, index) => ({
+          length: ITEM_HEIGHT,
+          offset: ITEM_HEIGHT * index,
+          index,
+        })}
+      />
+    </GestureHandlerRootView>
     // </SafeAreaView>
 
     // <Audio />
     // <VideoScreen/>
-    <VideoUploader />
+    // <VideoUploader />
   );
 };
 
