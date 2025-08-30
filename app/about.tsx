@@ -1,25 +1,26 @@
 import { Link } from 'expo-router'
 import React from 'react'
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native'
+import { SafeAreaView } from 'react-native-safe-area-context'
 
 export default function about() {
     return (
-        <View>
-            <Text>about</Text>
-            <Link href="/" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Go To Feed</Text>
-                </TouchableOpacity>
-            </Link>
-            <Link href="/profile/[id]" asChild>
-                <TouchableOpacity style={styles.button}>
-                    <Text style={styles.buttonText}>Go To Profile</Text>
-                </TouchableOpacity>
-            </Link>
-        </View>
+        <SafeAreaView style={{ flex: 1 }}>
+            <View>
+                <Link href="/" asChild>
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText}>Go To Feed</Text>
+                    </TouchableOpacity>
+                </Link>
+                <Link href="/profile/[id]" asChild>
+                    <TouchableOpacity style={styles.button}>
+                        <Text style={styles.buttonText}>Go To Profile</Text>
+                    </TouchableOpacity>
+                </Link>
+            </View>
+        </SafeAreaView>
     )
 }
-
 const styles = StyleSheet.create({
     button: {
         marginTop: 20,
