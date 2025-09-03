@@ -14,7 +14,6 @@
 //   );
 // }
 
-import { Link } from "expo-router";
 import React, { useCallback, useEffect, useState } from "react";
 import {
   ActivityIndicator,
@@ -27,10 +26,13 @@ import {
   View
 } from "react-native";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
 
 const { height } = Dimensions.get("window");
+const windowWidth = Dimensions.get("window").width;
+const windowHeight = Dimensions.get("window").height;
 const ITEM_HEIGHT = height * 0.8;
 
 interface Photo {
@@ -96,8 +98,6 @@ const PhotoItem = React.memo(
 
       {/* Title / Caption */}
       <Text style={styles.title}>{item.title}</Text>
-      <Link href="/about" style={{ marginBottom: 50, textAlign: 'center' }}>Go To Profile</Link>
-
     </View>
   )
 );
@@ -183,34 +183,33 @@ const HomePage: React.FC = () => {
   );
 
   return (
-    // <SafeAreaView style={{ flex: 1 }}>
-    <GestureHandlerRootView>
-
-      <FlatList
-        data={photos}
-        keyExtractor={(item) => item.id.toString()}
-        renderItem={renderItem}
-        pagingEnabled
-        snapToAlignment="start"
-        decelerationRate="fast"
-        onEndReached={fetchPhotos}
-        onEndReachedThreshold={0.7}
-        ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
-        initialNumToRender={5}
-        maxToRenderPerBatch={5}
-        windowSize={5}
-        removeClippedSubviews
-        getItemLayout={(_, index) => ({
-          length: ITEM_HEIGHT,
-          offset: ITEM_HEIGHT * index,
-          index,
-        })}
-      />
-    </GestureHandlerRootView>
-    // </SafeAreaView>
+    <SafeAreaView style={{ flex: 1 }}>
+      <GestureHandlerRootView>
+        <FlatList
+          data={photos}
+          keyExtractor={(item) => item.id.toString()}
+          renderItem={renderItem}
+          pagingEnabled
+          snapToAlignment="start"
+          decelerationRate="fast"
+          onEndReached={fetchPhotos}
+          onEndReachedThreshold={0.7}
+          ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
+          initialNumToRender={5}
+          maxToRenderPerBatch={5}
+          windowSize={5}
+          removeClippedSubviews
+          getItemLayout={(_, index) => ({
+            length: ITEM_HEIGHT,
+            offset: ITEM_HEIGHT * index,
+            index,
+          })}
+        />
+      </GestureHandlerRootView>
+    </SafeAreaView >
 
     // <Audio />
-    // <VideoScreen/>
+    // <VideoScreen />
     // <VideoUploader />
   );
 };
@@ -219,6 +218,7 @@ const styles = StyleSheet.create({
   reel: {
     height: ITEM_HEIGHT,
     backgroundColor: "#fff",
+    // width: windowWidth > 500 ? "30%" : "100%",
   },
   header: {
     flexDirection: "row",
@@ -232,7 +232,7 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.4)"
   },
   profileImage: {
-    width: 40,
+    width: windowWidth > 500 ? 50 : 40,
     height: 40,
     borderRadius: 20,
     marginRight: 10,
@@ -265,5 +265,4 @@ const styles = StyleSheet.create({
     justifyContent: "flex-start",
   }
 });
-
 export default HomePage;
