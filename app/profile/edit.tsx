@@ -23,10 +23,10 @@ interface ProfileData {
 
 const UserEditProfile = () => {
     const [profileData, setProfileData] = useState<ProfileData>({
-        username: 'adanan-chouhan',
-        name: 'adnan',
+        username: '',
+        name: '',
         password: '',
-        bio: 'hello',
+        bio: '',
         profilePicture: null,
         url: '',
     });
@@ -85,6 +85,7 @@ const UserEditProfile = () => {
     };
 
     const handleSave = () => {
+        // Save profile logic here
         Alert.alert('Profile Saved', 'Your profile has been updated successfully!');
     };
 
@@ -106,6 +107,7 @@ const UserEditProfile = () => {
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Edit Profile</Text>
 
+            {/* Profile Picture Section */}
             <View style={styles.profilePictureContainer}>
                 <TouchableOpacity onPress={toggleImageOptions}>
                     <View style={styles.profileImageWrapper}>
@@ -149,6 +151,7 @@ const UserEditProfile = () => {
                 )}
             </View>
 
+            {/* Username Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Username</Text>
                 <TextInput
@@ -158,6 +161,7 @@ const UserEditProfile = () => {
                 />
             </View>
 
+            {/* Name Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Name</Text>
                 <TextInput
@@ -167,6 +171,7 @@ const UserEditProfile = () => {
                 />
             </View>
 
+            {/* Password Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Password</Text>
                 <TextInput
@@ -178,6 +183,7 @@ const UserEditProfile = () => {
                 />
             </View>
 
+            {/* Bio Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Bio</Text>
                 <TextInput
@@ -185,13 +191,14 @@ const UserEditProfile = () => {
                     value={profileData.bio}
                     onChangeText={handleBioChange}
                     multiline
-                    maxLength={100}
+                    maxLength={50}
                 />
                 <Text style={styles.characterCount}>
-                    {characterCount.bio}/100
+                    {characterCount.bio}/50
                 </Text>
             </View>
 
+            {/* URL Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Add URL</Text>
                 <TextInput
@@ -199,14 +206,15 @@ const UserEditProfile = () => {
                     value={profileData.url}
                     onChangeText={handleUrlChange}
                     placeholder="https://example.com"
-                    maxLength={20}
+                    maxLength={50}
                     keyboardType="url"
                 />
                 <Text style={styles.characterCount}>
-                    {characterCount.url}/20
+                    {characterCount.url}/50
                 </Text>
             </View>
 
+            {/* Save Button */}
             <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
                 <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
