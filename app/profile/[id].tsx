@@ -15,11 +15,11 @@ import {
 // ===== Types =====
 interface User {
     id: string;
-    idName: string;
+    userName: string;
     name: string;
     bio: string;
-    avatar: string;
-    postsCount: number;
+    profilePicture: string;
+    posts: number;
     followers: number;
     following: number;
     likes: number;
@@ -33,12 +33,12 @@ interface Post {
 
 const user: User = {
     id: "u1",
-    idName: "mr._adnan_47",
+    userName: "mr._adnan_47",
     name: "Adnan Chouhan",
     bio: "Hello everyOne, I am Adnan Chouhan.",
-    avatar:
+    profilePicture:
         "https://wac-cdn.atlassian.com/dam/jcr:ba03a215-2f45-40f5-8540-b2015223c918/Max-R_Headshot%20(1).jpg?cdnVersion=2928",
-    postsCount: 120,
+    posts: 120,
     followers: 5600,
     following: 180,
     likes: 1511,
@@ -53,9 +53,9 @@ const posts: Post[] = Array.from({ length: 16 }).map((_, i) => ({
 // ===== Components =====
 
 // --- Top Header (Username + Menu) ---
-const TopHeader: React.FC<{ idName: string }> = ({ idName }) => (
+const TopHeader: React.FC<{ userName: string }> = ({ userName }) => (
     <View style={styles.topHeader}>
-        <Text style={styles.topHeaderText}>{idName}</Text>
+        <Text style={styles.topHeaderText}>{userName}</Text>
         <View style={styles.topHeaderIcons}>
             <MaterialIcons name="menu" size={24} color="#black" />
         </View>
@@ -64,10 +64,10 @@ const TopHeader: React.FC<{ idName: string }> = ({ idName }) => (
 
 // const ProfileHeader: React.FC<{ user: User }> = ({ user }) => (
 //     <View style={styles.header}>
-//         <Image source={{ uri: user.avatar }} style={styles.avatar} />
+//         <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
 //         <View style={styles.stats}>
 //             <View style={styles.stat}>
-//                 <Text style={styles.statNumber}>{user.postsCount}</Text>
+//                 <Text style={styles.statNumber}>{user.posts}</Text>
 //                 <Text style={styles.statLabel}>Posts</Text>
 //             </View>
 //             <View style={styles.stat}>
@@ -84,10 +84,10 @@ const TopHeader: React.FC<{ idName: string }> = ({ idName }) => (
 
 const ProfileHeader: React.FC<{ user: User }> = ({ user }) => (
     <View style={styles.header}>
-        <Image source={{ uri: user.avatar }} style={styles.avatar} />
+        <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
         <View style={styles.stats}>
             <View style={styles.stat}>
-                <Text style={styles.statNumber}>{user.postsCount}</Text>
+                <Text style={styles.statNumber}>{user.posts}</Text>
                 <Text style={styles.statLabel}>Posts</Text>
             </View>
             <View style={styles.stat}>
@@ -158,7 +158,7 @@ const ProfileScreen: React.FC = () => {
     return (
         // <SafeAreaView style={{ flex: 1 }}>
         <View style={styles.container}>
-            <TopHeader idName={user.idName} />
+            <TopHeader userName={user.userName} />
             <ProfileHeader user={user} />
             <UserInfo user={user} />
             <Tabs />
@@ -200,7 +200,7 @@ const styles = StyleSheet.create({
     //     padding: 15,
     //     alignItems: "center",
     // },
-    // avatar: {
+    // profilePicture: {
     //     width: 80,
     //     height: 80,
     //     borderRadius: 40,
@@ -228,7 +228,7 @@ const styles = StyleSheet.create({
         padding: 15,
         alignItems: "center",
     },
-    avatar: {
+    profilePicture: {
         width: 80,
         height: 80,
         borderRadius: 40,
