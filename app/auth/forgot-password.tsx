@@ -4,7 +4,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
-import { forgetPassword } from "./api";
+import { forgetPassword, resetPassword } from "./api";
 
 // Zod Schema
 const forgotSchema = z.object({
@@ -40,7 +40,7 @@ const ForgotPassword = () => {
 
     const handleSendOtp = async () => {
         try {
-            const data = await forgetPassword({emailOrPhone});
+            const data = await forgetPassword({ emailOrPhone });
             console.log(data);
             if (data.success) {
                 setOtpSent(true);
@@ -66,16 +66,11 @@ const ForgotPassword = () => {
         }
 
         try {
-            const res = await fetch("http://localhost:4000/api/reset-password", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    emailOrPhone,
-                    otp: otp.join(""),
-                    newPassword,
-                }),
+            const data = await resetPassword({
+                emailOrPhone,
+                otp: otp.join(""),
+                newPassword,
             });
-            const data = await res.json();
             if (data.success) {
                 Alert.alert("Success", "Password reset successfully!");
                 router.push("/auth/login");

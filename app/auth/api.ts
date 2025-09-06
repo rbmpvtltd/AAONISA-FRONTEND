@@ -32,4 +32,26 @@ async function registerUser(reqBody: any) {
     return data;
 }
 
-export { forgetPassword, sendOtp, registerUser };
+async function resetPassword(reqBody: any) {
+    // const token = getToken();
+    const config = {
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const body = reqBody;
+    const apiUrl = createApiUrl('/auth/reset-password');
+    const { data } = await axios.post(apiUrl, body, config);
+    return data;
+}
+
+async function loginUser(reqBody: any) {
+    // const token = getToken();
+    const config = {
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const body = reqBody;
+    const apiUrl = createApiUrl('/auth/login');
+    const { data } = await axios.post(apiUrl, body, config);
+    return data;
+}
+
+export { forgetPassword, sendOtp, registerUser, resetPassword, loginUser };
