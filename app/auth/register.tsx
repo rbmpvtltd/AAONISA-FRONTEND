@@ -257,6 +257,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
+import { registerUser, sendOtp } from "./api";
 
 // Zod Schema
 const registerSchema = z.object({
@@ -295,12 +296,7 @@ const Register = () => {
     const handleSendOtp = async () => {
         try {
             // Call backend to send OTP
-            const res = await fetch("http://localhost:4000/api/send-otp", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ emailOrPhone }),
-            });
-            const data = await res.json();
+            const data = await sendOtp({emailOrPhone})
             if (data.success) {
                 setOtpSent(true);
                 Alert.alert("OTP Sent", "Check your email/phone for the OTP");
@@ -327,17 +323,12 @@ const Register = () => {
 
         try {
             //  Call backend to register
-            const res = await fetch("http://localhost:4000/api/register", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({
-                    emailOrPhone,
-                    username,
-                    password,
-                    otp: otp.join(""),
-                }),
+            const data = await registerUser({
+                emailOrPhone,
+                username,
+                password,
+                otp: otp.join(""),
             });
-            const data = await res.json();
             if (data.success) {
                 Alert.alert("Success", "Account created successfully!");
                 router.push("/auth/login");

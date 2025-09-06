@@ -76,6 +76,7 @@ import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
+import { loginUser } from "./api";
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -112,19 +113,14 @@ const Login = () => {
             password,
         });
 
-        if (!validation.success) {
-            Alert.alert("Validation Error", validation.error.issues[0].message);
-            return;
-        }
+        // if (!validation.success) {
+        //     Alert.alert("Validation Error", validation.error.issues[0].message);
+        //     return;
+        // }
 
         try {
             // Call backend API
-            const res = await fetch("http://localhost:4000/api/login", {
-                method: "POST",
-                headers: { "Content-Type": "application/json" },
-                body: JSON.stringify({ identifier, password }),
-            });
-            const data = await res.json();
+            const data = await loginUser({ identifier, password });
             if (data.success) {
                 Alert.alert("Success", "Logged in successfully!");
                 router.push("/");
