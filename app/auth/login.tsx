@@ -107,6 +107,7 @@ const Login = () => {
         }
     }, [response]);
 
+    
     const handleLogin = async () => {
         const validation = loginSchema.safeParse({
             identifier,
@@ -118,10 +119,12 @@ const Login = () => {
         //     return;
         // }
 
+
         try {
             // Call backend API
             const data = await loginUser({ identifier, password });
-            if (data.success) {
+            console.log(data)
+            if (data.message =="Login successful") {
                 Alert.alert("Success", "Logged in successfully!");
                 router.push("/");
             } else {

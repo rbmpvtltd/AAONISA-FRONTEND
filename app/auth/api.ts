@@ -1,12 +1,12 @@
-import axios from 'axios';
 import { createApiUrl } from '@/util';
+import axios from 'axios';
 
 async function forgetPassword(reqBody: any) {
     // const token = getToken();
     const config = {
         headers: { 'Content-Type': 'application/json' },
     };
-    const apiUrl = createApiUrl('/auth/send-forgot-otp');
+    const apiUrl = createApiUrl('/users/forgot-password');
     const { data } = await axios.post(apiUrl, reqBody, config);
     return data;
 }
@@ -16,7 +16,7 @@ async function sendOtp(reqBody: any) {
     const config = {
         headers: { 'Content-Type': 'application/json' },
     };
-    const apiUrl = createApiUrl('/auth/send-otp');
+    const apiUrl = createApiUrl('/users/verify-otp');
     const { data } = await axios.post(apiUrl, reqBody, config);
     return data;
 }
@@ -27,7 +27,7 @@ async function registerUser(reqBody: any) {
         headers: { 'Content-Type': 'application/json' },
     };
     const body = reqBody;
-    const apiUrl = createApiUrl('/auth/register');
+    const apiUrl = createApiUrl('/users/register');
     const { data } = await axios.post(apiUrl, body, config);
     return data;
 }
@@ -38,7 +38,7 @@ async function resetPassword(reqBody: any) {
         headers: { 'Content-Type': 'application/json' },
     };
     const body = reqBody;
-    const apiUrl = createApiUrl('/auth/reset-password');
+    const apiUrl = createApiUrl('/users/reset-password');
     const { data } = await axios.post(apiUrl, body, config);
     return data;
 }
@@ -49,9 +49,9 @@ async function loginUser(reqBody: any) {
         headers: { 'Content-Type': 'application/json' },
     };
     const body = reqBody;
-    const apiUrl = createApiUrl('/auth/login');
+    const apiUrl = createApiUrl('/users/login');
     const { data } = await axios.post(apiUrl, body, config);
     return data;
 }
 
-export { forgetPassword, sendOtp, registerUser, resetPassword, loginUser };
+export { forgetPassword, loginUser, registerUser, resetPassword, sendOtp };
