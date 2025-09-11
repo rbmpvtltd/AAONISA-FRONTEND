@@ -1,75 +1,3 @@
-// import { Link, useRouter } from "expo-router";
-// import React, { useState } from "react";
-// import { StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
-
-// const Login = () => {
-//     const router = useRouter();
-//     const [email, setEmail] = useState("");
-//     const [password, setPassword] = useState("");
-
-//     const handleLogin = () => {
-//         if (!email || !password) {
-//             alert("Please enter email & password");
-//             return;
-//         }
-//         // API call 
-//         alert("Login successful!");
-//         router.push("/"); // login ke baad home page par bhej dena
-//     };
-
-//     return (
-//         <View style={styles.container}>
-//             <Text style={styles.title}>Login</Text>
-
-//             <TextInput
-//                 placeholder="Email"
-//                 style={styles.input}
-//                 value={email}
-//                 onChangeText={setEmail}
-//             />
-
-//             <TextInput
-//                 placeholder="Password"
-//                 style={styles.input}
-//                 secureTextEntry
-//                 value={password}
-//                 onChangeText={setPassword}
-//             />
-
-//             <TouchableOpacity style={styles.button} onPress={handleLogin}>
-//                 <Text style={styles.buttonText}>Login</Text>
-//             </TouchableOpacity>
-
-//             <Link href="/auth/register" style={styles.link}>
-//                 Don’t have an account? Register
-//             </Link>
-//         </View>
-//     );
-// };
-
-// export default Login;
-
-// const styles = StyleSheet.create({
-//     container: { flex: 1, justifyContent: "center", padding: 20 },
-//     title: { fontSize: 28, fontWeight: "bold", textAlign: "center", marginBottom: 20 },
-//     input: {
-//         borderWidth: 1,
-//         borderColor: "#ccc",
-//         borderRadius: 8,
-//         padding: 12,
-//         marginBottom: 12,
-//     },
-//     button: {
-//         backgroundColor: "#4CAF50",
-//         padding: 14,
-//         borderRadius: 8,
-//         alignItems: "center",
-//     },
-//     buttonText: { color: "#fff", fontSize: 16, fontWeight: "bold" },
-//     link: { marginTop: 15, color: "#0066cc", textAlign: "center" },
-// });
-
-
 import * as Google from "expo-auth-session/providers/google";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
@@ -107,6 +35,7 @@ const Login = () => {
         }
     }, [response]);
 
+    
     const handleLogin = async () => {
         const validation = loginSchema.safeParse({
             identifier,
@@ -118,10 +47,12 @@ const Login = () => {
         //     return;
         // }
 
+
         try {
             // Call backend API
             const data = await loginUser({ identifier, password });
-            if (data.success) {
+            console.log(data)
+            if (data.message =="Login successful") {
                 Alert.alert("Success", "Logged in successfully!");
                 router.push("/");
             } else {

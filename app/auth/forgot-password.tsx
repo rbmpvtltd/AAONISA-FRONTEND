@@ -1,10 +1,9 @@
-
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
-import { forgetPassword, resetPassword } from "./api";
+import { forgetPassword, resetPassword, sendOtp } from "./api";
 
 // Zod Schema
 const forgotSchema = z.object({
@@ -15,16 +14,17 @@ const forgotSchema = z.object({
             (val) => /\S+@\S+\.\S+/.test(val) || /^[0-9]{10}$/.test(val),
             "Invalid email or phone"
         ),
-    otp: z.string().length(4, "OTP must be 4 digits"),
+    otp: z.string().length(6, "OTP must be 6 digits"),
     newPassword: z.string().min(6, "Password must be at least 6 chars"),
 });
 
 const ForgotPassword = () => {
     const router = useRouter();
     const [emailOrPhone, setEmailOrPhone] = useState("");
-    const [otp, setOtp] = useState(["", "", "", ""]);
+    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
     const [newPassword, setNewPassword] = useState("");
     const [otpSent, setOtpSent] = useState(false);
+    const [token, setToken] = useState("");
 
     // Auto-fill OTP from clipboard
     useEffect(() => {
@@ -41,34 +41,58 @@ const ForgotPassword = () => {
     const handleSendOtp = async () => {
         try {
             const data = await forgetPassword({ emailOrPhone });
-            console.log(data);
+            console.log(data)
             if (data.success) {
                 setOtpSent(true);
                 Alert.alert("OTP Sent", "Check your email/phone for the OTP");
             } else {
-                Alert.alert("Error", data.message);
+                Alert.alert("Error", data);
             }
         } catch (error) {
             Alert.alert("Error", "Failed to send OTP");
         }
     };
 
-    const handleResetPassword = async () => {
-        const validation = forgotSchema.safeParse({
-            emailOrPhone,
-            otp: otp.join(""),
-            newPassword,
-        });
+    // const verifyOtp = async () => {
+    //     try {
+    //         const data = await sendOtp({ email:emailOrPhone,code:otp.join("") });
+    //         console.log(data)
+    //         if (data.success) {
+    //             console.log(data.token)
+    //         } else {
+    //             Alert.alert("Error", data.message);
+    //         }
+    //     } catch (error) {
+    //         Alert.alert("Error", "Failed to send OTP");
+    //     }
+    // };
 
-        if (!validation.success) {
-            Alert.alert("Validation Error", validation.error.issues[0].message);
-            return;
+const verifyOtp = async () => {
+    try {
+        const data = await sendOtp({ emailOrPhone: emailOrPhone, code: otp.join("") });
+        console.log(data);
+        if (data.success) {
+            console.log("Received Token:", data.token);
+
+          setToken(data.token);  
+        //     const check = await AsyncStorage.getItem("authToken");
+        // console.log("Check Saved Token: ", check);
+
+            Alert.alert("OTP Verified", "Token saved successfully!");
+        } else {
+            Alert.alert("Error", data.message);
         }
+    } catch (error) {
+        Alert.alert("Error", "Failed to verify OTP");
+    }
+};
 
-        try {
+
+    const handleResetPassword = async () => {
+                try {
             const data = await resetPassword({
                 emailOrPhone,
-                otp: otp.join(""),
+                token,
                 newPassword,
             });
             if (data.success) {
@@ -115,6 +139,10 @@ const ForgotPassword = () => {
 
             <TouchableOpacity style={styles.verifyButton} onPress={handleSendOtp}>
                 <Text style={styles.verifyText}>{otpSent ? "Resend OTP" : "Send OTP"}</Text>
+            </TouchableOpacity>
+
+            <TouchableOpacity style={styles.verifyButton} onPress={verifyOtp}>
+                <Text style={styles.verifyText}>Verify Otp</Text>
             </TouchableOpacity>
 
             <TextInput
