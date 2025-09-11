@@ -27,7 +27,20 @@ async function registerUser(reqBody: any) {
         headers: { 'Content-Type': 'application/json' },
     };
     const body = reqBody;
-    const apiUrl = createApiUrl('/users/register');
+    // console.log(body);
+    const apiUrl = createApiUrl('/users/register-check');
+    const { data } = await axios.post(apiUrl, body, config);
+    console.log(data)
+    return data;
+}
+
+async function verifyOtpRegisterUser(reqBody: any) {
+    // const token = getToken();
+    const config = {
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const body = reqBody;
+    const apiUrl = createApiUrl('/users/verify-otp-and-register');
     const { data } = await axios.post(apiUrl, body, config);
     return data;
 }
@@ -54,4 +67,5 @@ async function loginUser(reqBody: any) {
     return data;
 }
 
-export { forgetPassword, loginUser, registerUser, resetPassword, sendOtp };
+export { forgetPassword, loginUser, registerUser, resetPassword, sendOtp, verifyOtpRegisterUser };
+

@@ -257,7 +257,7 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect, useState } from "react";
 import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
-import { registerUser, sendOtp } from "./api";
+import { registerUser, verifyOtpRegisterUser } from "./api";
 
 // Zod Schema
 const registerSchema = z.object({
@@ -270,14 +270,14 @@ const registerSchema = z.object({
         ),
     username: z.string().min(3, "Username must be at least 3 chars"),
     password: z.string().min(6, "Password must be at least 6 chars"),
-    otp: z.string().length(4, "OTP must be 4 digits"),
+    otp: z.string().length(6, "OTP must be 6 digits"),
 });
 
 const Register = () => {
     const router = useRouter();
     const [emailOrPhone, setEmailOrPhone] = useState("");
-    const [otp, setOtp] = useState(["", "", "", ""]);
-    const [username, setUsername] = useState("");
+    const [otp, setOtp] = useState(["", "", "", "","",""]);
+    const [username, setUsername] = useState(""); 
     const [password, setPassword] = useState("");
     const [otpSent, setOtpSent] = useState(false);
 
@@ -296,7 +296,10 @@ const Register = () => {
     const handleSendOtp = async () => {
         try {
             // Call backend to send OTP
-            const data = await sendOtp({emailOrPhone})
+            // console.log(emailOrPhone,username)
+            const data = await registerUser({emailOrPhone,username})
+        console.log("==============================", data);
+
             if (data.success) {
                 setOtpSent(true);
                 Alert.alert("OTP Sent", "Check your email/phone for the OTP");
@@ -306,6 +309,8 @@ const Register = () => {
         } catch (error) {
             Alert.alert("Error", "Failed to send OTP");
         }
+
+
     };
 
     const handleSignUp = async () => {
@@ -323,7 +328,7 @@ const Register = () => {
 
         try {
             //  Call backend to register
-            const data = await registerUser({
+            const data = await verifyOtpRegisterUser({
                 emailOrPhone,
                 username,
                 password,

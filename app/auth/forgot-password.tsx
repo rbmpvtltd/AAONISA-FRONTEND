@@ -69,12 +69,10 @@ const ForgotPassword = () => {
 
 const verifyOtp = async () => {
     try {
-        const data = await sendOtp({ email: emailOrPhone, code: otp.join("") });
+        const data = await sendOtp({ emailOrPhone: emailOrPhone, code: otp.join("") });
         console.log(data);
         if (data.success) {
             console.log("Received Token:", data.token);
-
-            // Save token in AsyncStorage
 
           setToken(data.token);  
         //     const check = await AsyncStorage.getItem("authToken");
