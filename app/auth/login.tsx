@@ -1,10 +1,12 @@
-import * as Google from "expo-auth-session/providers/google";
+// import * as Google from "expo-auth-session/providers/google";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import * as WebBrowser from "expo-web-browser";
 import React, { useState } from "react";
-import { Alert, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
+import { Alert, KeyboardAvoidingView, Platform, StyleSheet, Text, TextInput, TouchableOpacity, View } from "react-native";
 import { z } from "zod";
 import { loginUser } from "./api";
+
 
 WebBrowser.maybeCompleteAuthSession();
 
@@ -20,50 +22,60 @@ const Login = () => {
     const [password, setPassword] = useState("");
 
     // Google Auth
-    const [request, response, promptAsync] = Google.useAuthRequest({
-        // expoClientId: "320530581975-r73n8nen70n03poe4qm8uvvn01skf7j7.apps.googleusercontent.com",
-        iosClientId: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
-        androidClientId: "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
-        webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
-    });
+    // const [request, response, promptAsync] = Google.useAuthRequest({
+    //     // expoClientId: "320530581975-r73n8nen70n03poe4qm8uvvn01skf7j7.apps.googleusercontent.com",
+    //     iosClientId: "YOUR_IOS_CLIENT_ID.apps.googleusercontent.com",
+    //     androidClientId: "YOUR_ANDROID_CLIENT_ID.apps.googleusercontent.com",
+    //     webClientId: "YOUR_WEB_CLIENT_ID.apps.googleusercontent.com",
+    // });
 
-    React.useEffect(() => {
-        if (response?.type === "success") {
-            const { authentication } = response;
-            Alert.alert("Google Login Success", JSON.stringify(authentication));
-            router.push("/");
-        }
-    }, [response]);
+    // React.useEffect(() => {
+    //     if (response?.type === "success") {
+    //         const { authentication } = response;
+    //         Alert.alert("Google Login Success", JSON.stringify(authentication));
+    //         router.push("/");
+    //     }
+    // }, [response]);
 
-    
+     const saveToken = async (token: string) => {
+  if (!token) return;
+  if (Platform.OS === "web") {
+    localStorage.setItem("accessToken", token);
+  } else {
+    await AsyncStorage.setItem("accessToken", token);
+  }
+};
+
+
     const handleLogin = async () => {
-        const validation = loginSchema.safeParse({
-            identifier,
-            password,
-        });
+  try {
+    const data = await loginUser({ identifier, password });
+    console.log("login response:", data);
 
-        // if (!validation.success) {
-        //     Alert.alert("Validation Error", validation.error.issues[0].message);
-        //     return;
-        // }
+    if (data.message === "Login successful") {
+      // 1. save token (response body me aa raha hai)
+      if (data.accessToken) {
+        await saveToken(data.accessToken);
+      }
 
+      Alert.alert("Success", "Logged in successfully!");
+      router.push("/");
+    } else {
+      Alert.alert("Error", data.message);
+    }
+  } catch (error) {
+    console.error("Login error:", error);
+    Alert.alert("Error", "Something went wrong");
+  }
+};
 
-        try {
-            // Call backend API
-            const data = await loginUser({ identifier, password });
-            console.log(data)
-            if (data.message =="Login successful") {
-                Alert.alert("Success", "Logged in successfully!");
-                router.push("/");
-            } else {
-                Alert.alert("Error", data.message);
-            }
-        } catch (error) {
-            Alert.alert("Error", "Something went wrong");
-        }
-    };
 
     return (
+          <KeyboardAvoidingView
+                            style={{ flex: 1 }} // Important: Give it flex: 1
+                            behavior={Platform.OS === "ios" ? "padding" : "height"} // Use 'padding' for iOS, 'height' is often better for Android with ScrollView
+                            keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} // Adjust offset if needed (e.g., if you have a header)
+                        >
         <View style={styles.container}>
             <Text style={styles.logo}>AAO NI SA</Text>
             <Text style={styles.subtitle}>Log in to see Videos from your friends.</Text>
@@ -96,18 +108,19 @@ const Login = () => {
             </TouchableOpacity>
 
             {/* Google Sign In */}
-            <TouchableOpacity
+            {/* <TouchableOpacity
                 style={styles.googleButton}
                 disabled={!request}
                 onPress={() => promptAsync()}
             >
                 <Text style={styles.googleText}>Sign in with Google</Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             <Link href="/auth/register" style={styles.link}>
                 Don’t have an account ? Sign up
             </Link>
         </View>
+        </KeyboardAvoidingView>
     );
 };
 

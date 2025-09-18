@@ -1,9 +1,14 @@
 import { Ionicons } from '@expo/vector-icons';
 import * as ImagePicker from 'expo-image-picker';
 import React, { useState } from 'react';
+import { updateProfile, updateProfileSendOtp } from "./api";
+
+
 import {
     Alert,
     Image,
+    KeyboardAvoidingView,
+    Platform,
     ScrollView,
     StyleSheet,
     Text,
@@ -15,66 +20,100 @@ import {
 interface ProfileData {
     username: string;
     name: string;
-    password: string;
     bio: string;
+
     profilePicture: string | null;
     url: string;
+    otp: string;
 }
 
 const UserEditProfile = () => {
+    const [otp, setOtp] = useState(["", "", "", "", "", ""]);
+        const [otpSent, setOtpSent] = useState(false);
     const [profileData, setProfileData] = useState<ProfileData>({
         username: '',
         name: '',
-        password: '',
         bio: '',
         profilePicture: null,
         url: '',
+        otp: '',
     });
 
     const [characterCount, setCharacterCount] = useState({
-        bio: 5,
+        bio: 0,
         url: 0,
     });
 
     const [showImageOptions, setShowImageOptions] = useState(false);
-
-    const pickImage = async (source: 'camera' | 'gallery') => {
+    const [otpSentSuccessfully, setOtpSentSuccessfully] = useState(false);
+    const pickImage = async (type: 'camera' | 'gallery') => {
         let result;
 
-        if (source === 'camera') {
-            const { status } = await ImagePicker.requestCameraPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Sorry, we need camera permissions to make this work!');
-                return;
-            }
-            result = await ImagePicker.launchCameraAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 1,
-            });
-        } else {
-            const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
-            if (status !== 'granted') {
-                Alert.alert('Sorry, we need gallery permissions to make this work!');
-                return;
-            }
-            result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Images,
-                allowsEditing: true,
-                aspect: [1, 1],
-                quality: 1,
-            });
-        }
+        // if (source === 'camera') {
+        //     const { status } = await ImagePicker.requestCameraPermissionsAsync();
+        //     if (status !== 'granted') {
+        //         Alert.alert('Sorry, we need camera permissions to make this work!');
+        //         return;
+        //     }
+        //     result = await ImagePicker.launchCameraAsync({
+        //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        //         allowsEditing: true,
+        //         aspect: [1, 1],
+        //         quality: 1,
+        //     });
+        // } else {
+        //     const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
+        //     if (status !== 'granted') {
+        //         Alert.alert('Sorry, we need gallery permissions to make this work!');
+        //         return;
+        //     }
+        //     result = await ImagePicker.launchImageLibraryAsync({
+        //         mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        //         allowsEditing: true,
+        //         aspect: [1, 1],
+        //         quality: 1,
+        //     });
+        // }
 
-        if (!result.canceled) {
-            setProfileData({
-                ...profileData,
-                profilePicture: result.assets[0].uri,
-            });
-            setShowImageOptions(false);
-        }
-    };
+
+
+
+  if (type === "camera") {
+    result = await ImagePicker.launchCameraAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+  } else {
+    result = await ImagePicker.launchImageLibraryAsync({
+      mediaTypes: ImagePicker.MediaTypeOptions.Images,
+      allowsEditing: true,
+      aspect: [1, 1],
+      quality: 1,
+    });
+  }
+
+
+    if (!result.canceled) {
+    const uri = result.assets[0].uri;
+
+    // 👇 yaha profileData me URI store kar do
+    setProfileData((prev) => ({
+      ...prev,
+      profilePicture: uri,
+    }));
+  }
+};
+
+    //     if (!result.canceled) {
+    //         setProfileData({
+    //             ...profileData,
+    //             profilePicture: result.assets[0].uri,
+    //         });
+    //         setShowImageOptions(false);
+    //     }
+    // };
 
     const deleteProfilePicture = () => {
         setProfileData({
@@ -84,10 +123,51 @@ const UserEditProfile = () => {
         setShowImageOptions(false);
     };
 
-    const handleSave = () => {
-        // Save profile logic here
-        Alert.alert('Profile Saved', 'Your profile has been updated successfully!');
+    const handleUsernameChange =(text: string) => {
+        setProfileData({ ...profileData, username: text });
     };
+
+    const handleSendOtp = async () => {
+        try {
+            const data = await updateProfileSendOtp({otp: "123456"});
+            if (data.success) {
+                setOtpSent(true);
+                Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+                setOtpSentSuccessfully(true);
+            } else {
+                Alert.alert("Error", data);
+            }
+        } catch (error) {
+            Alert.alert("Error", "Failed to send OTP");
+        }
+    };
+    const handleButtonClick = () => {
+    if (!otpSentSuccessfully) {
+        handleSendOtp(); // first click
+    } else {
+        handleSave(); // second click after OTP success
+    }
+};
+    // const handleSave = () => {
+    //     console.log(profileData);
+    //     updateProfile(profileData);
+
+    //     // Save profile logic here
+    //     // Alert.alert('Profile Saved', 'Your profile has been updated successfully!');
+    // };
+
+const handleSave = async () => {
+  try {
+    const data = await updateProfile(profileData);
+    if (data.success) {
+      Alert.alert('Success', 'Profile updated successfully!');
+    } else {
+      Alert.alert('Error', data.message || 'Failed to update profile');
+    }
+  } catch (err) {
+    Alert.alert('Error', 'Something went wrong while updating profile');
+  }
+};
 
     const handleBioChange = (text: string) => {
         setProfileData({ ...profileData, bio: text });
@@ -104,6 +184,11 @@ const UserEditProfile = () => {
     };
 
     return (
+           <KeyboardAvoidingView
+            style={{ flex: 1 }}
+            behavior={Platform.OS === "ios" ? "padding" : "height"} 
+            keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0} 
+        >
         <ScrollView style={styles.container}>
             <Text style={styles.header}>Edit Profile</Text>
 
@@ -171,18 +256,6 @@ const UserEditProfile = () => {
                 />
             </View>
 
-            {/* Password Field */}
-            <View style={styles.inputContainer}>
-                <Text style={styles.label}>Password</Text>
-                <TextInput
-                    style={styles.input}
-                    value={profileData.password}
-                    onChangeText={(text) => setProfileData({ ...profileData, password: text })}
-                    secureTextEntry
-                    placeholder="Enter new password"
-                />
-            </View>
-
             {/* Bio Field */}
             <View style={styles.inputContainer}>
                 <Text style={styles.label}>Bio</Text>
@@ -206,19 +279,50 @@ const UserEditProfile = () => {
                     value={profileData.url}
                     onChangeText={handleUrlChange}
                     placeholder="https://example.com"
-                    maxLength={50}
+                    maxLength={60}
                     keyboardType="url"
                 />
                 <Text style={styles.characterCount}>
-                    {characterCount.url}/50
+                    {characterCount.url}/60
                 </Text>
             </View>
 
+            {/* OTP Input */}
+  {otpSent ? (
+                <View style={styles.otpContainer}>
+                    {otp.map((digit, index) => (
+                        <TextInput
+                            key={index}
+                            style={styles.otpInput}
+                            maxLength={1}
+                            keyboardType="numeric"
+                            value={digit}
+                            onChangeText={(text) => {
+                                const newOtp = [...otp];
+                                newOtp[index] = text;
+                                setOtp(newOtp);
+                            }}
+                        />
+                    ))}
+                </View>
+            ) : null}
+{/* 
+{otpSent && (
+    <TouchableOpacity style={styles.verifyButton} onPress={() => {
+        // Optional: Add verify logic here later
+        Alert.alert('OTP Verified', 'Your OTP has been verified!');
+    }}>
+        <Text style={styles.verifyText}>Verify OTP</Text>
+    </TouchableOpacity>
+)} */}
+
+
             {/* Save Button */}
-            <TouchableOpacity style={styles.saveButton} onPress={handleSave}>
+            <TouchableOpacity style={styles.saveButton} onPress={handleButtonClick}>
                 <Text style={styles.saveButtonText}>Save</Text>
             </TouchableOpacity>
         </ScrollView>
+          </KeyboardAvoidingView>
     );
 };
 
@@ -253,7 +357,7 @@ const styles = StyleSheet.create({
         position: 'absolute',
         right: 0,
         bottom: 0,
-        backgroundColor: '#007AFF',
+        backgroundColor: '#00CFFF',
         borderRadius: 15,
         padding: 5,
     },
@@ -306,12 +410,31 @@ const styles = StyleSheet.create({
         alignSelf: 'flex-end',
         marginTop: 5,
     },
+        otpContainer: { flexDirection: "row", justifyContent: "space-between", marginBottom: 12 },
+    otpInput: {
+        borderWidth: 1,
+        borderColor: "#00CFFF",
+        backgroundColor: "#E6F9FF",
+        borderRadius: 8,
+        padding: 12,
+        textAlign: "center",
+        width: 50,
+    },
+       verifyButton: {
+        backgroundColor: "#00CFFF",
+        padding: 12,
+        borderRadius: 8,
+        alignItems: "center",
+        marginBottom: 12,
+    },
+        verifyText: { color: "#fff", fontWeight: "bold" },
     saveButton: {
-        backgroundColor: '#007AFF',
+        backgroundColor: '#00CFFF',
         padding: 15,
         borderRadius: 5,
         alignItems: 'center',
         marginTop: 20,
+        marginBottom: 20,
     },
     saveButtonText: {
         color: 'white',
