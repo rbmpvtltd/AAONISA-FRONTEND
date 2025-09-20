@@ -1,4 +1,3 @@
-
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
 import {
@@ -10,7 +9,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-
+import { useAppTheme } from "../themeHelper";
 
 // ===== Types =====
 interface User {
@@ -31,6 +30,11 @@ interface Post {
     image: string;
 }
 
+const { width, height } = Dimensions.get("window");
+const imageSize = width / 3;
+const profilePicSize = width * 0.22;
+const fontScale = width / 380;
+
 const user: User = {
     id: "u1",
     userName: "mr._adnan_47",
@@ -50,242 +54,162 @@ const posts: Post[] = Array.from({ length: 16 }).map((_, i) => ({
     image: `https://placekitten.com/${300 + i}/${300}`,
 }));
 
-// ===== Components =====
-
-// --- Top Header (Username + Menu) ---
-const TopHeader: React.FC<{ userName: string }> = ({ userName }) => (
-    <View style={styles.topHeader}>
-        <Text style={styles.topHeaderText}>{userName}</Text>
-        <View style={styles.topHeaderIcons}>
-            <MaterialIcons name="menu" size={24} color="#black" />
-        </View>
+const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme }) => (
+    <View style={[styles.topHeader]}>
+        <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
+        <MaterialIcons name="menu" size={24} color={theme.text} />
     </View>
 );
 
-// const ProfileHeader: React.FC<{ user: User }> = ({ user }) => (
-//     <View style={styles.header}>
-//         <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
-//         <View style={styles.stats}>
-//             <View style={styles.stat}>
-//                 <Text style={styles.statNumber}>{user.posts}</Text>
-//                 <Text style={styles.statLabel}>Posts</Text>
-//             </View>
-//             <View style={styles.stat}>
-//                 <Text style={styles.statNumber}>{user.followers}</Text>
-//                 <Text style={styles.statLabel}>Followers</Text>
-//             </View>
-//             <View style={styles.stat}>
-//                 <Text style={styles.statNumber}>{user.following}</Text>
-//                 <Text style={styles.statLabel}>Following</Text>
-//             </View>
-//         </View>
-//     </View>
-// );
-
-const ProfileHeader: React.FC<{ user: User }> = ({ user }) => (
+const ProfileHeader: React.FC<{ user: User; theme: any }> = ({ user, theme }) => (
     <View style={styles.header}>
         <Image source={{ uri: user.profilePicture }} style={styles.profilePicture} />
         <View style={styles.stats}>
-            <View style={styles.stat}>
-                <Text style={styles.statNumber}>{user.posts}</Text>
-                <Text style={styles.statLabel}>Posts</Text>
-            </View>
-            <View style={styles.stat}>
-                <Text style={styles.statNumber}>{user.followers}</Text>
-                <Text style={styles.statLabel}>Followers</Text>
-            </View>
-            <View style={styles.stat}>
-                <Text style={styles.statNumber}>{user.following}</Text>
-                <Text style={styles.statLabel}>Following</Text>
-            </View>
+            {[
+                { label: "Posts", value: user.posts },
+                { label: "Followers", value: user.followers },
+                { label: "Following", value: user.following },
+            ].map((item) => (
+                <View style={styles.stat} key={item.label}>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{item.value}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>{item.label}</Text>
+                </View>
+            ))}
             <View style={{ flexDirection: "row" }}>
                 <View style={styles.likesViews}>
-                    <Text style={styles.statLabel}>Likes</Text>
-                    <Text style={styles.statNumber}>{user.likes}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>Likes</Text>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{user.likes}</Text>
                 </View>
                 <View style={styles.likesViews}>
-                    <Text style={styles.statLabel}>Views</Text>
-                    <Text style={styles.statNumber}>{user.views}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>Views</Text>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{user.views}</Text>
                 </View>
             </View>
         </View>
     </View>
 );
 
-
-const UserInfo: React.FC<{ user: User }> = ({ user }) => (
+const UserInfo: React.FC<{ user: User; theme: any }> = ({ user, theme }) => (
     <View style={styles.userInfo}>
-        <Text style={styles.username}>{user.name}</Text>
-        <Text style={styles.bio}>{user.bio}</Text>
+        <Text style={[styles.username, { color: theme.text }]}>{user.name}</Text>
+        <Text style={[styles.bio, { color: theme.subtitle }]}>{user.bio}</Text>
     </View>
 );
 
-// --- Tabs (Posts, Reels, Tagged) ---
-const Tabs: React.FC = () => (
-    <View style={styles.tabs}>
+const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
+    <View style={[styles.tabs, { backgroundColor: theme.background }]}>
         <TouchableOpacity style={styles.tab}>
-            {/* <Ionicons name="grid-outline" size={22} color="#000" /> */}
-            <MaterialCommunityIcons name="view-grid-outline" size={22} color="#000" />
+            <MaterialCommunityIcons name="view-grid-outline" size={22} color={theme.text} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab}>
-            <Ionicons name="play-circle-outline" size={22} color="#000" />
+            <Ionicons name="play-circle-outline" size={22} color={theme.text} />
         </TouchableOpacity>
         <TouchableOpacity style={styles.tab}>
-            <Ionicons name="person-circle-outline" size={22} color="#000" />
+            <Ionicons name="person-circle-outline" size={22} color={theme.text} />
         </TouchableOpacity>
     </View>
 );
 
-const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => {
-    return (
-        <FlatList
-            data={posts}
-            keyExtractor={(item) => item.id}
-            numColumns={3}
-            renderItem={({ item }) => (
-                <Image
-                    source={{ uri: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D" }}
-                    style={styles.postImage}
-                />
-            )}
-            showsVerticalScrollIndicator={false}
-        />
-    );
-};
+const PostGrid: React.FC<{ posts: Post[] }> = ({ posts }) => (
+    <FlatList
+        data={posts}
+        keyExtractor={(item) => item.id}
+        numColumns={3}
+        renderItem={() => (
+            <Image
+                source={{
+                    uri: "https://images.unsplash.com/photo-1633332755192-727a05c4013d?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlcnxlbnwwfHwwfHx8MA%3D%3D",
+                }}
+                style={styles.postImage}
+            />
+        )}
+        showsVerticalScrollIndicator={false}
+    />
+);
 
-// ===== Main Screen =====
 const ProfileScreen: React.FC = () => {
+    const theme = useAppTheme(); 
+
     return (
-        // <SafeAreaView style={{ flex: 1 }}>
-        <View style={styles.container}>
-            <TopHeader userName={user.userName} />
-            <ProfileHeader user={user} />
-            <UserInfo user={user} />
-            <Tabs />
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+            <TopHeader userName={user.userName} theme={theme} />
+            <ProfileHeader user={user} theme={theme} />
+            <UserInfo user={user} theme={theme} />
+            <Tabs theme={theme} />
             <PostGrid posts={posts} />
         </View>
-        // </SafeAreaView>             
-
     );
 };
-
-// ===== Styles =====
-const { width } = Dimensions.get("window");
-const imageSize = width / 3;
 
 const styles = StyleSheet.create({
     container: {
         flex: 1,
-        backgroundColor: "#fff",
     },
     topHeader: {
         flexDirection: "row",
         justifyContent: "space-between",
         alignItems: "center",
-        paddingHorizontal: 15,
-        paddingVertical: 10,
-        backgroundColor: "#fff",
+        paddingHorizontal: width * 0.04,
+        paddingVertical: height * 0.015,
     },
     topHeaderText: {
-        color: "#black",
-        fontSize: 18,
+        fontSize: 18 * fontScale,
         fontWeight: "bold",
     },
-    topHeaderIcons: {
-        flexDirection: "row",
-        alignItems: "center",
-    },
-    // header: {
-    //     flexDirection: "row",
-    //     padding: 15,
-    //     alignItems: "center",
-    // },
-    // profilePicture: {
-    //     width: 80,
-    //     height: 80,
-    //     borderRadius: 40,
-    // },
-    // stats: {
-    //     flexDirection: "row",
-    //     justifyContent: "space-between",
-    //     flex: 1,
-    //     marginLeft: 20,
-    // },
-    // stat: {
-    //     alignItems: "center",
-    // },
-    // statNumber: {
-    //     fontSize: 18,
-    //     fontWeight: "bold",
-    //     color: "#black",
-    // },
-    // statLabel: {
-    //     fontSize: 14,
-    //     color: "#aaa",
-    // },
     header: {
         flexDirection: "row",
-        padding: 15,
+        padding: width * 0.04,
         alignItems: "center",
     },
     profilePicture: {
-        width: 80,
-        height: 80,
-        borderRadius: 40,
+        width: profilePicSize,
+        height: profilePicSize,
+        borderRadius: profilePicSize / 2,
     },
     stats: {
         flexDirection: "row",
         justifyContent: "space-between",
         flex: 1,
-        marginLeft: 20,
+        marginLeft: width * 0.05,
         flexWrap: "wrap",
     },
     stat: {
         alignItems: "center",
-        marginHorizontal: 8,
+        marginHorizontal: width * 0.02,
     },
     likesViews: {
         alignItems: "center",
         flexDirection: "row",
-        marginHorizontal: 8,
-        marginTop: 10,
-        gap: 10
+        marginHorizontal: width * 0.02,
+        marginTop: height * 0.01,
+        gap: width * 0.02,
     },
     statNumber: {
-        fontSize: 18,
+        fontSize: 16 * fontScale,
         fontWeight: "bold",
-        color: "#000",
     },
     statLabel: {
-        fontSize: 14,
-        color: "#aaa",
+        fontSize: 13 * fontScale,
     },
     userInfo: {
-        paddingHorizontal: 15,
-        marginBottom: 10,
+        paddingHorizontal: width * 0.04,
+        marginBottom: height * 0.01,
     },
     username: {
-        fontSize: 16,
+        fontSize: 16 * fontScale,
         fontWeight: "bold",
-        color: "#black",
     },
     bio: {
-        fontSize: 14,
-        color: "#aaa",
+        fontSize: 13 * fontScale,
         marginTop: 5,
     },
     tabs: {
         flexDirection: "row",
         justifyContent: "space-around",
-        // borderTopWidth: 0.5,
-        // borderTopColor: "#333",
-        // borderBottomWidth: 0.5,
-        // borderBottomColor: "#333",
-        paddingVertical: 8,
-        backgroundColor: "#fff",
+        paddingVertical: height * 0.012,
     },
     tab: {
-        padding: 5,
+        padding: width * 0.01,
     },
     postImage: {
         width: imageSize,
