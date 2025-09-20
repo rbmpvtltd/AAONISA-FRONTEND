@@ -7,16 +7,15 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View
+  View,
 } from "react-native";
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-
+import { useAppTheme } from "./themeHelper"; // ✅ import theme hook
 
 const { height } = Dimensions.get("window");
 const windowWidth = Dimensions.get("window").width;
-const windowHeight = Dimensions.get("window").height;
 const ITEM_HEIGHT = height * 0.8;
 
 interface Photo {
@@ -31,22 +30,31 @@ interface Photo {
   comments: string[];
 }
 
-// Pure UI Component (Only presentation, no state)
 const PhotoItem = React.memo(
-  ({ item, onLike, onSave, onComment, onShare }: {
+  ({
+    item,
+    onLike,
+    onSave,
+    onComment,
+    onShare,
+    theme,
+  }: {
     item: Photo;
     onLike: (id: number) => void;
     onSave: (id: number) => void;
     onComment: (id: number) => void;
     onShare: (id: number) => void;
+    theme: ReturnType<typeof useAppTheme>;
   }) => (
-    <View style={styles.reel}>
-      {/* Header (Profile Info) */}
-      <View style={styles.header}>
+    <View style={[styles.reel, { backgroundColor: theme.background }]}>
+      {/* Header */}
+      <View style={[styles.header, { backgroundColor: theme.overlay }]}>
         <Image source={{ uri: item.profilePic }} style={styles.profileImage} />
         <View style={styles.userInfo}>
-          <Text style={styles.username}>{item.username}</Text>
-          <Text style={{ color: "white", fontSize: 10 }}>{item.title.slice(0, 30)}</Text>
+          <Text style={[styles.username, { color: theme.text }]}>{item.username}</Text>
+          <Text style={{ color: theme.text, fontSize: 10 }}>
+            {item.title.slice(0, 30)}
+          </Text>
         </View>
       </View>
 
@@ -59,63 +67,58 @@ const PhotoItem = React.memo(
           <Icon
             name={item.liked ? "heart" : "heart-outline"}
             size={29}
-            color={item.liked ? "red" : "black"}
+            color={item.liked ? "red" : theme.text}
           />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => onComment(item.id)}>
-          <Icon name="chatbubble-outline" size={25} color="black" />
+          <Icon name="chatbubble-outline" size={25} color={theme.text} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => onShare(item.id)}>
-          <Icon name="share-social-outline" size={25} color="black" />
+          <Icon name="share-social-outline" size={25} color={theme.text} />
         </TouchableOpacity>
 
         <TouchableOpacity onPress={() => onSave(item.id)} style={{ marginLeft: "auto" }}>
           <Icon
             name={item.saved ? "bookmark" : "bookmark-outline"}
             size={25}
-            color="black"
+            color={theme.text}
           />
         </TouchableOpacity>
       </View>
 
-      {/* Title / Caption */}
-      <Text style={styles.title}>{item.title}</Text>
+      {/* Title */}
+      <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
     </View>
   )
 );
 
 const HomePage: React.FC = () => {
+  const theme = useAppTheme(); // ✅ get system theme
   const [photos, setPhotos] = useState<Photo[]>([]);
   const [page, setPage] = useState(0);
   const [loading, setLoading] = useState(false);
 
-  // API Fetcher
   const fetchPhotos = async () => {
     if (loading || photos.length >= 100) return;
     setLoading(true);
-
     try {
       const res = await fetch(
         `https://jsonplaceholder.typicode.com/photos?_start=${page}&_limit=10`
       );
       const data = await res.json();
-
-      //  Normalize API response (future-proof for backend integration)
       const updated: Photo[] = data.map((d: any) => ({
         id: d.id,
         title: d.title,
         imageUrl: d.url,
-        profilePic:
-          "https://randomuser.me/api/portraits/men/" + (d.id % 100) + ".jpg", // dummy profile
-        username: "user_" + d.id, // dummy username
+        profilePic: `https://randomuser.me/api/portraits/men/${d.id % 100}.jpg`,
+        username: "user_" + d.id,
         likes: Math.floor(Math.random() * 100),
         liked: false,
         saved: false,
         comments: [],
       }));
-
       setPhotos((prev) => [...prev, ...updated]);
       setPage((prev) => prev + 10);
     } catch (err) {
@@ -128,7 +131,6 @@ const HomePage: React.FC = () => {
     fetchPhotos();
   }, []);
 
-  // Handlers
   const handleLike = useCallback((id: number) => {
     setPhotos((prev) =>
       prev.map((p) =>
@@ -161,13 +163,14 @@ const HomePage: React.FC = () => {
         onSave={handleSave}
         onComment={handleComment}
         onShare={handleShare}
+        theme={theme}
       />
     ),
-    [handleLike, handleSave, handleComment, handleShare]
+    [handleLike, handleSave, handleComment, handleShare, theme]
   );
 
   return (
-    <SafeAreaView style={{ flex: 1 }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <GestureHandlerRootView>
         <FlatList
           data={photos}
@@ -178,7 +181,7 @@ const HomePage: React.FC = () => {
           decelerationRate="fast"
           onEndReached={fetchPhotos}
           onEndReachedThreshold={0.7}
-          ListFooterComponent={loading ? <ActivityIndicator size="large" /> : null}
+          ListFooterComponent={loading ? <ActivityIndicator size="large" color={theme.text} /> : null}
           initialNumToRender={5}
           maxToRenderPerBatch={5}
           windowSize={5}
@@ -190,19 +193,13 @@ const HomePage: React.FC = () => {
           })}
         />
       </GestureHandlerRootView>
-    </SafeAreaView >
-
-    // <Audio />
-    // <VideoScreen />
-    // <VideoUploader />
+    </SafeAreaView>
   );
 };
 
 const styles = StyleSheet.create({
   reel: {
     height: ITEM_HEIGHT,
-    backgroundColor: "#fff",
-    // width: windowWidth > 500 ? "30%" : "100%",
   },
   header: {
     flexDirection: "row",
@@ -213,7 +210,6 @@ const styles = StyleSheet.create({
     left: 0,
     right: 0,
     zIndex: 10,
-    backgroundColor: "rgba(0,0,0,0.4)"
   },
   profileImage: {
     width: windowWidth > 500 ? 50 : 40,
@@ -222,7 +218,6 @@ const styles = StyleSheet.create({
     marginRight: 10,
   },
   username: {
-    color: "white",
     fontSize: 16,
     fontWeight: "600",
   },
@@ -232,7 +227,6 @@ const styles = StyleSheet.create({
     resizeMode: "cover",
   },
   title: {
-    color: "#000",
     padding: 10,
     fontSize: 16,
   },
@@ -247,6 +241,7 @@ const styles = StyleSheet.create({
   userInfo: {
     flex: 1,
     justifyContent: "flex-start",
-  }
+  },
 });
+
 export default HomePage;
