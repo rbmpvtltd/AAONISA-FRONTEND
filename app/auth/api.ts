@@ -137,5 +137,19 @@ async function updateUserPhone(reqBody: any) {
   return data;
 }
 
-export { forgetPassword, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
+async function getUserInfoAndFollowState() {
+  const token = await getToken();
+  console.log(token);
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/follow/get-follow-state-and-userInfo');
+  const { data } = await axios.post(apiUrl,{}, config);
+  return data;
+}
+export { forgetPassword, getUserInfoAndFollowState, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 
