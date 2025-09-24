@@ -1,5 +1,15 @@
 import { createApiUrl } from '@/util';
+import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
+import { Platform } from 'react-native';
+
+const getToken = async () => {
+  if (Platform.OS === "web") {
+    return localStorage.getItem("accessToken");
+  } else {
+    return await AsyncStorage.getItem("accessToken");
+  }
+};
 
 async function forgetPassword(reqBody: any) {
     // const token = getToken();
@@ -67,5 +77,79 @@ async function loginUser(reqBody: any) {
     return data;
 }
 
-export { forgetPassword, loginUser, registerUser, resetPassword, sendOtp, verifyOtpRegisterUser };
+// 1️⃣ Send OTP for updating email
+async function updateEmailSendOtp(reqBody: any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/users/update-email-send-otp');
+  const { data } = await axios.post(apiUrl, reqBody, config);
+  return data;
+}
+
+// 2️⃣ Send OTP for updating phone
+async function updatePhoneSendOtp(reqBody: any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/users/update-phone-send-otp');
+  const { data } = await axios.post(apiUrl, reqBody, config);
+  return data;
+}
+
+// 3️⃣ Update user email (after OTP verification)
+async function updateUserEmail(reqBody: any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/users/update-user-email');
+  const { data } = await axios.post(apiUrl, reqBody, config);
+  return data;
+}
+
+// 4️⃣ Update user phone (after OTP verification)
+async function updateUserPhone(reqBody: any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/users/update-user-phone');
+  const { data } = await axios.post(apiUrl, reqBody, config);
+  return data;
+}
+
+async function getUserInfoAndFollowState() {
+  const token = await getToken();
+  console.log(token);
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/follow/get-follow-state-and-userInfo');
+  const { data } = await axios.post(apiUrl,{}, config);
+  return data;
+}
+export { forgetPassword, getUserInfoAndFollowState, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 

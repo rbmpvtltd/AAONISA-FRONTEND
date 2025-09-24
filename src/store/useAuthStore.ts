@@ -15,6 +15,10 @@ interface AuthState {
     password: string;
     newPassword: string;
     token: string;
+    verifyingEmail : boolean
+    verifyingPhone : boolean
+
+
 
 
     // Setters
@@ -29,7 +33,8 @@ interface AuthState {
     setPassword: (value: string) => void;
     setNewPassword: (value: string) => void;
     setToken: (value: string) => void;
-
+    setVerifyingEmail : (value : boolean) => void;
+    setVerifyingPhone : (value : boolean) => void;
 
     // Token helpers
     saveToken: (token: string) => Promise<void>;
@@ -51,6 +56,10 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     password: "",
     newPassword: "",
     token: "",
+    verifyingEmail : false,
+    verifyingPhone : false,
+
+
 
 
     setEmailOrPhone: (value) => set({ emailOrPhone: value }),
@@ -64,17 +73,18 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     setPassword: (value) => set({ password: value }),
     setNewPassword: (value) => set({ newPassword: value }),
     setToken: (value) => set({ token: value }),
-
+    setVerifyingEmail : (value) => set({ verifyingEmail : value }),
+    setVerifyingPhone : (value) => set({ verifyingPhone : value }),
 
 
     saveToken: async (token: string) => {
         set({ token });
         if (Platform.OS === "web") {
             if (typeof localStorage !== "undefined") {
-                localStorage.setItem("authToken", token);
+                localStorage.setItem("accessToken", token);
             }
         } else {
-            await AsyncStorage.setItem("authToken", token);
+            await AsyncStorage.setItem("accessToken", token);
         }
     },
 
@@ -113,5 +123,7 @@ export const useAuthStore = create<AuthState>((set, get) => ({
             password: "",
             newPassword: "",
             token: "",
+            verifyingEmail : false,
+            verifyingPhone : false,
         }),
 }));

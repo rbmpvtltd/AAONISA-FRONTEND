@@ -199,6 +199,7 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
+  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
@@ -209,6 +210,7 @@ import {
 } from "react-native";
 import { z } from "zod";
 import { useAppTheme } from "../themeHelper";
+import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "./api";
 
 const changeEmailAndPhoneSchema = z.object({
   email: z
@@ -231,11 +233,15 @@ const ChangeEmailAndPhone = () => {
     otp,
     emailOtpSent,
     phoneOtpSent,
+    verifyingEmail,
+    verifyingPhone,
     setEmail,
     setPhone,
     setOtp,
     setEmailOtpSent,
     setPhoneOtpSent,
+    setVerifyingEmail,
+    setVerifyingPhone,
   } = useAuthStore();
 
 useEffect(() => {
@@ -252,15 +258,62 @@ useEffect(() => {
   return () => clearInterval(interval);
 }, []);
 
+   const getOtpString = () => otp.join("");
 
-  const handleEmailOtpSend = () => {
-    setEmailOtpSent(true);
-    // API call for sending OTP can be added here
+const handleSendEmailOtp = async () => {
+    if (!email) return Alert.alert("Enter email first");
+    try {
+      const res = await updateEmailSendOtp({ email });
+      console.log(res)
+      if (res.success) setEmailOtpSent(true);
+      Alert.alert(res.message || "OTP sent to email");
+    } catch (err: any) {
+      Alert.alert(err.response?.data?.message || "Error sending OTP");
+    }
   };
 
-  const handlePhoneOtpSend = () => {
-    setPhoneOtpSent(true);
-    // API call for sending OTP can be added here
+    const handleVerifyEmailOtp = async () => {
+    const otpValue = getOtpString();
+    if (otpValue.length !== 6) return Alert.alert("Enter 6 digit OTP");
+    setVerifyingEmail(true);
+    try {
+      const res = await updateUserEmail({ email, otp: otpValue });
+      if (res.success) {
+        Alert.alert(res.message || "Email updated successfully");
+        setEmailOtpSent(false);
+        setOtp(["", "", "", "", "", ""]);
+      }
+    } catch (err: any) {
+      Alert.alert(err.response?.data?.message || "OTP verification failed");
+    }
+    setVerifyingEmail(false);
+  };
+const handleSendPhoneOtp = async () => {
+    if (!phone) return Alert.alert("Enter phone first");
+    try {
+      const res = await updatePhoneSendOtp({ phone: phone });
+      if (res.success) setPhoneOtpSent(true);
+      Alert.alert(res.message || "OTP sent to phone");
+    } catch (err: any) {
+      Alert.alert(err.response?.data?.message || "Error sending OTP");
+    }
+  };
+
+  const handleVerifyPhoneOtp = async () => {
+    const otpValue = getOtpString();
+    if (otpValue.length !== 6) return Alert.alert("Enter 6 digit OTP");
+    setVerifyingPhone(true);
+    try {
+      const res = await updateUserPhone({ phone: phone, otp: otpValue });
+      if (res.success) {
+        Alert.alert(res.message || "Phone updated successfully");
+        setPhoneOtpSent(false);
+        setOtp(["", "", "", "", "", ""]);
+      }
+    } catch (err: any) {
+      Alert.alert(err.response?.data?.message || "OTP verification failed");
+    }
+    setVerifyingPhone(false);
   };
 
   return (
@@ -304,8 +357,13 @@ useEffect(() => {
           </View>
         )}
 
-        <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleEmailOtpSend}>
-          <Text style={[styles.verifyText, { color: theme.buttonText }]}>{emailOtpSent ? "Verify OTP" : "Send OTP"}</Text>
+        <TouchableOpacity
+          style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]}
+          onPress={emailOtpSent ? handleVerifyEmailOtp : handleSendEmailOtp}
+        >
+          <Text style={[styles.verifyText, { color: theme.buttonText }]}>
+            {emailOtpSent ? (verifyingEmail ? "Verifying..." : "Verify OTP") : "Send OTP"}
+          </Text>
         </TouchableOpacity>
 
         {/* Phone input */}
@@ -337,8 +395,13 @@ useEffect(() => {
           </View>
         )}
 
-        <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handlePhoneOtpSend}>
-          <Text style={[styles.verifyText, { color: theme.buttonText }]}>{phoneOtpSent ? "Verify OTP" : "Send OTP"}</Text>
+        <TouchableOpacity
+          style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]}
+          onPress={phoneOtpSent ? handleVerifyPhoneOtp : handleSendPhoneOtp}
+        >
+          <Text style={[styles.verifyText, { color: theme.buttonText }]}>
+            {phoneOtpSent ? (verifyingPhone ? "Verifying..." : "Verify OTP") : "Send OTP"}
+          </Text>
         </TouchableOpacity>
       </View>
     </KeyboardAvoidingView>

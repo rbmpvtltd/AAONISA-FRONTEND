@@ -186,7 +186,7 @@ import {
 } from "react-native";
 import { z } from "zod";
 import { useAppTheme } from "../themeHelper";
-import { loginUser } from "./api";
+import { getUserInfoAndFollowState, loginUser } from "./api";
 
 const loginSchema = z.object({
   emailOrPhone: z
@@ -238,6 +238,8 @@ useEffect(() => {
         Alert.alert("Success", "Logged in successfully!");
         await resetAuth();
         router.push("/");
+        const userData = await getUserInfoAndFollowState();
+        console.log("User data:", userData);
       } else {
         Alert.alert("Error", data.message);
       }
@@ -310,7 +312,7 @@ useEffect(() => {
 
 
   {/* Google Sign In */}
-//         {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
+       {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
 //           <Text style={[styles.googleText, { color: theme.buttonText }]}>
 //             Sign in with Google
 //           </Text>
