@@ -23,9 +23,8 @@ interface ProfileData {
     username: string;
     name: string;
     bio: string;
-    profilePicture: string | null;
+    ProfilePicture: string | null;
     url: string;
-    otp: string;
 }
 
 const UserEditProfile = () => {
@@ -35,9 +34,8 @@ const UserEditProfile = () => {
         username: "",
         name: "",
         bio: "",
-        profilePicture: null,
+        ProfilePicture: null,
         url: "",
-        otp: "",
     });
     const [characterCount, setCharacterCount] = useState({ bio: 0, url: 0 });
 
@@ -61,12 +59,12 @@ const UserEditProfile = () => {
 
         if (!result.canceled) {
             const uri = result.assets[0].uri;
-            setProfileData((prev) => ({ ...prev, profilePicture: uri }));
+            setProfileData((prev) => ({ ...prev, ProfilePicture: uri }));
         }
     };
 
     const deleteProfilePicture = () => {
-        setProfileData((prev) => ({ ...prev, profilePicture: null }));
+        setProfileData((prev) => ({ ...prev, ProfilePicture: null }));
         setShowImageOptions(false);
     };
 
@@ -74,6 +72,7 @@ const UserEditProfile = () => {
         try {
             const data = await updateProfile(profileData);
             if (data.success) {
+                console.log(data.message);
                 Alert.alert("Success", "Profile updated successfully!");
             } else {
                 Alert.alert("Error", data.message || "Failed to update profile");
@@ -120,8 +119,8 @@ const UserEditProfile = () => {
               /> */}
                             <Image
                                 source={
-                                    profileData.profilePicture
-                                        ? { uri: profileData.profilePicture }
+                                    profileData.ProfilePicture
+                                        ? { uri: profileData.ProfilePicture }
                                         : theme.userImage
                                 }
                                 style={styles.profilePicture}
@@ -146,7 +145,7 @@ const UserEditProfile = () => {
                             >
                                 <Text style={styles.imageOptionText}>Gallery</Text>
                             </TouchableOpacity>
-                            {profileData.profilePicture && (
+                            {profileData.ProfilePicture && (
                                 <TouchableOpacity
                                     style={[styles.imageOption, styles.deleteOption]}
                                     onPress={deleteProfilePicture}

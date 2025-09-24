@@ -6,9 +6,18 @@ function createApiUrl(url: string) {
     return `${process.env.EXPO_PUBLIC_PRODUCTION_API_URL}${url}`;
 }
 
-const getToken = (name: string) => {
-	const token = sessionStorage.getItem(`AAO_NI_SAA_${name}`);
-	return token;
+import AsyncStorage from "@react-native-async-storage/async-storage";
+
+const getToken = async (name: string) => {
+  if (typeof window !== "undefined" && typeof window.document !== "undefined") {
+    // Web
+    return sessionStorage.getItem(`AAO_NI_SAA_${name}`); // synchronous
+  } else {
+    // Mobile
+    return await AsyncStorage.getItem(`AAO_NI_SAA_${name}`);
+  }
 };
 
+
 export { createApiUrl, getToken };
+

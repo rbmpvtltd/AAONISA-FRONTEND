@@ -310,7 +310,7 @@ useEffect(() => {
 
 
   {/* Google Sign In */}
-//         {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
+       {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
 //           <Text style={[styles.googleText, { color: theme.buttonText }]}>
 //             Sign in with Google
 //           </Text>
