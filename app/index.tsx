@@ -262,7 +262,7 @@ import {
 import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useAppTheme } from "./themeHelper";
+import { useAppTheme } from "../src/ constants/themeHelper";
 
 const { height } = Dimensions.get("window");
 const windowWidth = Dimensions.get("window").width;
