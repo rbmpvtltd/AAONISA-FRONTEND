@@ -247,6 +247,7 @@
 // export default ProfileScreen;
 
 
+import { useAppTheme } from "@/src/ constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";
@@ -260,7 +261,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useAppTheme } from "../themeHelper";
+// import { useAppTheme } from "../themeHelper";
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
