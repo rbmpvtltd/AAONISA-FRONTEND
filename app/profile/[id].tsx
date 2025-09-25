@@ -10,7 +10,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useAppTheme } from "../themeHelper";
+import { useAppTheme } from "../../src/ constants/themeHelper";
 
 interface User {
     id: string;

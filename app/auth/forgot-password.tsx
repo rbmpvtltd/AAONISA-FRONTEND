@@ -298,17 +298,17 @@ import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../themeHelper";
+import { useAppTheme } from "../../src/ constants/themeHelper";
 import { forgetPassword, resetPassword, sendOtp } from "./api";
 
 const forgotSchema = z.object({
