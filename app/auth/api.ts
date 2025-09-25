@@ -139,7 +139,6 @@ async function updateUserPhone(reqBody: any) {
 
 async function getUserInfoAndFollowState() {
   const token = await getToken();
-  console.log(token);
   const config = {
     headers: { 
       'Content-Type': 'application/json',

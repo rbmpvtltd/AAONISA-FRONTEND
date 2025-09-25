@@ -1,3 +1,4 @@
+import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import React, { useState } from "react";
@@ -16,7 +17,6 @@ import {
 } from "react-native";
 import { useAppTheme } from "../themeHelper";
 import { updateProfile } from "./api";
-
 const { width, height } = Dimensions.get("window");
 
 interface ProfileData {
@@ -28,17 +28,24 @@ interface ProfileData {
 }
 
 const UserEditProfile = () => {
+    const {
+        username: storeUsername,
+        name: storeName,
+        bio: storeBio,
+        profilePicture: storeProfilePicture,
+        url: storeUrl,
+    } = useProfileStore();
     const theme = useAppTheme();
     const [showImageOptions, setShowImageOptions] = useState(false);
     const [profileData, setProfileData] = useState<ProfileData>({
-        username: "",
-        name: "",
-        bio: "",
-        ProfilePicture: null,
-        url: "",
+        username: storeUsername || "",
+        name: storeName || "",
+        bio: storeBio || "",
+        ProfilePicture: storeProfilePicture || null,
+        url: storeUrl || "",
     });
     const [characterCount, setCharacterCount] = useState({ bio: 0, url: 0 });
-
+    const [imageChanged, setImageChanged] = useState(false);
     const pickImage = async (type: "camera" | "gallery") => {
         let result;
         if (type === "camera") {
@@ -60,19 +67,28 @@ const UserEditProfile = () => {
         if (!result.canceled) {
             const uri = result.assets[0].uri;
             setProfileData((prev) => ({ ...prev, ProfilePicture: uri }));
+            setImageChanged(true);
         }
     };
 
     const deleteProfilePicture = () => {
         setProfileData((prev) => ({ ...prev, ProfilePicture: null }));
+        setImageChanged(true);
         setShowImageOptions(false);
     };
 
     const handleSave = async () => {
         try {
-            const data = await updateProfile(profileData);
+            const data = await updateProfile(profileData, imageChanged);
             if (data.success) {
-                console.log(data.message);
+                useProfileStore.setState({
+                    username: profileData.username,
+                    name: profileData.name,
+                    bio: profileData.bio,
+                    profilePicture: data.dataUrl,
+                    url: profileData.url,
+                });
+
                 Alert.alert("Success", "Profile updated successfully!");
             } else {
                 Alert.alert("Error", data.message || "Failed to update profile");
@@ -81,6 +97,7 @@ const UserEditProfile = () => {
             Alert.alert("Error", "Something went wrong while updating profile");
         }
     };
+
 
 
     const handleBioChange = (text: string) => {
@@ -343,7 +360,7 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
             fontWeight: "bold",
         },
     });
-    
+
 export default UserEditProfile;
 
 

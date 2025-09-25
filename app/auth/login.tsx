@@ -172,7 +172,9 @@
 // });
 
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
 import { useProfileStore } from "@/src/store/userProfileStore";
+
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -216,11 +218,12 @@ const Login = () => {
   const {
      setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile
   } = useProfileStore();
-
+  const {setFollowersList, setFollowingsList, resetFollow} = useFollowStore();
   useEffect(() => {
     return () => {
       resetAuth?.();
       resetProfile?.();
+      resetFollow?.()
     };
   }, []);
 
@@ -234,8 +237,6 @@ const Login = () => {
 
     try {
       const data = await loginUser({ identifier: emailOrPhone, password });
-      console.log("login response:", data);
-
       if (data.message === "Login successful") {
         if (data.accessToken) {
           await saveToken(data.accessToken);
@@ -254,7 +255,8 @@ const Login = () => {
         setFollowingsCount(userData.followings.length)
         setUrl(userData.userProfileInfo.url);
         setPostCount(userData.userInfo.videos.length)
-
+        setFollowersList(userData.followers);
+        setFollowingsList(userData.followings);
         console.log("User data:", userData);
       } else {
         Alert.alert("Error", data.message);

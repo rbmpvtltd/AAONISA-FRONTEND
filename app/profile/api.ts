@@ -117,12 +117,10 @@ const getToken = async () => {
 
 
 
-async function updateProfile(profileData: any) {
-
-
+async function updateProfile(profileData: any,imageChanged: boolean) {
   try {
     const formData = new FormData();
-    if (profileData.ProfilePicture) {
+    if (profileData.ProfilePicture && imageChanged) {
       if (typeof profileData.ProfilePicture === "string") {
         if (profileData.ProfilePicture.startsWith("data:")) {
           if (Platform.OS === "web") {
@@ -154,7 +152,7 @@ async function updateProfile(profileData: any) {
     formData.append('name', profileData.name);
     formData.append('bio', profileData.bio);
     formData.append('url', profileData.url);
-
+    formData.append('imageChanged', String(imageChanged));
     const token = await getToken();
 
     const config = {
