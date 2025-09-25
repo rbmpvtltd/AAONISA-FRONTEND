@@ -172,6 +172,7 @@
 // });
 
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { useProfileStore } from "@/src/store/userProfileStore";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -212,20 +213,24 @@ const Login = () => {
     saveToken,
     resetAuth
   } = useAuthStore();
+  const {
+     setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile
+  } = useProfileStore();
 
-useEffect(() => {
-  return () => {
-    resetAuth();
-  };
-}, []);
+  useEffect(() => {
+    return () => {
+      resetAuth?.();
+      resetProfile?.();
+    };
+  }, []);
 
   const handleLogin = async () => {
-  const validation = loginSchema.safeParse({ emailOrPhone, password });
+    const validation = loginSchema.safeParse({ emailOrPhone, password });
 
-  if (!validation.success) {
-    Alert.alert("Validation Error", validation.error.issues[0].message);
-    return;
-  }
+    if (!validation.success) {
+      Alert.alert("Validation Error", validation.error.issues[0].message);
+      return;
+    }
 
     try {
       const data = await loginUser({ identifier: emailOrPhone, password });
@@ -233,12 +238,23 @@ useEffect(() => {
 
       if (data.message === "Login successful") {
         if (data.accessToken) {
-          await saveToken(data.accessToken); 
+          await saveToken(data.accessToken);
         }
         Alert.alert("Success", "Logged in successfully!");
         await resetAuth();
         router.push("/");
         const userData = await getUserInfoAndFollowState();
+        setUsername(userData.userInfo.username);
+        setName(userData.userProfileInfo.name);
+        setBio(userData.userProfileInfo.bio);
+        setProfilePicture(userData.userProfileInfo.ProfilePicture);
+        setViews(userData.userInfo.views.length);
+        setLikes(userData.userInfo.likes.length);
+        setFollowersCount(userData.followers.length)
+        setFollowingsCount(userData.followings.length)
+        setUrl(userData.userProfileInfo.url);
+        setPostCount(userData.userInfo.videos.length)
+
         console.log("User data:", userData);
       } else {
         Alert.alert("Error", data.message);
@@ -311,8 +327,8 @@ useEffect(() => {
         </TouchableOpacity>
 
 
-  {/* Google Sign In */}
-       {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
+        {/* Google Sign In */}
+        {/* <TouchableOpacity style={[styles.googleButton, { backgroundColor: theme.googleBg }]}>
 //           <Text style={[styles.googleText, { color: theme.buttonText }]}>
 //             Sign in with Google
 //           </Text>
