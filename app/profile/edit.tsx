@@ -15,7 +15,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useAppTheme } from "../themeHelper";
+import { useAppTheme } from "../../src/ constants/themeHelper";
 import { updateProfile } from "./api";
 const { width, height } = Dimensions.get("window");
 

@@ -178,17 +178,17 @@ import { useProfileStore } from "@/src/store/userProfileStore";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-  Alert,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../themeHelper";
+import { useAppTheme } from "../../src/ constants/themeHelper";
 import { getUserInfoAndFollowState, loginUser } from "./api";
 
 const loginSchema = z.object({
