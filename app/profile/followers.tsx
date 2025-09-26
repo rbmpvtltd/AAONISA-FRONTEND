@@ -1,4 +1,4 @@
-import { useAppTheme } from '@/src/ constants/themeHelper';
+import { useAppTheme } from '@/src/constants/themeHelper';
 import React from 'react';
 import { FlatList, Image, StyleSheet, Text, TouchableOpacity, View, useWindowDimensions } from 'react-native';
 

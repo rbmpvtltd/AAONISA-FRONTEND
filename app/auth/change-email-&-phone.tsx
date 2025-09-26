@@ -209,7 +209,7 @@ import {
     View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/ constants/themeHelper";
+import { useAppTheme } from "../../src/constants/themeHelper";
 import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "./api";
 
 const changeEmailAndPhoneSchema = z.object({

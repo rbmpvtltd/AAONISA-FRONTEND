@@ -188,7 +188,7 @@ import {
     View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/ constants/themeHelper";
+import { useAppTheme } from "../../src/constants/themeHelper";
 import { getUserInfoAndFollowState, loginUser } from "./api";
 
 const loginSchema = z.object({
