@@ -18,7 +18,7 @@ const FollowingsScreen: React.FC = () => {
   const renderFollowings = ({ item }: { item: Follow }) => (
     <View style={[styles.userRow, { borderBottomColor: theme.inputBorder }]}>
       <Image
-        source={{ uri: item.userProfilePicture || 'https://via.placeholder.com/150' }}
+        source={{ uri: item.userProfilePicture || 'https://avatar.iran.liara.run/public' }}
         style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }]}
       />
       <View style={[styles.userInfo, { marginLeft: padding / 2 }]}>
