@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
@@ -15,7 +16,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { useAppTheme } from "../../src/constants/themeHelper";
 import { updateProfile } from "./api";
 const { width, height } = Dimensions.get("window");
 

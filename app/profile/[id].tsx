@@ -261,7 +261,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-// import { useAppTheme } from "../themeHelper";
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
