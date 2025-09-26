@@ -1,24 +1,27 @@
-import { create } from "zustand";
+// src/store/followStore.ts
+import { create } from 'zustand';
+
+export interface Follow {
+  id: string;
+  username: string;
+  name: string;
+  userProfilePicture: string | null;
+}
 
 interface FollowState {
-  followersList: string[];
-  followingsList: string[];
-  setFollowersList: (followers: string[]) => void;
-  setFollowingsList: (followings: string[]) => void;
-  getFollowersList: () => string[];
-  getFollowingsList: () => string[];
+  followers: Follow[];
+  followings: Follow[];
+  setFollowers: (followers: Follow[]) => void;
+  setFollowings: (followings: Follow[]) => void;
+  setFollowState: (followers: Follow[], followings: Follow[]) => void;
   resetFollow: () => void;
 }
 
-export const useFollowStore = create<FollowState>((set, get) => ({
-  followersList: [],
-  followingsList: [],
-  
-  setFollowersList: (followersList) => set({ followersList }),
-  setFollowingsList: (followingsList) => set({ followingsList }),
-  
-  getFollowersList: () => get().followersList,
-  getFollowingsList: () => get().followingsList,
-
-  resetFollow: () => set({ followersList: [], followingsList: [] }),
+export const useFollowStore = create<FollowState>((set) => ({
+  followers: [],
+  followings: [],
+  setFollowers: (followers) => set({ followers }),
+  setFollowings: (followings) => set({ followings }),
+  setFollowState: (followers, followings) => set({ followers, followings }),
+  resetFollow: () => set({ followers: [], followings: [] }),
 }));

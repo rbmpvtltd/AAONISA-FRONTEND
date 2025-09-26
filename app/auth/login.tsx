@@ -178,17 +178,17 @@ import { useProfileStore } from "@/src/store/userProfileStore";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/ constants/themeHelper";
+import { useAppTheme } from "../../src/constants/themeHelper";
 import { getUserInfoAndFollowState, loginUser } from "./api";
 
 const loginSchema = z.object({
@@ -218,7 +218,7 @@ const Login = () => {
   const {
      setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile
   } = useProfileStore();
-  const {setFollowersList, setFollowingsList, resetFollow} = useFollowStore();
+  const {setFollowers, setFollowings, resetFollow} = useFollowStore();
   useEffect(() => {
     return () => {
       resetAuth?.();
@@ -255,8 +255,8 @@ const Login = () => {
         setFollowingsCount(userData.followings.length)
         setUrl(userData.userProfileInfo.url);
         setPostCount(userData.userInfo.videos.length)
-        setFollowersList(userData.followers);
-        setFollowingsList(userData.followings);
+        setFollowers(userData.followers);
+        setFollowings(userData.followings);
         console.log("User data:", userData);
       } else {
         Alert.alert("Error", data.message);

@@ -247,7 +247,7 @@
 // export default ProfileScreen;
 
 
-import { useAppTheme } from "@/src/ constants/themeHelper";
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import React from "react";

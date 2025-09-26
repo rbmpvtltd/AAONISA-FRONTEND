@@ -308,7 +308,7 @@ import {
     View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/ constants/themeHelper";
+import { useAppTheme } from "../../src/constants/themeHelper";
 import { forgetPassword, resetPassword, sendOtp } from "./api";
 
 const forgotSchema = z.object({
