@@ -173,8 +173,8 @@
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
+import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
 import { useProfileStore } from "@/src/store/userProfileStore";
-
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
@@ -189,7 +189,7 @@ import {
 } from "react-native";
 import { z } from "zod";
 import { useAppTheme } from "../../src/constants/themeHelper";
-import { getUserInfoAndFollowState, loginUser } from "./api";
+import { getUserInfoAndFollowState, getUserNotifications, loginUser } from "./api";
 
 const loginSchema = z.object({
   emailOrPhone: z
@@ -258,6 +258,13 @@ const Login = () => {
         setFollowers(userData.followers);
         setFollowings(userData.followings);
         console.log("User data:", userData);
+
+        const notifications: Notification[]  = await getUserNotifications();
+        const addNotification = useNotificationStore.getState().addNotification;
+        notifications.forEach((notification: Notification) => {
+          addNotification(notification);
+        });
+        console.log("Notifications:", notifications);
       } else {
         Alert.alert("Error", data.message);
       }
