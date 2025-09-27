@@ -150,5 +150,19 @@ async function getUserInfoAndFollowState() {
   const { data } = await axios.post(apiUrl,{}, config);
   return data;
 }
-export { forgetPassword, getUserInfoAndFollowState, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
+
+async function getUserNotifications() {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/notifications/getAll');
+  const { data } = await axios.post(apiUrl,{}, config);
+  return data;
+}
+export { forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 
