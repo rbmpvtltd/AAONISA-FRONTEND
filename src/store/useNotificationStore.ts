@@ -9,7 +9,7 @@ export interface Notification {
   sender?: {
     id: string;
     name: string;
-    imageBase64?: string;
+    profilePicture: string;
   };
   type: NotificationType;
   message?: string;
