@@ -51,10 +51,11 @@ const NotificationItem: React.FC<{ item: NotificationType; theme: any; width: nu
       ]}
     >
       <Image
-        source={{ uri: item.sender?.imageBase64 || DEFAULT_AVATAR }}
+        source={{ uri: item.sender?.profilePicture || DEFAULT_AVATAR }}
         style={[styles.avatar, { width: avatarSize, height: avatarSize, borderRadius: avatarSize / 2 }]}
         defaultSource={{ uri: DEFAULT_AVATAR }}
       />
+
       <View style={styles.content}>
         <Text style={{ color: theme.text, fontSize }}>
           <Text style={[styles.bold, { fontSize }]}>{item.sender?.name || "Unknown User"}</Text>{" "}
