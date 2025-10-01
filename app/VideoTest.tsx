@@ -13,8 +13,8 @@ export default function VideoTest() {
 
     const cameraRef = useRef<CameraView>(null);
     const recordingStartTimeRef = useRef<number | null>(null);
-    const autoStopTimeoutRef = useRef<number | null>(null);
-    const timerIntervalRef = useRef<number | null>(null);
+    const autoStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
+    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
 
     useEffect(() => {
         if (permission?.status === 'denied') {

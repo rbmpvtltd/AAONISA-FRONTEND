@@ -251,7 +251,7 @@ const handleStoryPress = useCallback((id: number) => {
           })}
         />
       </GestureHandlerRootView>
-    </SafeAreaView>
+    </SafeAreaView> 
   );
 };
 
