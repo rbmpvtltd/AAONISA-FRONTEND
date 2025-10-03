@@ -14,8 +14,8 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
     const [zoom, setZoom] = useState(0);
     const cameraRef = useRef<CameraView>(null);
     const recordingStartTimeRef = useRef<number | null>(null);
-    const autoStopTimeoutRef = useRef<NodeJS.Timeout | null>(null);
-    const timerIntervalRef = useRef<NodeJS.Timeout | null>(null);
+    const autoStopTimeoutRef = useRef<NodeJS.Timeout|number | null>(null);
+    const timerIntervalRef = useRef<NodeJS.Timeout|number | null>(null);
     const getContentTypeIcon = (type: string) => {
         switch (type) {
             case "story":
