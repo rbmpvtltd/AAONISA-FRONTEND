@@ -9,6 +9,10 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
+import { GestureHandlerRootView } from "react-native-gesture-handler";
+import FinalUpload from "./finalUpload";
+import MusicScreen from "./musicPanel";
+import TextOverlay, { OverlayMetadata } from "./textOverlay";
 import TwoPointSlider from "./trimSlider";
 const SCREEN_WIDTH = Dimensions.get("window").width;
 const TRIM_HANDLE_WIDTH = 20;
@@ -49,21 +53,6 @@ interface VideoPreviewProps {
     ) => void;
 }
 
-// const getFilterStyle = (filter: FilterType) => {
-//     switch (filter) {
-//         case "warm":
-//             return { backgroundColor: "rgba(255,165,0,0.2)" };
-//         case "cool":
-//             return { backgroundColor: "rgba(0,0,255,0.2)" };
-//         case "grayscale":
-//             return { backgroundColor: "rgba(128,128,128,0.3)" };
-//         case "vintage":
-//             return { backgroundColor: "rgba(255,192,203,0.2)" };
-//         default:
-//             return { backgroundColor: "transparent" };
-//     }
-// };
-
 export const VideoPreview: React.FC<VideoPreviewProps> = ({
     videoUri,
     contentType,
@@ -77,6 +66,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [musicVolume, setMusicVolume] = useState(50);
     const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null);
     const [musicSound, setMusicSound] = useState<Audio.Sound | null>(null);
+    const [overlays, setOverlays] = useState<OverlayMetadata[]>([]);
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -87,6 +77,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [isSelectingFilter, setIsSelectingFilter] = useState(false);
     const [isSelectingMusic, setIsSelectingMusic] = useState(false);
     const [isTrimming, setIsTrimming] = useState(false);
+    const [isFinalUploading, setIsUploading] = useState(false);
 
     const prevMusicVolume = useRef(50);
 
@@ -216,252 +207,280 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     };
 
     return (
+        <GestureHandlerRootView style={{ flex: 1 }}>
         <View style={{ flex: 1, backgroundColor: "black" }}>
             {/* Top-right close button */}
-            <TouchableOpacity
-                style={{ position: "absolute", top: 32, right: 22, zIndex: 100 }}
-                onPress={onDiscard}
-            >
-                <Ionicons name="close" size={32} color="white" />
-            </TouchableOpacity>
 
-            {/* Video */}
-            <Video
-                ref={videoRef}
-                source={{ uri: videoUri }}
-                style={{ flex: 1, width: "100%" }}
-                resizeMode={ResizeMode.CONTAIN}
-                shouldPlay={false}
-                onLoad={(status) => {
-                    if (status.isLoaded && status.durationMillis) {
-                        setVideoDuration(status.durationMillis / 1000);
-                        const maxDuration = contentType === "story" ? 30 : 120;
-                        setTrimEnd(Math.min(maxDuration, status.durationMillis / 1000));
-                    }
-                }}
-                onPlaybackStatusUpdate={handleVideoProgress}
-                volume={videoVolume / 100}
-            />
-            {/* Filter Overlay */}
-            <View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }, getFilterStyle(filter)]} />
-
-            {/* Play/Pause */}
-            <TouchableOpacity
-                style={{ position: "absolute", top: "45%", left: SCREEN_WIDTH / 2 - 25 }}
-                onPress={togglePlayback}
-            >
-                <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={50} color="white" />
-            </TouchableOpacity>
-
-            {/* Controls to open panels */}
-            {!isSelectingMusic && !isSelectingFilter && !isTrimming && (
-                <View
-                    style={{
-                        position: "absolute",
-                        bottom: 120,
-                        width: "100%",
-                        flexDirection: "row",
-                        justifyContent: "space-around",
-                        paddingHorizontal: 30,
-                        zIndex: 110,
-                    }}
-                >
-                    <TouchableOpacity onPress={() => setIsSelectingMusic(true)}>
-                        <Ionicons name="musical-notes" size={32} color="white" />
+            {!isFinalUploading ? (
+                <>
+                    {/* Your existing VideoPreview UI goes here */}
+                    <TouchableOpacity
+                        style={{ position: "absolute", top: 32, right: 22, zIndex: 100 }}
+                        onPress={onDiscard}
+                    >
+                        <Ionicons name="close" size={32} color="white" />
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setIsTrimming(true)}>
-                        <Ionicons name="cut" size={32} color="white" />
-                    </TouchableOpacity>
-                    <TouchableOpacity onPress={() => setIsSelectingFilter(true)}>
-                        <Ionicons name="color-filter-outline" size={32} color="white" />
-                    </TouchableOpacity>
-                </View>
-            )}
-
-            {/* Trim Panel */}
-            {isTrimming && (
-                <View style={{ position: "absolute", bottom: 0, width: "100%", backgroundColor: "#111" }}>
-                    {/* Buttons Row */}
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 5 }}>
-                        <TouchableOpacity onPress={resetPreview}>
-                            <Ionicons name="close-circle" size={28} color="white" />
-                        </TouchableOpacity>
-
-                        <View style={{ flexDirection: "row" }}>
-                            <TouchableOpacity onPress={() => setIsTrimming(false)}>
-                                <Ionicons name="checkmark-circle" size={28} color="white" />
-                            </TouchableOpacity>
-                        </View>
-                    </View>
-
-                    {/* Trim bar */}
-                    <TwoPointSlider
-                        startSec={trimStart}
-                        endSec={trimEnd}
-                        minTrim={10}
-                        totalTime={videoDuration}
-                        onTrimChange={(start, end) => {
-                            setTrimStart(start);
-                            setTrimEnd(end);
+                    {/* Next (Upload) button below the close button */}
+                    <TouchableOpacity
+                        style={{
+                            position: "absolute",
+                            top: 80, // just below the close button
+                            right: 26,
+                            zIndex: 100,
+                            alignItems: "center",
+                            justifyContent: "center",
                         }}
+                        onPress={() => setIsUploading(true)}
+                    >
+                        <Ionicons name="cloud-upload-outline" size={24} color="white" />
+                    </TouchableOpacity>
+                    {/* Video */}
+                    <Video
+                        ref={videoRef}
+                        source={{ uri: videoUri }}
+                        style={{ flex: 1, width: "100%" }}
+                        resizeMode={ResizeMode.CONTAIN}
+                        shouldPlay={false}
+                        onLoad={(status) => {
+                            if (status.isLoaded && status.durationMillis) {
+                                setVideoDuration(status.durationMillis / 1000);
+                                const maxDuration = contentType === "story" ? 30 : 120;
+                                setTrimEnd(Math.min(maxDuration, status.durationMillis / 1000));
+                            }
+                        }}
+                        onPlaybackStatusUpdate={handleVideoProgress}
+                        volume={videoVolume / 100}
                     />
-                </View>
-            )}
+                    {/* Filter Overlay */}
+                    <View style={[{ position: "absolute", top: 0, left: 0, right: 0, bottom: 0 }, getFilterStyle(filter)]} />
 
-            {/* Volume Sliders */}
-            {!isSelectingMusic && !isSelectingFilter && !isTrimming && (
-                <View style={{ position: "absolute", bottom: 10, width: "100%", flexDirection: "row", justifyContent: "space-around" }}>
-                    <View style={{ alignItems: "center" }}>
-                        <Text style={{ color: "white" }}>Video Vol</Text>
-                        <Slider
-                            style={{ width: 140, height: 40 }}
-                            minimumValue={0}
-                            maximumValue={100}
-                            value={videoVolume}
-                            onValueChange={adjustVideoVolume}
-                            onSlidingComplete={(vol) => {
-                                setVideoVolume(vol);
-                                if (vol === 0 || vol === 100) {
-                                    adjustVideoVolume(vol);
-                                };
+                    {/* Play/Pause */}
+                    <TouchableOpacity
+                        style={{ position: "absolute", top: "45%", left: SCREEN_WIDTH / 2 - 25 }}
+                        onPress={togglePlayback}
+                    >
+                        <Ionicons name={isPlaying ? "pause-circle" : "play-circle"} size={50} color="white" />
+                    </TouchableOpacity>
+
+                    {/* Controls to open panels */}
+                    {!isSelectingMusic && !isSelectingFilter && !isTrimming && (
+                        <View
+                            style={{
+                                position: "absolute",
+                                bottom: 120,
+                                width: "100%",
+                                flexDirection: "row",
+                                justifyContent: "space-around",
+                                paddingHorizontal: 30,
+                                zIndex: 110,
                             }}
-                            minimumTrackTintColor="#0095f6"
-                            maximumTrackTintColor="#ccc"
-                        />
-                    </View>
-                    <View style={{ alignItems: "center" }}>
-                        <Text style={{ color: "white" }}>Music Vol</Text>
-                        <Slider
-                            style={{ width: 140, height: 40 }}
-                            minimumValue={0}
-                            maximumValue={100}
-                            value={musicVolume}
-                            onValueChange={adjustMusicVolume}
-                            minimumTrackTintColor="#0095f6"
-                            maximumTrackTintColor="#ccc"
-                        />
-                    </View>
-                </View>
-            )}
-
-            {/* Music Selection Overlay */}
-            {isSelectingMusic && (
-                <View style={{ position: "absolute", bottom: 0, width: "100%", maxHeight: 300, backgroundColor: "#000" }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", padding: 10 }}>
-                        <Text style={{ color: "white", fontWeight: "bold" }}>Select Music</Text>
-                        <TouchableOpacity onPress={() => setIsSelectingMusic(false)}>
-                            <Ionicons name="close-circle" size={28} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                    <ScrollView>
-                        {musicOptions.map((m) => (
-                            <TouchableOpacity
-                                key={m.id}
-                                style={{
-                                    flexDirection: "row",
-                                    alignItems: "center",
-                                    padding: 10,
-                                    backgroundColor: selectedMusicId === m.id ? "#222" : "transparent",
-                                }}
-                                onPress={() => selectMusic(m.id)}
-                            >
-                                <Ionicons name="musical-notes" size={28} color="white" />
-                                <View style={{ marginLeft: 10 }}>
-                                    <Text style={{ color: "white" }}>{m.title}</Text>
-                                    <Text style={{ color: "gray" }}>{m.artist}</Text>
-                                </View>
-                                {selectedMusicId === m.id && <Ionicons name="checkmark-circle" size={28} color="#0095f6" />}
+                        >
+                            <TouchableOpacity onPress={() => setIsSelectingMusic(true)}>
+                                <Ionicons name="musical-notes" size={32} color="white" />
                             </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-            )}
-
-            {/* Filter Overlay */}
-            {/* {isSelectingFilter && (
-                <View style={{ position: "absolute", bottom: 0, width: "100%", maxHeight: 200, backgroundColor: "rgba(0,0,0,0.5)", paddingVertical: 10 }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 10 }}>
-                        <Text style={{ color: "white", fontWeight: "bold" }}>Filters</Text>
-                        <TouchableOpacity onPress={() => setIsSelectingFilter(false)}>
-                            <Ionicons name="close-circle" size={28} color="white" />
-                        </TouchableOpacity>
-                    </View>
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} style={{ padding: 10 }}>
-                        {(["none", "warm", "cool", "grayscale", "vintage"] as FilterType[]).map((f) => (
+                            <TouchableOpacity onPress={() => setIsTrimming(true)}>
+                                <Ionicons name="cut" size={32} color="white" />
+                            </TouchableOpacity>
+                            <TouchableOpacity onPress={() => setIsSelectingFilter(true)}>
+                                <Ionicons name="color-filter-outline" size={32} color="white" />
+                            </TouchableOpacity>
+                            {contentType === "story" && !isFinalUploading && (
+                        <>  
                             <TouchableOpacity
-                                key={f}
-                                style={{
-                                    marginRight: 10,
-                                    padding: 5,
-                                    borderColor: filter === f ? "#0095f6" : "transparent",
-                                    borderWidth: 2,
-                                    borderRadius: 6,
-                                }}
-                                onPress={() => setFilter(f)}
-                            >
-                                <View
-                                    style={{
-                                        width: 50,
-                                        height: 50,
-                                        borderRadius: 6,
-                                        backgroundColor: "transparent",
-                                        overflow: "hidden",
-                                    }}
+                                    style={{ marginBottom: 12 }}
+                                    onPress={() =>
+                                        setOverlays((prev) => [
+                                            ...prev,
+                                            {
+                                                id: Date.now().toString(),
+                                                text: "#example",
+                                                x: 50,
+                                                y: 100,
+                                                scale: 1,
+                                                rotation: 0,
+                                                fontSize: 24,
+                                                color: "white",
+                                            },
+                                        ])
+                                    }
                                 >
-                                    <View style={[{ flex: 1, backgroundColor: "transparent" }, getFilterStyle(f)]} />
-                                </View>
-                                <Text style={{ color: "white", textAlign: "center", marginTop: 4 }}>{f}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
-            )} */}
-            {isSelectingFilter && (
-                <View style={{
-                    position: "absolute",
-                    bottom: 0,
-                    width: "100%",
-                    maxHeight: 220,
-                    backgroundColor: "rgba(0,0,0,0.7)",
-                    paddingVertical: 12
-                }}>
-                    <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16 }}>
-                        <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>Filters</Text>
-                        <TouchableOpacity onPress={() => setIsSelectingFilter(false)}>
-                            <Ionicons name="close-circle" size={28} color="white" />
-                        </TouchableOpacity>
-                    </View>
+                                    <Ionicons name="pricetag-outline" size={32} color="white" />
+                                </TouchableOpacity>
 
-                    <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, marginTop: 10 }}>
-                        {(["none", "warm", "cool", "grayscale", "vintage", "sepia", "bright", "dark"] as FilterType[]).map((f) => (
-                            <TouchableOpacity
-                                key={f}
-                                style={{
-                                    marginRight: 12,
-                                    alignItems: "center",
-                                }}
-                                onPress={() => setFilter(f)}
-                            >
-                                <View style={{
-                                    width: 60,
-                                    height: 60,
-                                    borderRadius: 12,
-                                    borderWidth: filter === f ? 3 : 0,
-                                    borderColor: "#0095f6",
-                                    overflow: "hidden",
-                                    justifyContent: "center",
-                                    alignItems: "center",
-                                    backgroundColor: "#222"
-                                }}>
-                                    <View style={[{ width: "100%", height: "100%" }, getFilterStyle(f)]} />
+                                <TouchableOpacity
+                                    onPress={() =>
+                                        setOverlays((prev) => [
+                                            ...prev,
+                                            {
+                                                id: Date.now().toString(),
+                                                text: "@mention",
+                                                x: 50,
+                                                y: 200,
+                                                scale: 1,
+                                                rotation: 0,
+                                                fontSize: 24,
+                                                color: "white",
+                                            },
+                                        ])
+                                    }
+                                >
+                                    <Ionicons name="at-outline" size={32} color="white" />
+                                </TouchableOpacity>
+                            {overlays.map((overlay) => (
+                                <TextOverlay
+                                    key={overlay.id}
+                                    overlay={overlay}
+                                    onUpdate={(updated) => {
+                                        setOverlays((prev) =>
+                                            prev.map((o) => (o.id === updated.id ? updated : o))
+                                        );
+                                    }}
+                                />
+                            ))}
+                        </>
+                    )}
+                        </View>
+                    )}
+
+                    {/* Trim Panel */}
+                    {isTrimming && (
+                        <View style={{ position: "absolute", bottom: 0, width: "100%", backgroundColor: "#111" }}>
+                            {/* Buttons Row */}
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", marginBottom: 5 }}>
+                                <TouchableOpacity onPress={resetPreview}>
+                                    <Ionicons name="close-circle" size={28} color="white" />
+                                </TouchableOpacity>
+
+                                <View style={{ flexDirection: "row" }}>
+                                    <TouchableOpacity onPress={() => setIsTrimming(false)}>
+                                        <Ionicons name="checkmark-circle" size={28} color="white" />
+                                    </TouchableOpacity>
                                 </View>
-                                <Text style={{ color: "white", fontSize: 12, marginTop: 4, textTransform: "capitalize" }}>{f}</Text>
-                            </TouchableOpacity>
-                        ))}
-                    </ScrollView>
-                </View>
+                            </View>
+
+                            {/* Trim bar */}
+                            <TwoPointSlider
+                                startSec={trimStart}
+                                endSec={trimEnd}
+                                minTrim={10}
+                                totalTime={videoDuration}
+                                onTrimChange={(start, end) => {
+                                    setTrimStart(start);
+                                    setTrimEnd(end);
+                                }}
+                            />
+                        </View>
+                    )}
+
+                    {/* Volume Sliders */}
+                    {!isSelectingMusic && !isSelectingFilter && !isTrimming && (
+                        <View style={{ position: "absolute", bottom: 10, width: "100%", flexDirection: "row", justifyContent: "space-around" }}>
+                            <View style={{ alignItems: "center" }}>
+                                <Text style={{ color: "white" }}>Video Vol</Text>
+                                <Slider
+                                    style={{ width: 140, height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={100}
+                                    value={videoVolume}
+                                    onValueChange={adjustVideoVolume}
+                                    onSlidingComplete={(vol) => {
+                                        setVideoVolume(vol);
+                                        if (vol === 0 || vol === 100) {
+                                            adjustVideoVolume(vol);
+                                        };
+                                    }}
+                                    minimumTrackTintColor="#0095f6"
+                                    maximumTrackTintColor="#ccc"
+                                />
+                            </View>
+                            <View style={{ alignItems: "center" }}>
+                                <Text style={{ color: "white" }}>Music Vol</Text>
+                                <Slider
+                                    style={{ width: 140, height: 40 }}
+                                    minimumValue={0}
+                                    maximumValue={100}
+                                    value={musicVolume}
+                                    onValueChange={adjustMusicVolume}
+                                    minimumTrackTintColor="#0095f6"
+                                    maximumTrackTintColor="#ccc"
+                                />
+                            </View>
+                        </View>
+                    )}
+
+                    {/* Music Selection Overlay */}
+                    {isSelectingMusic && (
+                        <MusicScreen />
+
+                    )}
+
+                    {isSelectingFilter && (
+                        <View style={{
+                            position: "absolute",
+                            bottom: 0,
+                            width: "100%",
+                            maxHeight: 220,
+                            backgroundColor: "rgba(0,0,0,0.7)",
+                            paddingVertical: 12
+                        }}>
+                            <View style={{ flexDirection: "row", justifyContent: "space-between", paddingHorizontal: 16 }}>
+                                <Text style={{ color: "white", fontWeight: "bold", fontSize: 16 }}>Filters</Text>
+                                <TouchableOpacity onPress={() => setIsSelectingFilter(false)}>
+                                    <Ionicons name="close-circle" size={28} color="white" />
+                                </TouchableOpacity>
+                            </View>
+
+                            <ScrollView horizontal showsHorizontalScrollIndicator={false} contentContainerStyle={{ paddingHorizontal: 16, marginTop: 10 }}>
+                                {(["none", "warm", "cool", "grayscale", "vintage", "sepia", "bright", "dark"] as FilterType[]).map((f) => (
+                                    <TouchableOpacity
+                                        key={f}
+                                        style={{
+                                            marginRight: 12,
+                                            alignItems: "center",
+                                        }}
+                                        onPress={() => setFilter(f)}
+                                    >
+                                        <View style={{
+                                            width: 60,
+                                            height: 60,
+                                            borderRadius: 12,
+                                            borderWidth: filter === f ? 3 : 0,
+                                            borderColor: "#0095f6",
+                                            overflow: "hidden",
+                                            justifyContent: "center",
+                                            alignItems: "center",
+                                            backgroundColor: "#222"
+                                        }}>
+                                            <View style={[{ width: "100%", height: "100%" }, getFilterStyle(f)]} />
+                                        </View>
+                                        <Text style={{ color: "white", fontSize: 12, marginTop: 4, textTransform: "capitalize" }}>{f}</Text>
+                                    </TouchableOpacity>
+                                ))}
+                            </ScrollView>
+                        </View>
+                    )}
+                        
+
+                </>
+            ) : (
+                <FinalUpload
+                    contentType={contentType}
+                    onCancel={() => setIsUploading(false)}
+                    onUpload={(data) => {
+                        // Handle final upload
+                        console.log("Upload data:", data);
+                        console.log("Trim:", trimStart, trimEnd);
+                        console.log("Selected music:", selectedMusicId, "Volume:", musicVolume);
+
+                        // Call your API / backend here
+                        onUpload(trimStart, trimEnd, selectedMusicId, musicVolume);
+
+                        // Reset state if needed
+                        setIsUploading(false);
+                    }}
+                />
             )}
 
-        </View>
+        </View></GestureHandlerRootView>
     );
 };
