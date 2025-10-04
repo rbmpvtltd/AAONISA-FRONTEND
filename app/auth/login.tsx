@@ -171,6 +171,7 @@
 //   link: { marginTop: 15, textAlign: "center" },
 // });
 
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
 import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
@@ -188,7 +189,6 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/constants/themeHelper";
 import { getUserInfoAndFollowState, getUserNotifications, loginUser } from "./api";
 
 const loginSchema = z.object({

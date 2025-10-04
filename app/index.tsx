@@ -1,3 +1,4 @@
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { Photo, usePhotoStore } from "@/src/store/useFeedStore";
 import React, { useCallback, useEffect } from "react";
 import {
@@ -14,7 +15,6 @@ import {
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
-import { useAppTheme } from "../src/constants/themeHelper";
 
 const { height, width: windowWidth } = Dimensions.get("window");
 const ITEM_HEIGHT = height * 0.7;
