@@ -233,22 +233,22 @@
 // });
 
 
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-    Alert,
-    KeyboardAvoidingView,
-    Platform,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  KeyboardAvoidingView,
+  Platform,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/constants/themeHelper";
 import { registerUser, verifyOtpRegisterUser } from "./api";
 
 const registerSchema = z.object({

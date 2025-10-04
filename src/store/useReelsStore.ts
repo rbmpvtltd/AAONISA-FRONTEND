@@ -1,3 +1,4 @@
+import { Animated } from 'react-native';
 import { create } from 'zustand';
 
 export interface ReelItem {
@@ -16,16 +17,28 @@ export interface ReelItem {
 
 interface ReelsState {
   reels: ReelItem[];
+  currentIndex: number;
+  activeTab: 'Followers' | 'News' | 'Explore';
+  isMuted: boolean;
+  showIcon: boolean;
+  fadeAnim: Animated.Value;
+
+  // Actions
   toggleLike: (id: string) => void;
   addComment: (id: string) => void;
   addShare: (id: string) => void;
+
+  setCurrentIndex: (index: number) => void;
+  setActiveTab: (tab: 'Followers' | 'News' | 'Explore') => void;
+  toggleMute: () => void;
+  setShowIcon: (val: boolean) => void;
 }
 
-export const useReelsStore = create<ReelsState>((set) => ({
+export const useReelsStore = create<ReelsState>((set, get) => ({
   reels: [
     {
       id: '1',
-      videoUrl: require('../../assets/video/videoplayback9.mp4'),
+      videoUrl: require('../../assets/video/videoplayback11.mp4'),
       user: {
         username: 'traveler_jane',
         avatar:
@@ -65,8 +78,7 @@ export const useReelsStore = create<ReelsState>((set) => ({
       shares: 120,
       isLiked: false,
     },
-
-      {
+    {
       id: '4',
       videoUrl: require('../../assets/video/videoplayback12.mp4'),
       user: {
@@ -96,7 +108,7 @@ export const useReelsStore = create<ReelsState>((set) => ({
     },
     {
       id: '6',
-      videoUrl: require('../../assets/video/videoplayback9.mp4') ,
+      videoUrl: require('../../assets/video/videoplayback9.mp4'),
       user: {
         username: 'fitness_guru',
         avatar:
@@ -109,6 +121,12 @@ export const useReelsStore = create<ReelsState>((set) => ({
       isLiked: false,
     },
   ],
+
+  currentIndex: 0,
+  activeTab: 'Followers',
+  isMuted: false,
+  showIcon: false,
+  fadeAnim: new Animated.Value(0),
 
   toggleLike: (id: string) =>
     set((state) => ({
@@ -136,4 +154,9 @@ export const useReelsStore = create<ReelsState>((set) => ({
         reel.id === id ? { ...reel, shares: reel.shares + 1 } : reel
       ),
     })),
+
+  setCurrentIndex: (index: number) => set({ currentIndex: index }),
+  setActiveTab: (tab) => set({ activeTab: tab }),
+  toggleMute: () => set({ isMuted: !get().isMuted }),
+  setShowIcon: (val: boolean) => set({ showIcon: val }),
 }));
