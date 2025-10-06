@@ -67,7 +67,7 @@ export default function CreateReel() {
   const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
   
   const cameraRef = useRef<CameraView>(null);
-  const timerRef = useRef<NodeJS.Timeout | null>(null);
+  const timerRef = useRef<NodeJS.Timeout| number | null>(null);
   const zoomSliderRef = useRef<View>(null);
   const videoRef = useRef<Video>(null);
   const leftHandleRef = useRef<View>(null);
