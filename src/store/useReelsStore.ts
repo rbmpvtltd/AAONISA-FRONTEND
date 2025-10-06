@@ -17,6 +17,8 @@ export interface ReelItem {
 
 interface ReelsState {
   reels: ReelItem[];
+//  loading: boolean;
+  setReels: (newReels: ReelItem[]) => void;
   currentIndex: number;
   activeTab: 'Followers' | 'News' | 'Explore';
   isMuted: boolean;
@@ -27,7 +29,7 @@ interface ReelsState {
   toggleLike: (id: string) => void;
   addComment: (id: string) => void;
   addShare: (id: string) => void;
-
+  // setLoading: (val: boolean) => void;
   setCurrentIndex: (index: number) => void;
   setActiveTab: (tab: 'Followers' | 'News' | 'Explore') => void;
   toggleMute: () => void;
@@ -120,8 +122,97 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
       shares: 120,
       isLiked: false,
     },
-  ],
 
+    {
+      id: '7',
+      videoUrl: require('../../assets/video/videoplayback11.mp4'),
+      user: {
+        username: 'traveler_jane',
+        avatar:
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
+      likes: 12500,
+      comments: 340,
+      shares: 89,
+      isLiked: false,
+    },
+    {
+      id: '8',
+      videoUrl: require('../../assets/video/videoplayback10.mp4'),
+      user: {
+        username: 'foodie_mike',
+        avatar:
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
+      likes: 8900,
+      comments: 210,
+      shares: 45,
+      isLiked: false,
+    },
+    {
+      id: '9',
+      videoUrl: require('../../assets/video/videoplayback11.mp4'),
+      user: {
+        username: 'fitness_guru',
+        avatar:
+          'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Morning workout routine! 💪 #fitness #workout #health',
+      likes: 15600,
+      comments: 420,
+      shares: 120,
+      isLiked: false,
+    },
+    {
+      id: '10',
+      videoUrl: require('../../assets/video/videoplayback12.mp4'),
+      user: {
+        username: 'traveler_jane',
+        avatar:
+          'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
+      likes: 12500,
+      comments: 340,
+      shares: 89,
+      isLiked: false,
+    },
+    {
+      id: '11',
+      videoUrl: require('../../assets/video/videoplayback13.mp4'),
+      user: {
+        username: 'foodie_mike',
+        avatar:
+          'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
+      likes: 8900,
+      comments: 210,
+      shares: 45,
+      isLiked: false,
+    },
+    {
+      id: '12',
+      videoUrl: require('../../assets/video/videoplayback9.mp4'),
+      user: {
+        username: 'fitness_guru',
+        avatar:
+          'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
+      },
+      caption: 'Morning workout routine! 💪 #fitness #workout #health',
+      likes: 15600,
+      comments: 420,
+      shares: 120,
+      isLiked: false,
+    },
+  ],
+  loading: false,
+
+  setReels: (newReels) => set({ reels: newReels }),
+  // setLoading: (val: boolean) => set({ loading: val }),
+  
   currentIndex: 0,
   activeTab: 'Followers',
   isMuted: false,
@@ -133,10 +224,10 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
       reels: state.reels.map((reel) =>
         reel.id === id
           ? {
-              ...reel,
-              isLiked: !reel.isLiked,
-              likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
-            }
+            ...reel,
+            isLiked: !reel.isLiked,
+            likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
+          }
           : reel
       ),
     })),
