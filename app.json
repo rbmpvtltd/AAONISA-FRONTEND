@@ -46,7 +46,8 @@
           "cameraPermission": "The app accesses your camera to let you take profile pictures."
         }
       ],
-      "expo-audio"
+      "expo-audio",
+      "expo-video"
     ],
     "experiments": {
       "typedRoutes": true
