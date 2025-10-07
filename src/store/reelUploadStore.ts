@@ -69,7 +69,7 @@ interface UploadState {
 export const useUploadStore = create<UploadState>((set:any) => ({
   // --- Initial State ---
   videoUri: null,
-  contentType: "story",
+  contentType: "reels",
   trimStart: 0,
   trimEnd: 0,
   videoDuration: 0,

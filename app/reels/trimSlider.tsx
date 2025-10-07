@@ -1,7 +1,7 @@
 
+import { useUploadStore } from '@/src/store/reelUploadStore';
 import React, { useEffect, useRef, useState } from 'react';
 import { Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
-
 const SLIDER_WIDTH = Dimensions.get('window').width - 40;
 const THUMB_SIZE = 24;
 
@@ -45,6 +45,7 @@ const TwoPointSlider = ({
             return;
         }
         setStart(nextStart);
+        useUploadStore.getState().setTrimRange(nextStart, end);
     };
 
     const updateEnd = (pos: number) => {
@@ -53,6 +54,7 @@ const TwoPointSlider = ({
             return;
         }
         setEnd(nextEnd);
+        useUploadStore.getState().setTrimRange(start, nextEnd);
     };
 
     const startPan = useRef(
