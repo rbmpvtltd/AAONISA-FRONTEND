@@ -94,76 +94,99 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     //         prev.map((o) => (o.id === updated.id ? updated : o))
     //     );
     // };
+
+    function filterNameToHex(filter: string): string {
+        switch (filter?.toLowerCase()) {
+            case "warm": return "#FFA500"; // orange
+            case "cool": return "#0000FF"; // blue
+            case "grayscale": return "#808080"; // gray
+            case "vintage": return "#FFC0CB"; // pink
+            case "sepia": return "#704214"; // brown
+            case "bright": return "#FFFFFF"; // white
+            case "dark": return "#000000"; // black
+            default: return "#00000000"; // transparent fallback
+        }
+    }
+
+
     const storyUploading = async () => {
         const {
-      videoUri,
-      trimStart,
-      trimEnd,
-      selectedMusic,
-      overlays,
-      filter,
-      videoVolume,
-      musicVolume,
-      contentType,
-    } = useUploadStore.getState();
+            videoUri,
+            trimStart,
+            trimEnd,
+            selectedMusic,
+            overlays,
+            filter,
+            videoVolume,
+            musicVolume,
+            contentType,
+        } = useUploadStore.getState();
+        console.log(videoUri)
+        if (!videoUri) {
+            alert("No video selected!");
+            return;
+        }
+        let compressedUri;
+        try {
+            compressedUri = await VideoCompressor.compress(videoUri, {
+                compressionMethod: 'auto',
+                minimumFileSizeForCompress: 0,
+                maxSize: 720,
+                progressDivider: 1,
+            });
+            console.log("Compressed URI:", compressedUri);
+        } catch (err) {
+            console.error("Video compression failed:", err);
+            return;
+        }
 
-    if (!videoUri) {
-      alert("No video selected!");
-      return;
-    }
-    const compressedUri = await VideoCompressor.compress(videoUri, {
-      compressionMethod: 'auto',
-      minimumFileSizeForCompress: 0,
-      maxSize: 720,
-      progressDivider: 1,
-    });
-    const formData = new FormData();
+        const formData = new FormData();
 
-    // Video file
-    const filename = compressedUri.split("/").pop();
-    const fileType = filename?.split(".").pop();
-    formData.append("video", {
-      uri: compressedUri,
-      name: filename,
-      type: `video/${fileType}`,
-    } as any);
+        // Video file
+        const filename = compressedUri.split("/").pop();
+        const fileType = filename?.split(".").pop();
+        formData.append("video", {
+            uri: compressedUri,
+            name: filename,
+            type: `video/${fileType}`,
+        } as any);
+        const hexFilterColor = filterNameToHex(filter);
+        console.log("Hex filter color:", hexFilterColor);
+        // Other metadata
+        formData.append("contentType", contentType);
+        formData.append("trimStart", trimStart.toString());
+        formData.append("trimEnd", trimEnd.toString());
+        formData.append("videoVolume", videoVolume.toString());
+        formData.append("musicVolume", musicVolume.toString());
+        formData.append("filter", hexFilterColor);
+        formData.append("title", '');
+        formData.append("caption", '');
+        formData.append("hashtags", '');
+        formData.append("mentions", '');
 
-    // Other metadata
-    formData.append("contentType", contentType);
-    formData.append("trimStart", trimStart.toString());
-    formData.append("trimEnd", trimEnd.toString());
-    formData.append("videoVolume", videoVolume.toString());
-    formData.append("musicVolume", musicVolume.toString());
-    formData.append("filter", filter);
-    formData.append("title", '');
-    formData.append("caption", '');
-    formData.append("hashtags", '');
-    formData.append("mentions", '');
-
-    // Selected music
-    if (selectedMusic?.uri) {
-      formData.append("selectedMusicId", selectedMusic.id ?? "");
-      formData.append("selectedMusicUri", selectedMusic.uri ?? "");
-      formData.append("selectedMusicStartMs", (selectedMusic.startMs ?? 0).toString());
-      formData.append("selectedMusicEndMs", (selectedMusic.endMs ?? 0).toString());
-      formData.append("selectedMusicVolume", (selectedMusic.volume ?? 50).toString());
-    }
+        // Selected music
+        if (selectedMusic?.uri) {
+            formData.append("selectedMusicId", selectedMusic.id ?? "");
+            formData.append("selectedMusicUri", selectedMusic.uri ?? "");
+            formData.append("selectedMusicStartMs", (selectedMusic.startMs ?? 0).toString());
+            formData.append("selectedMusicEndMs", (selectedMusic.endMs ?? 0).toString());
+            formData.append("selectedMusicVolume", (selectedMusic.volume ?? 50).toString());
+        }
 
 
-    // Overlays
-    formData.append("overlays", JSON.stringify(overlays));
+        // Overlays
+        formData.append("overlays", JSON.stringify(overlays));
 
-    try {
-      const response = await uploadReel(formData);
-      console.log("Upload response:", response);
-      useUploadStore.getState().resetAll();
-      alert("Upload successful!");
-      resetPreview();
-      onDiscard()
-    } catch (err: any) {
-      console.error("Upload failed:", err?.response?.data || err.message);
-      alert("Upload failed, check console");
-    }
+        try {
+            const response = await uploadReel(formData);
+            console.log("Upload response:", response);
+            useUploadStore.getState().resetAll();
+            alert("Upload successful!");
+            resetPreview();
+            onDiscard()
+        } catch (err: any) {
+            console.error("Upload failed:", err?.response?.data || err.message);
+        }
         Alert.alert("Story uploaded successfully!");
     }
     // const removeOverlay = (id: string) => {
@@ -202,11 +225,11 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             fontSize: 24,
             color: "#FFFFFF",
         };
-    addOverlayToStore(newOverlay);
-};
+        addOverlayToStore(newOverlay);
+    };
 
     // ---------------- VIDEO & MUSIC SYNC ----------------
-    
+
     const togglePlayback = async () => {
         if (!videoRef.current) return;
         const status = await videoRef.current.getStatusAsync();
@@ -255,7 +278,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             videoRef.current.setPositionAsync(trimStart * 1000);
         }
         if (videoUri) setTrimEnd(videoDuration);
-    }, [videoUri, videoDuration, trimStart]);
+    }, [videoUri, videoDuration, trimStart, trimEnd]);
 
     // ------------------- RESET -------------------
     const resetPreview = async () => {
@@ -295,7 +318,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                 alignItems: "center",
                                 justifyContent: "center",
                             }}
-                            onPress={() => contentType==="story" ? storyUploading() :  setIsUploading(true)}
+                            onPress={() => contentType === "story" ? storyUploading() : setIsUploading(true)}
                         >
                             <Ionicons name="cloud-upload-outline" size={24} color="white" />
                         </TouchableOpacity>

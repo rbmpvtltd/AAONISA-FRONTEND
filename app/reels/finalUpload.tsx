@@ -42,6 +42,14 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [localHashtags, setLocalHashtags] = useState(hashtags);
   const [localMentions, setLocalMentions] = useState(mentions);
 
+  
+    function colorNameToHex(color: string): string {
+        const ctx = document.createElement('canvas').getContext('2d');
+        if (!ctx) return '#FFFFFF';
+        ctx.fillStyle = color;
+        return ctx.fillStyle; // always returns hex, e.g., "red" → "#ff0000"
+    }
+
   const handleUpload = async () => {
     if (!localTitle.trim() && !localCaption.trim()) {
       alert("Please add a title or caption before posting.");
@@ -87,7 +95,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     formData.append("trimEnd", trimEnd.toString());
     formData.append("videoVolume", videoVolume.toString());
     formData.append("musicVolume", musicVolume.toString());
-    formData.append("filter", filter);
+    formData.append("filter", colorNameToHex(filter));
     formData.append("title", localTitle);
     formData.append("caption", localCaption);
     formData.append("hashtags", localHashtags);
