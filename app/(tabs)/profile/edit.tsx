@@ -113,7 +113,7 @@ const UserEditProfile = () => {
     const styles = createStyles(theme);
 
     return (
-
+    // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: theme.background }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -238,6 +238,7 @@ const UserEditProfile = () => {
                 </TouchableOpacity>
             </ScrollView>
         </KeyboardAvoidingView>
+        // {/* </SafeAreaView> */}
     );
 };
 

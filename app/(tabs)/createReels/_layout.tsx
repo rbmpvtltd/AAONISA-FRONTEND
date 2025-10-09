@@ -1,8 +1,9 @@
 import { Stack } from "expo-router";
-
-export default function AuthLayout() {
+import * as React from "react";
+export default function CreateReelsLayout() {
+  // const Tab = createBottomTabNavigator();
   return (
-    <Stack
+     <Stack
       screenOptions={{
         headerShown: false, // top header hide
       }}

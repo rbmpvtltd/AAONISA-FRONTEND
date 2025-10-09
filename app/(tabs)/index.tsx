@@ -13,7 +13,6 @@ import {
   View,
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const { height, width: windowWidth } = Dimensions.get("window");
@@ -105,10 +104,8 @@ const StoryItem = React.memo(
 const HomePage: React.FC = () => {
   const theme = useAppTheme();
   const { photos, stories, page, loading,
-        addPhotos, addStories, setPhotos,
-        setStories, setPage, setLoading } = usePhotoStore();
-
-
+    addPhotos, addStories, setPhotos,
+    setStories, setPage, setLoading } = usePhotoStore();
 
   const fetchPhotos = async () => {
     if (loading || photos.length >= 100) return;
@@ -137,15 +134,15 @@ const HomePage: React.FC = () => {
     setLoading(false);
   };
 
-const fetchStories = async () => {
-  const arr: Story[] = Array.from({ length: 30 }).map((_, i) => ({
-    id: i + 1,
-    username: "story_" + (i + 1),
-    profilePic: `https://randomuser.me/api/portraits/men/${(i + 1) * 3 % 100}.jpg`,
-    viewed: false,
-  }));
-  addStories(arr); 
-};
+  const fetchStories = async () => {
+    const arr: Story[] = Array.from({ length: 30 }).map((_, i) => ({
+      id: i + 1,
+      username: "story_" + (i + 1),
+      profilePic: `https://randomuser.me/api/portraits/men/${(i + 1) * 3 % 100}.jpg`,
+      viewed: false,
+    }));
+    addStories(arr);
+  };
 
 
   useEffect(() => {
@@ -183,12 +180,12 @@ const fetchStories = async () => {
     Alert.alert("Share", "Sharing photo " + id);
   }, []);
 
-const handleStoryPress = useCallback((id: number) => {
-  setStories(prev =>
-    prev.map(s => s.id === id ? { ...s, viewed: true } : s)
-  );
-  Alert.alert("Story", "Open story viewer for story " + id);
-}, [setStories]);
+  const handleStoryPress = useCallback((id: number) => {
+    setStories(prev =>
+      prev.map(s => s.id === id ? { ...s, viewed: true } : s)
+    );
+    Alert.alert("Story", "Open story viewer for story " + id);
+  }, [setStories]);
 
 
   const renderStory = useCallback(
@@ -213,18 +210,28 @@ const handleStoryPress = useCallback((id: number) => {
   );
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+    // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <GestureHandlerRootView>
         {/* Stories Section */}
         <View style={{ paddingVertical: 10 }}>
-          <FlatList
+          {/* <FlatList
             data={stories}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderStory}
             horizontal
             showsHorizontalScrollIndicator={false}
             contentContainerStyle={{ paddingHorizontal: 10 }}
+          /> */}
+
+          <FlatList
+            data={stories}
+            keyExtractor={(item, index) => `${item.id}-${index}`} // ensures unique key
+            renderItem={renderStory}
+            horizontal
+            showsHorizontalScrollIndicator={false}
+            contentContainerStyle={{ paddingHorizontal: 10 }}
           />
+
         </View>
 
         {/* Feed Section */}
@@ -251,7 +258,7 @@ const handleStoryPress = useCallback((id: number) => {
           })}
         />
       </GestureHandlerRootView>
-    </SafeAreaView>
+    // </SafeAreaView>
   );
 };
 

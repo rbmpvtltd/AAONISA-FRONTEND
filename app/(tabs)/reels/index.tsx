@@ -86,6 +86,7 @@ const ReelItem = ({
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
+
       <Pressable
         style={{ flex: 1 }}
         onPress={handleToggleMute}
