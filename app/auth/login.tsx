@@ -243,7 +243,7 @@ const Login = () => {
         }
         Alert.alert("Success", "Logged in successfully!");
         await resetAuth();
-        router.push("/");
+        router.push("/(tabs)");
         const userData = await getUserInfoAndFollowState();
         setUsername(userData.userInfo.username);
         setName(userData.userProfileInfo.name);

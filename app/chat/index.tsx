@@ -1,7 +1,7 @@
 import { useAppTheme } from '@/src/constants/themeHelper';
 import { useChatStore } from '@/src/store/useChatStore';
 import { ChatSummary } from '@/src/types/chatType';
-import { router, Stack } from 'expo-router';
+import { router } from 'expo-router';
 import React from 'react';
 import {
   FlatList,
@@ -94,7 +94,7 @@ export default function ChatListScreen() {
         Chats
       </Text> */}
 
-         <Stack.Screen name="chat" options={{ title: "Chats" }} />
+         {/* <Stack.Screen name="chat" options={{ title: "Chats" }} /> */}
 
 
       <FlatList
