@@ -1,3 +1,4 @@
+import { updateProfile } from "@/app/(tabs)/profile/api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
@@ -16,7 +17,6 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
-import { updateProfile } from "./api";
 const { width, height } = Dimensions.get("window");
 
 interface ProfileData {
