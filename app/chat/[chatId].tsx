@@ -2,7 +2,6 @@ import { useAppTheme } from '@/src/constants/themeHelper';
 import { useChatStore } from '@/src/store/useChatStore';
 import { Message } from '@/src/types/chatType';
 import { RouteProp, useRoute } from '@react-navigation/native';
-import { Stack } from 'expo-router';
 import React, { useRef } from 'react';
 import {
   FlatList,
@@ -172,7 +171,7 @@ export default function ChatDetailScreen() {
       behavior={Platform.OS === 'ios' ? 'padding' : 'height'}
       keyboardVerticalOffset={Platform.OS === 'ios' ? 90 : 80}
     >
-   <Stack.Screen name={`${chatId}`} options={{ title: `${chatName}` }} /> //  Screen title
+   {/* <Stack.Screen name={`${chatId}`} options={{ title: `${chatName}` }} />  */}
       <View style={[styles.container, { padding }]}>
         <FlatList
           ref={flatRef}

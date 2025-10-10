@@ -1,17 +1,12 @@
 import { Stack } from "expo-router";
 import * as React from "react";
-
-
-export default function ProfileLayout() {
+export default function SearchLayout() {
   // const Tab = createBottomTabNavigator();
   return (
-
-
      <Stack
       screenOptions={{
-        headerShown: false, // top header hide
+        headerShown: true, // top header hide
       }}
-    />
- 
+    />    
   );
 }

@@ -4,7 +4,7 @@ import { CameraType, CameraView, useCameraPermissions } from 'expo-camera';
 import * as ImagePicker from 'expo-image-picker';
 import * as MediaLibrary from 'expo-media-library';
 import { useCallback, useEffect, useRef, useState } from 'react';
-import { Alert, Dimensions, PanResponder, PermissionStatus, ScrollView, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { Alert, Dimensions, PanResponder, PermissionStatus, ScrollView, StatusBar, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
 
 type ContentType = 'story' | 'reels' | 'news';
@@ -799,6 +799,7 @@ const adjustVideoVolume = async (volume: number) => {
       {/* Video Preview on the same screen */}
       {videoUri ? (
         <View style={styles.previewContainer}>
+                <StatusBar hidden />
           <Video
             ref={videoRef}
             source={{ uri: videoUri }}

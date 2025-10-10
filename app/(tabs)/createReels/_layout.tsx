@@ -7,6 +7,7 @@ export default function CreateReelsLayout() {
       screenOptions={{
         headerShown: false, // top header hide
       }}
-    />    
+    />   
+    
   );
 }
