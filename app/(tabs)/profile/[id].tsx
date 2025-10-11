@@ -249,6 +249,7 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import React from "react";
 import {
     Dimensions,
@@ -260,6 +261,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
@@ -279,8 +281,8 @@ const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme
 );
 
 const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
-    const { profilePicture, likes, views, followersCount, followingsCount,postsCount } = useProfileStore();
-
+    const { profilePicture, likes, views, followersCount, followingsCount, postsCount } = useProfileStore();
+    const router = useRouter();
 
     return (
         <View style={styles.header}>
@@ -292,17 +294,30 @@ const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
                 }
                 style={styles.profilePicture}
             />
+
             <View style={styles.stats}>
-                {[
-                    { label: "Posts", value: postsCount },
-                    { label: "Followers", value: followersCount },
-                    { label: "Following", value: followingsCount },
-                ].map((item) => (
-                    <View style={styles.stat} key={item.label}>
-                        <Text style={[styles.statNumber, { color: theme.text }]}>{item.value}</Text>
-                        <Text style={[styles.statLabel, { color: theme.subtitle }]}>{item.label}</Text>
-                    </View>
-                ))}
+                <View style={styles.stat}>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{postsCount}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>Posts</Text>
+                </View>
+
+                <TouchableOpacity
+                    style={styles.stat}
+                  onPress={() => router.push("/profile/followers")}
+                >
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{followersCount}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>Followers</Text>
+                </TouchableOpacity>
+
+                <TouchableOpacity
+                    style={styles.stat}
+                  onPress={() => router.push("/profile/followings")}
+                >
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{followingsCount}</Text>
+                    <Text style={[styles.statLabel, { color: theme.subtitle }]}>Following</Text>
+                </TouchableOpacity>
+
+
                 <View style={{ flexDirection: "row" }}>
                     <View style={styles.likesViews}>
                         <Text style={[styles.statLabel, { color: theme.subtitle }]}>Likes</Text>
@@ -375,13 +390,13 @@ const ProfileScreen: React.FC = () => {
     const { username } = useProfileStore();
 
     return (
-        <View style={[styles.container, { backgroundColor: theme.background }]}>
+        <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
             <TopHeader userName={username || "Username"} theme={theme} />
             <ProfileHeader theme={theme} />
             <UserInfo theme={theme} />
             <Tabs theme={theme} />
             <PostGrid posts={posts} />
-        </View>
+        </SafeAreaView>
     );
 };
 
