@@ -107,8 +107,37 @@ const HomePage: React.FC = () => {
     addPhotos, addStories, setPhotos,
     setStories, setPage, setLoading } = usePhotoStore();
 
+  // const fetchPhotos = async () => {
+  //   if (loading || photos.length >= 100) return;
+  //   setLoading(true);
+  //   try {
+  //     const res = await fetch(
+  //       `https://jsonplaceholder.typicode.com/photos?_start=${page}&_limit=10`
+  //     );
+  //     const data = await res.json();
+  //     const updated: Photo[] = data.map((d: any) => ({
+  //       id: d.id,
+  //       title: d.title,
+  //       imageUrl: d.url,
+  //       profilePic: `https://randomuser.me/api/portraits/men/${d.id % 100}.jpg`,
+  //       username: "user_" + d.id,
+  //       likes: Math.floor(Math.random() * 100),
+  //       liked: false,
+  //       saved: false,
+  //       comments: [],
+  //     }));
+  //     addPhotos(updated);
+  //     setPage(page + 10);
+  //   } catch (err) {
+  //     console.error("Error fetching photos ===> ", err);
+  //   }
+  //   setLoading(false);
+  // };
+  
+
+
   const fetchPhotos = async () => {
-    if (loading || photos.length >= 100) return;
+    if (loading || photos.length >= 100) return;  
     setLoading(true);
     try {
       const res = await fetch(
@@ -129,10 +158,11 @@ const HomePage: React.FC = () => {
       addPhotos(updated);
       setPage(page + 10);
     } catch (err) {
-      console.error("Error fetching photos ===> ", err);
+      console.error(err);
     }
     setLoading(false);
   };
+
 
   const fetchStories = async () => {
     const arr: Story[] = Array.from({ length: 30 }).map((_, i) => ({
@@ -211,10 +241,10 @@ const HomePage: React.FC = () => {
 
   return (
     // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-      <GestureHandlerRootView>
-        {/* Stories Section */}
-        <View style={{ paddingVertical: 10 }}>
-          {/* <FlatList
+    <GestureHandlerRootView>
+      {/* Stories Section */}
+      <View style={{ paddingVertical: 10 }}>
+        {/* <FlatList
             data={stories}
             keyExtractor={(item) => item.id.toString()}
             renderItem={renderStory}
@@ -223,19 +253,19 @@ const HomePage: React.FC = () => {
             contentContainerStyle={{ paddingHorizontal: 10 }}
           /> */}
 
-          <FlatList
-            data={stories}
-            keyExtractor={(item, index) => `${item.id}-${index}`} // ensures unique key
-            renderItem={renderStory}
-            horizontal
-            showsHorizontalScrollIndicator={false}
-            contentContainerStyle={{ paddingHorizontal: 10 }}
-          />
-
-        </View>
-
-        {/* Feed Section */}
         <FlatList
+          data={stories}
+          keyExtractor={(item, index) => `${item.id}-${index}`}
+          renderItem={renderStory}
+          horizontal
+          showsHorizontalScrollIndicator={false}
+          contentContainerStyle={{ paddingHorizontal: 10 }}
+        />
+
+      </View>
+
+      {/* Feed Section */}
+      {/* <FlatList
           data={photos}
           keyExtractor={(item) => item.id.toString()}
           renderItem={renderItem}
@@ -256,8 +286,32 @@ const HomePage: React.FC = () => {
             offset: ITEM_HEIGHT * index,
             index,
           })}
-        />
-      </GestureHandlerRootView>
+        /> */}
+
+      <FlatList
+        data={photos}
+        keyExtractor={(item) => item.id.toString()}
+        renderItem={renderItem}
+        pagingEnabled={false}
+        snapToInterval={undefined}
+        snapToAlignment={undefined}
+        decelerationRate="fast"
+        onEndReached={fetchPhotos}
+        onEndReachedThreshold={0.5}
+        ListFooterComponent={
+          loading ? (
+            <View style={{ paddingVertical: 20 }}>
+              <ActivityIndicator size="large" color={theme.text} /> 
+            </View>
+          ) : null
+        }
+        initialNumToRender={5}
+        maxToRenderPerBatch={5}
+        windowSize={11}
+        removeClippedSubviews = {true}
+      />
+
+    </GestureHandlerRootView>
     // </SafeAreaView>
   );
 };
