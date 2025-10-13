@@ -249,7 +249,8 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
-import { useRouter } from "expo-router";
+import { DrawerActions } from "@react-navigation/native";
+import { useNavigation, useRouter } from "expo-router";
 import React from "react";
 import {
     Dimensions,
@@ -263,6 +264,9 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+
+
+
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
 const profilePicSize = width * 0.22;
@@ -273,12 +277,26 @@ const posts = Array.from({ length: 16 }).map((_, i) => ({
     image: `https://placekitten.com/${300 + i}/300`,
 }));
 
-const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme }) => (
-    <View style={styles.topHeader}>
-        <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
-        <MaterialIcons name="menu" size={24} color={theme.text} />
-    </View>
-);
+// const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme }) => (
+//     <View style={styles.topHeader}>
+//         <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
+//         <MaterialIcons name="menu" size={24} color={theme.text} />
+//     </View>
+// );
+
+const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme }) => {
+    const navigation = useNavigation();
+
+    return (
+        <View style={styles.topHeader}>
+            <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
+
+            <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+                <MaterialIcons name="menu" size={26} color={theme.text} />
+            </TouchableOpacity>
+        </View>
+    );
+};
 
 const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
     const { profilePicture, likes, views, followersCount, followingsCount, postsCount } = useProfileStore();

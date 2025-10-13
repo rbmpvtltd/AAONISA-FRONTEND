@@ -79,7 +79,6 @@
 // }));
 
 // ===========================================================================================
-
 import { create } from "zustand";
 
 export interface Story {
@@ -106,13 +105,16 @@ interface PhotoState {
   stories: Story[];
   page: number;
   loading: boolean;
+  isMuted: boolean; 
   setPhotos: (updater: (prev: Photo[]) => Photo[]) => void;
   addPhotos: (newPhotos: Photo[]) => void;
   setStories: (updater: (prev: Story[]) => Story[]) => void;
   addStories: (newStories: Story[]) => void;
   setPage: (page: number) => void;
   setLoading: (value: boolean) => void;
+  toggleMute: () => void;
   reset: () => void;
+  
 }
 
 export const usePhotoStore = create<PhotoState>((set) => ({
@@ -120,6 +122,7 @@ export const usePhotoStore = create<PhotoState>((set) => ({
   stories: [],           // default empty array
   page: 0,               // default page 0
   loading: false,        // default false
+  isMuted: false,
 
   // Update photos safely
   setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
@@ -154,6 +157,7 @@ export const usePhotoStore = create<PhotoState>((set) => ({
 
   setLoading: (value) => set({ loading: value }),
 
+  toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   // Reset store completely
   reset: () => set({ photos: [], stories: [], page: 0, loading: false }),
 }));
