@@ -1,4 +1,3 @@
-// themeHelper.ts
 import { Appearance } from "react-native";
 
 const lightTheme = {
@@ -37,3 +36,4 @@ export const useAppTheme = () => {
   const systemTheme = Appearance.getColorScheme(); 
   return systemTheme === "dark" ? darkTheme : lightTheme;
 };
+
