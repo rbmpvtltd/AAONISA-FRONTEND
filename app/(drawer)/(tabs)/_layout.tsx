@@ -128,12 +128,13 @@
 
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons } from "@expo/vector-icons";
-import { Tabs, useRouter } from "expo-router";
+import { Tabs, useNavigation, useRouter } from "expo-router";
 import { StatusBar, TouchableOpacity, View } from "react-native";
 
 export default function TabsLayout() {
   const router = useRouter();
   const theme = useAppTheme(); 
+   const navigation = useNavigation();
 
   return (
     <>
@@ -142,26 +143,16 @@ export default function TabsLayout() {
         barStyle={theme.background === "#000" ? "light-content" : "dark-content"}
         backgroundColor={theme.background}
       />
+   
+        <Tabs
+      screenOptions={{
+        tabBarShowLabel: false,
+        headerShown: true,
+        headerStyle: { backgroundColor: theme.background },
+        headerTitleStyle: { color: theme.text },
+      }}
+    >
 
-      <Tabs
-        screenOptions={{
-          tabBarShowLabel: true,
-          tabBarStyle: {
-            backgroundColor: theme.background,
-            borderTopWidth: 0.4,
-            borderTopColor: theme.text === "#fff" ? "#444" : "#ccc",
-          },
-          tabBarActiveTintColor: theme.text,
-          tabBarInactiveTintColor: theme.subtitle,
-          headerStyle: {
-            backgroundColor: theme.background,
-          },
-          headerTitleStyle: {
-            color: theme.text,
-          },
-          headerTintColor: theme.text,
-        }}
-      >
         {/*  Home */}
         <Tabs.Screen
           name="index"

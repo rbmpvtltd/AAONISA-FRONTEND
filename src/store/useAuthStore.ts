@@ -18,9 +18,6 @@ interface AuthState {
     verifyingEmail : boolean
     verifyingPhone : boolean
 
-
-
-
     // Setters
     setEmailOrPhone: (value: string) => void;
     setEmail: (value: string) => void;
@@ -59,9 +56,6 @@ export const useAuthStore = create<AuthState>((set, get) => ({
     verifyingEmail : false,
     verifyingPhone : false,
 
-
-
-
     setEmailOrPhone: (value) => set({ emailOrPhone: value }),
     setEmail: (value) => set({ email: value }),
     setPhone: (value) => set({ phone: value }),
@@ -81,10 +75,13 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ token });
         if (Platform.OS === "web") {
             if (typeof localStorage !== "undefined") {
-                localStorage.setItem("accessToken", token);
+                // localStorage.setItem("accessToken", token);
+                localStorage.setItem("authToken", token);
             }
         } else {
-            await AsyncStorage.setItem("accessToken", token);
+            // await AsyncStorage.setItem("accessToken", token);
+            await AsyncStorage.setItem("authToken", token);
+
         }
     },
 
