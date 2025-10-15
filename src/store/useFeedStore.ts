@@ -79,13 +79,104 @@
 // }));
 
 // ===========================================================================================
-import { create } from "zustand";
+// import { create } from "zustand";
 
+// export interface Story {
+//   id: number;
+//   username: string;
+//   profilePic: string;
+//   viewed: boolean;
+// }
+
+// export interface Photo {
+//   id: number;
+//   title: string;
+//   imageUrl: string;
+//   profilePic: string;
+//   username: string;
+//   likes: number;
+//   liked: boolean;
+//   saved: boolean;
+//   comments: string[];
+// }
+
+// interface PhotoState {
+//   photos: Photo[];
+//   stories: Story[];
+//   page: number;
+//   loading: boolean;
+//   isMuted: boolean; 
+//   setPhotos: (updater: (prev: Photo[]) => Photo[]) => void;
+//   addPhotos: (newPhotos: Photo[]) => void;
+//   setStories: (updater: (prev: Story[]) => Story[]) => void;
+//   addStories: (newStories: Story[]) => void;
+//   setPage: (page: number) => void;
+//   setLoading: (value: boolean) => void;
+//   toggleMute: () => void;
+//   reset: () => void;
+  
+// }
+
+// export const usePhotoStore = create<PhotoState>((set) => ({
+//   photos: [],            // default empty array
+//   stories: [],           // default empty array
+//   page: 0,               // default page 0
+//   loading: false,        // default false
+//   isMuted: false,
+
+//   // Update photos safely
+//   setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
+
+//   // Add new photos without duplicates
+//   addPhotos: (newPhotos) =>
+//     set((state) => ({
+//       photos: [
+//         ...state.photos,
+//         ...newPhotos.filter(
+//           (photo) => !state.photos.some((p) => p.id === photo.id)
+//         ),
+//       ],
+//     })),
+
+//   // Update stories safely
+//   setStories: (updater) => set((state) => ({ stories: updater(state.stories) })),
+
+//   // Add new stories and ensure unique IDs
+//   addStories: (newStories) =>
+//     set((state) => ({
+//       stories: [
+//         ...state.stories,
+//         ...newStories.map((story, i) => ({
+//           ...story,
+//           id: state.stories.length + i + 1, // unique id
+//         })),
+//       ],
+//     })),
+
+//   setPage: (page) => set({ page }),
+
+//   setLoading: (value) => set({ loading: value }),
+
+//   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
+//   // Reset store completely
+//   reset: () => set({ photos: [], stories: [], page: 0, loading: false }),
+// }));
+
+//======================================================================================
+
+import { create } from "zustand";
 export interface Story {
   id: number;
   username: string;
   profilePic: string;
   viewed: boolean;
+}
+
+export interface Comment {
+  username: string;
+  text: string;
+  time: string;
+  profilePic?: string;
 }
 
 export interface Photo {
@@ -97,7 +188,7 @@ export interface Photo {
   likes: number;
   liked: boolean;
   saved: boolean;
-  comments: string[];
+  comments: Comment[];
 }
 
 interface PhotoState {
@@ -105,7 +196,7 @@ interface PhotoState {
   stories: Story[];
   page: number;
   loading: boolean;
-  isMuted: boolean; 
+  isMuted: boolean;
   setPhotos: (updater: (prev: Photo[]) => Photo[]) => void;
   addPhotos: (newPhotos: Photo[]) => void;
   setStories: (updater: (prev: Story[]) => Story[]) => void;
@@ -114,20 +205,17 @@ interface PhotoState {
   setLoading: (value: boolean) => void;
   toggleMute: () => void;
   reset: () => void;
-  
 }
 
 export const usePhotoStore = create<PhotoState>((set) => ({
-  photos: [],            // default empty array
-  stories: [],           // default empty array
-  page: 0,               // default page 0
-  loading: false,        // default false
+  photos: [],
+  stories: [],
+  page: 0,
+  loading: false,
   isMuted: false,
 
-  // Update photos safely
   setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
 
-  // Add new photos without duplicates
   addPhotos: (newPhotos) =>
     set((state) => ({
       photos: [
@@ -138,26 +226,21 @@ export const usePhotoStore = create<PhotoState>((set) => ({
       ],
     })),
 
-  // Update stories safely
   setStories: (updater) => set((state) => ({ stories: updater(state.stories) })),
 
-  // Add new stories and ensure unique IDs
   addStories: (newStories) =>
     set((state) => ({
       stories: [
         ...state.stories,
         ...newStories.map((story, i) => ({
           ...story,
-          id: state.stories.length + i + 1, // unique id
+          id: state.stories.length + i + 1,
         })),
       ],
     })),
 
   setPage: (page) => set({ page }),
-
   setLoading: (value) => set({ loading: value }),
-
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
-  // Reset store completely
   reset: () => set({ photos: [], stories: [], page: 0, loading: false }),
 }));

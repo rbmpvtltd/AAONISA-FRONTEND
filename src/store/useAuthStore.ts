@@ -75,12 +75,12 @@ export const useAuthStore = create<AuthState>((set, get) => ({
         set({ token });
         if (Platform.OS === "web") {
             if (typeof localStorage !== "undefined") {
-                // localStorage.setItem("accessToken", token);
-                localStorage.setItem("authToken", token);
+                localStorage.setItem("accessToken", token);
+                // localStorage.setItem("authToken", token);
             }
         } else {
-            // await AsyncStorage.setItem("accessToken", token);
-            await AsyncStorage.setItem("authToken", token);
+            await AsyncStorage.setItem("accessToken", token);
+            // await AsyncStorage.setItem("authToken", token);
 
         }
     },

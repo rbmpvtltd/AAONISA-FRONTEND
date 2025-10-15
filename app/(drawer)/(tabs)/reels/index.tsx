@@ -1,5 +1,6 @@
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useIsFocused } from '@react-navigation/native';
+import { router, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef } from 'react';
 import {
@@ -168,7 +169,7 @@ const ReelItem = ({
           <Text style={styles.actionText}>{formatNumber(item.likes)}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => addComment(item.id)}>
+        <TouchableOpacity style={styles.actionButton}  onPress={() => router.push(`/comment/${item.id}`)}>
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.comments)}</Text>
         </TouchableOpacity>
@@ -206,6 +207,7 @@ const ReelsFeed = () => {
     setShowIcon,
     fadeAnim,
   } = useReelsStore();
+const router = useRouter();
 
   useEffect(() => {
     if (!isFocused) {
