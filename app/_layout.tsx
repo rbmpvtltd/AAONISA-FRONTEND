@@ -30,10 +30,10 @@ export default function RootLayout() {
 
     if (!token && !inAuth) {
       setNavigated(true);
-      router.replace("/auth/login");
+      router.navigate("/auth/login");
     } else if (token && inAuth) {
       setNavigated(true);
-      router.replace("/(drawer)/(tabs)");
+      router.navigate("/(drawer)/(tabs)");
     } else if (token && !inAuth) {
       setNavigated(true); // already logged in and on valid page
     }

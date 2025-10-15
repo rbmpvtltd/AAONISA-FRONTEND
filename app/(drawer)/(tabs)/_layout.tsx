@@ -7,7 +7,7 @@
 
 //   return (
 //     <>
-    
+
 //   <StatusBar
 //         hidden={false}               // show karna hai
 //         barStyle="dark-content"      // dark icons (for light background)
@@ -24,7 +24,7 @@
 //         },
 //       }}
 //     >
-        
+
 //       {/* Home (Feed) */}
 //       <Tabs.Screen
 //         name="index"
@@ -133,8 +133,8 @@ import { StatusBar, TouchableOpacity, View } from "react-native";
 
 export default function TabsLayout() {
   const router = useRouter();
-  const theme = useAppTheme(); 
-   const navigation = useNavigation();
+  const theme = useAppTheme();
+  const navigation = useNavigation();
 
   return (
     <>
@@ -143,15 +143,15 @@ export default function TabsLayout() {
         barStyle={theme.background === "#000" ? "light-content" : "dark-content"}
         backgroundColor={theme.background}
       />
-   
-        <Tabs
-      screenOptions={{
-        tabBarShowLabel: false,
-        headerShown: true,
-        headerStyle: { backgroundColor: theme.background },
-        headerTitleStyle: { color: theme.text },
-      }}
-    >
+
+      <Tabs
+        screenOptions={{
+          tabBarShowLabel: false,
+          headerShown: true,
+          headerStyle: { backgroundColor: theme.background },
+          headerTitleStyle: { color: theme.text },
+        }}
+      >
 
         {/*  Home */}
         <Tabs.Screen
@@ -188,6 +188,15 @@ export default function TabsLayout() {
                 color={focused ? theme.text : theme.subtitle}
               />
             ),
+          }}
+        />
+        
+        {/*  Comment */}
+        <Tabs.Screen
+          name="comment/[id]"
+          options={{
+            tabBarButton: () => null, // hides the tab from the tab bar
+            tabBarStyle: { display: 'none' }, // optional: hide bar when on this screen
           }}
         />
 
