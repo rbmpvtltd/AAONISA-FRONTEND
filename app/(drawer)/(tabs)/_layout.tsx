@@ -1,131 +1,3 @@
-// import { Ionicons } from "@expo/vector-icons";
-// import { Tabs, useRouter } from "expo-router";
-// import { StatusBar, TouchableOpacity, View } from "react-native";
-
-// export default function TabsLayout() {
-//   const router = useRouter();
-
-//   return (
-//     <>
-
-//   <StatusBar
-//         hidden={false}               // show karna hai
-//         barStyle="dark-content"      // dark icons (for light background)
-//         backgroundColor="#fff"       // white background
-//       />
-
-//     <Tabs
-//       screenOptions={{
-//         tabBarShowLabel: true,
-//         tabBarStyle: {
-//           backgroundColor: "#fff",
-//           borderTopWidth: 0.4,
-//           borderTopColor: "#ccc",
-//         },
-//       }}
-//     >
-
-//       {/* Home (Feed) */}
-//       <Tabs.Screen
-//         name="index"
-//         options={{
-//           headerShown: true,
-//           headerTitle: "Aao Ni Sa",
-//           headerTitleStyle: { fontWeight: "700", fontSize: 20 },
-//           headerRight: () => (
-//             <View style={{ flexDirection: "row", gap: 20, marginRight: 15 }}>
-//               {/* Notifications */}
-//               <TouchableOpacity onPress={() => router.push("/notifications")}>
-//                 <Ionicons name="heart-outline" size={24} color="black" />
-//               </TouchableOpacity>
-
-//               {/* Chat */}
-//               <TouchableOpacity onPress={() => router.push("/chat")}>
-//                 <Ionicons
-//                   name="chatbubble-ellipses-outline"
-//                   size={24}
-//                   color="black"
-//                 />
-//               </TouchableOpacity>
-//             </View>
-//           ),
-//           tabBarIcon: ({ focused }) => (
-//             <Ionicons
-//               name={focused ? "home" : "home-outline"}
-//               size={24}
-//               color="black"
-//             />
-//           ),
-//         }}
-//       />
-
-//       {/* Search */}
-//       <Tabs.Screen
-//         name="search"
-//         options={{
-//           headerShown: false,
-//           title: "Search",
-//           tabBarIcon: ({ focused }) => (
-//             <Ionicons
-//               name={focused ? "search" : "search-outline"}
-//               size={24}
-//               color="black"
-//             />
-//           ),
-//         }}
-//       />
-
-//  {/* Create Reels */}
-//      <Tabs.Screen
-//         name="create"
-//         options={{
-//             headerShown: false,
-//           title: "Create",
-//           tabBarIcon: ({focused}) => (
-//             <Ionicons
-//              name={focused ? "add-circle" : "add-circle-outline"}
-//              size={24} 
-//              color="black" />
-//           ),
-//         }}
-//       />
-
-//       {/* Reels Feed */}
-//       <Tabs.Screen
-//         name="reels"
-//         options={{
-//           headerShown: false, 
-//           title: "Reels Feed",
-//           tabBarIcon: ({ focused }) => (
-//             <Ionicons
-//               name={focused ? "film" : "film-outline"}
-//               size={24}
-//               color="black"
-//             />
-//           ),
-//         }}
-//       />
-
-//       {/* Profile */}
-//       <Tabs.Screen
-//         name="profile"
-//         options={{
-//           headerShown: false,
-//           title: "Profile",
-//           tabBarIcon: ({ focused }) => (
-//             <Ionicons
-//               name={focused ? "person" : "person-outline"}
-//               size={24}
-//               color="black"
-//             />
-//           ),
-//         }}
-//       />
-//     </Tabs>
-//     </>
-//   );
-// }
-
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useNavigation, useRouter } from "expo-router";
@@ -191,14 +63,7 @@ export default function TabsLayout() {
           }}
         />
         
-        {/*  Comment */}
-        <Tabs.Screen
-          name="comment/[id]"
-          options={{
-            tabBarButton: () => null, // hides the tab from the tab bar
-            tabBarStyle: { display: 'none' }, // optional: hide bar when on this screen
-          }}
-        />
+      
 
         {/*  Search */}
         <Tabs.Screen
@@ -215,17 +80,18 @@ export default function TabsLayout() {
             ),
           }}
         />
+       
 
         {/*  Create */}
         <Tabs.Screen
-          name="create"
+          name="createReels"
           options={{
             headerShown: false,
             title: "Create",
             tabBarIcon: ({ focused }) => (
               <Ionicons
                 name={focused ? "add-circle" : "add-circle-outline"}
-                size={24}
+                size={28}
                 color={focused ? theme.text : theme.subtitle}
               />
             ),
@@ -240,8 +106,8 @@ export default function TabsLayout() {
             title: "Reels Feed",
             tabBarIcon: ({ focused }) => (
               <Ionicons
-                name={focused ? "film" : "film-outline"}
-                size={24}
+                name={focused ? "play-circle" : "play-circle-outline"}
+                size={26}
                 color={focused ? theme.text : theme.subtitle}
               />
             ),
@@ -262,7 +128,7 @@ export default function TabsLayout() {
               />
             ),
           }}
-        />
+        /> 
       </Tabs>
     </>
   );

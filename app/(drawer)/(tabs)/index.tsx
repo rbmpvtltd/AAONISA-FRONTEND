@@ -130,7 +130,7 @@ const PhotoItem = React.memo(
           >
             <Icon
               name={isMuted ? "volume-mute" : "volume-high"}
-              size={30}
+              size={24}
               color="white"
             />
           </TouchableOpacity>
@@ -173,7 +173,7 @@ const StoryItem = React.memo(
       <View
         style={[
           styles.storyBorder,
-          { borderColor: story.viewed ? theme.inputBorder : "#ff8501" },
+          { borderColor:  "#ff8501" },
         ]}
       >
         <Image source={{ uri: story.profilePic }} style={styles.storyImage} />

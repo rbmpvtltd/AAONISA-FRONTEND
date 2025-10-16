@@ -2,7 +2,7 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 
-export default function ChatLayout() {
+export default function CommentLayout() {
   const theme = useAppTheme(); 
 
   return (
@@ -28,21 +28,14 @@ export default function ChatLayout() {
           },
         }}
       >
-        {/* Chat List */}
+        {/* Comment */}
         <Stack.Screen
-          name="index"
+          name="[id]"
           options={{
-            title: "Messages",
+            title: "Comments",
           }}
         />
 
-        {/* Chat Detail */}
-        <Stack.Screen
-          name="[chatId]"
-          options={{
-            title: "Chat Detail",
-          }}
-        />
       </Stack>
     </>
   );
