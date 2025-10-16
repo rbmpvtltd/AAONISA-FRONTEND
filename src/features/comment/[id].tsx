@@ -266,7 +266,6 @@
 //   },
 // });
 
-
 // =======================================================
 
 import { useAppTheme } from "@/src/constants/themeHelper";
@@ -274,18 +273,19 @@ import { usePhotoStore } from "@/src/store/useFeedStore";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import React, { useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  FlatList,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    FlatList,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const { width: windowWidth } = Dimensions.get("window");
@@ -356,22 +356,13 @@ const CommentPage = () => {
   };
 
   return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: theme.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
       keyboardVerticalOffset={90}
     >
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        {/* Header */}
-        <View style={[styles.header, { borderBottomColor: theme.inputBorder }]}>
-          <TouchableOpacity onPress={() => router.back()}>
-            <Icon name="arrow-back" size={windowWidth * 0.06} color={theme.text} />
-          </TouchableOpacity>
-          <Text style={[styles.headerTitle, { color: theme.text }]}>
-            Comments
-          </Text>
-        </View>
-
+     
         {/* Comment List */}
         <FlatList
           data={photo.comments}
@@ -487,8 +478,8 @@ const CommentPage = () => {
             </Text>
           </TouchableOpacity>
         </View>
-      </View>
     </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
@@ -496,14 +487,6 @@ export default CommentPage;
 
 const styles = StyleSheet.create({
   container: { flex: 1 },
-  header: {
-    flexDirection: "row",
-    alignItems: "center",
-    paddingVertical: 15,
-    paddingHorizontal: 15,
-    borderBottomWidth: 1,
-  },
-  headerTitle: { fontSize: 18, fontWeight: "600", marginLeft: 15 },
   commentContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
