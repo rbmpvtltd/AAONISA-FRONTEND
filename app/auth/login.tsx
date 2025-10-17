@@ -69,8 +69,8 @@ const Login = () => {
           await saveToken(data.accessToken);
         }
         Alert.alert("Success", "Logged in successfully!");
-        await resetAuth();
-        router.push("/(drawer)/(tabs)");
+        // await resetAuth();
+        router.replace("/(drawer)/(tabs)");
         const userData = await getUserInfoAndFollowState();
         setUsername(userData.userInfo.username);
         setName(userData.userProfileInfo.name);
