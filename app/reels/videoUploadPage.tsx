@@ -18,7 +18,12 @@ import FinalUpload from "./finalUpload";
 import MusicScreen from "./musicPanel";
 import TextOverlay from "./textOverlay";
 import TwoPointSlider from "./trimSlider";
+
+const VIDEO_WIDTH = 720;
+const VIDEO_HEIGHT = 1280;
 const SCREEN_WIDTH = Dimensions.get("window").width;
+const SCREEN_HEIGHT = Dimensions.get("window").height;
+
 const TRIM_HANDLE_WIDTH = 20;
 type FilterType = "none" | "warm" | "cool" | "grayscale" | "vintage" | "sepia" | "bright" | "dark";
 
@@ -74,7 +79,6 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [musicVolume, setMusicVolume] = useState(50);
     const [selectedMusicId, setSelectedMusicId] = useState<string | null>(null);
     const soundRef = useRef<Audio.Sound | null>(null);
-    // const [overlays, setOverlays] = useState<OverlayMetadata[]>([]);
 
     const [trimStart, setTrimStart] = useState(0);
     const [trimEnd, setTrimEnd] = useState(0);
@@ -88,13 +92,6 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [isFinalUploading, setIsUploading] = useState(false);
 
     const prevMusicVolume = useRef(50);
-
-    // const updateOverlay = (updated: OverlayMetadata) => {
-    //     setOverlays((prev) =>
-    //         prev.map((o) => (o.id === updated.id ? updated : o))
-    //     );
-    // };
-
     function filterNameToHex(filter: string): string {
         switch (filter?.toLowerCase()) {
             case "warm": return "#FFA500"; // orange
@@ -107,6 +104,19 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             default: return "#00000000"; // transparent fallback
         }
     }
+
+    function mapOverlayToBackend(overlay: any) {
+        console.log(overlay)
+        let newY = 0
+        overlay.y >= 0 ? newY = overlay.y * 3 : newY = ((overlay.y * (-1)) + 130) * 2.5;
+        return {
+            ...overlay,
+            x: overlay.x + (overlay.x * 1.2),
+            y: newY,
+            fontSize: overlay.fontSize * overlay.scale,
+        };
+    }
+
 
 
     const storyUploading = async () => {
@@ -121,7 +131,6 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             musicVolume,
             contentType,
         } = useUploadStore.getState();
-        console.log(videoUri)
         if (!videoUri) {
             alert("No video selected!");
             return;
@@ -134,7 +143,6 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                 maxSize: 720,
                 progressDivider: 1,
             });
-            console.log("Compressed URI:", compressedUri);
         } catch (err) {
             console.error("Video compression failed:", err);
             return;
@@ -150,8 +158,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             name: filename,
             type: `video/${fileType}`,
         } as any);
-        const hexFilterColor = filterNameToHex(filter);
-        console.log("Hex filter color:", hexFilterColor);
+        const hexFilterColor = filterNameToHex(filter);;
         // Other metadata
         formData.append("contentType", contentType);
         formData.append("trimStart", trimStart.toString());
@@ -173,9 +180,9 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             formData.append("selectedMusicVolume", (selectedMusic.volume ?? 50).toString());
         }
 
-
+        const backendOverlays = overlays.map(mapOverlayToBackend);
         // Overlays
-        formData.append("overlays", JSON.stringify(overlays));
+        formData.append("overlays", JSON.stringify(backendOverlays));
 
         try {
             const response = await uploadReel(formData);
@@ -189,25 +196,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         }
         Alert.alert("Story uploaded successfully!");
     }
-    // const removeOverlay = (id: string) => {
-    //     setOverlays((prev) => prev.filter((o) => o.id !== id));
-    // };
 
-    // const addOverlay = (text = "#example") => {
-    //     setOverlays((prev) => [
-    //         ...prev,
-    //         {
-    //             id: Date.now().toString(),
-    //             text,
-    //             x: SCREEN_WIDTH * 0.30,
-    //             y: -140,
-    //             scale: 1,
-    //             rotation: 0,
-    //             fontSize: 24,
-    //             color: "#FFFFFF",
-    //         },
-    //     ]);
-    // };
     const setMusicVolumeStore = useUploadStore((state) => state.setMusicVolume);
     const setVideoVolumeStore = useUploadStore((state) => state.setVideoVolume);
     const addOverlayToStore = useUploadStore((state) => state.addOverlay);

@@ -266,6 +266,7 @@ const Login = () => {
         });
         console.log("Notifications:", notifications);
       } else {
+        console.log(data)
         Alert.alert("Error", data.message);
       }
     } catch (error) {

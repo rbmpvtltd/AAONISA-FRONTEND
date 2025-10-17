@@ -53,6 +53,7 @@ const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }
       if (!isEditing) {
         x.value = overlay.x + e.translationX;
         y.value = overlay.y + e.translationY;
+        // console.log(`x: ${x.value.toFixed(1)}, y: ${y.value.toFixed(1)}`);
       }
     })
     .onEnd(() => runOnJS(onUpdate)({ ...overlay, x: x.value, y: y.value }));
