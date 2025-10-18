@@ -1,14 +1,13 @@
 import React, { useEffect, useState } from "react";
 import {
   Dimensions,
-  Keyboard,
   Modal,
   ScrollView,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { Gesture, GestureDetector } from "react-native-gesture-handler";
 import Animated, { runOnJS, useAnimatedStyle, useSharedValue } from "react-native-reanimated";
@@ -37,39 +36,116 @@ const COLORS = [
   "#00FFFF", "#800080", "#FFC0CB", "#808080", "#FFD700", "#008000"
 ];
 
+
 const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }) => {
   const x = useSharedValue(overlay.x);
   const y = useSharedValue(overlay.y);
   const scale = useSharedValue(overlay.scale);
   const rotation = useSharedValue(overlay.rotation);
+  const startScale = useSharedValue(overlay.scale);
+  const startRotation = useSharedValue(overlay.rotation);
+  const startX = useSharedValue(overlay.x);
+  const startY = useSharedValue(overlay.y);
 
   const [isEditing, setIsEditing] = useState(false);
   const [tempText, setTempText] = useState(overlay.text);
-  const [keyboardHeight, setKeyboardHeight] = useState(0);
 
-  // ---------- Gestures ----------
+  // ---------- DEBUG: log on overlay prop change ----------
+  useEffect(() => {
+    x.value = overlay.x;
+    y.value = overlay.y;
+    scale.value = overlay.scale;
+    rotation.value = overlay.rotation;
+  }, [overlay]);
+
+  // ---------- debounce function ----------
+  function debounce(func: (...args: any[]) => void, delay: number) {
+    let timeout: number;
+    return (...args: any) => {
+      clearTimeout(timeout);
+      timeout = setTimeout(() => func(...args), delay);
+    };
+  }
+
+  const updateOverlayToStore = debounce((updated: OverlayMetadata) => {
+    onUpdate(updated);
+  }, 50);
+
+  // ---------- PAN ----------
   const panGesture = Gesture.Pan()
+    .onBegin(() => {
+      startX.value = x.value;
+      startY.value = y.value;
+    })
     .onUpdate((e) => {
       if (!isEditing) {
-        x.value = overlay.x + e.translationX;
-        y.value = overlay.y + e.translationY;
-        // console.log(`x: ${x.value.toFixed(1)}, y: ${y.value.toFixed(1)}`);
+        x.value = startX.value + e.translationX;
+        y.value = startY.value + e.translationY;
       }
     })
-    .onEnd(() => runOnJS(onUpdate)({ ...overlay, x: x.value, y: y.value }));
+    .onEnd(() => {
+  const finalOverlay = {
+    id: overlay.id,
+    text: overlay.text,
+    color: overlay.color,
+    fontSize: overlay.fontSize,
+    x: x.value,
+    y: y.value,
+    scale: scale.value,
+    rotation: rotation.value,
+  };
+  runOnJS(updateOverlayToStore)(finalOverlay);
+});
 
+  // ---------- PINCH ----------
   const pinchGesture = Gesture.Pinch()
-    .onUpdate((e) => { if (!isEditing) scale.value = overlay.scale * e.scale; })
-    .onEnd(() => runOnJS(onUpdate)({ ...overlay, scale: scale.value }));
+    .onBegin(() => { startScale.value = scale.value; })
+    .onUpdate((e) => {
+      if (!isEditing) {
+        const newScale = startScale.value * e.scale;
+        scale.value = Math.min(Math.max(newScale, 0.3), 5); 
+      }
+    })
+    .onEnd(() => {
+  const finalOverlay = {
+    id: overlay.id,
+    text: overlay.text,
+    color: overlay.color,
+    fontSize: overlay.fontSize,
+    x: x.value,
+    y: y.value,
+    scale: scale.value,
+    rotation: rotation.value,
+  };
+  runOnJS(updateOverlayToStore)(finalOverlay);
+});
 
+  // ---------- ROTATION ----------
   const rotationGesture = Gesture.Rotation()
-    .onUpdate((e) => { if (!isEditing) rotation.value = overlay.rotation + e.rotation; })
-    .onEnd(() => runOnJS(onUpdate)({ ...overlay, rotation: rotation.value }));
+    .onBegin(() => { startRotation.value = rotation.value; })
+    .onUpdate((e) => {
+      if (!isEditing) {
+        rotation.value = startRotation.value + e.rotation;
+      }
+    })
+    .onEnd(() => {
+  const finalOverlay = {
+    id: overlay.id,
+    text: overlay.text,
+    color: overlay.color,
+    fontSize: overlay.fontSize,
+    x: x.value,
+    y: y.value,
+    scale: scale.value,
+    rotation: rotation.value,
+  };
+  runOnJS(updateOverlayToStore)(finalOverlay);
+});
 
   const combinedGesture = Gesture.Simultaneous(panGesture, pinchGesture, rotationGesture);
 
   const animatedStyle = useAnimatedStyle(() => ({
-    position: "absolute",
+    position: 'absolute',
     left: x.value,
     top: y.value,
     transform: [
@@ -79,25 +155,11 @@ const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }
     zIndex: 100,
   }));
 
-  // ---------- Keyboard ----------
-  useEffect(() => {
-    const showSub = Keyboard.addListener("keyboardDidShow", (e) =>
-      setKeyboardHeight(e.endCoordinates.height)
-    );
-    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-      setKeyboardHeight(0);
-      if (isEditing) applyTextChange();
-    });
-    return () => {
-      showSub.remove();
-      hideSub.remove();
-    };
-  }, [isEditing]);
-
-  // ---------- Handlers ----------
+  // ---------- handlers for text ----------
   const applyTextChange = () => {
-    if (tempText.trim() === "") return;
+    if (tempText.trim() === '') return;
     const updatedText = preserveSpecialSymbols(overlay.text, tempText);
+    console.log('Text updated:', updatedText);
     onUpdate({ ...overlay, text: updatedText });
     setTempText(updatedText);
     setIsEditing(false);
@@ -105,7 +167,7 @@ const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }
 
   const preserveSpecialSymbols = (original: string, edited: string) => {
     if (!original || original.length === 0) return edited;
-    if (original[0] === "#" || original[0] === "@") {
+    if (original[0] === '#' || original[0] === '@') {
       let newText = original[0];
       if (edited[0] === original[0]) edited = edited.slice(1);
       newText += edited;
@@ -114,71 +176,72 @@ const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }
     return edited;
   };
 
-  const changeColor = (color: string) => onUpdate({ ...overlay, color });
+  const changeColor = (color: string) => {
+    console.log('Color changed:', color);
+    onUpdate({ ...overlay, color });
+  };
 
-  const removeOverlay = () => onRemove(overlay.id);
+  const removeOverlay = () => {
+    onRemove(overlay.id);
+  };
 
   const closeEditing = () => setIsEditing(false);
 
+  // ---------- Render ----------
   return (
-<GestureDetector gesture={combinedGesture}>
-  <Animated.View style={animatedStyle}>
-    {/* Overlay text */}
-    <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
-      <Text style={[styles.overlayText, { fontSize: overlay.fontSize, color: overlay.color }]}>
-        {overlay.text}
-      </Text>
-    </TouchableOpacity>
-
-    {/* Full-screen Modal for Editing */}
-    <Modal visible={isEditing} animationType="fade" transparent>
-      <View style={styles.modalOverlay}>
-        {/* Close Button */}
-        <TouchableOpacity style={styles.closeButton} onPress={closeEditing}>
-          <Text style={styles.closeText}>×</Text>
+    <GestureDetector gesture={combinedGesture}>
+      <Animated.View style={animatedStyle}>
+        <TouchableOpacity activeOpacity={1} onPress={() => setIsEditing(true)}>
+          <Text style={[styles.overlayText, { fontSize: overlay.fontSize, color: overlay.color }]}>
+            {overlay.text}
+          </Text>
         </TouchableOpacity>
 
-        {/* Color Palette */}
-        <ScrollView
-          horizontal
-          showsHorizontalScrollIndicator={false}
-          style={styles.colorScroll}
-          contentContainerStyle={styles.colorRow}
-        >
-          {COLORS.map((c) => (
-            <TouchableOpacity
-              key={c}
-              style={[styles.colorCircle, { backgroundColor: c }]}
-              onPress={() => changeColor(c)}
+        <Modal visible={isEditing} animationType="fade" transparent>
+          <View style={styles.modalOverlay}>
+            <TouchableOpacity style={styles.closeButton} onPress={closeEditing}>
+              <Text style={styles.closeText}>×</Text>
+            </TouchableOpacity>
+
+            <ScrollView
+              horizontal
+              showsHorizontalScrollIndicator={false}
+              style={styles.colorScroll}
+              contentContainerStyle={styles.colorRow}
+            >
+              {COLORS.map(c => (
+                <TouchableOpacity
+                  key={c}
+                  style={[styles.colorCircle, { backgroundColor: c }]}
+                  onPress={() => changeColor(c)}
+                />
+              ))}
+            </ScrollView>
+
+            <TextInput
+              style={[styles.dummyInput, { color: overlay.color, maxHeight: 80 }]}
+              value={tempText}
+              onChangeText={setTempText}
+              autoFocus
+              multiline
+              scrollEnabled
+              onSubmitEditing={applyTextChange}
+              onBlur={applyTextChange}
+              blurOnSubmit
+              keyboardAppearance="dark"
+              returnKeyType="done"
             />
-          ))}
-        </ScrollView>
 
-        {/* Dummy Input */}
-        <TextInput
-          style={[styles.dummyInput, { color: overlay.color, maxHeight: 80 }]}
-          value={tempText}
-          onChangeText={setTempText}
-          autoFocus
-          multiline
-          scrollEnabled
-          onSubmitEditing={applyTextChange}
-          onBlur={applyTextChange}
-          blurOnSubmit
-          keyboardAppearance="dark"
-          returnKeyType="done"
-        />
-
-        {/* Remove Button */}
-        <TouchableOpacity style={styles.removeButton} onPress={removeOverlay}>
-          <Text style={styles.removeText}>Remove</Text>
-        </TouchableOpacity>
-      </View>
-    </Modal>
-  </Animated.View>
-</GestureDetector>
+            <TouchableOpacity style={styles.removeButton} onPress={removeOverlay}>
+              <Text style={styles.removeText}>Remove</Text>
+            </TouchableOpacity>
+          </View>
+        </Modal>
+      </Animated.View>
+    </GestureDetector>
   );
 };
+
 
 const styles = StyleSheet.create({
   overlayText: {

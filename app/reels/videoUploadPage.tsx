@@ -11,7 +11,6 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { Video as VideoCompressor } from 'react-native-compressor';
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { uploadReel } from "./api";
 import FinalUpload from "./finalUpload";
@@ -117,7 +116,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         };
     }
 
-
+    
 
     const storyUploading = async () => {
         const {
@@ -135,30 +134,31 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             alert("No video selected!");
             return;
         }
-        let compressedUri;
-        try {
-            compressedUri = await VideoCompressor.compress(videoUri, {
-                compressionMethod: 'auto',
-                minimumFileSizeForCompress: 0,
-                maxSize: 720,
-                progressDivider: 1,
-            });
-        } catch (err) {
-            console.error("Video compression failed:", err);
-            return;
-        }
+
+        // let compressedUri;
+        // try {
+        //     compressedUri = await VideoCompressor.compress(videoUri, {
+        //         compressionMethod: 'auto',
+        //         minimumFileSizeForCompress: 0,
+        //         maxSize: 1280,
+        //         progressDivider: 1,
+        //     });
+        // } catch (err) {
+        //     console.error("Video compression failed:", err);
+        //     return;
+        // }
 
         const formData = new FormData();
 
         // Video file
-        const filename = compressedUri.split("/").pop();
+        const filename = videoUri.split("/").pop();
         const fileType = filename?.split(".").pop();
         formData.append("video", {
-            uri: compressedUri,
+            uri: videoUri,
             name: filename,
             type: `video/${fileType}`,
         } as any);
-        const hexFilterColor = filterNameToHex(filter);;
+        const hexFilterColor = filterNameToHex(filter);
         // Other metadata
         formData.append("contentType", contentType);
         formData.append("trimStart", trimStart.toString());
@@ -201,7 +201,8 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const setVideoVolumeStore = useUploadStore((state) => state.setVideoVolume);
     const addOverlayToStore = useUploadStore((state) => state.addOverlay);
     const removeOverlayToStore = useUploadStore((state) => state.removeOverlay);
-    const updateOverlayToStore = useUploadStore((state) => state.updateOverlay);
+    const updateOverlay = useUploadStore((state) => state.updateOverlay);
+    
     const overlays = useUploadStore((state) => state.overlays);
     const addOverlay = (text = "#example") => {
         const newOverlay = {
@@ -391,7 +392,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                                 <TextOverlay
                                                     key={overlay.id}
                                                     overlay={overlay}
-                                                    onUpdate={updateOverlayToStore}
+                                                    onUpdate={updateOverlay}
                                                     onRemove={removeOverlayToStore}
                                                 />
                                             ))}

@@ -14,7 +14,6 @@ import {
   View,
   useWindowDimensions,
 } from "react-native";
-import { Video as VideoCompressor } from 'react-native-compressor';
 
 import { uploadReel } from "./api";
 interface FinalUploadProps {
@@ -50,6 +49,19 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
         return ctx.fillStyle; // always returns hex, e.g., "red" → "#ff0000"
     }
 
+    function filterNameToHex(filter: string): string {
+        switch (filter?.toLowerCase()) {
+            case "warm": return "#FFA500"; // orange
+            case "cool": return "#0000FF"; // blue
+            case "grayscale": return "#808080"; // gray
+            case "vintage": return "#FFC0CB"; // pink
+            case "sepia": return "#704214"; // brown
+            case "bright": return "#FFFFFF"; // white
+            case "dark": return "#000000"; // black
+            default: return "#00000000"; // transparent fallback
+        }
+    }
+
   const handleUpload = async () => {
     if (!localTitle.trim() && !localCaption.trim()) {
       alert("Please add a title or caption before posting.");
@@ -72,22 +84,23 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       alert("No video selected!");
       return;
     }
-    const compressedUri = await VideoCompressor.compress(videoUri, {
-      compressionMethod: 'auto',
-      minimumFileSizeForCompress: 0,
-      maxSize: 720,
-      progressDivider: 1,
-    });
+    // const compressedUri = await VideoCompressor.compress(videoUri, {
+    //   compressionMethod: 'auto',
+    //   minimumFileSizeForCompress: 0,
+    //   maxSize: 1280,
+    //   progressDivider: 1,
+    // });
     const formData = new FormData();
 
     // Video file
-    const filename = compressedUri.split("/").pop();
+    const filename = videoUri.split("/").pop();
     const fileType = filename?.split(".").pop();
     formData.append("video", {
-      uri: compressedUri,
+      uri: videoUri,
       name: filename,
       type: `video/${fileType}`,
     } as any);
+        const hexFilterColor = filterNameToHex(filter);
 
     // Other metadata
     formData.append("contentType", contentType);
@@ -95,7 +108,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     formData.append("trimEnd", trimEnd.toString());
     formData.append("videoVolume", videoVolume.toString());
     formData.append("musicVolume", musicVolume.toString());
-    formData.append("filter", colorNameToHex(filter));
+    formData.append("filter", hexFilterColor);
     formData.append("title", localTitle);
     formData.append("caption", localCaption);
     formData.append("hashtags", localHashtags);
