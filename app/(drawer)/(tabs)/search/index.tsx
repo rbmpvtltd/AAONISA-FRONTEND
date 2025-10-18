@@ -1,4 +1,4 @@
-  import { useRouter } from "expo-router";
+import { useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useMemo } from "react";
 import {
