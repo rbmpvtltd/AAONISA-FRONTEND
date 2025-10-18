@@ -20,7 +20,7 @@
 // //  loading: boolean;
 //   setReels: (newReels: ReelItem[]) => void;
 //   currentIndex: number;
-//   activeTab: 'Followers' | 'News' | 'Explore';
+//   activeTab: 'Followings' | 'News' | 'Explore';
 //   isMuted: boolean;
 //   showIcon: boolean;
 //   fadeAnim: Animated.Value;
@@ -31,7 +31,7 @@
 //   addShare: (id: string) => void;
 //   // setLoading: (val: boolean) => void;
 //   setCurrentIndex: (index: number) => void;
-//   setActiveTab: (tab: 'Followers' | 'News' | 'Explore') => void;
+//   setActiveTab: (tab: 'Followings' | 'News' | 'Explore') => void;
 //   toggleMute: () => void;
 //   setShowIcon: (val: boolean) => void;
 // }
@@ -214,7 +214,7 @@
 //   // setLoading: (val: boolean) => set({ loading: val }),
   
 //   currentIndex: 0,
-//   activeTab: 'Followers',
+//   activeTab: 'Followings',
 //   isMuted: false,
 //   showIcon: false,
 //   fadeAnim: new Animated.Value(0),
@@ -277,7 +277,7 @@ export interface ReelItem {
 interface ReelsState {
   reels: ReelItem[];
   currentIndex: number;
-  activeTab: 'Followers' | 'News' | 'Explore';
+  activeTab: 'Followings' | 'News' | 'Explore';
   isMuted: boolean;
   showIcon: boolean;
   fadeAnim: Animated.Value;
@@ -287,7 +287,7 @@ interface ReelsState {
   addComment: (id: string) => void;
   addShare: (id: string) => void;
   setCurrentIndex: (index: number) => void;
-  setActiveTab: (tab: 'Followers' | 'News' | 'Explore') => void;
+  setActiveTab: (tab: 'Followings' | 'News' | 'Explore') => void;
   toggleMute: () => void;
   setShowIcon: (val: boolean) => void;
   
@@ -468,7 +468,7 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   ],
 
   currentIndex: 0,
-  activeTab: 'Followers',
+  activeTab: 'Followings',
   isMuted: false,
   showIcon: false,
   fadeAnim: new Animated.Value(0),

@@ -118,7 +118,7 @@
 // // //       {/* Top Bar */}
 // // //       <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
 // // //         <View style={styles.tabsContainer}>
-// // //           {['Followers', 'News', 'Explore'].map((tab) => (
+// // //           {['Followings', 'News', 'Explore'].map((tab) => (
 // // //             <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
 // // //               <Text
 // // //                 style={[
@@ -453,7 +453,7 @@
 //       {/* Top Bar */}
 //       <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
 //         <View style={styles.tabsContainer}>
-//           {['Followers', 'News', 'Explore'].map((tab) => (
+//           {['Followings', 'News', 'Explore'].map((tab) => (
 //             <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
 //               <Text
 //                 style={[
@@ -824,7 +824,7 @@ const ReelItem = ({
       {/* Top Bar */}
       <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
-          {['Followers', 'News', 'Explore'].map((tab) => (
+          {['Followings', 'News', 'Explore'].map((tab) => (
             <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
               <Text
                 style={[
@@ -1034,7 +1034,7 @@ const ReelsFeed = () => {
           offset: SCREEN_HEIGHT * index,
           index,
         })}
-        // ✅ NEW: Extra safety for URL update
+        // NEW: Extra safety for URL update
         onMomentumScrollEnd={(event) => {
           const offsetY = event.nativeEvent.contentOffset.y;
           const index = Math.round(offsetY / SCREEN_HEIGHT);

@@ -162,7 +162,6 @@ const PhotoItem = React.memo(
 
         <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
       </View>
-
     );
   }
 );
@@ -306,13 +305,21 @@ const handleComment = useCallback((id: number) => {
     Alert.alert("Share", "Sharing photo " + id);
   }, []);
 
-  const handleStoryPress = useCallback(
-    (id: number) => {
-      setStories((prev) => prev.map((s) => (s.id === id ? { ...s, viewed: true } : s)));
-      Alert.alert("Story", "Open story viewer for story " + id);
-    },
-    [setStories]
-  );
+  // const handleStoryPress = useCallback(
+  //   (id: number) => {
+  //     setStories((prev) => prev.map((s) => (s.id === id ? { ...s, viewed: true } : s)));
+  //     Alert.alert("Story", "Open story viewer for story " + id);
+  //   },
+  //   [setStories]
+  // );
+
+const handleStoryPress = useCallback(
+  (id: number) => {
+    setStories((prev) => prev.map((s) => (s.id === id ? { ...s, viewed: true } : s)));
+    router.push(`/story/${id}`); 
+  },
+  [setStories]
+);
 
   const renderStory = useCallback(
     ({ item }: { item: Story }) => (
