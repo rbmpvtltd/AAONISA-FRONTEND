@@ -1,8 +1,3 @@
-// import DrawerLayout from "@/src/navigation/drawerLayout";
-
-// export default DrawerLayout;
-
-
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { createDrawerNavigator } from "@react-navigation/drawer";
 import { withLayoutContext } from "expo-router";
