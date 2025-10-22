@@ -34,7 +34,10 @@ export const FeedList = () => {
             likes: Math.floor(Math.random() * 100),
             liked: false,
             saved: false,
-            comments: [],
+            // comments: [],
+            comments: Math.floor(Math.random() * 50), //  number
+    shares: Math.floor(Math.random() * 20),    //  number
+
         }));
 
         addPhotos(dummyData);
