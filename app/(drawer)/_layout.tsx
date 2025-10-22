@@ -17,6 +17,7 @@ export default function DrawerLayout() {
         backgroundColor={theme.background}
         barStyle={theme.background === "#000" ? "light-content" : "dark-content"}
       />
+
       <Drawer
         screenOptions={{
              drawerPosition: "right",

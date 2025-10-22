@@ -66,6 +66,7 @@ async function resetPassword(reqBody: any) {
     return data;
 }
 
+
 async function loginUser(reqBody: any) {
     // const token = getToken();
     const config = {
@@ -77,7 +78,24 @@ async function loginUser(reqBody: any) {
     return data;
 }
 
-// 1️⃣ Send OTP for updating email
+async function logoutUser() {
+  const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/users/logout');
+  const { data } = await axios.post(apiUrl, {}, config);
+  return data;
+}
+
+
+// Send OTP for updating email
 async function updateEmailSendOtp(reqBody: any) {
   const token = await getToken();
   const config = {
@@ -92,7 +110,7 @@ async function updateEmailSendOtp(reqBody: any) {
   return data;
 }
 
-// 2️⃣ Send OTP for updating phone
+// Send OTP for updating phone
 async function updatePhoneSendOtp(reqBody: any) {
   const token = await getToken();
   const config = {
@@ -107,7 +125,7 @@ async function updatePhoneSendOtp(reqBody: any) {
   return data;
 }
 
-// 3️⃣ Update user email (after OTP verification)
+// Update user email (after OTP verification)
 async function updateUserEmail(reqBody: any) {
   const token = await getToken();
   const config = {
@@ -122,7 +140,7 @@ async function updateUserEmail(reqBody: any) {
   return data;
 }
 
-// 4️⃣ Update user phone (after OTP verification)
+// Update user phone (after OTP verification)
 async function updateUserPhone(reqBody: any) {
   const token = await getToken();
   const config = {
@@ -164,5 +182,5 @@ async function getUserNotifications() {
   const { data } = await axios.post(apiUrl,{}, config);
   return data;
 }
-export { forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
+export { forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, logoutUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 

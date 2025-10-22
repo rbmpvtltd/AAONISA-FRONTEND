@@ -93,6 +93,8 @@ export interface Photo {
   likes: number;
   liked: boolean;
   saved: boolean;
+   comments: number; // add this
+  shares: number;   // add this
 }
 
 interface FeedState {
@@ -114,15 +116,28 @@ export const useFeedStore = create<FeedState>((set) => ({
   loading: false,
   isMuted: false,
 
-  setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
+  // setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
+  setPhotos: (updater) =>
+  set((state) => ({
+    photos: updater(state.photos).map(photo => ({
+      ...photo,
+      comments: photo.comments ?? 0,
+      shares: photo.shares ?? 0,
+    })),
+  })),
+
 
   addPhotos: (newPhotos) =>
     set((state) => ({
       photos: [
         ...state.photos,
-        ...newPhotos.filter(
-          (photo) => !state.photos.some((p) => p.id === photo.id)
-        ),
+        ...newPhotos
+        .filter((photo) => !state.photos.some((p) => p.id === photo.id))
+        .map(photo => ({
+          ...photo,
+          comments: photo.comments ?? 0,
+          shares: photo.shares ?? 0,
+        })),
       ],
     })),
 

@@ -60,19 +60,25 @@ export const FeedItem = React.memo(
 
                 {/* Bottom actions */}
                 <View style={styles.actionsRow}>
-                    <TouchableOpacity onPress={() => onLike(item.id)}>
+                    <TouchableOpacity onPress={() => onLike(item.id)} style={styles.actionBtn}>
                         <Icon
                             name={item.liked ? "heart" : "heart-outline"}
                             size={29}
                             color={item.liked ? "red" : theme.text}
                         />
+                        <Text style={[styles.countText, { color: theme.text }]}>{item.likes}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => onComment(item.id)}>
+
+                    <TouchableOpacity onPress={() => onComment(item.id)} style={styles.actionBtn}>
                         <Icon name="chatbubble-outline" size={25} color={theme.text} />
+                        <Text style={[styles.countText, { color: theme.text }]}>{item.comments ?? 0}</Text>
                     </TouchableOpacity>
-                    <TouchableOpacity onPress={() => onShare(item.id)}>
+
+                    <TouchableOpacity onPress={() => onShare(item.id)} style={styles.actionBtn}>
                         <Icon name="share-social-outline" size={25} color={theme.text} />
+                        <Text style={[styles.countText, { color: theme.text }]}>{item.shares ?? 0}</Text>
                     </TouchableOpacity>
+
                     <TouchableOpacity onPress={() => onSave(item.id)} style={{ marginLeft: "auto" }}>
                         <Icon
                             name={item.saved ? "bookmark" : "bookmark-outline"}
@@ -106,10 +112,19 @@ const styles = StyleSheet.create({
     title: { padding: 10, fontSize: 16 },
     actionsRow: {
         flexDirection: "row",
-        gap: 10,
+        gap: 15,
         paddingHorizontal: 20,
         paddingVertical: 8,
         alignItems: "center",
+    },
+    actionBtn: {
+        flexDirection: "row", // icon + count side by side
+        alignItems: "center",
+        gap: 5, // spacing between icon & number
+    },
+    countText: {
+        fontSize: 14,
+        fontWeight: "500",
     },
     volumeBtn: {
         position: "absolute",
