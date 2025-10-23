@@ -51,7 +51,7 @@ export const FeedItem = React.memo(
                         style={{ width: "100%", height: "100%" }}
                         player={player}
                         contentFit="cover"
-                        nativeControls={false} //  disable default player UI
+                        nativeControls={true} //  disable default player UI
                     />
                     <TouchableOpacity onPress={toggleMute} style={styles.volumeBtn}>
                         <Icon name={isMuted ? "volume-mute" : "volume-high"} size={24} color="white" />
@@ -118,9 +118,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     actionBtn: {
-        flexDirection: "row", // icon + count side by side
+        flexDirection: "row", 
         alignItems: "center",
-        gap: 5, // spacing between icon & number
+        gap: 5, 
     },
     countText: {
         fontSize: 14,
@@ -128,8 +128,8 @@ const styles = StyleSheet.create({
     },
     volumeBtn: {
         position: "absolute",
-        bottom: 20,
-        right: 20,
+        bottom: 60,
+        right: 10,
         backgroundColor: "rgba(0,0,0,0.3)",
         padding: 5,
         borderRadius: 20,

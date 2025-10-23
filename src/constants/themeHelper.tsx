@@ -12,8 +12,8 @@ const lightTheme = {
   googleBg: "#DB4437",
   link: "#0066cc",
   placeholder: "#666",
-    overlay: "rgba(0,0,0,0.4)", 
-     userImage: require("@/assets/lightThemeUser.png"), 
+  overlay: "rgba(0,0,0,0.4)",
+  userImage: "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311jpg",
 };
 
 const darkTheme = {
@@ -29,11 +29,11 @@ const darkTheme = {
   link: "#66aaff",
   placeholder: "#aaa",
   overlay: "rgba(255,255,255,0.15)",
-    userImage: require("@/assets/darkThemeUser.jpg"),
+  userImage: "https://i.pinimg.com/564x/57/00/c0/5700c04197ee9a4372a35ef16eb78f4e.jpg",
 };
 
 export const useAppTheme = () => {
-  const systemTheme = Appearance.getColorScheme(); 
+  const systemTheme = Appearance.getColorScheme();
   return systemTheme === "dark" ? darkTheme : lightTheme;
 };
 

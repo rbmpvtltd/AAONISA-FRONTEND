@@ -11,7 +11,7 @@ import {
   TextInput,
   TouchableOpacity,
   View,
-  useWindowDimensions,
+  useWindowDimensions
 } from "react-native";
 
 import { useUploadStore } from "@/src/store/reelUploadStore";
@@ -40,6 +40,8 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [localCaption, setLocalCaption] = useState(caption);
   const [localHashtags, setLocalHashtags] = useState(hashtags);
   const [localMentions, setLocalMentions] = useState(mentions);
+  const [isUploading, setIsUploading] = useState(false);
+
 
   
     function colorNameToHex(color: string): string {
@@ -84,6 +86,9 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       alert("No video selected!");
       return;
     }
+
+      setIsUploading(true); 
+
     // const compressedUri = await VideoCompressor.compress(videoUri, {
     //   compressionMethod: 'auto',
     //   minimumFileSizeForCompress: 0,
@@ -136,7 +141,9 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     } catch (err: any) {
       console.error("Upload failed:", err?.response?.data || err.message);
       alert("Upload failed, check console");
-    }
+    }finally {
+    setIsUploading(false);
+  }
   };
 
 
@@ -294,6 +301,15 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
           </TouchableOpacity>
         </ScrollView>
       </View>
+        {isUploading && (
+      <View style={styles.loadingOverlay}>
+        <View style={[styles.loadingBox,{backgroundColor :theme.background}]}>
+          <Ionicons name="cloud-upload-outline" size={50} color={theme.buttonBg} />
+          {/* <ActivityIndicator size="large" color={theme.buttonBg} /> */}
+          <Text style={[styles.loadingText, { color: theme.text }]}>Uploding...</Text>
+        </View>
+      </View>
+    )}
     </KeyboardAvoidingView>
   );
 };
@@ -332,6 +348,27 @@ const styles = StyleSheet.create({
   uploadText: {
     fontWeight: "bold",
   },
+  loadingOverlay: {
+  position: "absolute",
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  backgroundColor: "rgba(0,0,0,0.5)",
+  justifyContent: "center",
+  alignItems: "center",
+  zIndex: 10,
+},
+loadingBox: {
+  padding: 20,
+  borderRadius: 16,
+  alignItems: "center",
+},
+loadingText: {
+  marginTop: 10,
+  fontSize: 16,
+  fontWeight: "600",
+},
 });
 
 export default FinalUpload;

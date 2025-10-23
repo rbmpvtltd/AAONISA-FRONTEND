@@ -10,7 +10,9 @@ interface ProfileState {
     views: number;  
     followersCount: number;
     followingsCount: number;
-    postsCount: number
+    postsCount: number;
+     isFollowing: boolean; 
+  toggleFollow: () => void; 
 
     setUsername: (username: string) => void;
     setName: (name: string) => void;
@@ -36,6 +38,8 @@ export const useProfileStore = create<ProfileState>((set,get) => ({
     followersCount: 0,
     followingsCount: 0,
     postsCount: 0,
+    isFollowing: false,
+    
     setUsername: (username) => set({ username }),
     setName: (name) => set({ name }),
     setBio: (bio) => set({ bio }),
@@ -46,6 +50,7 @@ export const useProfileStore = create<ProfileState>((set,get) => ({
     setFollowersCount: (followersCount) => set({ followersCount }),
     setFollowingsCount: (followingsCount) => set({ followingsCount }),
     setPostCount: (postsCount) => set({ postsCount }),
+       toggleFollow: () => set({ isFollowing: !get().isFollowing }),
     resetProfile: () =>
         set({
             username: "",
