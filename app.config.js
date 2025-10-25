@@ -1,10 +1,11 @@
-{
+import 'dotenv/config';
+
+export default {
   "expo": {
     "name": "Aao-Ni-Sa",
     "slug": "Aao-Ni-Sa",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assets/images/icon.png",
     "scheme": "justsearchapp",
     "userInterfaceStyle": "automatic",
     "newArchEnabled": true,
@@ -13,24 +14,22 @@
       "bundleIdentifier": "com.anonymous.AaoNiSa"
     },
     "android": {
+       "googleServicesFile": "./google-services.json",
+       "useNextNotificationsApi": true,
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO"
       ],
-      "adaptiveIcon": {
-        "foregroundImage": "./assets/images/adaptive-icon.png",
-        "backgroundColor": "#ffffff"
-      },
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.AaoNiSa"
     },
     "web": {
       "bundler": "metro",
-      "output": "static",
-      "favicon": "./assets/images/favicon.png"
+      "output": "static"
     },
     "plugins": [
       "expo-router",
+        "expo-notifications",
       [
         "expo-camera",
         {
@@ -55,7 +54,8 @@
     "extra": {
       "router": {},
       "eas": {
-        "projectId": "eb0e9ead-a81c-4c54-9c18-b0a0aa88b8f2"
+        "projectId":  process.env.EAS_PROJECT_ID,
+        "owner" :	"rbm.jodhpur03"
       }
     }
   }

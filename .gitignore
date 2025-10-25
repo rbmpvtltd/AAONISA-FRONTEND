@@ -48,3 +48,5 @@ build/
 
 assets/
 
+# Firebase Android config
+google-services.json

@@ -1,7 +1,9 @@
+// import Constants from 'expo-constants';
 // import * as Device from 'expo-device';
 // import * as Notifications from 'expo-notifications';
 // import { useEffect, useState } from 'react';
-// import { Button, Platform, Text, View } from 'react-native';
+// import { Button, Platform, Text } from 'react-native';
+// import { View } from 'react-native-reanimated/lib/typescript/Animated';
 
 
 // Notifications.setNotificationHandler({
@@ -13,9 +15,7 @@
 //   }),
 // });
 
-
-
-// async function sendPushNotification(expoPushToken: string) {
+//  export async function sendPushNotification(expoPushToken: string) {
 //   const message = {
 //     to: expoPushToken,
 //     sound: 'default',
@@ -62,15 +62,19 @@
 //       handleRegistrationError('Permission not granted to get push token for push notification!');
 //       return;
 //     }
-//     // const projectId = Constants?.expoConfig?.extra?.eas?.projectId ?? Constants?.easConfig?.projectId;
-//     const projectId = "eb0e9ead-a81c-4c54-9c18-b0a0aa88b8f2" 
+//     // const projectId =  "d922a8c6-cd24-4146-a208-ba8bb9c2c5cc";
+//     const projectId =  Constants?.expoConfig?.extra?.eas?.projectId ??Constants?.easConfig?.projectId;
+//   console.log("===========================================================================================");
+//   console.log(projectId);
+//   console.log("===========================================================================================");
+
 //     if (!projectId) {
 //       handleRegistrationError('Project ID not found');
 //     }
 //     try {
 //       const pushTokenString = (
 //         await Notifications.getExpoPushTokenAsync({
-//           projectId,
+//           projectId, LOG  ExponentPushToken[2BgPGfOfgZDoKzY7deHP1Z]
 //         })
 //       ).data;
 //       console.log(pushTokenString);
@@ -83,7 +87,7 @@
 //   }
 // }
 
-// export default function App() {
+// export default function PushNotification() {
 //   const [expoPushToken, setExpoPushToken] = useState('');
 //   const [notification, setNotification] = useState<Notifications.Notification | undefined>(
 //     undefined
