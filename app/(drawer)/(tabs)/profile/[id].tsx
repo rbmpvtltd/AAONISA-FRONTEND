@@ -16,6 +16,13 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
+// const currentUserData = async () => {
+//     return await GetCurrentUser();
+// }
+
+// currentUserData().then((data) => {
+//   console.log("data receive:", data);
+// });
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;

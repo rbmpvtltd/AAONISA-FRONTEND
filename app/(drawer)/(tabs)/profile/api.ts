@@ -169,6 +169,8 @@ async function updateProfile(profileData: any,imageChanged: boolean) {
   }
 }
 
+
+
 async function GetProfileUsername(username: string) {
   const token = await getToken();
 
@@ -180,7 +182,7 @@ async function GetProfileUsername(username: string) {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl(`/api/users/profile/${username}`);
+  const apiUrl = createApiUrl(`/users/profile/${username}`);
   const { data } = await axios.get(apiUrl, config);
   return data;
 }
@@ -196,7 +198,7 @@ async function GetCurrentUser() {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl('/api/users/profile/current');
+  const apiUrl = createApiUrl('/users/profile/current');
   const { data } = await axios.get(apiUrl, config);
   return data;
 }
@@ -212,7 +214,7 @@ async function  SearchUserProfiel(query: string) {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl(`/api/users/search?q=${query}`);
+  const apiUrl = createApiUrl(`/users/search?q=${query}`);
   const { data } = await axios.get(apiUrl, config);
   return data;
 }
@@ -228,7 +230,7 @@ async function followUser(followingId: string) {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl('/api/follow/addfollow');
+  const apiUrl = createApiUrl('/follow/addfollow');
   console.log('Calling URL:', apiUrl);
 
   const { data } = await axios.post(apiUrl, { following: followingId }, config);
@@ -247,7 +249,7 @@ async function UnfollowUser(followingId: string) {
     data: { following: followingId }
   };
 
-  const apiUrl = createApiUrl('/api/follow/unfollow');
+  const apiUrl = createApiUrl('/follow/unfollow');
   console.log('Calling URL:', apiUrl);
 
   const { data } = await axios.delete(apiUrl, config);

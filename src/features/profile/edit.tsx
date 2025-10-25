@@ -98,8 +98,6 @@ const UserEditProfile = () => {
         }
     };
 
-
-
     const handleBioChange = (text: string) => {
         setProfileData((prev) => ({ ...prev, bio: text }));
         setCharacterCount((prev) => ({ ...prev, bio: text.length }));
@@ -113,7 +111,7 @@ const UserEditProfile = () => {
     const styles = createStyles(theme);
 
     return (
-    // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: theme.background }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -127,18 +125,21 @@ const UserEditProfile = () => {
                     <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
                         <View style={styles.profileImageWrapper}>
                             {/* <Image
-                source={
-                  profileData.profilePicture
-                    ? { uri: profileData.profilePicture }
-                    : require("@/assets/lightThemeUser.png")
-                }
-                style={styles.profilePicture}
-              /> */}
-                            <Image
                                 source={
                                     profileData.ProfilePicture
                                         ? { uri: profileData.ProfilePicture }
                                         : theme.userImage
+                                }
+                                style={styles.profilePicture}
+                            /> */}
+
+                            <Image
+                                source={
+                                    profileData.ProfilePicture
+                                        ? { uri: profileData.ProfilePicture }
+                                        : typeof theme.userImage === "number"
+                                            ? theme.userImage // require() return karta hai number type
+                                            : { uri: theme.userImage }
                                 }
                                 style={styles.profilePicture}
                             />
