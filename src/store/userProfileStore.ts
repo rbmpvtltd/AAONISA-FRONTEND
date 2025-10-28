@@ -1,5 +1,14 @@
 import { create } from "zustand";
 
+interface Video {
+    id : string,
+  uuid: string;
+  videoUrl: string;
+  caption?: string;
+  title?: string;
+  created_at?: string;
+}
+
 interface ProfileState {
     username: string;
     name: string;
@@ -11,6 +20,7 @@ interface ProfileState {
     followersCount: number;
     followingsCount: number;
     postsCount: number;
+    videos : Video[];
      isFollowing: boolean; 
   toggleFollow: () => void; 
 
@@ -24,6 +34,7 @@ interface ProfileState {
     setFollowersCount: (followersCount: number) => void;
     setFollowingsCount: (followingCount: number) => void;
     setPostCount: (postsCount: number) => void;
+       setVideos: (videos: Video[]) => void;
     resetProfile: () => void;
 }
 
@@ -38,6 +49,7 @@ export const useProfileStore = create<ProfileState>((set,get) => ({
     followersCount: 0,
     followingsCount: 0,
     postsCount: 0,
+     videos: [],
     isFollowing: false,
     
     setUsername: (username) => set({ username }),
@@ -49,6 +61,7 @@ export const useProfileStore = create<ProfileState>((set,get) => ({
     setViews: (views) => set({ views }),
     setFollowersCount: (followersCount) => set({ followersCount }),
     setFollowingsCount: (followingsCount) => set({ followingsCount }),
+    setVideos: (videos) => set({ videos }),
     setPostCount: (postsCount) => set({ postsCount }),
        toggleFollow: () => set({ isFollowing: !get().isFollowing }),
     resetProfile: () =>
@@ -62,6 +75,7 @@ export const useProfileStore = create<ProfileState>((set,get) => ({
             views: 0,
             followersCount: 0,
             followingsCount: 0,
-            postsCount: 0
+            postsCount: 0,
+            videos : [],
         }),
 }));
