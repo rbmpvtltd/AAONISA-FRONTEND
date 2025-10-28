@@ -3,36 +3,24 @@ import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useNavigation, useRouter } from "expo-router";
+import { useVideoPlayer, VideoView } from "expo-video";
 import React from "react";
 import {
     Dimensions,
-    FlatList,
     Image,
     Linking,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
+import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-
-// const currentUserData = async () => {
-//     return await GetCurrentUser();
-// }
-
-// currentUserData().then((data) => {
-//   console.log("data receive:", data);
-// });
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
 const profilePicSize = width * 0.22;
 const fontScale = width / 380;
-
-const posts = Array.from({ length: 16 }).map((_, i) => ({
-    id: (i + 1).toString(),
-    image: `https://placekitten.com/${300 + i}/300`,
-}));
 
 const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme }) => {
     const navigation = useNavigation();
@@ -49,7 +37,7 @@ const TopHeader: React.FC<{ userName: string; theme: any }> = ({ userName, theme
 };
 
 const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
-    const { profilePicture, likes, views, followersCount, followingsCount, postsCount } = useProfileStore();
+    const { profilePicture, likes, views, followersCount, followingsCount, postsCount, } = useProfileStore();
     const router = useRouter();
 
     return (
@@ -71,7 +59,7 @@ const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
 
                 <TouchableOpacity
                     style={styles.stat}
-                  onPress={() => router.push("/profile/followers")}
+                    onPress={() => router.push("/profile/followers")}
                 >
                     <Text style={[styles.statNumber, { color: theme.text }]}>{followersCount}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Followers</Text>
@@ -79,7 +67,7 @@ const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
 
                 <TouchableOpacity
                     style={styles.stat}
-                  onPress={() => router.push("/profile/followings")}
+                    onPress={() => router.push("/profile/followings")}
                 >
                     <Text style={[styles.statNumber, { color: theme.text }]}>{followingsCount}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Following</Text>
@@ -102,12 +90,12 @@ const ProfileHeader: React.FC<{ theme: any }> = ({ theme }) => {
 };
 
 const UserInfo: React.FC<{ theme: any }> = ({ theme }) => {
-    const { name, bio, url,isFollowing, toggleFollow  } = useProfileStore();
+    const { name, bio, url, isFollowing, toggleFollow } = useProfileStore();
 
     const openUrl = () => {
         if (url) {
             const link = url.startsWith("http") ? url : `https://${url}`;
-            Linking.openURL(link).catch(() => console.log("Failed to open URL"));
+            Linking.openURL(link).catch(() => console.log("Failed to open URL"));;
         }
     };
     return (
@@ -123,19 +111,19 @@ const UserInfo: React.FC<{ theme: any }> = ({ theme }) => {
                 </Text>
             ) : null}
 
-                  <TouchableOpacity onPress={toggleFollow}>
+            {/* <TouchableOpacity onPress={toggleFollow}>
                 <Text
                     style={[
                         styles.followButton,
                         {
-                            backgroundColor : theme.buttonBg,
+                            backgroundColor: theme.buttonBg,
                             color: "#fff",
                         },
                     ]}
                 >
                     {isFollowing ? "Unfollow" : "Follow"}
                 </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
         </View>
     );
 };
@@ -154,17 +142,62 @@ const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
     </View>
 );
 
-const PostGrid: React.FC<{ posts: any[] }> = ({ posts }) => (
-    <FlatList
-        data={posts}
-        keyExtractor={(item) => item.id}
-        numColumns={3}
-        renderItem={({ item }) => (
-            <Image source={{ uri: item.image }} style={styles.postImage} />
-        )}
-        showsVerticalScrollIndicator={false}
-    />
-);
+const VideoItem = ({ videoUrl }: { videoUrl: string }) => {
+    const player = useVideoPlayer(videoUrl, (player) => {
+        player.loop = true;
+        player.muted = true;  
+        player.pause();
+    });
+
+    return (
+        <View style={styles.videoContainer}>
+            <VideoView
+                style={styles.postVideo}
+                player={player}
+                allowsFullscreen={false}
+                allowsPictureInPicture={false}
+                contentFit="cover"
+                nativeControls={false}
+            />
+        </View>
+    );
+};
+
+
+const PostGrid: React.FC = () => {
+    const { videos } = useProfileStore();
+
+    if (!videos || videos.length === 0) {
+        return (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+                <Text>No videos uploaded yet.</Text>
+            </View>
+        );
+    }
+
+    return (
+        <FlatList
+            data={videos}
+            keyExtractor={(item: any) => item.uuid}
+            numColumns={3}
+            renderItem={({ item }) => {
+                if (item.videoUrl) {
+                    return <VideoItem videoUrl={item.videoUrl} />;
+                }
+
+                // fallback for image
+                return (
+                    <Image
+                        source={{ uri: item.image }}
+                        style={styles.postImage}
+                    />
+                );
+            }}
+            showsVerticalScrollIndicator={false}
+        />
+    );
+};
+
 
 const ProfileScreen: React.FC = () => {
     const theme = useAppTheme();
@@ -176,7 +209,7 @@ const ProfileScreen: React.FC = () => {
             <ProfileHeader theme={theme} />
             <UserInfo theme={theme} />
             <Tabs theme={theme} />
-            <PostGrid posts={posts} />
+            <PostGrid />
         </SafeAreaView>
     );
 };
@@ -227,16 +260,16 @@ const styles = StyleSheet.create({
         marginTop: height * 0.01,
         gap: width * 0.02,
     },
-    followButton : {
+    followButton: {
         flexDirection: "row",
-        justifyContent : "center",
+        justifyContent: "center",
         marginTop: height * 0.01,
         gap: width * 0.02,
-        backgroundColor : "#3498db",
-        borderRadius : 5,
-        padding : 10,
-        textAlign : "center",
-        fontSize : 16
+        backgroundColor: "#3498db",
+        borderRadius: 5,
+        padding: 10,
+        textAlign: "center",
+        fontSize: 16
     },
     statNumber: {
         fontSize: 16 * fontScale,
@@ -265,13 +298,45 @@ const styles = StyleSheet.create({
     tab: {
         padding: width * 0.01,
     },
-    postImage: {
-        width: imageSize,
-        height: imageSize,
-        margin: 1,
+    videoContainer: {
+        width: width / 3 - 3, 
+        height: height * 0.32, 
+        margin: 1.5,
+        borderRadius: 8,
+        overflow: "hidden",
+        backgroundColor: "#000",
     },
+    postVideo: {
+        width: "100%",
+        height: "100%",
+    },
+    postImage: {
+        width: width / 3 - 3,
+        height: width / 3 - 3,
+        margin: 1.5,
+        resizeMode: "cover",
+    },
+
+//     videoContainer: {
+//   flex: 1 / 3,          // 3 columns me perfect divide
+//   aspectRatio: 1,       // ✅ perfect square ratio
+//   margin: 1.5,
+//   borderRadius: 8,
+//   overflow: "hidden",   // ✅ video ya image box ke bahar na jaaye
+//   backgroundColor: "#000",
+// },
+// postVideo: {
+//   width: "100%",
+//   height: "100%",
+//   resizeMode: "cover",  // ✅ extra content cut ho jaye
+// },
+// postImage: {
+//   flex: 1 / 3,
+//   aspectRatio: 1,       // ✅ maintain shape
+//   margin: 1.5,
+//   resizeMode: "cover",  // ✅ image box ke andar hi rahegi
+//   borderRadius: 8,
+// },
 });
 
 export default ProfileScreen;
-
-
