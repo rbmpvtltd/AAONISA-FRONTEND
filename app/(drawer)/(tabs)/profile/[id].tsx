@@ -142,7 +142,8 @@ const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
     </View>
 );
 
-const VideoItem = ({ videoUrl }: { videoUrl: string }) => {
+const VideoItem = ({ videoUrl,id }: { videoUrl: string, id : string }) => {
+    const router = useRouter();
     const player = useVideoPlayer(videoUrl, (player) => {
         player.loop = true;
         player.muted = true;  
@@ -150,6 +151,13 @@ const VideoItem = ({ videoUrl }: { videoUrl: string }) => {
     });
 
     return (
+           <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => router.push({ pathname: "/(drawer)/(tabs)/profile/userReelsFeed",
+                params : {id}
+})} //  ID send ho rahi hai
+            
+        >
         <View style={styles.videoContainer}>
             <VideoView
                 style={styles.postVideo}
@@ -160,9 +168,9 @@ const VideoItem = ({ videoUrl }: { videoUrl: string }) => {
                 nativeControls={false}
             />
         </View>
+        </TouchableOpacity>
     );
 };
-
 
 const PostGrid: React.FC = () => {
     const { videos } = useProfileStore();
@@ -182,7 +190,7 @@ const PostGrid: React.FC = () => {
             numColumns={3}
             renderItem={({ item }) => {
                 if (item.videoUrl) {
-                    return <VideoItem videoUrl={item.videoUrl} />;
+                    return ( <VideoItem videoUrl={item.videoUrl} id = {item.id} />);
                 }
 
                 // fallback for image
@@ -317,26 +325,6 @@ const styles = StyleSheet.create({
         resizeMode: "cover",
     },
 
-//     videoContainer: {
-//   flex: 1 / 3,          // 3 columns me perfect divide
-//   aspectRatio: 1,       // ✅ perfect square ratio
-//   margin: 1.5,
-//   borderRadius: 8,
-//   overflow: "hidden",   // ✅ video ya image box ke bahar na jaaye
-//   backgroundColor: "#000",
-// },
-// postVideo: {
-//   width: "100%",
-//   height: "100%",
-//   resizeMode: "cover",  // ✅ extra content cut ho jaye
-// },
-// postImage: {
-//   flex: 1 / 3,
-//   aspectRatio: 1,       // ✅ maintain shape
-//   margin: 1.5,
-//   resizeMode: "cover",  // ✅ image box ke andar hi rahegi
-//   borderRadius: 8,
-// },
 });
 
 export default ProfileScreen;

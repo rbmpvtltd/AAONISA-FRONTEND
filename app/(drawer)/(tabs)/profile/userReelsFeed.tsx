@@ -1,21 +1,23 @@
 import { useReelsStore } from '@/src/store/useReelsStore';
+import { useProfileStore } from '@/src/store/userProfileStore';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
-    Animated,
-    FlatList,
-    Image,
-    Pressable,
-    StatusBar,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    useWindowDimensions,
-    View,
+  Animated,
+  FlatList,
+  Image,
+  Pressable,
+  StatusBar,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  useWindowDimensions,
+  View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
+
 
 const ReelItem = ({
   item,
@@ -38,6 +40,7 @@ const ReelItem = ({
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
+  const {username, profilePicture} = useProfileStore();
 
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
 
@@ -66,6 +69,7 @@ const ReelItem = ({
   }, [isMuted]);
 
   const formatNumber = (num: number): string => {
+    if (typeof num !== 'number' || isNaN(num)) return '0';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
     if (num >= 1000) return (num / 1000).toFixed(1) + 'K';
     return num.toString();
@@ -111,7 +115,7 @@ const ReelItem = ({
       </Pressable>
 
       {/* Top Bar */}
-      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
           {['Followings', 'News', 'Explore'].map((tab) => (
             <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
@@ -126,27 +130,30 @@ const ReelItem = ({
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </View> */}
 
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
           <Image
-            source={{ uri: item.user.avatar }}
+            source={{ uri: item.profilePicture}}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
               borderRadius: AVATAR_SIZE / 2,
               marginRight: 8,
+                borderWidth: 2,
+              borderColor: '#fff',
             }}
           />
-          <Text style={styles.username}>@{item.user.username}</Text>
+          <Text style={styles.username}>{username}</Text>
         </View>
+            <Text style={styles.username}>{item.title}</Text>
         <Text style={styles.caption}>{item.caption}</Text>
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
-            Original Sound - {item.user.username}
+            Original Sound - hello
           </Text>
         </View>
       </View>
@@ -155,7 +162,7 @@ const ReelItem = ({
       <View style={[styles.rightActions, { bottom: rightActionsBottom }]}>
         <TouchableOpacity style={styles.actionButton}>
           <Image
-            source={{ uri: item.user.avatar }}
+            source={{ uri: item.profilePicture }}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
@@ -200,18 +207,20 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id } = useLocalSearchParams(); 
+  const { id } = useLocalSearchParams();
+  const { videos } = useProfileStore(); 
+  const [isMuted, setIsMuted] = useState(false);
 
   const {
     reels,
-    toggleLike,
-    addComment,
-    addShare,
+    // toggleLike,
+    // addComment,
+    // addShare,
     currentIndex,
     setCurrentIndex,
     activeTab,
     setActiveTab,
-    isMuted,
+    // isMuted,
     toggleMute,
     showIcon,
     setShowIcon,
@@ -219,20 +228,27 @@ const ReelsFeed = () => {
     updateReelURL, //NEW: URL update function
   } = useReelsStore();
 
+  const {toggleLike, addComment, addShare } = useProfileStore();
+
+
   // NEW: URL update function
   const updateURL = (index: number) => {
     if (reels[index]) {
       const reelId = reels[index].id;
-      
       // Method 1: Expo Router setParams (Recommended)
       router.setParams({ id: reelId });
-      
       // Method 2: Store mein bhi update karo for logging
       updateReelURL(reelId);
-      
-      // console.log('🎬 Reel Changed:', reelId, 'URL Updated');
     }
   };
+
+  useEffect(() => {
+    if (videos.length > 0) {
+      setTimeout(() => {
+        flatListRef.current?.scrollToIndex({ index: currentIndex, animated: false });
+      }, 100);
+    }
+  }, [videos]);
 
   useEffect(() => {
     if (id && reels.length > 0) {
@@ -258,20 +274,14 @@ const ReelsFeed = () => {
     }
   }, [isFocused]);
 
-  //  UPDATED: Scroll handler with URL update
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / SCREEN_HEIGHT);
-    
-    if (index !== currentIndex) {
-      setCurrentIndex(index);
-      updateURL(index); // URL update karo
-    }
+    setCurrentIndex(index);
   };
 
-  // mute/unmute animation
   const handleToggleMute = () => {
-    toggleMute();
+    setIsMuted(!isMuted);
     setShowIcon(true);
 
     Animated.timing(fadeAnim, {
@@ -294,7 +304,7 @@ const ReelsFeed = () => {
       <StatusBar hidden />
       <FlatList
         ref={flatListRef}
-        data={reels}
+        data={videos}
         renderItem={({ item, index }) => (
           <ReelItem
             item={item}
@@ -311,7 +321,8 @@ const ReelsFeed = () => {
             setActiveTab={setActiveTab}
           />
         )}
-        keyExtractor={(item) => item.id.toString()}
+        // keyExtractor={(item) => item.id.toString()}
+        keyExtractor={(item, index) => item?.id ? item.id.toString() : index.toString()}
         pagingEnabled
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}
@@ -348,15 +359,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 10,
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
+  // topBar: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  //   paddingHorizontal: 16,
+  //   position: 'absolute',
+  //   top: 0,
+  //   left: 0,
+  //   right: 0,
+  // },
   bottomContent: { position: 'absolute', left: '4%', right: '20%' },
   userInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   username: { color: '#fff', fontSize: 16, fontWeight: '600' },

@@ -84,7 +84,7 @@ const Login = () => {
         setPostCount(userData.userInfo.videos.length);
         console.log("Post count:", userData.userInfo.videos);
         setVideos(userData.userInfo.videos);
-        console.log("===============================",setVideos)
+        // console.log("===============================",setVideos)
         setFollowers(userData.followers);
         setFollowings(userData.followings);
 
