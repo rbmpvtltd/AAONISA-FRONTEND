@@ -54,6 +54,14 @@ export default function ProfileLayout() {
             headerShown: true,
           }}
         />
+
+          <Stack.Screen
+          name="userReelsFeed"
+          options={{
+            title: "UserPosts",
+            headerShown: false,
+          }}
+        />
       </Stack>
     </>
   );
