@@ -79,13 +79,13 @@ export const FeedItem = React.memo(
                         <Text style={[styles.countText, { color: theme.text }]}>{item.shares ?? 0}</Text>
                     </TouchableOpacity>
 
-                    <TouchableOpacity onPress={() => onSave(item.id)} style={{ marginLeft: "auto" }}>
+                    {/* <TouchableOpacity onPress={() => onSave(item.id)} style={{ marginLeft: "auto" }}>
                         <Icon
                             name={item.saved ? "bookmark" : "bookmark-outline"}
                             size={25}
                             color={theme.text}
                         />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>

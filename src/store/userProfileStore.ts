@@ -195,22 +195,37 @@ export const useProfileStore = create<ProfileState>((set) => ({
 //       ),
 //     })),
 
-toggleLike: (id) =>
-  set((state) => {
-    // Copy array safely (no reference link)
-    const updatedVideos = state.videos.map((video) => {
-      if (video.id === id) {
-        const isLiked = !video.isLiked;
-        const likesCount = isLiked
-          ? (video.likes || 0) + 1
-          : (video.likes || 0) - 1;
-        return { ...video, isLiked, likes: likesCount };
-      }
-      return { ...video }; // clone others too
-    });
+// toggleLike: (id) =>
+//   set((state) => {
+//     // Copy array safely (no reference link)
+//     const updatedVideos = state.videos.map((video) => {
+//       if (video.id === id) {
+//         const isLiked = !video.isLiked;
+//         const likesCount = isLiked
+//           ? (video.likes || 0) + 1
+//           : (video.likes || 0) - 1;
+//         return { ...video, isLiked, likes: likesCount };
+//       }
+//       return { ...video }; // clone others too
+//     });
 
-    return { videos: updatedVideos };
-  }),
+//     return { videos: updatedVideos };
+//   }),
+
+  toggleLike: (id) =>
+    set((state) => ({
+      videos: state.videos.map((video) => {
+        if (video.id === id) {
+          const isLiked = !video.isLiked;
+          const likesCount = Math.max(
+            0,
+            isLiked ? (video.likes || 0) + 1 : (video.likes || 0) - 1
+          );
+          return { ...video, isLiked, likes: likesCount };
+        }
+        return video; // baaki videos unchanged
+      }),
+    })),
 
 
   // ✅ Add comment count

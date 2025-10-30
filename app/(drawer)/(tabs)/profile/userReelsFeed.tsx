@@ -1,3 +1,4 @@
+import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
 import { useIsFocused } from '@react-navigation/native';
@@ -8,6 +9,8 @@ import {
   Animated,
   FlatList,
   Image,
+  NativeScrollEvent,
+  NativeSyntheticEvent,
   Pressable,
   StatusBar,
   StyleSheet,
@@ -19,7 +22,7 @@ import {
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 
-const ReelItem = ({
+const UserReelItem = ({
   item,
   index,
   currentIndex,
@@ -40,7 +43,9 @@ const ReelItem = ({
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
-  const {username, profilePicture} = useProfileStore();
+  const { username, profilePicture } = useProfileStore();
+  const [showOptions, setShowOptions] = React.useState(false);
+
 
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
 
@@ -54,14 +59,43 @@ const ReelItem = ({
   );
 
   // autoplay control
+  // useEffect(() => {
+  //   if (currentIndex === index) {
+  //     player.currentTime = 0;
+  //     player.play();
+  //   } else {
+  //     player.pause();
+  //   }
+  // }, [currentIndex, index]);
+
+  //   useEffect(() => {
+  //   if (currentIndex === index) {
+  //     player.currentTime = 0;
+  //     player.play();
+  //     player.volume = isMuted ? 0 : 1;
+  //   } else {
+  //     player.pause();
+  //     player.volume = 0; // ensure muted when off-screen
+  //   }
+  // }, [currentIndex, index, isMuted]);
+
+
   useEffect(() => {
     if (currentIndex === index) {
       player.currentTime = 0;
       player.play();
+      player.volume = isMuted ? 0 : 1;
     } else {
       player.pause();
+      player.volume = 0;
     }
-  }, [currentIndex, index]);
+    // Cleanup: jab component unmount ho ya index change ho
+    return () => {
+      player.pause();
+      player.volume = 0;
+    };
+  }, [currentIndex, index, isMuted]);
+
 
   // mute/unmute
   useEffect(() => {
@@ -136,19 +170,19 @@ const ReelItem = ({
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
           <Image
-            source={{ uri: item.profilePicture}}
+            source={{ uri: item.profilePicture }}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
               borderRadius: AVATAR_SIZE / 2,
               marginRight: 8,
-                borderWidth: 2,
+              borderWidth: 2,
               borderColor: '#fff',
             }}
           />
           <Text style={styles.username}>{username}</Text>
         </View>
-            <Text style={styles.username}>{item.title}</Text>
+        <Text style={styles.username}>{item.title}</Text>
         <Text style={styles.caption}>{item.caption}</Text>
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
@@ -195,29 +229,44 @@ const ReelItem = ({
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton}>
+        {/* <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
+        </TouchableOpacity> */}
+
+        <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
         </TouchableOpacity>
       </View>
+
+
+      <BottomDrawer
+        visible={showOptions}
+        onClose={() => setShowOptions(false)}
+        onSave={() => { router.push("/(drawer)/(tabs)/reels/bookmark"); setShowOptions(false) }}
+        onReport={() => console.log("Reported")}
+        onShare={() => console.log("Shared")}
+      />
     </View>
   );
 };
 
-const ReelsFeed = () => {
+const UserReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
   const { id } = useLocalSearchParams();
-  const { videos } = useProfileStore(); 
+  // const { videos } = useProfileStore(); 
   const [isMuted, setIsMuted] = useState(false);
+  const { videos, toggleLike, addComment, addShare } = useProfileStore();
+
 
   const {
-    reels,
+    // reels,
     // toggleLike,
     // addComment,
     // addShare,
-    currentIndex,
-    setCurrentIndex,
+    // currentIndex,
+    // setCurrentIndex,
     activeTab,
     setActiveTab,
     // isMuted,
@@ -228,13 +277,15 @@ const ReelsFeed = () => {
     updateReelURL, //NEW: URL update function
   } = useReelsStore();
 
-  const {toggleLike, addComment, addShare } = useProfileStore();
+  const [currentIndex, setCurrentIndex] = useState(0);
+
+  // const {toggleLike, addComment, addShare } = useProfileStore();
 
 
   // NEW: URL update function
   const updateURL = (index: number) => {
-    if (reels[index]) {
-      const reelId = reels[index].id;
+    if (videos[index]) {
+      const reelId = videos[index].id;
       // Method 1: Expo Router setParams (Recommended)
       router.setParams({ id: reelId });
       // Method 2: Store mein bhi update karo for logging
@@ -251,8 +302,8 @@ const ReelsFeed = () => {
   }, [videos]);
 
   useEffect(() => {
-    if (id && reels.length > 0) {
-      const index = reels.findIndex((r) => r.id == id);
+    if (id && videos.length > 0) {
+      const index = videos.findIndex((r) => r.id == id);
       if (index !== -1) {
         setCurrentIndex(index);
         setTimeout(() => {
@@ -264,17 +315,32 @@ const ReelsFeed = () => {
         }, 100);
       }
     }
-  }, [id, reels]);
+  }, [id, videos]);
+
+  // useEffect(() => {
+  //   if (!isFocused) {
+  //     if (!isMuted) toggleMute();
+  //   } else {
+  //     if (isMuted) toggleMute();
+  //   }
+  // }, [isFocused]);
 
   useEffect(() => {
     if (!isFocused) {
-      if (!isMuted) toggleMute();
+      setIsMuted(true); // mute all
     } else {
-      if (isMuted) toggleMute();
+      setIsMuted(false);
     }
   }, [isFocused]);
 
-  const handleScroll = (event: any) => {
+  useEffect(() => {
+    if (!isFocused) {
+      flatListRef.current?.scrollToOffset({ offset: 0, animated: false });
+    }
+  }, [isFocused]);
+
+
+  const handleScroll = (event: NativeSyntheticEvent<NativeScrollEvent>) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / SCREEN_HEIGHT);
     setCurrentIndex(index);
@@ -306,7 +372,7 @@ const ReelsFeed = () => {
         ref={flatListRef}
         data={videos}
         renderItem={({ item, index }) => (
-          <ReelItem
+          <UserReelItem
             item={item}
             index={index}
             currentIndex={currentIndex}
@@ -338,7 +404,8 @@ const ReelsFeed = () => {
         onMomentumScrollEnd={(event) => {
           const offsetY = event.nativeEvent.contentOffset.y;
           const index = Math.round(offsetY / SCREEN_HEIGHT);
-          if (index !== currentIndex && reels[index]) {
+          if (index !== currentIndex && videos[index]) {
+            setCurrentIndex(index);
             updateURL(index);
           }
         }}
@@ -403,4 +470,4 @@ const styles = StyleSheet.create({
   },
 });
 
-export default ReelsFeed;
+export default UserReelsFeed;
