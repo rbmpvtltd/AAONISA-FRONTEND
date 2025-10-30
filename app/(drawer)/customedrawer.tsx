@@ -77,7 +77,7 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="bookmark-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => props.navigation.navigate("(tabs)/profile")}
+            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedCategories")}}
           />
 
           <DrawerItem

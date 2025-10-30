@@ -55,11 +55,27 @@ export default function ProfileLayout() {
           }}
         />
 
+    <Stack.Screen
+          name="savedCategories"
+          options={{
+            title: "savePost",
+            headerShown: true,
+          }}
+        />
+
           <Stack.Screen
           name="userReelsFeed"
           options={{
             title: "UserPosts",
             headerShown: false,
+          }}
+        />
+
+         <Stack.Screen
+          name="bookmark"
+          options={{
+            title: "savePost",
+            headerShown: true,
           }}
         />
       </Stack>

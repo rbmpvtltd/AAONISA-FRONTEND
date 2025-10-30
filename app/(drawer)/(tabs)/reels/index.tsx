@@ -1,8 +1,10 @@
+import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef } from 'react';
+
 import {
   Animated,
   FlatList,
@@ -32,6 +34,7 @@ const ReelItem = ({
   setActiveTab,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
+const [showOptions, setShowOptions] = React.useState(false);
 
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
   const rightActionsBottom = SCREEN_HEIGHT * 0.12;
@@ -187,11 +190,24 @@ const ReelItem = ({
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
-
+{/* 
         <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
-        </TouchableOpacity>
-      </View>
+        </TouchableOpacity> */}
+
+ <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
+  <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
+</TouchableOpacity>
+  </View>
+ 
+  <BottomDrawer
+  visible={showOptions}
+  onClose={() => setShowOptions(false)}
+  onSave={() => {router.push("/(drawer)/(tabs)/reels/bookmark"); setShowOptions(false)}}
+  onReport={() => console.log("Reported")}
+  onShare={() => console.log("Shared")}
+/>
+    
     </View>
   );
 };
@@ -390,6 +406,39 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '700',
   },
+  overlay: {
+  position: 'absolute',
+  top: 0,
+  left: 0,
+  right: 0,
+  bottom: 0,
+  justifyContent: 'flex-end',
+  backgroundColor: 'rgba(0,0,0,0.5)',
+  zIndex: 999,
+},
+overlayBackground: {
+  flex: 1,
+},
+bottomDrawer: {
+  backgroundColor: '#1a1a1a',
+  borderTopLeftRadius: 16,
+  borderTopRightRadius: 16,
+  paddingVertical: 20,
+  paddingHorizontal: 20,
+},
+optionButton: {
+  flexDirection: 'row',
+  alignItems: 'center',
+  paddingVertical: 12,
+  borderBottomWidth: 0.4,
+  borderBottomColor: '#333',
+},
+optionText: {
+  color: '#fff',
+  fontSize: 16,
+  marginLeft: 12,
+},
+
 });
 
 export default ReelsFeed;
