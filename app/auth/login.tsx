@@ -43,7 +43,7 @@ const Login = () => {
     resetAuth
   } = useAuthStore();
   const {
-     setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile
+     setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile,setVideos
   } = useProfileStore();
   const {setFollowers, setFollowings, resetFollow} = useFollowStore();
   useEffect(() => {
@@ -81,10 +81,12 @@ const Login = () => {
         setFollowersCount(userData.followers.length)
         setFollowingsCount(userData.followings.length)
         setUrl(userData.userProfileInfo.url);
-        setPostCount(userData.userInfo.videos.length)
+        setPostCount(userData.userInfo.videos.length);
+        console.log("Post count:", userData.userInfo.videos);
+        setVideos(userData.userInfo.videos);
+        // console.log("===============================",setVideos)
         setFollowers(userData.followers);
         setFollowings(userData.followings);
-        console.log("User data:", userData);
 
         const notifications: Notification[]  = await getUserNotifications();
         const addNotification = useNotificationStore.getState().addNotification;
