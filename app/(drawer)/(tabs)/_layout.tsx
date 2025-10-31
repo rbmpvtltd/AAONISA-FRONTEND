@@ -129,6 +129,20 @@ export default function TabsLayout() {
             ),
           }}
         /> 
+      <Tabs.Screen
+          name="bookmark"
+          options={{
+            headerShown: false,
+            title: "Profile",
+            tabBarIcon: ({ focused }) => (
+              <Ionicons
+                name={focused ? "person" : "person-outline"}
+                size={24}
+                color={focused ? theme.text : theme.subtitle}
+              />
+            ),
+          }}
+        /> 
       </Tabs>
     </>
   );
