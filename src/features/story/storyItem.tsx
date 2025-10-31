@@ -8,7 +8,7 @@ export const StoryItem = React.memo(
             <View
                 style={[
                     styles.storyBorder,
-                    { borderColor: story.viewed ? "#ccc" : "#ff8501" },
+                    { borderColor:  "#ff8501" },
                 ]}
             >
                 <Image source={{ uri: story.profilePic }} style={styles.storyImage} />
