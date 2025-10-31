@@ -1,6 +1,7 @@
 import { useStoryStore } from "@/src/store/useStoryStore";
+import { router } from "expo-router";
 import React, { useCallback } from "react";
-import { Alert, FlatList, View } from "react-native";
+import { FlatList, View } from "react-native";
 import { StoryItem } from "./storyItem";
 
 export const StoryList = ({ theme }: { theme: any }) => {
@@ -9,8 +10,8 @@ export const StoryList = ({ theme }: { theme: any }) => {
     const handleStoryPress = useCallback(
         (id: number) => {
             setStories((prev) => prev.map((s) => (s.id === id ? { ...s, viewed: true } : s)));
-            // router.push(`/story/${id}`);
-            Alert.alert("Story", "Open story viewer for story " + id);
+            router.push(`/story`);
+            // Alert.alert("Story", "Open story viewer for story " + id);
         },
         [setStories]
     );
