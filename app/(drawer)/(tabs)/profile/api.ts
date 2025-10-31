@@ -26,7 +26,7 @@
 // }
 
 // // async function updateProfile(reqBody: any) {
-    
+
 // //     const token = await getToken();
 // //     const config = {
 // //         headers: { 'Content-Type': 'multipart/form-data' ,
@@ -88,7 +88,9 @@
 import { createApiUrl } from '@/util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import * as FileSystem from "expo-file-system";
+import convertToBase64Expo from './base64Converter';
+
+
 import { Platform } from 'react-native';
 
 const getToken = async () => {
@@ -114,60 +116,41 @@ const getToken = async () => {
 // }
 
 
-async function updateProfile(profileData: any,imageChanged: boolean) {
+async function updateProfile(profileData:any, imageChanged:any) {
   try {
-    const formData = new FormData();
-    if (profileData.ProfilePicture && imageChanged) {
-      if (typeof profileData.ProfilePicture === "string") {
-        if (profileData.ProfilePicture.startsWith("data:")) {
-          if (Platform.OS === "web") {
-            const res = await fetch(profileData.ProfilePicture);
-            const blob = await res.blob();
-            formData.append(
-              "ProfilePicture",
-              new File([blob], "profile.jpg", { type: "image/jpeg" })
-            );
-          } else {
-            const fileUri = FileSystem.cacheDirectory + "profile.jpg";
-            const cleanBase64 = profileData.ProfilePicture.split(",")[1];
-            await FileSystem.writeAsStringAsync(fileUri, cleanBase64, {
-              encoding: FileSystem.EncodingType.Base64,
-            });
-            formData.append("ProfilePicture", {
-              uri: fileUri,
-              type: "image/jpeg",
-              name: "profile.jpg",
-            } as any);
-          }
-        }
-      } else {
-        formData.append("ProfilePicture", profileData.ProfilePicture);
-      }
+    let base64Image = null; // ✅ default null
+    
+    if (imageChanged && profileData.ProfilePicture) {
+      base64Image = await convertToBase64Expo(profileData.ProfilePicture);
     }
 
-    formData.append('username', profileData.username);
-    formData.append('name', profileData.name);
-    formData.append('bio', profileData.bio);
-    formData.append('url', profileData.url);
-    formData.append('imageChanged', String(imageChanged));
-    const token = await getToken();
-
-    const config = {
-      headers: {
-        'Content-Type': 'multipart/form-data',
-        ...(token ? { Authorization: `Bearer ${token}` } : {}),
-      },
-      withCredentials: true,
+    const payload = {
+      username: profileData.username,
+      name: profileData.name,
+      bio: profileData.bio,
+      url: profileData.url,
+      imageChanged,
+      ProfilePicture: base64Image, // ✅ null if no image
     };
 
-    const apiUrl = createApiUrl('/users/update-profile');
-    const { data } = await axios.post(apiUrl, formData, config);
+    const token = await getToken();
+    console.log("TOKEN FRONT:", token);
+
+    const apiUrl = createApiUrl("/users/update-profile");
+    const { data } = await axios.post(apiUrl, payload, {
+      headers: {
+        "Content-Type": "application/json", // ✅ ADD THIS
+        Authorization: `Bearer ${token}`,   // ✅ CORRECT
+      },
+    });
+    
     return data;
-  } catch (error) {
-    console.log('Update Profile Error:', error);
-    throw error;
+  } catch (err) {
+    console.log("Update Profile Error:", err);
+    throw err;
   }
 }
+
 
 
 
@@ -203,9 +186,9 @@ async function GetCurrentUser() {
   return data;
 }
 
-async function  SearchUserProfiel(query: string) {
+async function SearchUserProfiel(query: string) {
   const token = await getToken();
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',

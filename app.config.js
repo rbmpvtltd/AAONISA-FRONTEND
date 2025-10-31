@@ -21,7 +21,8 @@ export default {
         "android.permission.RECORD_AUDIO"
       ],
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.AaoNiSa"
+      "package": "com.anonymous.AaoNiSa",
+      "usesCleartextTraffic": true
     },
     "web": {
       "bundler": "metro",

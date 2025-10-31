@@ -85,7 +85,7 @@ const UserEditProfile = () => {
                     username: profileData.username,
                     name: profileData.name,
                     bio: profileData.bio,
-                    profilePicture: data.dataUrl,
+                    profilePicture: data.dataUri,
                     url: profileData.url,
                 });
 
