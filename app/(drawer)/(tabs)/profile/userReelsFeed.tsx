@@ -80,19 +80,50 @@ const UserReelItem = ({
   // }, [currentIndex, index, isMuted]);
 
 
+  // useEffect(() => {
+  //   if (currentIndex === index) {
+  //     player.currentTime = 0;
+  //     player.play();
+  //     player.volume = isMuted ? 0 : 1;
+  //   } else {
+  //     player.pause();
+  //     player.volume = 0;
+  //   }
+  //   // Cleanup: jab component unmount ho ya index change ho
+  //   return () => {
+  //     player.pause();
+  //     player.volume = 0;
+  //   };
+  // }, [currentIndex, index, isMuted]);
+
+
   useEffect(() => {
-    if (currentIndex === index) {
-      player.currentTime = 0;
-      player.play();
-      player.volume = isMuted ? 0 : 1;
-    } else {
-      player.pause();
-      player.volume = 0;
-    }
-    // Cleanup: jab component unmount ho ya index change ho
+    let isMounted = true;
+
+    const controlPlayback = async () => {
+      try {
+        if (!isMounted || !player) return;
+
+        if (currentIndex === index) {
+          player.currentTime = 0;
+          await player.play();
+          player.volume = isMuted ? 0 : 1;
+        } else {
+          await player.pause();
+          player.volume = 0;
+        }
+      } catch (error) {
+        console.warn('Playback control error:', (error as Error)?.message);
+      }
+    };
+
+    controlPlayback();
+
     return () => {
-      player.pause();
-      player.volume = 0;
+      isMounted = false;
+      try {
+        player.pause?.();
+      } catch { }
     };
   }, [currentIndex, index, isMuted]);
 
@@ -129,6 +160,7 @@ const UserReelItem = ({
       >
         <VideoView
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+          key={`video-${item.id}-${index}`}
           player={player}
           contentFit="cover"
           allowsFullscreen={false}
