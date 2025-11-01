@@ -15,11 +15,10 @@
         "buildType": "app-bundle",
         "node": "20.19.4",
         "env" : {
-           "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON"
-        },
-        "android": {
+           "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON",
         "googleServicesFile": "google-services.json"
-      }
+
+        }
       }
     }
   }
