@@ -62,8 +62,8 @@ export default function TabsLayout() {
             ),
           }}
         />
-        
-      
+
+
 
         {/*  Search */}
         <Tabs.Screen
@@ -80,7 +80,7 @@ export default function TabsLayout() {
             ),
           }}
         />
-       
+
 
         {/*  Create */}
         <Tabs.Screen
@@ -97,6 +97,7 @@ export default function TabsLayout() {
             ),
           }}
         />
+
 
         {/*  Reels */}
         <Tabs.Screen
@@ -128,8 +129,8 @@ export default function TabsLayout() {
               />
             ),
           }}
-        /> 
-      <Tabs.Screen
+        />
+        {/* <Tabs.Screen
           name="bookmark"
           options={{
             headerShown: false,
@@ -142,7 +143,16 @@ export default function TabsLayout() {
               />
             ),
           }}
-        /> 
+        /> */}
+
+        <Tabs.Screen
+          name="story/[id]"
+          options={{
+            headerShown: false,
+            tabBarStyle: { display: "none" },
+            tabBarButton: () => null, // hides the tab from Tab Bar
+          }}
+        />
       </Tabs>
     </>
   );
