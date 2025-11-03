@@ -36,37 +36,41 @@
 import { create } from "zustand";
 
 export interface Story {
-  id: number;
+  id: string;
   videoUrl: string;
   duration: number;
   viewed: boolean;
 }
 
-interface StoryUser {
+export interface StoryUser {
   username: string;
   profilePic: string;
   stories: Story[];
+  owner: string;
 }
 
 interface StoryState {
-  userStory: StoryUser | null;
-  setUserStory: (data: StoryUser) => void;
-  markStoryViewed: (storyId: number) => void;
+  userStories: StoryUser[];
+  setUserStories: (data: StoryUser[]) => void;
+  markStoryViewed: ( storyId: string) => void;
 }
 
 export const useStoryStore = create<StoryState>((set) => ({
-  userStory: null,
-  setUserStory: (data) => set({ userStory: data }),
+  userStories: [],
+
+  setUserStories: (data) => set({ userStories: data }),
+
   markStoryViewed: (storyId) =>
-    set((state) => {
-      if (!state.userStory) return state;
-      return {
-        userStory: {
-          ...state.userStory,
-          stories: state.userStory.stories.map((s) =>
-            s.id === storyId ? { ...s, viewed: true } : s
-          ),
-        },
-      };
-    }),
+    set((state) => ({
+      userStories: state.userStories.map((user) =>
+        user.owner
+          ? {
+              ...user,
+              stories: user.stories.map((s) =>
+                s.id === storyId ? { ...s, viewed: true } : s
+              ),
+            }
+          : user
+      ),
+    })),
 }));
