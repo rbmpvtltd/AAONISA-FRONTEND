@@ -16,14 +16,40 @@ export default function TabsLayout() {
         backgroundColor={theme.background}
       />
 
-      <Tabs
+      {/* <Tabs
         screenOptions={{
           tabBarShowLabel: false,
           headerShown: true,
           headerStyle: { backgroundColor: theme.background },
           headerTitleStyle: { color: theme.text },
         }}
+      > */}
+
+
+      <Tabs
+        screenOptions={({ route }) => ({
+          tabBarShowLabel: false,
+          headerShown: true,
+          headerStyle: { backgroundColor: theme.background },
+          headerTitleStyle: { color: theme.text },
+          tabBarStyle: { backgroundColor: theme.background },
+
+          tabBarActiveTintColor: theme.text,
+          tabBarInactiveTintColor: theme.subtitle,
+
+          tabBarIcon: ({ focused, color, size }) => {
+            let iconName: string = "home-outline";
+            if (route.name === "index") iconName = focused ? "home" : "home-outline";
+            else if (route.name === "search") iconName = focused ? "search" : "search-outline";
+            else if (route.name === "createReels") iconName = focused ? "add-circle" : "add-circle-outline";
+            else if (route.name === "reels") iconName = focused ? "play-circle" : "play-circle-outline";
+            else if (route.name === "profile") iconName = focused ? "person" : "person-outline";
+
+            return <Ionicons name={iconName as any} size={size} color={focused ? theme.text : theme.subtitle} />;
+          },
+        })}
       >
+
 
         {/*  Home */}
         <Tabs.Screen
@@ -145,14 +171,14 @@ export default function TabsLayout() {
           }}
         /> */}
 
-        <Tabs.Screen
+        {/* <Tabs.Screen
           name="story/[id]"
           options={{
             headerShown: false,
             tabBarStyle: { display: "none" },
             tabBarButton: () => null, // hides the tab from Tab Bar
           }}
-        />
+        /> */}
       </Tabs>
     </>
   );
