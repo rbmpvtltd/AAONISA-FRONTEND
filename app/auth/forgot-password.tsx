@@ -47,6 +47,9 @@ const ForgotPassword = () => {
      resetAuth
   } = useAuthStore();
 
+   // declare refs (same file where TextInput is imported from 'react-native')
+    const otpRefs = React.useRef<(TextInput | null)[]>([]);
+
   // Clipboard auto detect OTP
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -171,22 +174,72 @@ const handleSendOtp = async () => {
         />
 
         {otpSent && (
-          <View style={styles.otpContainer}>
-            {otp.map((digit, index) => (
-              <TextInput
-                key={index}
-                style={[styles.otpInput, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
-                maxLength={1}
-                keyboardType="numeric"
-                value={digit}
-                onChangeText={(text) => {
-                  const newOtp = [...otp];
-                  newOtp[index] = text;
-                  setOtp(newOtp);
-                }}
-              />
-            ))}
-          </View>
+          // <View style={styles.otpContainer}>
+          //   {otp.map((digit, index) => (
+          //     <TextInput
+          //       key={index}
+          //       style={[styles.otpInput, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
+          //       maxLength={1}
+          //       keyboardType="numeric"
+          //       value={digit}
+          //       onChangeText={(text) => {
+          //         const newOtp = [...otp];
+          //         newOtp[index] = text;
+          //         setOtp(newOtp);
+          //       }}
+          //     />
+          //   ))}
+          // </View>
+
+           <View style={styles.otpContainer}>
+                      {otp.map((digit, index) => (
+                        <TextInput
+                          key={index}
+                          // typed callback ref — this removes the TS error
+                          ref={(r: TextInput | null) => {
+                            otpRefs.current[index] = r;
+                          }}
+                          style={[
+                            styles.otpInput,
+                            {
+                              backgroundColor: theme.inputBg,
+                              borderColor: theme.inputBorder,
+                              color: theme.text,
+                            },
+                          ]}
+                          maxLength={1}
+                          keyboardType="numeric"
+                          value={digit}
+                          onChangeText={(text) => {
+                            const newOtp = [...otp];
+                            newOtp[index] = text;
+                            setOtp(newOtp);
+          
+                            // Next box auto focus
+                            if (text.length === 1 && index < otp.length - 1) {
+                              otpRefs.current[index + 1]?.focus();
+                            }
+                          }}
+                          onKeyPress={({ nativeEvent }) => {
+                            if (nativeEvent.key === "Backspace") {
+                              const newOtp = [...otp];
+                              // if current box is empty, move to previous and clear it
+                              if (!digit && index > 0) {
+                                otpRefs.current[index - 1]?.focus();
+                                newOtp[index - 1] = "";
+                              } else {
+                                // clear current
+                                newOtp[index] = "";
+                              }
+                              setOtp(newOtp);
+                            }
+                          }}
+                          // helpful props
+                          textContentType="oneTimeCode"
+                          selectTextOnFocus
+                        />
+                      ))}
+                    </View>
         )}
 
         <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>

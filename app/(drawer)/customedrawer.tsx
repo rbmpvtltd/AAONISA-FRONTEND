@@ -1,4 +1,6 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { useReelsStore } from "@/src/store/useReelsStore";
+import { useThemeStore } from "@/src/store/useThemeStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -9,10 +11,16 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { logoutUser } from "../auth/api";
 
 export default function CustomDrawer(props: any) {
-  const theme = useAppTheme();
-  const [darkMode, setDarkMode] = useState(false);
+  // const theme = useAppTheme();
+  // const [darkMode, setDarkMode] = useState(false);
+
+
+const { theme: themeMode, toggleTheme } = useThemeStore();
+const theme = useAppTheme();
+
   const [onlineStatus, setOnlineStatus] = useState(true);
-  const [autoScroll, setAutoScroll] = useState(false);
+  const { autoScroll, setAutoScroll } = useReelsStore();
+
   const router = useRouter();
 
   const handleLogout = async () => {
@@ -102,7 +110,7 @@ export default function CustomDrawer(props: any) {
             <Text style={{ color: theme.text, flex: 1, marginLeft: 15 }}>
               Dark Mode
             </Text>
-            <Switch value={darkMode} onValueChange={setDarkMode} />
+            <Switch value={themeMode === "dark"} onValueChange={toggleTheme} />
           </View>
 
           {/* Online Status */}

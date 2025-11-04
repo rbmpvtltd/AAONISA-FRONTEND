@@ -233,7 +233,33 @@ const ReelsFeed = () => {
     setShowIcon,
     fadeAnim,
     updateReelURL, //NEW: URL update function
+    autoScroll,
   } = useReelsStore();
+
+  // auto scroll 
+useEffect(() => {
+  let interval: any;
+
+  if (autoScroll && reels.length > 0) {
+    interval = setInterval(() => {
+      const nextIndex =
+        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+      setCurrentIndex(nextIndex);
+
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+
+      updateURL(nextIndex);
+    }, 5000);
+  }
+
+  return () => clearInterval(interval);
+}, [autoScroll, reels, currentIndex]);
+
+
 
   // NEW: URL update function
   const updateURL = (index: number) => {

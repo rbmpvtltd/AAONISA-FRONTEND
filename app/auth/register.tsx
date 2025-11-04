@@ -47,6 +47,10 @@ const Register = () => {
     resetAuth
   } = useAuthStore();
 
+
+  // declare refs (same file where TextInput is imported from 'react-native')
+  const otpRefs = React.useRef<(TextInput | null)[]>([]);
+  
   useEffect(() => {
     if (Platform.OS === "web") return;
 
@@ -57,8 +61,9 @@ const Register = () => {
         clearInterval(interval);
       }
     }, 2000);
-    return () => {clearInterval(interval);
-       resetAuth(); 
+    return () => {
+      clearInterval(interval);
+      resetAuth();
     };
   }, []);
 
@@ -98,7 +103,7 @@ const Register = () => {
       });
       if (data.success) {
         Alert.alert("Success", "Account created successfully!");
-         await resetAuth();
+        await resetAuth();
         router.push("/auth/login");
       } else {
         Alert.alert("Error", data.message);
@@ -132,13 +137,43 @@ const Register = () => {
         />
 
         {otpSent ? (
+          // <View style={styles.otpContainer}>
+          //   {otp.map((digit, index) => (
+          //     <TextInput
+          //       key={index}
+          //       style={[
+          //         styles.otpInput,
+          //         { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
+          //       ]}
+          //       maxLength={1}
+          //       keyboardType="numeric"
+          //       value={digit}
+          //       onChangeText={(text) => {
+          //         const newOtp = [...otp];
+          //         newOtp[index] = text;
+          //         setOtp(newOtp);
+          //       }}
+          //     />
+          //   ))}
+          // </View>
+
+
+          // inside your render
           <View style={styles.otpContainer}>
             {otp.map((digit, index) => (
               <TextInput
                 key={index}
+                // typed callback ref — this removes the TS error
+                ref={(r: TextInput | null) => {
+                  otpRefs.current[index] = r;
+                }}
                 style={[
                   styles.otpInput,
-                  { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
+                  {
+                    backgroundColor: theme.inputBg,
+                    borderColor: theme.inputBorder,
+                    color: theme.text,
+                  },
                 ]}
                 maxLength={1}
                 keyboardType="numeric"
@@ -147,7 +182,29 @@ const Register = () => {
                   const newOtp = [...otp];
                   newOtp[index] = text;
                   setOtp(newOtp);
+
+                  // Next box auto focus
+                  if (text.length === 1 && index < otp.length - 1) {
+                    otpRefs.current[index + 1]?.focus();
+                  }
                 }}
+                onKeyPress={({ nativeEvent }) => {
+                  if (nativeEvent.key === "Backspace") {
+                    const newOtp = [...otp];
+                    // if current box is empty, move to previous and clear it
+                    if (!digit && index > 0) {
+                      otpRefs.current[index - 1]?.focus();
+                      newOtp[index - 1] = "";
+                    } else {
+                      // clear current
+                      newOtp[index] = "";
+                    }
+                    setOtp(newOtp);
+                  }
+                }}
+                // helpful props
+                textContentType="oneTimeCode"
+                selectTextOnFocus
               />
             ))}
           </View>
@@ -200,7 +257,7 @@ const Register = () => {
 
 export default Register;
 
- const styles = StyleSheet.create({
+const styles = StyleSheet.create({
   container: { flex: 1, justifyContent: "center", padding: 20 },
   logo: { fontSize: 32, fontWeight: "bold", textAlign: "center", marginBottom: 10 },
   subtitle: { fontSize: 16, textAlign: "center", marginBottom: 20 },
