@@ -32,5 +32,25 @@ const getAllStories = async () => {
   }
 };
 
-export { getAllStories };
+const getAllBookmarks = async () => {
+    const token = await getToken();
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/bookmarks/findAllBookmarks');
+
+  // backend update
+  try {
+    const data =  await axios.get(apiUrl, config);
+    return data.data
+  } catch (e) {
+    console.log("getting story  failed", e);
+  }
+}
+export { getAllBookmarks, getAllStories };
 

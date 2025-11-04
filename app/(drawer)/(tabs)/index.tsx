@@ -46,12 +46,13 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { FeedList } from "@/src/features/feed/feedList";
 import { StoryList } from "@/src/features/story/storyList";
+import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { getAllStories } from "./api";
+import { getAllBookmarks, getAllStories } from "./api";
 
 interface StoryUser {
   username: string;
@@ -71,6 +72,7 @@ const HomePage = () => {
   const isFocused = useIsFocused();
   const { setUserStories} = useStoryStore();
   const { setPhotos, toggleMute } = useFeedStore();
+  const { setCategories } = useBookmarkStore();
 
   // useEffect(() => {
   //   setUserStory({
@@ -123,6 +125,13 @@ const HomePage = () => {
       setUserStories(stories);
     } catch (err) {
       console.log("Stories fetch error", err);
+    }
+
+    try {
+      const bookmarks = await getAllBookmarks();
+      setCategories((prev) => [...prev, ...bookmarks]);
+    } catch (err) {
+      console.log("Bookmarks fetch error", err);
     }
   }
 
