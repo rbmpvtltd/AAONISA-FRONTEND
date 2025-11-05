@@ -8,7 +8,6 @@ import { useRouter } from "expo-router";
 import React, { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { logoutUser } from "../auth/api";
 
 export default function CustomDrawer(props: any) {
   // const theme = useAppTheme();
@@ -22,22 +21,18 @@ const theme = useAppTheme();
   const { autoScroll, setAutoScroll } = useReelsStore();
 
   const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const response = await logoutUser();
-
-      await AsyncStorage.removeItem("accessToken");
-      await AsyncStorage.removeItem("refreshToken");
-
-      Alert.alert("Logged out successfully!");
-
-      router.replace("/auth/login");
-    } catch (error) {
-      console.error("Logout Error:", error);
-      Alert.alert("Logout failed, please try again!");
-    }
-  };
+  
+const handleLogout = async () => {
+  try {
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("refreshToken");
+    Alert.alert("Logged out successfully!");
+    router.replace("/auth/login");
+  } catch (error) {
+     console.error("Logout Error:", error);
+    Alert.alert("Logout failed, please try again!");
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
