@@ -48,6 +48,7 @@
 // }
 
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { registerForPushNotificationsAsync } from "@/src/utils/notification";
 import {
   Stack,
   useNavigationContainerRef,
@@ -97,6 +98,18 @@ export default function RootLayout() {
       setNavigated(true);
     }
   }, [loading, token, segments]);
+
+React.useEffect(() => {
+    if (token) {
+      registerForPushNotificationsAsync()
+        .then((pushToken) => {
+          if (pushToken) {
+            console.log("Expo Push Token:", pushToken);
+          }
+        })
+        .catch((err) => console.log("Notification error:", err));
+    }
+  }, [token]);
 
   return (
     <>

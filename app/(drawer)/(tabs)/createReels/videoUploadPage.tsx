@@ -4,6 +4,7 @@ import Slider from "@react-native-community/slider";
 import { Audio, AVPlaybackStatus, ResizeMode, Video } from "expo-av";
 import React, { useEffect, useRef, useState } from "react";
 import {
+    ActivityIndicator,
     Alert,
     Dimensions,
     ScrollView,
@@ -90,13 +91,16 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [isTrimming, setIsTrimming] = useState(false);
     const [isFinalUploading, setIsUploading] = useState(false);
 
+    const [isUploadingStory, setIsUploadingStory] = useState(false);
+
+
     const prevMusicVolume = useRef(50);
     function filterNameToHex(filter: string): string {
         switch (filter?.toLowerCase()) {
             case "warm": return "#FFA500"; // orange
             case "cool": return "#0000FF"; // blue
             case "grayscale": return "#808080"; // gray
-            case "vintage": return "#FFC0CB"; // pink
+            case "vintage": return "#FFC0CB"; // pink   
             case "sepia": return "#704214"; // brown
             case "bright": return "#FFFFFF"; // white
             case "dark": return "#000000"; // black
@@ -119,6 +123,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     
 
     const storyUploading = async () => {
+          setIsUploadingStory(true);
         const {
             videoUri,
             trimStart,
@@ -194,8 +199,11 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         } catch (err: any) {
             console.error("Upload failed:", err?.response?.data || err.message);
         }
+             finally {
+    setIsUploadingStory(false); // ✅ loader OFF
+}
         Alert.alert("Story uploaded successfully!");
-    }
+   }
 
     const setMusicVolumeStore = useUploadStore((state) => state.setMusicVolume);
     const setVideoVolumeStore = useUploadStore((state) => state.setVideoVolume);
@@ -308,6 +316,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                 alignItems: "center",
                                 justifyContent: "center",
                             }}
+                             disabled={isUploadingStory}
                             onPress={() => contentType === "story" ? storyUploading() : setIsUploading(true)}
                         >
                             <Ionicons name="cloud-upload-outline" size={24} color="white" />
@@ -533,6 +542,26 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                         onDiscard={onDiscard}
                     />
                 )}
+ {isUploadingStory && (
+        <View
+          style={{
+            position: "absolute",
+            top: 0,
+            left: 0,
+            right: 0,
+            bottom: 0,
+            backgroundColor: "rgba(0,0,0,0.6)",
+            alignItems: "center",
+            justifyContent: "center",
+            zIndex: 9999,
+          }}
+        >
+          <ActivityIndicator size="large" color="#fff" />
+          <Text style={{ color: "#fff", marginTop: 10, fontSize: 16 }}>
+            Uploading Story...
+          </Text>
+        </View>
+      )}
 
             </View></GestureHandlerRootView>
     );
