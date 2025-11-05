@@ -80,7 +80,7 @@ const handleLogout = async () => {
               <Ionicons name="bookmark-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedCategories")}}
+            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedScreen")}}
           />
 
           <DrawerItem

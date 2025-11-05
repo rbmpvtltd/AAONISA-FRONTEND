@@ -21,6 +21,7 @@ export default function ReelDetailScreen() {
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
       <Text>Loading Reel: {id}</Text>
+      
     </View>
   );
 }

@@ -1,7 +1,7 @@
 import { useAuthStore } from "@/src/store/useAuthStore";
 import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -13,7 +13,8 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { useAppTheme } from "../../src/constants/themeHelper";
+// import { useAppTheme } from "../../src/constants/themeHelper";
+import { useAppTheme } from "@/src/constants/themeHelper";
 import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "./api";
 
 const changeEmailAndPhoneSchema = z.object({

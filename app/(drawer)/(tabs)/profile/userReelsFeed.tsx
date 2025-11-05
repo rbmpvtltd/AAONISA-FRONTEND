@@ -1,10 +1,13 @@
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
+import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef, useState } from 'react';
+// import { BookmarkButton } from '@/src/features/bookmark/bookmarkButton';
+import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import {
   Animated,
   FlatList,
@@ -37,7 +40,14 @@ const UserReelItem = ({
   setActiveTab,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
-
+    const {
+    categories,
+    panelVisible,
+    openBookmarkPanel,
+    closePanel,
+    addCategory,
+    saveToCategory
+  } = useBookmarkStore();
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
   const rightActionsBottom = SCREEN_HEIGHT * 0.12;
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
@@ -48,7 +58,6 @@ const UserReelItem = ({
 
 
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
-
   // create player
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
@@ -269,12 +278,14 @@ const UserReelItem = ({
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
         </TouchableOpacity>
       </View>
+          
+      <BookmarkPanel />
 
 
       <BottomDrawer
         visible={showOptions}
         onClose={() => setShowOptions(false)}
-        onSave={() => { router.push("/(drawer)/(tabs)/reels/bookmark"); setShowOptions(false) }}
+        onSave={() => { openBookmarkPanel(item.uuid); setShowOptions(false); }}
         onReport={() => console.log("Reported")}
         onShare={() => console.log("Shared")}
       />
