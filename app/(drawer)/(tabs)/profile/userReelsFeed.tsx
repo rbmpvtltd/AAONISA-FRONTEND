@@ -23,7 +23,7 @@ import {
   View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { likeDislike } from './api';
+import { likeDislike, markViewed } from './api';
 
 const UserReelItem = ({
   item,
@@ -56,6 +56,8 @@ const UserReelItem = ({
   const { username, profilePicture } = useProfileStore();
   const [showOptions, setShowOptions] = React.useState(false);
   const videoKey = currentIndex === index ? `video-${item.uuid}-active` : `video-${item.uuid}`;
+  const [viewed, setViewed] = useState(false);
+
   let reelId = item.uuid;
   // create player
   const player = useVideoPlayer(
@@ -140,6 +142,33 @@ const UserReelItem = ({
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
+
+
+useEffect(() => {
+  let frameId: number;
+
+  const checkTime = () => {
+    try {
+      // current video only
+      if (currentIndex === index && player?.playing) {
+        const time = player.currentTime;
+        if (!viewed && time >= 10) {
+          setViewed(true);
+          markViewed(item.uuid);
+        }
+      }
+    } catch (e) {}
+    frameId = requestAnimationFrame(checkTime);
+  };
+  frameId = requestAnimationFrame(checkTime);
+  return () => cancelAnimationFrame(frameId);
+}, [player, currentIndex, index, viewed]);
+
+// Reset on swipe
+useEffect(() => {
+  setViewed(false);
+}, [currentIndex]);
+
 
   const formatNumber = (num: number): string => {
     if (typeof num !== 'number' || isNaN(num)) return '0';
