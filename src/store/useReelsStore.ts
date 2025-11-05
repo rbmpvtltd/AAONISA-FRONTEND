@@ -525,10 +525,10 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   updateReelURL: (reelId: string) => {
     // Expo Router ke through URL update karo
     const currentState = get();
-    console.log('URL Updated to Reel:', reelId);
+    // console.log('URL Updated to Reel:', reelId);
     
     // Deep link URL create karo (for sharing purposes)
     const deepLinkUrl = Linking.createURL(`/reels/${reelId}`);
-    console.log('Deep Link:', deepLinkUrl);
+    // console.log('Deep Link:', deepLinkUrl);
   },
 }));
