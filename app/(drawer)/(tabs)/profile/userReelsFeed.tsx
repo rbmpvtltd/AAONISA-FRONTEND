@@ -23,7 +23,7 @@ import {
   View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { likeDislike, markViewed } from './api';
 
 const UserReelItem = ({
   item,
@@ -55,9 +55,10 @@ const UserReelItem = ({
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const { username, profilePicture } = useProfileStore();
   const [showOptions, setShowOptions] = React.useState(false);
+  const videoKey = currentIndex === index ? `video-${item.uuid}-active` : `video-${item.uuid}`;
+  const [viewed, setViewed] = useState(false);
 
-
-  const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
+  let reelId = item.uuid;
   // create player
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
@@ -142,6 +143,33 @@ const UserReelItem = ({
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
 
+
+useEffect(() => {
+  let frameId: number;
+
+  const checkTime = () => {
+    try {
+      // current video only
+      if (currentIndex === index && player?.playing) {
+        const time = player.currentTime;
+        if (!viewed && time >= 10) {
+          setViewed(true);
+          markViewed(item.uuid);
+        }
+      }
+    } catch (e) {}
+    frameId = requestAnimationFrame(checkTime);
+  };
+  frameId = requestAnimationFrame(checkTime);
+  return () => cancelAnimationFrame(frameId);
+}, [player, currentIndex, index, viewed]);
+
+// Reset on swipe
+useEffect(() => {
+  setViewed(false);
+}, [currentIndex]);
+
+
   const formatNumber = (num: number): string => {
     if (typeof num !== 'number' || isNaN(num)) return '0';
     if (num >= 1000000) return (num / 1000000).toFixed(1) + 'M';
@@ -158,7 +186,6 @@ const UserReelItem = ({
   const handlePressOut = () => {
     player.play();
   };
-
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <Pressable
@@ -169,7 +196,7 @@ const UserReelItem = ({
       >
         <VideoView
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-          key={`video-${item.id}-${index}`}
+          key={`video-${item.uuid}-${index}`}
           player={player}
           contentFit="cover"
           allowsFullscreen={false}
@@ -248,7 +275,7 @@ const UserReelItem = ({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {toggleLike(item.uuid);likeDislike(reelId)}}>
           <Ionicons
             name={item.isLiked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}
@@ -328,7 +355,7 @@ const UserReelsFeed = () => {
   // NEW: URL update function
   const updateURL = (index: number) => {
     if (videos[index]) {
-      const reelId = videos[index].id;
+      const reelId = videos[index].uuid;
       // Method 1: Expo Router setParams (Recommended)
       router.setParams({ id: reelId });
       // Method 2: Store mein bhi update karo for logging
@@ -346,7 +373,7 @@ const UserReelsFeed = () => {
 
   useEffect(() => {
     if (id && videos.length > 0) {
-      const index = videos.findIndex((r) => r.id == id);
+      const index = videos.findIndex((r) => r.uuid == id);
       if (index !== -1) {
         setCurrentIndex(index);
         setTimeout(() => {
