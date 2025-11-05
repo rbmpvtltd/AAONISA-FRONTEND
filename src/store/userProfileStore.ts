@@ -87,7 +87,6 @@
 import { create } from "zustand";
 
 interface Video {
-  id: string;
   uuid: string;
   videoUrl: string;
   caption?: string;
@@ -215,7 +214,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   toggleLike: (id) =>
     set((state) => ({
       videos: state.videos.map((video) => {
-        if (video.id === id) {
+        if (video.uuid === id) {
           const isLiked = !video.isLiked;
           const likesCount = Math.max(
             0,
@@ -232,7 +231,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   addComment: (id) =>
     set((state) => ({
       videos: state.videos.map((video) =>
-        video.id === id
+        video.uuid === id
           ? { ...video, comments: (video.comments || 0) + 1 }
           : video
       ),
@@ -244,7 +243,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   addShare: (id) =>
     set((state) => ({
       videos: state.videos.map((video) =>
-        video.id === id
+        video.uuid === id
           ? { ...video, shares: (video.shares || 0) + 1 }
           : video
       ),

@@ -275,7 +275,7 @@ useEffect(() => {
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => {toggleLike(item.id);likeDislike(reelId)}}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {toggleLike(item.uuid);likeDislike(reelId)}}>
           <Ionicons
             name={item.isLiked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}
@@ -355,7 +355,7 @@ const UserReelsFeed = () => {
   // NEW: URL update function
   const updateURL = (index: number) => {
     if (videos[index]) {
-      const reelId = videos[index].id;
+      const reelId = videos[index].uuid;
       // Method 1: Expo Router setParams (Recommended)
       router.setParams({ id: reelId });
       // Method 2: Store mein bhi update karo for logging
@@ -373,7 +373,7 @@ const UserReelsFeed = () => {
 
   useEffect(() => {
     if (id && videos.length > 0) {
-      const index = videos.findIndex((r) => r.id == id);
+      const index = videos.findIndex((r) => r.uuid == id);
       if (index !== -1) {
         setCurrentIndex(index);
         setTimeout(() => {
