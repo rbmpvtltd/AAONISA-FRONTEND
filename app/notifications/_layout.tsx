@@ -1,14 +1,3 @@
-// import { Stack } from "expo-router";
-
-// export default function NotificationLayout() {
-//   return (
-//     <Stack>
-//       <Stack.Screen name="index" options={{ title: "Notifications" }} />
-//     </Stack>
-//   );
-// }
-
-
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
