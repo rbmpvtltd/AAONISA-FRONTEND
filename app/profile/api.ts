@@ -118,7 +118,7 @@ const getToken = async () => {
 
 async function updateProfile(profileData:any, imageChanged:any) {
   try {
-    let base64Image = null; // ✅ default null
+    let base64Image = null;
     
     if (imageChanged && profileData.ProfilePicture) {
       base64Image = await convertToBase64Expo(profileData.ProfilePicture);
@@ -130,7 +130,7 @@ async function updateProfile(profileData:any, imageChanged:any) {
       bio: profileData.bio,
       url: profileData.url,
       imageChanged,
-      ProfilePicture: base64Image, // ✅ null if no image
+      ProfilePicture: base64Image, // null if no image
     };
 
     const token = await getToken();
@@ -170,22 +170,22 @@ async function GetProfileUsername(username: string) {
   return data;
 }
 
-async function GetCurrentUser() {
+ async function GetCurrentUser() {
   const token = await getToken();
-
   const config = {
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl('/users/profile/current');
+  const apiUrl = createApiUrl("/users/profile/current");
   const { data } = await axios.get(apiUrl, config);
-  return data;
+  console.log(data);
+  
+  return data?.userProfile; 
+  
 }
-
 async function SearchUserProfiel(query: string) {
   const token = await getToken();
 

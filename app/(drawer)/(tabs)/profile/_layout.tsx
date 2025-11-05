@@ -1,6 +1,5 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Stack } from "expo-router";
-import * as React from "react";
 import { StatusBar } from "react-native";
 
 export default function ProfileLayout() {
@@ -25,7 +24,7 @@ export default function ProfileLayout() {
         }}
       >
         <Stack.Screen
-          name="[id]"
+          name="[username]"
           options={{
             headerShown: false,
           }}

@@ -3,7 +3,7 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
 import { useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { logoutUser } from "../auth/api";
@@ -49,7 +49,7 @@ export default function CustomDrawer(props: any) {
             )}
             labelStyle={{ color: theme.text }}
             onPress={() => {
-              router.push("/(drawer)/(tabs)/profile/edit")
+              router.push("/profile/edit")
             }}
           />
 
