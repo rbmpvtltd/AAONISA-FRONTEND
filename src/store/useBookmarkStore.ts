@@ -24,71 +24,85 @@ interface BookmarkStore {
   saveToCategory: (categoryId: string) => void;
 
   setCategories: (fn: (prev: Category[]) => Category[]) => void;
-  getReelById: (reelId: string | string) => Reel | null;
+  getReelById: (reelId: string) => Reel | null;
 }
 
 export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
-  categories: [
-
-  ],
-
+  categories: [],
   panelVisible: false,
   selectedReel: null,
 
   openBookmarkPanel: (reel) =>
-    set({
-      selectedReel: reel,
-      panelVisible: true,
-    }),
+    set({ selectedReel: reel, panelVisible: true }),
 
   closePanel: () => set({ panelVisible: false }),
 
   addCategory: (name) => {
     set((state) => {
       const exists = state.categories.some(
-        c => c.name.trim().toLowerCase() === name.trim().toLowerCase()
+        (c) => c.name.trim().toLowerCase() === name.trim().toLowerCase()
       );
 
       if (exists) {
         console.warn("Category already exists!");
-        return state; // ❌ don't add duplicate
+        return state; // ❌ koi new id nahi banegi
       }
 
-      const newCat = { id: Date.now().toString(), name, reels: [] };
+      const newCategory = {
+        id: Date.now().toString(),
+        name,
+        reels: [],
+      };
 
       return {
-        categories: [...state.categories, newCat]
+        categories: [...state.categories, newCategory],
       };
     });
   },
-
 
   saveToCategory: (categoryId) => {
     const { selectedReel, categories } = get();
     if (!selectedReel) return;
 
-    const updated = categories.map((cat) =>
-      cat.id === categoryId
-        ? { ...cat, reels: [...cat.reels, selectedReel] }  // ✅ correct object
-        : cat
-    );
+    const updatedCategories = categories.map((cat) => {
+      if (cat.id !== categoryId) return cat;
+
+      // 🔥 check if reel already exists
+      const alreadySaved = cat.reels.some(r => r.uuid === selectedReel.uuid);
+      if (alreadySaved) {
+        console.warn("Reel already exists in this category!");
+        return cat; // ❌ dobara add nahi hogi
+      }
+
+      return { ...cat, reels: [...cat.reels, selectedReel] };
+    });
 
     set({
-      categories: updated,
+      categories: updatedCategories,
       panelVisible: false,
     });
   },
 
-  setCategories: (updateFn) =>
-    set((state) => ({
-      categories: updateFn(state.categories),
-    })),
-  getReelById: (reelId: string | undefined) => {
+  setCategories: (fn) => {
+    set((state) => {
+      const updated = fn(state.categories);
+
+      // ✅ remove duplicate category names (safety filter)
+      const unique = updated.filter(
+        (cat, index, arr) =>
+          index === arr.findIndex((c) => c.name.toLowerCase() === cat.name.toLowerCase())
+      );
+
+      return { categories: unique };
+    });
+  },
+
+  getReelById: (reelId) => {
     const { categories } = get();
-    for (let c of categories) {
-      const found = c.reels.find(r => r.uuid === reelId);
+    for (const cat of categories) {
+      const found = cat.reels.find((r) => r.uuid === reelId);
       if (found) return found;
     }
     return null;
-  }
+  },
 }));

@@ -23,7 +23,7 @@ import {
   View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
+import { likeDislike } from './api';
 
 const UserReelItem = ({
   item,
@@ -55,9 +55,8 @@ const UserReelItem = ({
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const { username, profilePicture } = useProfileStore();
   const [showOptions, setShowOptions] = React.useState(false);
-
-
-  const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
+  const videoKey = currentIndex === index ? `video-${item.uuid}-active` : `video-${item.uuid}`;
+  let reelId = item.uuid;
   // create player
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
@@ -158,7 +157,6 @@ const UserReelItem = ({
   const handlePressOut = () => {
     player.play();
   };
-
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <Pressable
@@ -169,7 +167,7 @@ const UserReelItem = ({
       >
         <VideoView
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-          key={`video-${item.id}-${index}`}
+          key={`video-${item.uuid}-${index}`}
           player={player}
           contentFit="cover"
           allowsFullscreen={false}
@@ -248,7 +246,7 @@ const UserReelItem = ({
           />
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {toggleLike(item.id);likeDislike(reelId)}}>
           <Ionicons
             name={item.isLiked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}

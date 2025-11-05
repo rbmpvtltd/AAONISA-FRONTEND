@@ -240,8 +240,47 @@ async function UnfollowUser(followingId: string) {
   return data;
 }
 
+
+const markViewed = async (storyId: string) => {
+    const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/view/addview');
+  // backend update
+  try {
+    await axios.post(apiUrl, { storyId }, config);
+  } catch (e) {
+    console.log("mark viewed failed", e);
+  }
+};
+
+const likeDislike = async (storyId: string) => {
+    const token = await getToken();
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/like/toggle');
+  // backend update
+  try {
+    await axios.post(apiUrl, { reel_id: storyId }, config);
+  } catch (e) {
+    console.log("like api failed", e);
+  }
+}
 export {
-  followUser, GetCurrentUser, GetProfileUsername, SearchUserProfiel,
+  followUser, GetCurrentUser, GetProfileUsername, likeDislike, markViewed, SearchUserProfiel,
   UnfollowUser, updateProfile
 };
 
