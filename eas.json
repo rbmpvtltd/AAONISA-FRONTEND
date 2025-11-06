@@ -16,7 +16,7 @@
            "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON"
         },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     }
   }
