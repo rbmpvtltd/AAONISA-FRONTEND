@@ -253,7 +253,7 @@
 
 // app/_layout.tsx
 import { useAuthStore } from "@/src/store/useAuthStore";
-import { registerForPushNotificationsAsync } from "@/src/utils/notification";
+import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Stack,
   useNavigationContainerRef,
@@ -342,18 +342,21 @@ export default function RootLayout() {
     if (token && !inAuthGroup) setNavigated(true);
   }, [initializing, token, segments, navigated, router, navigationRef]);
 
-React.useEffect(() => {
-    if (token) {
-      registerForPushNotificationsAsync()
-        .then((pushToken) => {
-          if (pushToken) {
-            console.log("Expo Push Token:", pushToken);
-          }
-        })
-        .catch((err) => console.log("Notification error:", err));
-    }
-  }, [token]);
+  /* -------------------------------------------------
+     5. Splash Screen
+     ------------------------------------------------- */
+  if (initializing) {
+    return (
+      <View style={styles.splash}>
+        <ActivityIndicator size="large" color="#1d9bf0" />
+        <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+      </View>
+    );
+  }
 
+  /* -------------------------------------------------
+     6. Main App Wrapped in GestureHandlerRootView
+     ------------------------------------------------- */
   return (
     <GestureHandlerRootView style={styles.container}>
       <QueryClientProvider client={queryClient}>
