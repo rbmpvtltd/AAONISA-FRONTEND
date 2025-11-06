@@ -14,7 +14,7 @@ export default {
       "bundleIdentifier": "com.anonymous.AaoNiSa"
     },
     "android": {
-       "googleServicesFile": "google-services.json",
+       "googleServicesFile": "./google-services.json",
        "useNextNotificationsApi": true,
       "permissions": [
         "android.permission.CAMERA",
