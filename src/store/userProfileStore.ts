@@ -109,6 +109,7 @@ interface ProfileState {
   setUserProfileInfo: (info: any) => void;
 
   username: string;
+  userId: string;
   name: string;
   bio: string;
   url : string,
@@ -121,6 +122,7 @@ interface ProfileState {
   views : number,
 
   setUsername: (username: string) => void;
+  setUserId: (username: string) => void;
   setName: (name: string) => void;
   setBio: (bio: string) => void;
   setUrl: (url: string) => void;
@@ -148,6 +150,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   setUserProfileInfo: (info) => set({ userProfileInfo: info }),
 
   username: "",
+  userId: "",
   name: "",
   bio: "",
   url : "",
@@ -160,6 +163,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   isFollowing: false,
 
   setUsername: (username) => set({ username }),
+  setUserId: (userId) => set({ userId }),
   setName: (name) => set({ name }),
   setBio: (bio) => set({ bio }),
   setProfilePicture: (url) => set({ profilePicture: url }),
@@ -252,6 +256,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
     resetProfile: () =>
         set({
             username: "",
+            // userId: "",
             name: "",
             bio: "",
             profilePicture: null,
