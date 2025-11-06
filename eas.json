@@ -11,15 +11,12 @@
       }
     },
     "production": {
-      "android": {
-        "buildType": "app-bundle",
         "node": "20.19.4",
-        "env" : {
+       "env" : {
            "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON"
         },
-        "android": {
-        "googleServicesFile": "google-services.json"
-      }
+      "android": {
+        "buildType": "app-bundle"
       }
     }
   }

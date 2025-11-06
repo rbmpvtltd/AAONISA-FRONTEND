@@ -1,4 +1,6 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { useReelsStore } from "@/src/store/useReelsStore";
+import { useThemeStore } from "@/src/store/useThemeStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { DrawerContentScrollView, DrawerItem } from "@react-navigation/drawer";
@@ -6,30 +8,31 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { logoutUser } from "../auth/api";
 
 export default function CustomDrawer(props: any) {
-  const theme = useAppTheme();
-  const [darkMode, setDarkMode] = useState(false);
+  // const theme = useAppTheme();
+  // const [darkMode, setDarkMode] = useState(false);
+
+
+const { theme: themeMode, toggleTheme } = useThemeStore();
+const theme = useAppTheme();
+
   const [onlineStatus, setOnlineStatus] = useState(true);
-  const [autoScroll, setAutoScroll] = useState(false);
+  const { autoScroll, setAutoScroll } = useReelsStore();
+
   const router = useRouter();
-
-  const handleLogout = async () => {
-    try {
-      const response = await logoutUser();
-
-      await AsyncStorage.removeItem("accessToken");
-      await AsyncStorage.removeItem("refreshToken");
-
-      Alert.alert("Logged out successfully!");
-
-      router.replace("/auth/login");
-    } catch (error) {
-      console.error("Logout Error:", error);
-      Alert.alert("Logout failed, please try again!");
-    }
-  };
+  
+const handleLogout = async () => {
+  try {
+    await AsyncStorage.removeItem("accessToken");
+    await AsyncStorage.removeItem("refreshToken");
+    Alert.alert("Logged out successfully!");
+    router.replace("/auth/login");
+  } catch (error) {
+     console.error("Logout Error:", error);
+    Alert.alert("Logout failed, please try again!");
+  }
+};
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -77,7 +80,7 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="bookmark-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedCategories")}}
+            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedScreen")}}
           />
 
           <DrawerItem
@@ -102,7 +105,7 @@ export default function CustomDrawer(props: any) {
             <Text style={{ color: theme.text, flex: 1, marginLeft: 15 }}>
               Dark Mode
             </Text>
-            <Switch value={darkMode} onValueChange={setDarkMode} />
+            <Switch value={themeMode === "dark"} onValueChange={toggleTheme} />
           </View>
 
           {/* Online Status */}

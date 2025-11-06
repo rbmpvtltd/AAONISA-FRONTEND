@@ -3,6 +3,7 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons } from "@expo/vector-icons";
 import React, { useState } from "react";
 import {
+  ActivityIndicator,
   KeyboardAvoidingView,
   Platform,
   ScrollView,
@@ -304,8 +305,8 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
         {isUploading && (
       <View style={styles.loadingOverlay}>
         <View style={[styles.loadingBox,{backgroundColor :theme.background}]}>
-          <Ionicons name="cloud-upload-outline" size={50} color={theme.buttonBg} />
-          {/* <ActivityIndicator size="large" color={theme.buttonBg} /> */}
+          {/* <Ionicons name="cloud-upload-outline" size={50} color={theme.buttonBg} /> */}
+          <ActivityIndicator size="large" color={theme.buttonBg} />
           <Text style={[styles.loadingText, { color: theme.text }]}>Uploding...</Text>
         </View>
       </View>

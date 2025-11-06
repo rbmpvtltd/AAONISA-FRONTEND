@@ -36,39 +36,55 @@
 
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { router } from "expo-router";
-import React, { useCallback } from "react";
+import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const StoryList = ({ theme }: { theme: any }) => {
-  const { userStory, markStoryViewed } = useStoryStore();
+  const { userStories } = useStoryStore();
 
-  const handlePress = useCallback(() => {
-    if (!userStory) return;
-    markStoryViewed(userStory.stories[0].id);
-    router.push(`/story/${userStory.stories[0].id}`);
-  }, [userStory]);
+  if (!userStories || userStories.length === 0) return null;
 
-  if (!userStory) return null;
+  const handlePress = (userId: string) => {
+    const user = userStories.find(u => u.username === userId);
+    if (!user) return;
+
+    // find first unviewed story, otherwise open first story
+    const story = user.stories.find(s => !s.viewed) || user.stories[0];
+    console.log(story);
+    router.push(`/story/${story.id}`);
+  };
 
   return (
-    <TouchableOpacity style={styles.storyContainer} onPress={handlePress}>
-      <View
-        style={[
-          styles.storyBorder,
-          { borderColor: userStory.stories.some((s) => !s.viewed) ? "#ff8501" : "#999" },
-        ]}
-      >
-        <Image source={{ uri: userStory.profilePic }} style={styles.storyImage} />
-      </View>
-      <Text style={[styles.storyUsername, { color: theme.text }]} numberOfLines={1}>
-        {userStory.username}
-      </Text>
-    </TouchableOpacity>
+    <View style={{ flexDirection: "row", paddingHorizontal: 10 }}>
+      {userStories.map((user) => {
+        const seen = !user.stories.some((s) => !s.viewed); // all viewed?
+        
+        return (
+          <TouchableOpacity
+            key={user.username}
+            style={styles.storyContainer}
+            onPress={() => handlePress(user.username)}
+          >
+            <View
+              style={[
+                styles.storyBorder,
+                { borderColor: seen ? "#999" : "#ff8501" },
+              ]}
+            >
+              <Image source={{ uri: user.profilePic }} style={styles.storyImage} />
+            </View>
+            <Text style={[styles.storyUsername, { color: theme.text }]} numberOfLines={1}>
+              {user.username}
+            </Text>
+          </TouchableOpacity>
+        );
+      })}
+    </View>
   );
 };
 
 const styles = StyleSheet.create({
-  storyContainer: { alignItems: "center", marginHorizontal: 15, width: 70 },
+  storyContainer: { alignItems: "center", marginHorizontal: 10, width: 70 },
   storyBorder: { borderWidth: 3, padding: 2, borderRadius: 40, marginBottom: 4 },
   storyImage: { width: 60, height: 60, borderRadius: 30 },
   storyUsername: { fontSize: 12, textAlign: "center" },

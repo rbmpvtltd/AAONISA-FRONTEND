@@ -2,8 +2,9 @@ import React, { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
 interface Reel {
-  id: string;
+  uuid: string;
   thumbnail: string;
+  videoUrl: string;
 }
 
 interface Category {

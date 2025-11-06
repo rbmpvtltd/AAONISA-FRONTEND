@@ -255,7 +255,6 @@
 
 // ==============================================================
 
-// src/store/useReelsStore.ts
 import * as Linking from 'expo-linking';
 import { Animated } from 'react-native';
 import { create } from 'zustand';
@@ -281,6 +280,7 @@ interface ReelsState {
   isMuted: boolean;
   showIcon: boolean;
   fadeAnim: Animated.Value;
+    autoScroll: boolean;                 // NEW: auto scroll toggle
 
   // Actions
   toggleLike: (id: string) => void;
@@ -290,6 +290,8 @@ interface ReelsState {
   setActiveTab: (tab: 'Followings' | 'News' | 'Explore') => void;
   toggleMute: () => void;
   setShowIcon: (val: boolean) => void;
+  setAutoScroll: (value: boolean) => void; // NEW: setter function
+
   
   //   NEW: URL Management Functions
   updateReelURL: (reelId: string) => void;
@@ -484,6 +486,7 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   isMuted: false,
   showIcon: false,
   fadeAnim: new Animated.Value(0),
+   autoScroll: false,    
 
   toggleLike: (id: string) =>
     set((state) => ({
@@ -516,15 +519,16 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleMute: () => set({ isMuted: !get().isMuted }),
   setShowIcon: (val: boolean) => set({ showIcon: val }),
+    setAutoScroll: (value: boolean) => set({ autoScroll: value }), 
 
   //  NEW: URL Update Function
   updateReelURL: (reelId: string) => {
     // Expo Router ke through URL update karo
     const currentState = get();
-    console.log('URL Updated to Reel:', reelId);
+    // console.log('URL Updated to Reel:', reelId);
     
     // Deep link URL create karo (for sharing purposes)
     const deepLinkUrl = Linking.createURL(`/reels/${reelId}`);
-    console.log('Deep Link:', deepLinkUrl);
+    // console.log('Deep Link:', deepLinkUrl);
   },
 }));

@@ -1,10 +1,11 @@
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
+import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useIsFocused } from '@react-navigation/native';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef } from 'react';
-
 import {
   Animated,
   FlatList,
@@ -35,13 +36,14 @@ const ReelItem = ({
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
 const [showOptions, setShowOptions] = React.useState(false);
-
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
   const rightActionsBottom = SCREEN_HEIGHT * 0.12;
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
-
+   const {
+      openBookmarkPanel,
+    } = useBookmarkStore();
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
 
   // create player
@@ -202,11 +204,13 @@ const [showOptions, setShowOptions] = React.useState(false);
  
   <BottomDrawer
   visible={showOptions}
-  onClose={() => setShowOptions(false)}
-  onSave={() => {router.push("/(drawer)/(tabs)/reels/bookmark"); setShowOptions(false)}}
+  onClose={() =>{setShowOptions(false)}}
+  onSave={() => {openBookmarkPanel(item.id); setShowOptions(false)}}
   onReport={() => console.log("Reported")}
   onShare={() => console.log("Shared")}
 />
+
+
     
     </View>
   );
@@ -233,7 +237,33 @@ const ReelsFeed = () => {
     setShowIcon,
     fadeAnim,
     updateReelURL, //NEW: URL update function
+    autoScroll,
   } = useReelsStore();
+
+  // auto scroll 
+useEffect(() => {
+  let interval: any;
+
+  if (autoScroll && reels.length > 0) {
+    interval = setInterval(() => {
+      const nextIndex =
+        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+      setCurrentIndex(nextIndex);
+
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+
+      updateURL(nextIndex);
+    }, 10000);
+  }
+
+  return () => clearInterval(interval);
+}, [autoScroll, reels, currentIndex]);
+
+
 
   // NEW: URL update function
   const updateURL = (index: number) => {
@@ -348,6 +378,8 @@ const ReelsFeed = () => {
           }
         }}
       />
+      <BookmarkPanel
+      /> 
     </View>
   );
 };
