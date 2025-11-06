@@ -194,7 +194,6 @@
 // export default ExploreScreen;
 
 
-// app/(drawer)/(tabs)/explore/index.tsx
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -213,6 +212,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { SearchUserProfiel } from "../../../profile/api";
 
 const { width } = Dimensions.get("window");
@@ -270,8 +270,8 @@ export default function ExploreScreen() {
   }, []);
 
   const clearSearch = () => setSearchQuery("");
-
-  return (
+ return (
+    <SafeAreaView style={{flex:1}} edges={["top"]}>
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* SEARCH BAR */}
       <View style={styles.searchContainer}>
@@ -338,6 +338,7 @@ export default function ExploreScreen() {
         </ScrollView>
       )}
     </View>
+    </SafeAreaView>
   );
 }
 

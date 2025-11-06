@@ -17,6 +17,7 @@ import {
     TouchableOpacity,
     View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 const { width, height } = Dimensions.get("window");
 
 interface ProfileData {
@@ -111,7 +112,7 @@ const UserEditProfile = () => {
     const styles = createStyles(theme);
 
     return (
-        // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
         <KeyboardAvoidingView
             style={{ flex: 1, backgroundColor: theme.background }}
             behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -239,7 +240,7 @@ const UserEditProfile = () => {
                 </TouchableOpacity>
             </ScrollView>
         </KeyboardAvoidingView>
-        // {/* </SafeAreaView> */}
+        // </SafeAreaView>
     );
 };
 
@@ -365,4 +366,3 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
     });
 
 export default UserEditProfile;
-
