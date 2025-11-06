@@ -366,5 +366,3 @@ const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
     });
 
 export default UserEditProfile;
-
-//edit
