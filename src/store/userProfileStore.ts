@@ -216,7 +216,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
 //   }),
 
   toggleLike: (id) =>
-    set((state) => ({
+    set((state) => ({ 
       videos: state.videos.map((video) => {
         if (video.uuid === id) {
           const isLiked = !video.isLiked;
