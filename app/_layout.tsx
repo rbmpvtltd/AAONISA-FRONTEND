@@ -1,51 +1,4 @@
-// // // import { useAuthStore } from "@/src/store/useAuthStore";
-// // // import { Stack, useRouter, useSegments } from "expo-router";
-// // // import React from "react";
-// // // import { StatusBar } from "react-native";
 
-// // // export default function RootLayout() {
-// // //   const router = useRouter();
-// // //   const segments = useSegments();
-// // //   const { token, getToken, setToken } = useAuthStore();
-// // //   const [loading, setLoading] = React.useState(true);
-// // //   const [navigated, setNavigated] = React.useState(false); 
-
-// // //   // 🔹 Step 1: Load token on app start
-// // //   React.useEffect(() => {
-// // //     const init = async () => {
-// // //       const storedToken = await getToken();
-// // //       if (storedToken) {
-// // //         setToken(storedToken);
-// // //       }
-// // //       setLoading(false);
-// // //     };
-// // //     init();
-// // //   }, []);
-
-// // //   // 🔹 Step 2: Handle navigation only once
-// // //   React.useEffect(() => {
-// // //     if (loading || navigated) return;
-
-// // //     const inAuth = segments[0] === "auth";
-
-// // //     if (!token && !inAuth) {
-// // //       setNavigated(true);
-// // //       router.replace("/auth/login");
-// // //     } else if (token && inAuth) {
-// // //       setNavigated(true);
-// // //       router.replace("/(drawer)/(tabs)");
-// // //     } else if (token && !inAuth) {
-// // //       setNavigated(true); // already logged in and on valid page
-// // //     }
-// // //   }, [loading, token, segments]);
-
-// // //   return (
-// // //   <>
-// // // <StatusBar  backgroundColor="#fff" />
-// // //   <Stack screenOptions={{ headerShown: false }} />
-// // // </>
-// // //   );
-// // // }
 
 // // import { useAuthStore } from "@/src/store/useAuthStore";
 // // import { QueryClient, QueryClientProvider } from '@tanstack/react-query';
@@ -115,9 +68,9 @@
 // //     </>
 // //   );
 // // }
+// ==================================================================================
 
-
-// // app/_layout.tsx
+// import { useAuthStore } from "@/src/store/useAuthStore";
 // import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 // import {
 //   Stack,
@@ -127,8 +80,7 @@
 // } from "expo-router";
 // import React from "react";
 // import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
-
-// import { useAuthStore } from "@/src/store/useAuthStore";
+// import { GestureHandlerRootView } from "react-native-gesture-handler";
 
 // /* -------------------------------------------------
 //    1. TanStack Query Client (Global Cache)
@@ -137,8 +89,8 @@
 //   defaultOptions: {
 //     queries: {
 //       retry: 1,
-//       staleTime: 5 * 60 * 1000,     // 5 min — data fresh
-//       gcTime: 10 * 60 * 1000,       // REPLACE cacheTime with gcTime
+//       staleTime: 5 * 60 * 1000,
+//       gcTime: 10 * 60 * 1000,
 //       refetchOnMount: false,
 //       refetchOnWindowFocus: false,
 //     },
@@ -155,23 +107,19 @@
 //   const router = useRouter();
 //   const segments = useSegments();
 //   const navigationRef = useNavigationContainerRef();
-
 //   const { token, getToken, setToken } = useAuthStore();
 
-//   // UI State
 //   const [initializing, setInitializing] = React.useState(true);
 //   const [navigated, setNavigated] = React.useState(false);
 
 //   /* -------------------------------------------------
-//      3. Load token from SecureStore on first mount
+//      3. Load token from SecureStore
 //      ------------------------------------------------- */
 //   React.useEffect(() => {
 //     (async () => {
 //       try {
 //         const storedToken = await getToken();
-//         if (storedToken) {
-//           setToken(storedToken);
-//         }
+//         if (storedToken) setToken(storedToken);
 //       } catch (error) {
 //         console.warn("Failed to load token:", error);
 //       } finally {
@@ -181,26 +129,23 @@
 //   }, [getToken, setToken]);
 
 //   /* -------------------------------------------------
-//      4. Auth-aware routing (after token loaded)
+//      4. Auth-aware routing
 //      ------------------------------------------------- */
 //   React.useEffect(() => {
 //     if (initializing || navigated) return;
 
 //     const inAuthGroup = segments[0] === "auth";
 
-//     // CASE 1: No token → Force login
 //     if (!token && !inAuthGroup) {
 //       setNavigated(true);
 //       router.replace("/auth/login");
 //       return;
 //     }
 
-//     // CASE 2: Token exists but still in auth → Go home
 //     if (token && inAuthGroup) {
 //       setNavigated(true);
 //       router.replace("/(drawer)/(tabs)");
 
-//       // Reset stack so back button can't go to login
 //       setTimeout(() => {
 //         if (navigationRef.isReady()) {
 //           navigationRef.resetRoot({
@@ -212,14 +157,11 @@
 //       return;
 //     }
 
-//     // CASE 3: Token + not in auth → All good
-//     if (token && !inAuthGroup) {
-//       setNavigated(true);
-//     }
+//     if (token && !inAuthGroup) setNavigated(true);
 //   }, [initializing, token, segments, navigated, router, navigationRef]);
 
 //   /* -------------------------------------------------
-//      5. Render: Splash → App
+//      5. Splash Screen
 //      ------------------------------------------------- */
 //   if (initializing) {
 //     return (
@@ -230,18 +172,26 @@
 //     );
 //   }
 
+//   /* -------------------------------------------------
+//      6. Main App Wrapped in GestureHandlerRootView
+//      ------------------------------------------------- */
 //   return (
-//     <QueryClientProvider client={queryClient}>
-//       <StatusBar barStyle="dark-content" backgroundColor="#fff" />
-//       <Stack screenOptions={{ headerShown: false }} />
-//     </QueryClientProvider>
+//     <GestureHandlerRootView style={styles.container}>
+//       <QueryClientProvider client={queryClient}>
+//         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
+//         <Stack screenOptions={{ headerShown: false }} />
+//       </QueryClientProvider>
+//     </GestureHandlerRootView>
 //   );
 // }
 
 // /* -------------------------------------------------
-//    6. Splash Screen Styles
+//    7. Styles
 //    ------------------------------------------------- */
 // const styles = StyleSheet.create({
+//   container: {
+//     flex: 1,
+//   },
 //   splash: {
 //     flex: 1,
 //     backgroundColor: "#fff",
@@ -250,9 +200,11 @@
 //   },
 // });
 
+//===========================================================
 
-// app/_layout.tsx
+
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { registerForPushNotificationsAsync } from "@/src/utils/notification";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Stack,
@@ -343,7 +295,34 @@ export default function RootLayout() {
   }, [initializing, token, segments, navigated, router, navigationRef]);
 
   /* -------------------------------------------------
-     5. Splash Screen
+     5. Ask Notification Permission After Login
+     ------------------------------------------------- */
+  React.useEffect(() => {
+    if (token) {
+      (async () => {
+        try {
+          const pushToken = await registerForPushNotificationsAsync();
+          if (pushToken) {
+            console.log("========================== PushToken ========================== ");
+            console.log("Expo Push Token:", pushToken);
+            console.log("============================================");
+
+            // 👉 optional: send token to backend here
+            // await fetch(`${API_URL}/save-device-token`, {
+            //   method: 'POST',
+            //   headers: { 'Content-Type': 'application/json' },
+            //   body: JSON.stringify({ pushToken, userToken: token }),
+            // });
+          }
+        } catch (error) {
+          console.error("Notification permission error:", error);
+        }
+      })();
+    }
+  }, [token]);
+
+  /* -------------------------------------------------
+     6. Splash Screen
      ------------------------------------------------- */
   if (initializing) {
     return (
@@ -355,7 +334,7 @@ export default function RootLayout() {
   }
 
   /* -------------------------------------------------
-     6. Main App Wrapped in GestureHandlerRootView
+     7. Main App Wrapped in GestureHandlerRootView
      ------------------------------------------------- */
   return (
     <GestureHandlerRootView style={styles.container}>
@@ -368,7 +347,7 @@ export default function RootLayout() {
 }
 
 /* -------------------------------------------------
-   7. Styles
+   8. Styles
    ------------------------------------------------- */
 const styles = StyleSheet.create({
   container: {
