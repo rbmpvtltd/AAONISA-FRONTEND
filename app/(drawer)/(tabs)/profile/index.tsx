@@ -69,7 +69,8 @@ import { PostGrid, ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profil
 import { GetCurrentUser, GetProfileUsername } from "@/app/profile/api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, SafeAreaView, View } from "react-native";
+import { ActivityIndicator, View } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyProfileScreen() {
   const theme = useAppTheme();
@@ -96,7 +97,7 @@ export default function MyProfileScreen() {
   }
 
   return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
       <TopHeader
         userName={profile?.username}
         theme={theme}
