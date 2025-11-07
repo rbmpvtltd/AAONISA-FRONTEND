@@ -108,12 +108,12 @@ const FollowingScreen = () => {
             styles.followButton,
             {
               backgroundColor: theme.buttonBg ,
-              opacity: unfollowMutation.isPending ? 0.6 : 1,
+              opacity: unfollowMutation.isPending ? 0 : 1,
             },
           ]}
         >
           <Text style={[styles.followButtonText, { color: theme.buttonText || '#fff' }]}>
-            {unfollowMutation.isPending ? '...' : 'Unfollow'}
+            {unfollowMutation.isPending ? 'Unfollow' : 'Unfollow'}
           </Text>
         </TouchableOpacity>
       </View>

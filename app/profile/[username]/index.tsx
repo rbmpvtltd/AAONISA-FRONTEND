@@ -54,7 +54,10 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     const followingsCount = profile.followings?.length || 0;
 
     // if your backend doesn’t send posts/likes/views yet
-    const postsCount = profile.posts?.length || 0;
+    const postsCount = profile.videos?.length || 0;
+    console.log("video", postsCount);
+    
+
     const likes = profile.likes || 0;
     const views = profile.views || 0;
 
@@ -199,7 +202,7 @@ export const UserInfo: React.FC<{
 
             {/* 🔹 Follow / Unfollow Button */}
             {!isOwnProfile && (
-                <TouchableOpacity onPress={onFollowToggle} style={[styles.followButton, { backgroundColor: isFollowing ? "#555" : theme.buttonBg }]}>
+                <TouchableOpacity onPress={onFollowToggle} style={[styles.followButton, { backgroundColor: isFollowing ? theme.buttonBg : theme.buttonBg }]}>
                     <Text style={{ color: "#fff", fontWeight: "600" }}>
                         {isFollowing ? "Following" : "Follow"}
                     </Text>
@@ -237,7 +240,7 @@ const VideoItem = ({ videoUrl, id }: { videoUrl: string, id: string }) => {
             activeOpacity={0.9}
             onPress={() => router.push({
                 pathname: "/profile/userReelsFeed",
-                params: { id }
+                params: { id : id}
             })} //  ID send ho rahi hai
 
         >
@@ -271,7 +274,7 @@ export const PostGrid: React.FC<{ videos: any[] }> = ({ videos }) => {
             numColumns={3}
             renderItem={({ item }) => {
                 if (item.videoUrl) {
-                    return <VideoItem videoUrl={item.videoUrl} id={item.id} />;
+                    return <VideoItem videoUrl={item.videoUrl} id={item.uuid} />;
                 }
 
                 return (
