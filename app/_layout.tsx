@@ -205,6 +205,7 @@
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { registerForPushNotificationsAsync } from "@/src/utils/notification";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
 import {
   Stack,
@@ -262,8 +263,53 @@ export default function RootLayout() {
     })();
   }, [getToken, setToken]);
 
+
   /* -------------------------------------------------
-     4. Auth-aware routing
+     4. Ask Notification Permission After Login
+   ------------------------------------------------- */
+  React.useEffect(() => {
+    (async () => {
+      try {
+        const pushToken = await registerForPushNotificationsAsync();
+        console.log("========================== PushToken =========================");
+        console.log("Expo Push Token:", pushToken);
+        console.log("============================================");
+
+        if (pushToken) {
+          console.log("Expo Push Token:", pushToken);
+
+          // Save pushToken to AsyncStorage
+          await AsyncStorage.setItem("pushToken", pushToken);
+
+          console.log("Push token saved to AsyncStorage");
+        } else {
+          console.log("Push token not received");
+        }
+      } catch (error) {
+        console.error("Error requesting notification permission:", error);
+      }
+    })();
+  }, []);
+
+  // React.useEffect(() => {
+  //   if (token) {
+  //     (async () => {
+  //       try {
+  //         const pushToken = await registerForPushNotificationsAsync();
+  //         if (pushToken) {
+  //           console.log("========================== PushToken ========================== ");
+  //           console.log("Expo Push Token:", pushToken);
+  //           console.log("============================================");
+  //         }
+  //       } catch (error) {
+  //         console.error("Notification permission error:", error);
+  //       }
+  //     })();
+  //   }
+  // }, [token]);
+
+  /* -------------------------------------------------
+     5. Auth-aware routing
      ------------------------------------------------- */
   React.useEffect(() => {
     if (initializing || navigated) return;
@@ -293,33 +339,6 @@ export default function RootLayout() {
 
     if (token && !inAuthGroup) setNavigated(true);
   }, [initializing, token, segments, navigated, router, navigationRef]);
-
-  /* -------------------------------------------------
-     5. Ask Notification Permission After Login
-     ------------------------------------------------- */
-  React.useEffect(() => {
-    if (token) {
-      (async () => {
-        try {
-          const pushToken = await registerForPushNotificationsAsync();
-          if (pushToken) {
-            console.log("========================== PushToken ========================== ");
-            console.log("Expo Push Token:", pushToken);
-            console.log("============================================");
-
-            // 👉 optional: send token to backend here
-            // await fetch(`${API_URL}/save-device-token`, {
-            //   method: 'POST',
-            //   headers: { 'Content-Type': 'application/json' },
-            //   body: JSON.stringify({ pushToken, userToken: token }),
-            // });
-          }
-        } catch (error) {
-          console.error("Notification permission error:", error);
-        }
-      })();
-    }
-  }, [token]);
 
   /* -------------------------------------------------
      6. Splash Screen
