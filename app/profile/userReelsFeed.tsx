@@ -216,24 +216,6 @@ useEffect(() => {
         )}
       </Pressable>
 
-      {/* Top Bar */}
-      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
-        <View style={styles.tabsContainer}>
-          {['Followings', 'News', 'Explore'].map((tab) => (
-            <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View> */}
-
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
