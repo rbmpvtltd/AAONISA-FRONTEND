@@ -52,6 +52,7 @@ const lightTheme = {
   googleBg: "#DB4437",
   link: "#0066cc",
   placeholder: "#666",
+    searchBg : "#66666623",
   overlay: "rgba(0,0,0,0.4)",
   userImage:
     "https://www.shutterstock.com/image-vector/avatar-gender-neutral-silhouette-vector-600nw-2470054311jpg",
@@ -69,6 +70,7 @@ const darkTheme = {
   googleBg: "#DB4437",
   link: "#66aaff",
   placeholder: "#aaa",
+   searchBg : "#1C1C1C",
   overlay: "rgba(255,255,255,0.15)",
   userImage:
     "https://i.pinimg.com/564x/57/00/c0/5700c04197ee9a4372a35ef16eb78f4e.jpg",

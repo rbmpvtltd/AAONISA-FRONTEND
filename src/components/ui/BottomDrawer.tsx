@@ -1,4 +1,5 @@
-// import React, { useEffect, useRef } from "react";
+// import { useAppTheme } from "@/src/constants/themeHelper";
+// import { useEffect, useRef } from "react";
 // import {
 //   Animated,
 //   Dimensions,
@@ -13,6 +14,8 @@
 
 // const BottomDrawer = ({ visible, onClose, onSave, onReport, onShare }: any) => {
 //   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
+
+//   const theme = useAppTheme();
 
 //   useEffect(() => {
 //     if (visible) {
@@ -33,28 +36,34 @@
 //   if (!visible) return null;
 
 //   return (
-//     <View style={styles.overlay}>
+//     <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
 //       <TouchableOpacity style={styles.overlayBackground} onPress={onClose} />
 
 //       <Animated.View
 //         style={[
 //           styles.bottomDrawer,
-//           { transform: [{ translateY: slideAnim }] },
+//           { 
+//             backgroundColor: theme.background, 
+//             transform: [{ translateY: slideAnim }],
+//             borderTopColor: theme.inputBorder
+//           },
 //         ]}
 //       >
 //         <TouchableOpacity style={styles.optionButton} onPress={onSave}>
-//           <Ionicons name="bookmark-outline" size={22} color="#fff" />
-//           <Text style={styles.optionText}>Save</Text>
+//           <Ionicons name="bookmark-outline" size={22} color={theme.text} />
+//           <Text style={[styles.optionText, { color: theme.text }]}>Save</Text>
 //         </TouchableOpacity>
 
 //         <TouchableOpacity style={styles.optionButton} onPress={onReport}>
-//           <Ionicons name="alert-circle-outline" size={22} color="#fff" />
-//           <Text style={styles.optionText}>Report</Text>
+//           <Ionicons name="alert-circle-outline" size={22} color={theme.text} />
+//           <Text style={[styles.optionText, { color: theme.text }]}>Report</Text>
 //         </TouchableOpacity>
 
 //         <TouchableOpacity style={styles.optionButton} onPress={onShare}>
-//           <Ionicons name="share-social-outline" size={22} color="#fff" />
-//           <Text style={styles.optionText}>Share Video</Text>
+//           <Ionicons name="share-social-outline" size={22} color={theme.text} />
+//           <Text style={[styles.optionText, { color: theme.text }]}>
+//             Share Video
+//           </Text>
 //         </TouchableOpacity>
 //       </Animated.View>
 //     </View>
@@ -67,28 +76,25 @@
 //     top: 0,
 //     left: 0,
 //     right: 0,
-//     bottom: 90,
+//     bottom: 70,
 //     justifyContent: "flex-end",
-//     backgroundColor: "rgba(0,0,0,0.5)",
 //     zIndex: 999,
 //   },
 //   overlayBackground: { flex: 1 },
 //   bottomDrawer: {
-//     backgroundColor: "#1a1a1a",
 //     borderTopLeftRadius: 16,
 //     borderTopRightRadius: 16,
 //     paddingVertical: 20,
 //     paddingHorizontal: 20,
+//     borderTopWidth: 0.5,
 //   },
 //   optionButton: {
 //     flexDirection: "row",
 //     alignItems: "center",
 //     paddingVertical: 12,
 //     borderBottomWidth: 0.4,
-//     borderBottomColor: "#333",
 //   },
 //   optionText: {
-//     color: "#fff",
 //     fontSize: 16,
 //     marginLeft: 12,
 //   },
@@ -96,12 +102,20 @@
 
 // export default BottomDrawer;
 
+// ==========================================================
 
 import { useAppTheme } from "@/src/constants/themeHelper";
-import React, { useEffect, useRef } from "react";
+import * as Clipboard from "expo-clipboard";
+import * as FileSystem from "expo-file-system";
+import * as MediaLibrary from "expo-media-library";
+import { useEffect, useRef, useState } from "react";
+import { Alert } from "react-native";
+
 import {
   Animated,
   Dimensions,
+  Linking,
+  Share,
   StyleSheet,
   Text,
   TouchableOpacity,
@@ -111,10 +125,33 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const BottomDrawer = ({ visible, onClose, onSave, onReport, onShare }: any) => {
+const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl }: any) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
-
   const theme = useAppTheme();
+  const [showSharePanel, setShowSharePanel] = useState(false);
+
+
+  const availablePlatforms = [
+    { name: 'WhatsApp', urlScheme: 'whatsapp://send?text=', color: '#25D366', icon: 'logo-whatsapp' },
+    { name: 'Telegram', urlScheme: 'tg://msg?text=', color: '#229ED9', icon: 'send-outline' },
+    { name: 'Facebook', urlScheme: 'fb://facewebmodal/f?href=', color: '#1877F2', icon: 'logo-facebook' },
+    { name: 'Instagram', urlScheme: 'instagram://share?text=', color: '#C13584', icon: 'logo-instagram' },
+  ];
+
+  const [activePlatforms, setActivePlatforms] = useState<any[]>([]);
+
+  useEffect(() => {
+    const checkApps = async () => {
+      const available: any[] = [];
+      for (let platform of availablePlatforms) {
+        const canOpen = await Linking.canOpenURL(platform.urlScheme);
+        if (canOpen) available.push(platform);
+      }
+      setActivePlatforms(available);
+    };
+
+    checkApps();
+  }, []);
 
   useEffect(() => {
     if (visible) {
@@ -134,6 +171,73 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onShare }: any) => {
 
   if (!visible) return null;
 
+  const handleCopyLink = async () => {
+    await Clipboard.setStringAsync(reelUrl);
+    alert("Link copied to clipboard!");
+  };
+
+  const handleSharePlatform = async (platform: string) => {
+    const encodedUrl = encodeURIComponent(reelUrl);
+
+    let url = "";
+
+    switch (platform) {
+      case "whatsapp":
+        url = `whatsapp://send?text=${encodedUrl}`;
+        break;
+      case "telegram":
+        url = `tg://msg?text=${encodedUrl}`;
+        break;
+      case "facebook":
+        url = `fb://facewebmodal/f?href=https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+        break;
+      case "instagram":
+        url = `instagram://share?text=${encodedUrl}`;
+        break;
+      default:
+        await Share.share({
+          message: `Check this reel: ${reelUrl}`,
+        });
+        return;
+    }
+
+    try {
+      const supported = await Linking.canOpenURL(url);
+      if (supported) {
+        await Linking.openURL(url);
+      } else {
+        alert(`${platform} app is not installed!`);
+      }
+    } catch (error) {
+      console.log("Error opening app:", error);
+    }
+  };
+
+
+  const handleDownloadReel = async () => {
+    try {
+      const { status } = await MediaLibrary.requestPermissionsAsync();
+      if (status !== "granted") {
+        alert("Permission to access gallery is required!");
+        return;
+      }
+
+      const fileUri = FileSystem.documentDirectory + "reel.mp4";
+      const downloadResumable = FileSystem.createDownloadResumable(
+        reelUrl,
+        fileUri
+      );
+
+      const { uri } = (await downloadResumable.downloadAsync())!;
+      const asset = await MediaLibrary.createAssetAsync(uri);
+      await MediaLibrary.createAlbumAsync("Download", asset, false);
+      Alert.alert("Download complete!", "Video saved to gallery 🎉");
+    } catch (error) {
+      console.log("Download error:", error);
+      Alert.alert("Error", "Failed to download the video.");
+    }
+  };
+
   return (
     <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
       <TouchableOpacity style={styles.overlayBackground} onPress={onClose} />
@@ -141,29 +245,94 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onShare }: any) => {
       <Animated.View
         style={[
           styles.bottomDrawer,
-          { 
-            backgroundColor: theme.background, 
+          {
+            backgroundColor: theme.background,
             transform: [{ translateY: slideAnim }],
-            borderTopColor: theme.inputBorder
+            borderTopColor: theme.inputBorder,
           },
         ]}
       >
-        <TouchableOpacity style={styles.optionButton} onPress={onSave}>
-          <Ionicons name="bookmark-outline" size={22} color={theme.text} />
-          <Text style={[styles.optionText, { color: theme.text }]}>Save</Text>
-        </TouchableOpacity>
+        {!showSharePanel ? (
+          <>
+            <TouchableOpacity style={styles.optionButton} onPress={onSave}>
+              <Ionicons name="bookmark-outline" size={22} color={theme.text} />
+              <Text style={[styles.optionText, { color: theme.text }]}>
+                Save
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionButton} onPress={onReport}>
-          <Ionicons name="alert-circle-outline" size={22} color={theme.text} />
-          <Text style={[styles.optionText, { color: theme.text }]}>Report</Text>
-        </TouchableOpacity>
+            <TouchableOpacity style={styles.optionButton} onPress={onReport}>
+              <Ionicons
+                name="alert-circle-outline"
+                size={22}
+                color={theme.text}
+              />
+              <Text style={[styles.optionText, { color: theme.text }]}>
+                Report
+              </Text>
+            </TouchableOpacity>
 
-        <TouchableOpacity style={styles.optionButton} onPress={onShare}>
-          <Ionicons name="share-social-outline" size={22} color={theme.text} />
-          <Text style={[styles.optionText, { color: theme.text }]}>
-            Share Video
-          </Text>
-        </TouchableOpacity>
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={() => setShowSharePanel(true)}
+            >
+              <Ionicons
+                name="share-social-outline"
+                size={22}
+                color={theme.text}
+              />
+              <Text style={[styles.optionText, { color: theme.text }]}>
+                Share Video
+              </Text>
+            </TouchableOpacity>
+          </>
+        ) : (
+          <View>
+            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 15, }}>
+              <TouchableOpacity onPress={() => setShowSharePanel(false)}>
+                <Ionicons name="arrow-back" size={24} color={theme.text} style={{ marginRight: 8}} />
+              </TouchableOpacity>
+
+              <Text style={[styles.shareTitle, { color: theme.text }]}>Share Reel</Text>
+            </View>
+
+
+            <TouchableOpacity
+              style={styles.optionButton}
+              onPress={handleCopyLink}
+            >
+              <Ionicons name="copy-outline" size={22} color={theme.text} />
+              <Text style={[styles.optionText, { color: theme.text }]}>
+                Copy Link
+              </Text>
+            </TouchableOpacity>
+
+            <View style={styles.socialRow}>
+              {activePlatforms.map((platform) => (
+                <TouchableOpacity
+                  key={platform.name}
+                  style={styles.socialBtn}
+                  onPress={() => Linking.openURL(platform.urlScheme + encodeURIComponent(reelUrl))}
+                >
+                  <Ionicons name={platform.icon} size={30} color={platform.color} />
+                </TouchableOpacity>
+              ))}
+              <TouchableOpacity
+                style={styles.socialBtn}
+                onPress={() => handleSharePlatform("other")}
+              >
+                <Ionicons name="share-outline" size={30} color={theme.text} />
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                style={styles.optionButton}
+                onPress={handleDownloadReel}
+              >
+                <Ionicons name="arrow-down-circle" size={30} color={theme.text} />
+              </TouchableOpacity>
+            </View>
+          </View>
+        )}
       </Animated.View>
     </View>
   );
@@ -197,6 +366,25 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
   },
+  shareTitle: {
+    fontSize: 18,
+    fontWeight: "600",
+    marginBottom: 15,
+  },
+  socialRow: {
+    flexDirection: "row",
+    justifyContent: "space-around",
+    marginVertical: 20,
+  },
+  socialBtn: {
+    padding: 10,
+  },
+  backBtn: {
+    alignItems: "center",
+  },
 });
 
 export default BottomDrawer;
+
+
+
