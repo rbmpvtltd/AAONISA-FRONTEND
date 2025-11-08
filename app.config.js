@@ -3,6 +3,7 @@ import 'dotenv/config';
 export default {
   "expo": {
     "name": "Aao-Ni-Sa",
+      "deepLinks": true,
     "slug": "Aao-Ni-Sa",
     "version": "1.0.0",
     "orientation": "portrait",
@@ -54,7 +55,7 @@ export default {
     },
     "extra": {
       "router": {},
-      "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
+      // "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
       "eas": {
         "projectId":  process.env.EAS_PROJECT_ID,
         "owner" :	"rbm.jodhpur03"
