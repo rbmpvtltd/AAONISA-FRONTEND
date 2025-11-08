@@ -88,6 +88,8 @@ export default function MyProfileScreen() {
     enabled: !!currentUser?.username, // tabhi chale jab username mil jaaye
   });
 
+  console.log("user data in current user ", profile);
+  
   if (currentUserLoading || profileLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -116,5 +118,3 @@ export default function MyProfileScreen() {
     </SafeAreaView>
   );
 }
-
-

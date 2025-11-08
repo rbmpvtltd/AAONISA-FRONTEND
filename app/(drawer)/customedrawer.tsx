@@ -1,3 +1,4 @@
+import { expoTokenUnassign } from "@/src/api/auth-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useReelsStore } from "@/src/store/useReelsStore";
 import { useThemeStore } from "@/src/store/useThemeStore";
@@ -8,7 +9,6 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { expoTokenUnassign } from "../auth/api";
 export default function CustomDrawer(props: any) {
   // const theme = useAppTheme();
   // const [darkMode, setDarkMode] = useState(false);
