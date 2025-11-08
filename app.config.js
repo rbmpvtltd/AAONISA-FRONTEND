@@ -54,7 +54,7 @@ export default {
     },
     "extra": {
       "router": {},
-      "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
+      // "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
       "eas": {
         "projectId":  process.env.EAS_PROJECT_ID,
         "owner" :	"rbm.jodhpur03"
