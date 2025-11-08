@@ -1,6 +1,6 @@
 import { ResizeMode, Video } from 'expo-av';
 import { CameraView, useCameraPermissions } from 'expo-camera';
-import React, { useEffect, useRef, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Alert, Button, Text, View } from 'react-native';
 import ZoomSlider from './zoomSlider';
 export default function VideoTest() {
