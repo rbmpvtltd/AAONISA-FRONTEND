@@ -8,7 +8,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-
+import { expoTokenUnassign } from "../auth/api";
 export default function CustomDrawer(props: any) {
   // const theme = useAppTheme();
   // const [darkMode, setDarkMode] = useState(false);
@@ -24,9 +24,13 @@ const theme = useAppTheme();
   
 const handleLogout = async () => {
   try {
+    const  pushToken = await AsyncStorage.getItem("pushToken");
+    if (pushToken) {
+      await expoTokenUnassign(pushToken);
+    }
     await AsyncStorage.removeItem("accessToken");
     await AsyncStorage.removeItem("refreshToken");
-    Alert.alert("Logged out successfully!");
+    Alert.alert("Logged out successfully!"); 
     router.replace("/auth/login");
   } catch (error) {
      console.error("Logout Error:", error);

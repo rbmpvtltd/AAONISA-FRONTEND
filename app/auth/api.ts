@@ -182,5 +182,48 @@ async function getUserNotifications() {
   const { data } = await axios.post(apiUrl,{}, config);
   return data;
 }
-export { forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, logoutUser, registerUser, resetPassword, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
+
+async function expoTokenAssign(reqBody: any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/tokens/assign');
+  const { data } = await axios.post(apiUrl, reqBody, config);
+  return data;
+}
+
+async function expoTokenUnassign(pushToken:any) {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/tokens/unassign/'+pushToken);
+  const { data } = await axios.delete(apiUrl, config);
+  console.log(data)
+  return data;
+}
+
+async function sendNotification() {
+  const token = await getToken();
+  const config = {
+    headers: { 
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+      withCredentials: true
+    },
+  };
+  const apiUrl = createApiUrl('/tokens/send');
+  const { data } = await axios.post(apiUrl, config);
+  return data;
+}
+export { expoTokenAssign, expoTokenUnassign, forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, logoutUser, registerUser, resetPassword, sendNotification, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 
