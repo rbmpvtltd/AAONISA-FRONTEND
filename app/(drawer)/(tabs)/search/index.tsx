@@ -274,20 +274,20 @@ export default function ExploreScreen() {
     <SafeAreaView style={{flex:1}} edges={["top"]}>
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* SEARCH BAR */}
-      <View style={styles.searchContainer}>
-        <Ionicons name="search" size={20} color="#888" style={styles.searchIcon} />
+      <View style={[styles.searchContainer , { backgroundColor: theme.searchBg }]}>
+        <Ionicons name="search" size={20} color={theme.text} style={styles.searchIcon} />
         <TextInput
           style={[styles.input, { color: theme.text }]}
           placeholder="Search"
-          placeholderTextColor="#888"
+          placeholderTextColor={theme.text}
           value={searchQuery}
           onChangeText={setSearchQuery}
           autoCapitalize="none"
         />
-        {searchLoading && <ActivityIndicator size="small" color="#888" style={styles.loading} />}
+        {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
         {searchQuery ? (
           <TouchableOpacity onPress={clearSearch}>
-            <Ionicons name="close-circle" size={20} color="#888" />
+            <Ionicons name="close-circle" size={20} color={theme.text} />
           </TouchableOpacity>
         ) : null}
       </View>
@@ -303,7 +303,7 @@ export default function ExploreScreen() {
                 setSearchQuery("");
                 router.push(`/profile/${item.username}`);
               }}
-              style={styles.userItem}
+              style={[styles.userItem, {backgroundColor: theme.buttonBg}]}
             >
 
               <Image
@@ -381,12 +381,12 @@ const styles = StyleSheet.create({
   searchContainer: {
     flexDirection: "row",
     alignItems: "center",
-    marginHorizontal: 12,
+    marginHorizontal: 7,
     marginTop: 12,
-    backgroundColor: "#f0f0f0",
     borderRadius: 10,
     paddingHorizontal: 12,
     height: 44,
+    marginBottom : 12
   },
   searchIcon: { marginRight: 8 },
   input: { flex: 1, fontSize: 16 },
@@ -396,7 +396,6 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     alignItems: "center",
     padding: 12,
-    backgroundColor: "#1a1a1a",
     borderRadius: 12,
     marginBottom: 8,
   },
