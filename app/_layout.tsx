@@ -205,8 +205,10 @@
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { registerForPushNotificationsAsync } from "@/src/utils/notification";
+import { createApiUrl } from "@/util";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
+import axios from "axios";
 import {
   Stack,
   useNavigationContainerRef,
@@ -216,7 +218,6 @@ import {
 import React from "react";
 import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-
 /* -------------------------------------------------
    1. TanStack Query Client (Global Cache)
    ------------------------------------------------- */
@@ -247,6 +248,17 @@ export default function RootLayout() {
   const [initializing, setInitializing] = React.useState(true);
   const [navigated, setNavigated] = React.useState(false);
 
+  const sendToken = async (pushToken: string) => {
+    const config = {
+      headers: {
+        "Content-Type": "application/json",
+      },
+    };
+    const apiUrl = createApiUrl("/tokens/create");
+    console.log("Calling URL:", apiUrl);
+    const { data } = await axios.post(apiUrl, { token:pushToken }, config);
+    console.log(data);
+  }
   /* -------------------------------------------------
      3. Load token from SecureStore
      ------------------------------------------------- */
@@ -276,12 +288,9 @@ export default function RootLayout() {
         console.log("============================================");
 
         if (pushToken) {
-          console.log("Expo Push Token:", pushToken);
-
           // Save pushToken to AsyncStorage
           await AsyncStorage.setItem("pushToken", pushToken);
-
-          console.log("Push token saved to AsyncStorage");
+          sendToken(pushToken);
         } else {
           console.log("Push token not received");
         }
