@@ -66,7 +66,7 @@
 // }
 
 import { PostGrid, ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profile/[username]/index";
-import { GetCurrentUser, GetProfileUsername } from "@/app/profile/api";
+import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, View } from "react-native";

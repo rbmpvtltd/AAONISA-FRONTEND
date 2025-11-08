@@ -52,7 +52,7 @@ import { useStoryStore } from "@/src/store/useStoryStore";
 import { useIsFocused } from "@react-navigation/native";
 import React, { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
-import { getAllBookmarks, getAllStories } from "./api";
+import { getAllBookmarks, getAllStories } from "../../../src/api/tab-api";
 
 interface StoryUser {
   username: string;

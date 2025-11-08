@@ -4,7 +4,7 @@ import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
 import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Link, useRouter } from "expo-router";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -16,7 +16,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { getUserInfoAndFollowState, getUserNotifications, loginUser } from "./api";
+import { getUserInfoAndFollowState, getUserNotifications, loginUser } from "../../src/api/auth-api";
 
 const loginSchema = z.object({
   emailOrPhone: z

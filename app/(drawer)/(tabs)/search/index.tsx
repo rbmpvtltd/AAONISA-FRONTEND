@@ -213,7 +213,7 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { SearchUserProfiel } from "../../../profile/api";
+import { SearchUserProfiel } from "../../../../src/api/profile-api";
 
 const { width } = Dimensions.get("window");
 const numColumns = 3;

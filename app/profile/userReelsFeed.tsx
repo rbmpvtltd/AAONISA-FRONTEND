@@ -23,7 +23,7 @@ import {
   View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import { likeDislike, markViewed } from './api';
+import { likeDislike, markViewed } from '../../src/api/profile-api';
 
 const UserReelItem = ({
   item,

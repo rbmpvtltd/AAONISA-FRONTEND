@@ -125,19 +125,19 @@
 // export default FollowersScreen;
 
 
-import { GetProfileUsername, followUser } from '@/app/profile/api';
+import { GetProfileUsername, followUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
 import {
-    ActivityIndicator,
-    FlatList,
-    Image,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View,
-    useWindowDimensions,
+  ActivityIndicator,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+  useWindowDimensions,
 } from 'react-native';
 
 interface Follower {

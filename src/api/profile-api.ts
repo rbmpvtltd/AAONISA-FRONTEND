@@ -88,7 +88,7 @@
 import { createApiUrl } from '@/util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import convertToBase64Expo from './base64Converter';
+import convertToBase64Expo from '../../app/profile/base64Converter';
 
 
 import { Platform } from 'react-native';
@@ -100,6 +100,7 @@ const getToken = async () => {
     return await AsyncStorage.getItem("accessToken");
   }
 };
+
 // async function updateProfileSendOtp(reqBody: any) {
 //   const token = await getToken();
 //   const config = {
@@ -116,42 +117,131 @@ const getToken = async () => {
 // }
 
 
-async function updateProfile(profileData:any, imageChanged:any) {
+// async function updateProfile(profileData:any, imageChanged:any) {
+//   try {
+//     let base64Image = null;
+
+//     if (imageChanged && profileData.ProfilePicture) {
+//       base64Image = await convertToBase64Expo(profileData.ProfilePicture);
+//     }
+
+//     const payload = {
+//       username: profileData.username,
+//       name: profileData.name,
+//       bio: profileData.bio,
+//       url: profileData.url,
+//       imageChanged,
+//       ProfilePicture: base64Image, // null if no image
+//     };
+
+//     const token = await getToken();
+//     console.log("TOKEN FRONT:", token);
+
+//     const apiUrl = createApiUrl("/users/update-profile");
+//     const  data  = await axios.post(apiUrl, payload, {
+//       headers: {
+//         "Content-Type": "application/json", // ✅ ADD THIS
+//         Authorization: `Bearer ${token}`,   // ✅ CORRECT
+//       },
+//     });
+
+//     console.log("data is here in api", data);
+//     return data;
+
+//   } catch (err) {
+//     console.log("Update Profile Error:", err);
+//     throw err;
+//   }
+// // }
+// async function updateProfile(profileData: any, imageChanged: boolean) {
+//   try {
+//     let base64Image = null;
+
+//     // Convert only if the image is local
+//     if (
+//       imageChanged &&
+//       profileData.ProfilePicture &&
+//       !profileData.ProfilePicture.startsWith("http")
+//     ) {
+//       base64Image = await convertToBase64Expo(profileData.ProfilePicture);
+//     }
+
+//     const payload = {
+//       username: profileData.username,
+//       name: profileData.name,
+//       bio: profileData.bio,
+//       url: profileData.url,
+//       imageChanged: imageChanged ? "true" : "false",
+//       ProfilePicture: base64Image,
+//     };
+
+//     console.log("PAYLOAD SENDING:", payload);
+
+//     const token = await getToken();
+//     const apiUrl = createApiUrl("/users/update-profile");
+
+//     const response = await axios.post(apiUrl, payload, {
+//       headers: {
+//         "Content-Type": "application/json",
+//         Authorization: `Bearer ${token}`,
+//       },
+//     });
+
+//     return response.data;
+
+//   } catch (err: any) {
+//     console.log("Update Profile Error:", err?.response?.data || err.message || err);
+//     throw err;
+//   }
+// }
+
+
+async function updateProfile(profileData: any, imageChanged: boolean) {
   try {
-    let base64Image = null;
-    
-    if (imageChanged && profileData.ProfilePicture) {
+    let base64Image: string | null = null;
+
+    // ✅ If user picked a new image (local file)
+    if (
+      imageChanged &&
+      profileData.ProfilePicture &&
+      !profileData.ProfilePicture.startsWith("http")
+    ) {
       base64Image = await convertToBase64Expo(profileData.ProfilePicture);
     }
 
     const payload = {
-      username: profileData.username,
-      name: profileData.name,
-      bio: profileData.bio,
-      url: profileData.url,
-      imageChanged,
-      ProfilePicture: base64Image, // null if no image
+      username: profileData.username || "",
+      name: profileData.name || "",
+      bio: profileData.bio || "",
+      url: profileData.url || "",
+      
+      // ✅ Backend expects STRING ("true"/"false") 
+      imageChanged: String(imageChanged),
+
+      // ✅ BASE64 or null for delete image
+      ProfilePicture: base64Image,
     };
 
-    const token = await getToken();
-    console.log("TOKEN FRONT:", token);
+    console.log("✅ FINAL PAYLOAD SENDING:", payload);
 
+    const token = await getToken();
     const apiUrl = createApiUrl("/users/update-profile");
-    const { data } = await axios.post(apiUrl, payload, {
+
+    const res = await axios.post(apiUrl, payload, {
       headers: {
-        "Content-Type": "application/json", // ✅ ADD THIS
-        Authorization: `Bearer ${token}`,   // ✅ CORRECT
+        Authorization: `Bearer ${token}`,
+        "Content-Type": "application/json",
       },
     });
-    
-    return data;
-  } catch (err) {
-    console.log("Update Profile Error:", err);
+
+    console.log("✅ FINAL RESPONSE:", res.data);
+    return res.data;
+
+  } catch (err: any) {
+    console.log("❌ UPDATE PROFILE ERROR:", err?.response?.data || err);
     throw err;
   }
 }
-
-
 
 
 async function GetProfileUsername(username: string) {
@@ -170,7 +260,7 @@ async function GetProfileUsername(username: string) {
   return data;
 }
 
- async function GetCurrentUser() {
+async function GetCurrentUser() {
   const token = await getToken();
   const config = {
     headers: {
@@ -182,9 +272,9 @@ async function GetProfileUsername(username: string) {
   const apiUrl = createApiUrl("/users/profile/current");
   const { data } = await axios.get(apiUrl, config);
   console.log(data);
-  
-  return data?.userProfile; 
-  
+
+  return data?.userProfile;
+
 }
 async function SearchUserProfiel(query: string) {
   const token = await getToken();
@@ -242,7 +332,7 @@ async function UnfollowUser(followingId: string) {
 
 
 const markViewed = async (storyId: string) => {
-    const token = await getToken();
+  const token = await getToken();
 
   const config = {
     headers: {
@@ -262,7 +352,7 @@ const markViewed = async (storyId: string) => {
 };
 
 const likeDislike = async (storyId: string) => {
-    const token = await getToken();
+  const token = await getToken();
   const config = {
     headers: {
       'Content-Type': 'application/json',

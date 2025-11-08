@@ -14,7 +14,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { registerUser, verifyOtpRegisterUser } from "./api";
+import { registerUser, verifyOtpRegisterUser } from "../../src/api/auth-api";
 
 const registerSchema = z.object({
   emailOrPhone: z

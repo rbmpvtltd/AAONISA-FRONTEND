@@ -1,21 +1,21 @@
-import { updateProfile } from "@/app/profile/api";
+import { updateProfile } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 const { width, height } = Dimensions.get("window");
 

@@ -2,7 +2,7 @@ import { createApiUrl } from '@/util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Platform } from 'react-native';
-import { useStoryStore } from "../../src/store/useStoryStore";
+import { useStoryStore } from "../store/useStoryStore";
 
 const getToken = async () => {
   if (Platform.OS === "web") {

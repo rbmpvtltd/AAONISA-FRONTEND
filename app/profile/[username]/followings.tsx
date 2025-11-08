@@ -1,4 +1,4 @@
-import { GetProfileUsername, UnfollowUser } from '@/app/profile/api';
+import { GetProfileUsername, UnfollowUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';

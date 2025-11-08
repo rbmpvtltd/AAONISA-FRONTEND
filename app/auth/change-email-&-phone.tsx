@@ -15,7 +15,7 @@ import {
 import { z } from "zod";
 // import { useAppTheme } from "../../src/constants/themeHelper";
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "./api";
+import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "../../src/api/auth-api";
 
 const changeEmailAndPhoneSchema = z.object({
   email: z

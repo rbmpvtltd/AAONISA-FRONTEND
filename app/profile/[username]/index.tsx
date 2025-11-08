@@ -6,18 +6,18 @@ import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
 import {
-    ActivityIndicator,
-    Dimensions,
-    Image,
-    Linking,
-    StyleSheet,
-    Text,
-    TouchableOpacity,
-    View
+  ActivityIndicator,
+  Dimensions,
+  Image,
+  Linking,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View
 } from "react-native";
 import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../api";
+import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
