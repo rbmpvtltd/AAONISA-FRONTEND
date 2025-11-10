@@ -1,339 +1,97 @@
-// import { useAppTheme } from "@/src/constants/themeHelper";
-// import { usePhotoStore } from "@/src/store/useFeedStore";
-// import { useLocalSearchParams, useRouter } from "expo-router";
-// import React, { useState } from "react";
-// import {
-//   Alert,
-//   Dimensions,
-//   FlatList,
-//   Image,
-//   KeyboardAvoidingView,
-//   Platform,
-//   StyleSheet,
-//   Text,
-//   TextInput,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
-// import { SafeAreaView } from "react-native-safe-area-context";
-// import Icon from "react-native-vector-icons/Ionicons";
-
-// const { width: windowWidth } = Dimensions.get("window");
-
-// const CommentPage = () => {
-//   const { id } = useLocalSearchParams();
-//   const router = useRouter();
-//   const theme = useAppTheme();
-
-//   const photos = usePhotoStore((state) => state.photos);
-//   const setPhotos = usePhotoStore((state) => state.setPhotos);
-
-//   const photo = photos.find((p) => p.id === Number(id));
-//   const [comment, setComment] = useState("");
-
-//   if (!photo) {
-//     return (
-//       <View style={[styles.container, { backgroundColor: theme.background }]}>
-//         <Text style={{ color: theme.text, textAlign: "center", marginTop: 20 }}>
-//           Photo not found!
-//         </Text>
-//       </View>
-//     );
-//   }
-
-//   const handleAddComment = () => {
-//     if (comment.trim() === "") return;
-
-//     const newComment = {
-//       username: "you",
-//       text: comment,
-//       time: "Just now",
-//       profilePic:
-//         "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-//       id: Date.now(), 
-//     };
-
-//     const updatedComments = [...photo.comments, newComment];
-
-//     setPhotos((prev) =>
-//       prev.map((p) =>
-//         p.id === photo.id ? { ...p, comments: updatedComments } : p
-//       )
-//     );
-
-//     setComment("");
-//   };
-
-//   const handleDeleteComment = (commentId: number) => {
-//     Alert.alert("Delete Comment", "Are you sure you want to delete this comment?", [
-//       { text: "Cancel", style: "cancel" },
-//       {
-//         text: "Delete",
-//         style: "destructive",
-//         onPress: () => {
-//           const updatedComments = photo.comments.filter(
-//             (c: any) => c.id !== commentId
-//           );
-
-//           setPhotos((prev) =>
-//             prev.map((p) =>
-//               p.id === photo.id ? { ...p, comments: updatedComments } : p
-//             )
-//           );
-//         },
-//       },
-//     ]);
-//   };
-
-//   return (
-//     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-//     <KeyboardAvoidingView
-//       style={{ flex: 1, backgroundColor: theme.background }}
-//       behavior={Platform.OS === "ios" ? "padding" : "height"}
-//       keyboardVerticalOffset={90}
-//     >
-     
-//         {/* Comment List */}
-//         <FlatList
-//           data={photo.comments}
-//           keyExtractor={(item: any) =>
-//             item.id ? item.id.toString() : Math.random().toString()
-//           }
-//           contentContainerStyle={{ paddingBottom: 10 }}
-//           renderItem={({ item }: any) => (
-//             <View style={styles.commentContainer}>
-//               <Image
-//                 source={{
-//                   uri:
-//                     item.profilePic ||
-//                     "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-//                 }}
-//                 style={styles.profilePic}
-//               />
-
-//               <View style={{ flex: 1 }}>
-//                 <Text style={[styles.commentUsername, { color: theme.text }]}>
-//                   {item.username}{" "}
-//                   <Text style={[styles.commentText, { color: theme.subtitle }]}>
-//                     {item.text}
-//                   </Text>
-//                 </Text>
-
-//                 <View style={styles.commentMeta}>
-//                   <Text style={[styles.commentTime, { color: theme.subtitle }]}>
-//                     {item.time}
-//                   </Text>
-
-//                   <TouchableOpacity>
-//                     <Text style={[styles.replyText, { color: theme.placeholder }]}>
-//                       Reply
-//                     </Text>
-//                   </TouchableOpacity>
-
-//                   {item.username === "you" && (
-//                     <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
-//                       <Text
-//                         style={[styles.deleteText, { color: theme.buttonBg }]}
-//                       >
-//                         Delete
-//                       </Text>
-//                     </TouchableOpacity>
-//                   )}
-//                 </View>
-//               </View>
-
-//               <TouchableOpacity>
-//                 <Icon
-//                   name="heart-outline"
-//                   size={windowWidth * 0.05}
-//                   color={theme.text}
-//                 />
-//               </TouchableOpacity>
-//             </View>
-//           )}
-//           ListEmptyComponent={
-//             <Text
-//               style={[
-//                 styles.emptyText,
-//                 { color: theme.placeholder, fontSize: windowWidth * 0.04 },
-//               ]}
-//             >
-//               No comments yet. Be the first to comment!
-//             </Text>
-//           }
-//         />
-
-//         {/* Input Row */}
-//         <View
-//           style={[
-//             styles.inputRow,
-//             {
-//               borderTopColor: theme.inputBorder,
-//               backgroundColor: theme.background,
-//             },
-//           ]}
-//         >
-//           <Image
-//             source={{
-//               uri: "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-//             }}
-//             style={styles.commentProfilePic}
-//           />
-
-//           <TextInput
-//             placeholder="Add a comment..."
-//             placeholderTextColor={theme.placeholder}
-//             style={[
-//               styles.input,
-//               {
-//                 color: theme.text,
-//                 backgroundColor: theme.inputBg,
-//               },
-//             ]}
-//             value={comment}
-//             onChangeText={setComment}
-//           />
-
-//           <TouchableOpacity onPress={handleAddComment}>
-//             <Text
-//               style={[
-//                 styles.postButton,
-//                 {
-//                   color:
-//                     comment.trim() === "" ? theme.placeholder : theme.buttonBg,
-//                 },
-//               ]}
-//             >
-//               Post
-//             </Text>
-//           </TouchableOpacity>
-//         </View>
-//     </KeyboardAvoidingView>
-//     </SafeAreaView>
-//   );
-// };
-
-// export default CommentPage;
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1 },
-//   commentContainer: {
-//     flexDirection: "row",
-//     alignItems: "flex-start",
-//     paddingHorizontal: 15,
-//     paddingVertical: 10,
-//     gap: 10,
-//   },
-//   profilePic: { width: 35, height: 35, borderRadius: 50 },
-//   commentUsername: { fontWeight: "600", fontSize: 14 },
-//   commentText: { fontWeight: "400" },
-//   commentMeta: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     gap: 15,
-//     marginTop: 3,
-//   },
-//   commentTime: { fontSize: 12 },
-//   replyText: { fontSize: 12 },
-//   deleteText: { fontSize: 12, fontWeight: "600" },
-//   emptyText: { textAlign: "center", marginTop: 30 },
-//   inputRow: {
-//     flexDirection: "row",
-//     alignItems: "center",
-//     paddingHorizontal: 10,
-//     borderTopWidth: 1,
-//     paddingVertical: 8,
-//   },
-//   commentProfilePic: {
-//     width: 30,
-//     height: 30,
-//     borderRadius: 50,
-//     marginRight: 10,
-//   },
-//   input: {
-//     flex: 1,
-//     borderRadius: 20,
-//     paddingHorizontal: 15,
-//     paddingVertical: 6,
-//     fontSize: 14,
-//   },
-//   postButton: {
-//     fontSize: 14,
-//     fontWeight: "600",
-//     marginLeft: 10,
-//   },
-// });
-
-// =========================================================
-
-
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useCommentStore } from "@/src/store/useCommentStore";
-import { useFeedStore } from "@/src/store/useFeedStore";
-import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useState } from "react";
+import { useLocalSearchParams } from "expo-router";
+import { useEffect, useState } from "react";
 import {
   Alert,
   Dimensions,
   FlatList,
   Image,
   KeyboardAvoidingView,
-  Platform, StyleSheet, Text,
+  Platform,
+  StyleSheet,
+  Text,
   TextInput,
   TouchableOpacity,
-  View
-} from 'react-native';
+  View,
+} from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
 
 const { width: windowWidth } = Dimensions.get("window");
 
 const CommentPage = () => {
-  const { id } = useLocalSearchParams();
-  const router = useRouter();
+  const { id } = useLocalSearchParams(); // photoId
   const theme = useAppTheme();
+  const { comments, addComment, deleteComment, setComments } = useCommentStore();
+  const [commentText, setCommentText] = useState("");
 
-  const photos = useFeedStore((state) => state.photos);
-  const photo = photos.find((p) => p.id === Number(id));
+  const postId = Number(id) || 1; // fallback id = 1
+  const photoComments = comments[postId] || [];
 
-  const { comments, addComment, deleteComment } = useCommentStore();
-  const [comment, setComment] = useState("");
-
-  const photoComments = comments[Number(id)] || [];
-
-  if (!photo) {
-    return (
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={{ color: theme.text, textAlign: "center", marginTop: 20 }}>
-          Photo not found!
-        </Text>
-      </View>
-    );
-  }
+  // 🧠 Dummy comments when nothing exists in store
+  useEffect(() => {
+    // if (!comments[postId] || comments[postId].length === 0) {
+    //   setComments(postId, [
+    //     {
+    //       uuid: "c1",
+    //       username: "john_doe",
+    //       content: "Awesome photo! 🔥",
+    //       userProfile:
+    //         "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
+    //       time: "2h ago",
+    //       replyCount: 1,
+    //       replies: [
+    //         {
+    //           uuid: "r1",
+    //           parentId: "c1",
+    //           username: "alice",
+    //           content: "Agree! Stunning shot 📸",
+    //           userProfile:
+    //             "https://randomuser.me/api/portraits/women/44.jpg",
+    //           time: "1h ago",
+    //         },
+    //       ],
+    //     },
+    //     {
+    //       uuid: "c2",
+    //       username: "michael",
+    //       content: "What camera did you use?",
+    //       userProfile:
+    //         "https://randomuser.me/api/portraits/men/45.jpg",
+    //       time: "30m ago",
+    //       replyCount: 0,
+    //       replies: [],
+    //     },
+    //   ]);
+    // }
+  }, []);
 
   const handleAddComment = () => {
-    if (comment.trim() === "") return;
+    if (commentText.trim() === "") return;
 
     const newComment = {
-      id: Date.now(),
+      uuid: Date.now().toString(),
       username: "you",
-      text: comment,
-      time: "Just now",
-      profilePic:
+      content: commentText,
+      userProfile:
         "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
+      time: "Just now",
+      replyCount: 0,
+      replies: [],
     };
 
-    addComment(Number(id), newComment);
-    setComment("");
+    addComment(postId, newComment);
+    setCommentText("");
   };
 
-  const handleDeleteComment = (commentId: number) => {
+  const handleDeleteComment = (commentId: string) => {
     Alert.alert("Delete Comment", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => deleteComment(Number(id), commentId),
+        onPress: () => deleteComment(postId, commentId),
       },
     ]);
   };
@@ -341,23 +99,19 @@ const CommentPage = () => {
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <KeyboardAvoidingView
-        style={{ flex: 1, backgroundColor: theme.background }}
+        style={{ flex: 1 }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={90}
       >
         {/* Comment List */}
         <FlatList
           data={photoComments}
-          keyExtractor={(item: any) => item.id.toString()}
+          keyExtractor={(item) => item.uuid}
           contentContainerStyle={{ paddingBottom: 10 }}
-          renderItem={({ item }: any) => (
+          renderItem={({ item }) => (
             <View style={styles.commentContainer}>
               <Image
-                source={{
-                  uri:
-                    item.profilePic ||
-                    "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde",
-                }}
+                source={{ uri: item.userProfile }}
                 style={styles.profilePic}
               />
 
@@ -365,7 +119,7 @@ const CommentPage = () => {
                 <Text style={[styles.commentUsername, { color: theme.text }]}>
                   {item.username}{" "}
                   <Text style={[styles.commentText, { color: theme.subtitle }]}>
-                    {item.text}
+                    {item.content}
                   </Text>
                 </Text>
 
@@ -375,13 +129,17 @@ const CommentPage = () => {
                   </Text>
 
                   <TouchableOpacity>
-                    <Text style={[styles.replyText, { color: theme.placeholder }]}>
+                    <Text
+                      style={[styles.replyText, { color: theme.placeholder }]}
+                    >
                       Reply
                     </Text>
                   </TouchableOpacity>
 
                   {item.username === "you" && (
-                    <TouchableOpacity onPress={() => handleDeleteComment(item.id)}>
+                    <TouchableOpacity
+                      onPress={() => handleDeleteComment(item.uuid)}
+                    >
                       <Text
                         style={[styles.deleteText, { color: theme.buttonBg }]}
                       >
@@ -390,6 +148,36 @@ const CommentPage = () => {
                     </TouchableOpacity>
                   )}
                 </View>
+
+                {/* Show replies (if any) */}
+                {item.replies && item.replies.length > 0 && (
+                  <View style={{ marginTop: 8, paddingLeft: 40 }}>
+                    {item.replies.map((reply) => (
+                      <View
+                        key={reply.uuid}
+                        style={{ flexDirection: "row", marginBottom: 5 }}
+                      >
+                        <Image
+                          source={{ uri: reply.userProfile }}
+                          style={styles.replyProfilePic}
+                        />
+                        <Text
+                          style={[
+                            styles.commentUsername,
+                            { color: theme.text },
+                          ]}
+                        >
+                          {reply.username}{" "}
+                          <Text
+                            style={[styles.commentText, { color: theme.subtitle }]}
+                          >
+                            {reply.content}
+                          </Text>
+                        </Text>
+                      </View>
+                    ))}
+                  </View>
+                )}
               </View>
 
               <TouchableOpacity>
@@ -435,13 +223,10 @@ const CommentPage = () => {
             placeholderTextColor={theme.placeholder}
             style={[
               styles.input,
-              {
-                color: theme.text,
-                backgroundColor: theme.inputBg,
-              },
+              { color: theme.text, backgroundColor: theme.inputBg },
             ]}
-            value={comment}
-            onChangeText={setComment}
+            value={commentText}
+            onChangeText={setCommentText}
           />
 
           <TouchableOpacity onPress={handleAddComment}>
@@ -450,7 +235,9 @@ const CommentPage = () => {
                 styles.postButton,
                 {
                   color:
-                    comment.trim() === "" ? theme.placeholder : theme.buttonBg,
+                    commentText.trim() === ""
+                      ? theme.placeholder
+                      : theme.buttonBg,
                 },
               ]}
             >
@@ -466,7 +253,6 @@ const CommentPage = () => {
 export default CommentPage;
 
 const styles = StyleSheet.create({
-  container: { flex: 1 },
   commentContainer: {
     flexDirection: "row",
     alignItems: "flex-start",
@@ -475,6 +261,12 @@ const styles = StyleSheet.create({
     gap: 10,
   },
   profilePic: { width: 35, height: 35, borderRadius: 50 },
+  replyProfilePic: {
+    width: 25,
+    height: 25,
+    borderRadius: 50,
+    marginRight: 8,
+  },
   commentUsername: { fontWeight: "600", fontSize: 14 },
   commentText: { fontWeight: "400" },
   commentMeta: {
