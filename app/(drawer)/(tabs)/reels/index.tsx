@@ -44,6 +44,8 @@ const [showOptions, setShowOptions] = React.useState(false);
    const {
       openBookmarkPanel,
     } = useBookmarkStore();
+
+
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
 
   // create player
@@ -116,7 +118,7 @@ const [showOptions, setShowOptions] = React.useState(false);
       </Pressable>
 
       {/* Top Bar */}
-      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
           {['Followings', 'News', 'Explore'].map((tab) => (
             <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
@@ -131,13 +133,71 @@ const [showOptions, setShowOptions] = React.useState(false);
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </View> */}
+
+
+{/* Top Bar */}
+<View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+ {/* <View style={styles.tabsContainer}>
+  {['Followings', 'News', 'Explore'].map((tab) => (
+    <TouchableOpacity
+      key={tab}
+      onPress={async () => {  // 👈 async lagaya
+        setActiveTab(tab as any);
+
+        let response;
+        switch (tab) {
+          case 'Followings':
+            response = await getCategoryReel('followings', 1, 10);
+            break;
+          case 'News':
+            response = await getCategoryReel('news', 1, 10);
+            break;
+          case 'Explore':
+            response = await getCategoryReel('explore', 1, 10);
+            break;
+        }
+
+        console.log("RESPONSE:", response); // ✅ yahan actual data milega
+      }}
+    >
+      <Text
+        style={[
+          styles.tabText,
+          activeTab === tab && styles.activeTabText,
+        ]}
+      >
+        {tab}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View> */}
+
+
+<View style={styles.tabsContainer}>
+  {['Followings', 'News', 'Explore'].map((tab) => (
+    <TouchableOpacity
+      key={tab}
+      onPress={() => setActiveTab(tab as any)}
+    >
+      <Text
+        style={[
+          styles.tabText,
+          activeTab === tab && styles.activeTabText,
+        ]}
+      >
+        {tab}
+      </Text>
+    </TouchableOpacity>
+  ))}
+</View>
+</View>
 
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
           <Image
-            source={{ uri: item.user.avatar }}
+            source={{ uri: item.user.profilePic}}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
@@ -208,10 +268,7 @@ const [showOptions, setShowOptions] = React.useState(false);
   onSave={() => {openBookmarkPanel(item.id); setShowOptions(false)}}
   onReport={() => console.log("Reported")}
   onShare={() => console.log("Shared")}
-/>
-
-
-    
+/>    
     </View>
   );
 };
@@ -238,7 +295,13 @@ const ReelsFeed = () => {
     fadeAnim,
     updateReelURL, //NEW: URL update function
     autoScroll,
+    fetchReelsByCategory,
   } = useReelsStore();
+
+useEffect(() => {
+  fetchReelsByCategory(activeTab.toLowerCase() as any);
+}, [activeTab]);
+
 
   // auto scroll 
 useEffect(() => {
@@ -340,8 +403,12 @@ useEffect(() => {
       <StatusBar hidden />
       <FlatList
         ref={flatListRef}
-        data={reels}
-        renderItem={({ item, index }) => (
+        // data={reels || []}
+        data={Array.isArray(reels) ? reels.filter(r => r?.id) : []}
+          keyExtractor={(item, index) => (item?.id ? String(item.id) : `key-${index}`)}
+        renderItem={({ item, index }) => {
+             if (!item) return null;
+          return(
           <ReelItem
             item={item}
             index={index}
@@ -356,8 +423,8 @@ useEffect(() => {
             activeTab={activeTab}
             setActiveTab={setActiveTab}
           />
-        )}
-        keyExtractor={(item) => item.id.toString()}
+        )}}
+        // keyExtractor={(item) => item.id.toString()}
         pagingEnabled
         showsVerticalScrollIndicator={false}
         onScroll={handleScroll}

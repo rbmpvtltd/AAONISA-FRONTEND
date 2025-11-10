@@ -1,6 +1,8 @@
 import { createApiUrl } from "@/util";
 import axios from "axios";
 
+import AsyncStorage from "@react-native-async-storage/async-storage";
+import { Platform } from 'react-native';
  async function getAllStreamIds() {
   try {
     const config = {
@@ -18,4 +20,32 @@ import axios from "axios";
   }
 }
 
-export { getAllStreamIds };
+
+const getToken = async () => {
+  if (Platform.OS === "web") {
+    return localStorage.getItem("accessToken");
+  } else {
+    return await AsyncStorage.getItem("accessToken");
+  }
+};
+
+const getCategoryReel = async (type:string,page:number,limit:number) => {
+    const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl(`/videos/feed?type=${type}&page=${page}&limit=${limit}`);
+  console.log(apiUrl)
+  const { data } = await axios.get(apiUrl, config);
+  console.log(data)
+  return data;
+};
+
+
+export { getAllStreamIds, getCategoryReel };
