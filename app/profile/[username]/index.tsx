@@ -176,35 +176,44 @@ export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
     </View>
 );
 
-const VideoItem = ({ videoUrl, id }: { videoUrl: string, id: string }) => {
-    const router = useRouter();
-    const player = useVideoPlayer(videoUrl, (player) => {
-        player.loop = true;
-        player.muted = true;
-        player.pause();
-    });
+const VideoItem = ({
+  videoUrl,
+  id,
+  username,
+}: {
+  videoUrl: string;
+  id: string;
+  username: string;
+}) => {
+  const router = useRouter();
 
-    return (
-        <TouchableOpacity
-            activeOpacity={0.9}
-            onPress={() => router.push({
-                pathname: "/profile/userReelsFeed",
-                params: { id: id }
-            })} //  ID send ho rahi hai
+  const player = useVideoPlayer(videoUrl, (p) => {
+    p.loop = true;
+    p.muted = true;
+    p.pause();
+  });
 
-        >
-            <View style={styles.videoContainer}>
-                <VideoView
-                    style={styles.postVideo}
-                    player={player}
-                    allowsFullscreen={false}
-                    allowsPictureInPicture={false}
-                    contentFit="cover"
-                    nativeControls={false}
-                />
-            </View>
-        </TouchableOpacity>
-    );
+  return (
+    <TouchableOpacity
+      activeOpacity={0.9}
+      onPress={() =>
+        router.push(
+          `/profile/${username}/userReelsFeed/${id}`
+        )
+      }
+    >
+      <View style={styles.videoContainer}>
+        <VideoView
+          style={styles.postVideo}  
+          player={player}
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
+          contentFit="cover"
+          nativeControls={false}
+        />
+      </View>
+    </TouchableOpacity>
+  );
 };
 
 export const PostGrid: React.FC<{ videos: any[] }> = ({ videos }) => {
@@ -223,7 +232,8 @@ export const PostGrid: React.FC<{ videos: any[] }> = ({ videos }) => {
             numColumns={3}
             renderItem={({ item }) => {
                 if (item.videoUrl) {
-                    return <VideoItem videoUrl={item.videoUrl} id={item.uuid} />;
+                    return <VideoItem videoUrl={item.videoUrl} id={item.uuid} username={item.username}
+            />
                 }
 
                 return (
