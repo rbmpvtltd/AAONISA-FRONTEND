@@ -47,16 +47,18 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     const router = useRouter();
     const user = profile.username;
     console.log("username resive here", user);
-    
+
     // backend data destructuring
-    const profilePicture = profile.userProfile?.ProfilePicture || null;
+    const profilePicture = profile.userProfile.ProfilePicture || null;
+    console.log("new profilePicture", profilePicture);
+    
     const followersCount = profile.followers?.length || 0;
     const followingsCount = profile.followings?.length || 0;
 
     // if your backend doesn’t send posts/likes/views yet
     const postsCount = profile.videos?.length || 0;
     console.log("video", postsCount);
-    
+
 
     const likes = profile.likes || 0;
     const views = profile.views || 0;
@@ -73,6 +75,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
             />
 
 
+
             <View style={styles.stats}>
                 <View style={styles.stat}>
                     <Text style={[styles.statNumber, { color: theme.text }]}>{postsCount}</Text>
@@ -82,7 +85,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
                 <TouchableOpacity
                     style={styles.stat}
                     // onPress={() => router.push( `/profile/followers`)}
-                  onPress={() => router.push(`/profile/${profile.username}/followers`)}
+                    onPress={() => router.push(`/profile/${profile.username}/followers`)}
                 >
                     <Text style={[styles.statNumber, { color: theme.text }]}>{followersCount}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Followers</Text>
@@ -110,60 +113,6 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
         </View>
     );
 };
-
-
-
-// export const UserInfo: React.FC<{ theme: any; profile: any;isFollowing: boolean;  isOwnProfile: boolean; onFollowToggle: () => void }> = ({
-//     theme,
-//     profile,
-//     isOwnProfile,
-//     onFollowToggle,
-// }) => {
-//     if (!profile) return null;
-
-//     const user = profile.userProfile;
-//     console.log("user is here", user);
-
-
-//     const openUrl = () => {
-//         if (user?.url) {
-//             const link = user.url.startsWith("http")
-//                 ? user.url
-//                 : `https://${user.url}`;
-//             Linking.openURL(link).catch(() => console.log("Failed to open URL"));
-//         }
-//     };
-
-//     return (
-//         <View style={styles.userInfo}>
-//             <Text style={[styles.username, { color: theme.text }]}>
-//                 {user?.name || "Your Name"}
-//             </Text>
-//             <Text style={[styles.bio, { color: theme.subtitle }]}>
-//                 {user?.bio || "Your bio..."}
-//             </Text>
-//             {user?.url ? (
-//                 <Text style={[styles.website, { color: "#3498db" }]} onPress={openUrl}>
-//                     {user.url}
-//                 </Text>
-//             ) : null}
-
-//             {!isOwnProfile && (
-//                 <TouchableOpacity onPress={onFollowToggle}>
-//                     <Text
-//                         style={[
-//                             styles.followButton,
-//                             { backgroundColor: theme.buttonBg, color: "#fff" },
-//                         ]}
-//                     >
-//                         {profile?.isFollowing ? "Unfollow" : "Follow"}
-//                     </Text>
-//                 </TouchableOpacity>
-//             )}
-
-//         </View>
-//     );
-// };
 
 
 export const UserInfo: React.FC<{
@@ -240,7 +189,7 @@ const VideoItem = ({ videoUrl, id }: { videoUrl: string, id: string }) => {
             activeOpacity={0.9}
             onPress={() => router.push({
                 pathname: "/profile/userReelsFeed",
-                params: { id : id}
+                params: { id: id }
             })} //  ID send ho rahi hai
 
         >
@@ -415,88 +364,6 @@ export const ProfileScreen: React.FC = () => {
         </SafeAreaView>
     );
 };
-
-
-// const ProfileScreen: React.FC = () => {
-//     const theme = useAppTheme();
-//     const queryClient = useQueryClient();
-//     const { username } = useLocalSearchParams<{ username?: string }>();
-//   const [isFollowing, setIsFollowing] = useState(false);
-
-//     // Fetch current user
-//     const { data: currentUser, isLoading: currentUserLoading } = useQuery({
-//         queryKey: ["currentUser"],
-//         queryFn: GetCurrentUser,
-//     });
-
-//     // Fetch profile user
-//     const { data: profile, isLoading: profileLoading } = useQuery({
-//         queryKey: ["profile", username],
-//         queryFn: () => GetProfileUsername(username || ""),
-//         enabled: !!username,
-//     });
-//     console.log("username:", username);
-
-//     // Follow/Unfollow mutations
-//   const followMutation = useMutation({
-//     mutationFn: (id: string) => followUser(id),
-//     onMutate: () => setIsFollowing(true),
-//     onError: () => setIsFollowing(false),
-//     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['userProfile', username], })
-//   });
-
-//   const unfollowMutation = useMutation({
-//     mutationFn: (id: string) => UnfollowUser(id),
-//     onMutate: () => setIsFollowing(false),
-//     onError: () => setIsFollowing(true),
-//     onSuccess: () => queryClient.invalidateQueries({ queryKey: ['userProfile', username] }),
-//   });
-
-//     if (currentUserLoading || profileLoading) {
-//         return (
-//             <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-//                 <ActivityIndicator size="large" color={theme.text} />
-//             </View>
-//         );
-//     }
-
-//     const isOwnProfile =
-//         currentUser?.username === profile?.userProfile?.username ||
-//         currentUser?.id === profile?.userProfile?.id;
-
-//     const handleFollowToggle = () => {
-
-//   // Update follow state once both user data and currentUser are loaded
-//   useEffect(() => {
-//     if (data?.followers && currentUserData?.userProfile?.id) {
-//       const alreadyFollowing = data.followers.some(
-//         (follower: any) => follower.id === currentUserData.userProfile.id
-//       );
-//       console.log("Already following:", alreadyFollowing);
-//       setIsFollowing(alreadyFollowing);
-//     }
-//   }, [data?.followers, currentUserData?.userProfile?.id]);
-
-//     };
-
-
-//     return (
-//         <SafeAreaView style={[styles.container, { backgroundColor: theme.background }]}>
-//             <TopHeader userName={username || "Username"} theme={theme} isOwnProfile={isOwnProfile} />
-//             <ProfileHeader theme={theme} profile={profile} />
-//             {/* <ProfileHeader theme={theme} /> */}
-//             <UserInfo
-//                 theme={theme}
-//                 profile={profile}
-//                 isOwnProfile={isOwnProfile}
-//                 onFollowToggle={handleFollowToggle}
-//             />
-//             <Tabs theme={theme} />
-//             <PostGrid videos={profile.videos || []} />
-//         </SafeAreaView>
-//     );
-// };
-
 
 const styles = StyleSheet.create({
     container: { flex: 1 },

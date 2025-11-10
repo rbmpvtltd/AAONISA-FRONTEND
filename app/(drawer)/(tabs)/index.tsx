@@ -50,7 +50,7 @@ import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { useIsFocused } from "@react-navigation/native";
-import React, { useEffect } from "react";
+import { useEffect } from "react";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 import { getAllBookmarks, getAllStories } from "../../../src/api/tab-api";
 

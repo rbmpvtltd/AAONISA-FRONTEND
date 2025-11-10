@@ -114,7 +114,7 @@ interface ProfileState {
   bio: string;
   url : string,
   isFollowing : boolean,
-  profilePicture: string | null;
+  ProfilePicture: string | null;
   followersCount: number;
   followingsCount: number;
   postsCount: number;
@@ -154,7 +154,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   name: "",
   bio: "",
   url : "",
-  profilePicture: "",
+  ProfilePicture: "",
   followersCount: 0,
   followingsCount: 0,
   postsCount: 0,
@@ -166,7 +166,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
   setUserId: (userId) => set({ userId }),
   setName: (name) => set({ name }),
   setBio: (bio) => set({ bio }),
-  setProfilePicture: (url) => set({ profilePicture: url }),
+  setProfilePicture: (url) => set({ ProfilePicture: url }),
   setFollowersCount: (count) => set({ followersCount: count }),
   setFollowingsCount: (count) => set({ followingsCount: count }),
   setPostCount: (count) => set({ postsCount: count }),
@@ -259,7 +259,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
             // userId: "",
             name: "",
             bio: "",
-            profilePicture: null,
+            ProfilePicture: null,
             url: "",
             likes: 0,
             views: 0,
