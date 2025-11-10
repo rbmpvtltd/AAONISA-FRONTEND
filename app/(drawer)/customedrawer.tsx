@@ -21,22 +21,22 @@ const theme = useAppTheme();
   const { autoScroll, setAutoScroll } = useReelsStore();
 
   const router = useRouter();
-  
-const handleLogout = async () => {
-  try {
-    const  pushToken = await AsyncStorage.getItem("pushToken");
-    if (pushToken) {
-      await expoTokenUnassign(pushToken);
+    
+  const handleLogout = async () => {
+    try {
+      const pushToken = await AsyncStorage.getItem("pushToken");
+      if (pushToken) {
+        await expoTokenUnassign(pushToken);
+      }
+      await AsyncStorage.removeItem("accessToken");
+      await AsyncStorage.removeItem("refreshToken");
+      Alert.alert("Logged out successfully!"); 
+      router.replace("/auth/login");
+    } catch (error) {
+      console.error("Logout Error:", error);
+      Alert.alert("Logout failed, please try again!");
     }
-    await AsyncStorage.removeItem("accessToken");
-    await AsyncStorage.removeItem("refreshToken");
-    Alert.alert("Logged out successfully!"); 
-    router.replace("/auth/login");
-  } catch (error) {
-     console.error("Logout Error:", error);
-    Alert.alert("Logout failed, please try again!");
-  }
-};
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>

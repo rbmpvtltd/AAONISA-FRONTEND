@@ -698,22 +698,23 @@ import { updateProfile } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
-import { useMutation } from "@tanstack/react-query";
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-    ActivityIndicator,
-    Alert,
-    Dimensions,
-    Image,
-    KeyboardAvoidingView,
-    Platform,
-    ScrollView,
-    StyleSheet,
-    Text,
-    TextInput,
-    TouchableOpacity,
-    View,
+  ActivityIndicator,
+  Alert,
+  Dimensions,
+  Image,
+  KeyboardAvoidingView,
+  Platform,
+  ScrollView,
+  StyleSheet,
+  Text,
+  TextInput,
+  TouchableOpacity,
+  View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -723,12 +724,13 @@ interface ProfileData {
   username: string;
   name: string;
   bio: string;
-  ProfilePicture: string | null;
+  profilePicture: string | null;
   url: string;
 }
 
 function UserEditProfile() {
   const theme = useAppTheme();
+  const queryClient = useQueryClient();
 
   // ✅ Get Zustand store
   const profileStore = useProfileStore();
@@ -738,7 +740,7 @@ function UserEditProfile() {
     username: profileStore.username || "",
     name: profileStore.name || "",
     bio: profileStore.bio || "",
-    ProfilePicture: profileStore.profilePicture || null,
+profilePicture: profileStore.profilePicture || null,
     url: profileStore.url || "",
   });
 
@@ -796,12 +798,15 @@ function UserEditProfile() {
         username: data.data.username,
         name: data.data.name,
         bio: data.data.bio,
-        profilePicture: data.data.ProfilePicture,
+        profilePicture: data.data.profilePicture,
         url: data.data.url,
       });
 
       setImageChanged(false);
       setShowImageOptions(false);
+
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       Alert.alert("Success", "Profile updated successfully!");
     },
     onError: () => {
@@ -829,11 +834,11 @@ function UserEditProfile() {
               <View style={styles.profileImageWrapper}>
                 <Image
                   source={
-                    profileData.ProfilePicture
-                      ? { uri: profileData.ProfilePicture }
+                    profileData.profilePicture
+                      ? { uri: profileData.profilePicture }
                       : typeof theme.userImage === "number"
-                      ? theme.userImage
-                      : { uri: theme.userImage }
+                        ? theme.userImage
+                        : { uri: theme.userImage }
                   }
                   style={styles.profilePicture}
                 />
@@ -852,7 +857,7 @@ function UserEditProfile() {
                 <TouchableOpacity style={styles.imageOption} onPress={() => pickImage("gallery")}>
                   <Text style={styles.imageOptionText}>Gallery</Text>
                 </TouchableOpacity>
-                {profileData.ProfilePicture && (
+                {profileData.profilePicture && (
                   <TouchableOpacity
                     style={[styles.imageOption, styles.deleteOption]}
                     onPress={deleteProfilePicture}
