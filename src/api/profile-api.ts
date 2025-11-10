@@ -46,11 +46,11 @@
 //     const formData = new FormData();
 
 //     // Agar user ne profile picture select ki hai
-//     if (profileData.profilePicture) {
+//     if (profileData.ProfilePicture) {
 //       formData.append('ProfilePicture', {
-//         uri: profileData.profilePicture,
+//         uri: profileData.ProfilePicture,
 //         type: 'image/jpeg', // ya 'image/png', imagePicker se mimetype check kar sakte ho
-//         name: 'profile.jpg', // ya dynamic: profileData.profilePicture.split('/').pop()
+//         name: 'profile.jpg', // ya dynamic: profileData.ProfilePicture.split('/').pop()
 //       } as any);
 //     }
 
@@ -214,12 +214,12 @@ async function updateProfile(profileData: any, imageChanged: boolean) {
       name: profileData.name || "",
       bio: profileData.bio || "",
       url: profileData.url || "",
-      
+
       // ✅ Backend expects STRING ("true"/"false") 
       imageChanged: String(imageChanged),
 
       // ✅ BASE64 or null for delete image
-      ProfilePicture: base64Image,
+      ProfilePicture: base64Image               // new image
     };
 
     console.log("✅ FINAL PAYLOAD SENDING:", payload);

@@ -40,7 +40,7 @@
 //         username: storeUsername,
 //         name: storeName,
 //         bio: storeBio,
-//         profilePicture: storeProfilePicture,
+//         ProfilePicture: storeProfilePicture,
 //         url: storeUrl,
 //     } = useProfileStore();
 
@@ -113,7 +113,7 @@
 //                 username: data.data.username,
 //                 name: data.data.name,
 //                 bio: data.data.bio,
-//                 profilePicture: data.data.ProfilePicture,
+//                 ProfilePicture: data.data.ProfilePicture,
 //                 url: data.data.url,
 //             });
 
@@ -145,7 +145,7 @@
 //                 <ScrollView style={styles.container}>
 
 //                     {/* ✅ Profile Picture */}
-//                     <View style={styles.profilePictureContainer}>
+//                     <View style={styles.ProfilePictureContainer}>
 //                         <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
 //                             <View style={styles.profileImageWrapper}>
 //                                 <Image
@@ -156,7 +156,7 @@
 //                                                 ? theme.userImage
 //                                                 : { uri: theme.userImage }
 //                                     }
-//                                     style={styles.profilePicture}
+//                                     style={styles.ProfilePicture}
 //                                 />
 
 
@@ -286,7 +286,7 @@
 //             backgroundColor: theme.background,
 //             paddingHorizontal: width * 0.05,
 //         },
-//         profilePictureContainer: {
+//         ProfilePictureContainer: {
 //             marginTop: height * 0.02,
 //             alignItems: "center",
 //             marginBottom: height * 0.02,
@@ -295,7 +295,7 @@
 //             position: "relative",
 //             marginBottom: height * 0.015,
 //         },
-//         profilePicture: {
+//         ProfilePicture: {
 //             width: width * 0.28,
 //             height: width * 0.28,
 //             borderRadius: (width * 0.28) / 2,
@@ -429,7 +429,7 @@
 //         username: state.username,
 //         name: state.name,
 //         bio: state.bio,
-//         profilePicture: state.profilePicture,
+//         ProfilePicture: state.ProfilePicture,
 //         url: state.url,
 //     }));
 
@@ -452,7 +452,7 @@
 //             username: profileStore.username || "",
 //             name: profileStore.name || "",
 //             bio: profileStore.bio || "",
-//             ProfilePicture: profileStore.profilePicture || null,
+//             ProfilePicture: profileStore.ProfilePicture || null,
 //             url: profileStore.url || "",
 //         });
 
@@ -465,7 +465,7 @@
 //         profileStore.username,
 //         profileStore.name,
 //         profileStore.bio,
-//         profileStore.profilePicture,
+//         profileStore.ProfilePicture,
 //         profileStore.url,
 //     ]);
 
@@ -516,7 +516,7 @@
 //                 username: data.data.username,
 //                 name: data.data.name,
 //                 bio: data.data.bio,
-//                 profilePicture: data.data.ProfilePicture,
+//                 ProfilePicture: data.data.ProfilePicture,
 //                 url: data.data.url,
 //             });
 
@@ -546,7 +546,7 @@
 //             >
 //                 <ScrollView style={styles.container}>
 //                     {/* Profile Picture */}
-//                     <View style={styles.profilePictureContainer}>
+//                     <View style={styles.ProfilePictureContainer}>
 //                         <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
 //                             <View style={styles.profileImageWrapper}>
 //                                 <Image
@@ -557,7 +557,7 @@
 //                                                 ? theme.userImage
 //                                                 : { uri: theme.userImage }
 //                                     }
-//                                     style={styles.profilePicture}
+//                                     style={styles.ProfilePicture}
 //                                 />
 //                                 <View style={styles.cameraIcon}>
 //                                     <Ionicons name="camera" size={width * 0.05} color="white" />
@@ -673,9 +673,9 @@
 // const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
 //     StyleSheet.create({
 //         container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },
-//         profilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
+//         ProfilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
 //         profileImageWrapper: { position: "relative", marginBottom: height * 0.015 },
-//         profilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
+//         ProfilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
 //         cameraIcon: { position: "absolute", right: 0, bottom: 0, backgroundColor: theme.buttonBg, borderRadius: width * 0.05, padding: width * 0.015 },
 //         imageOptionsContainer: { width: "100%", alignItems: "center", marginTop: height * 0.01 },
 //         imageOption: { backgroundColor: theme.inputBg, padding: height * 0.015, borderRadius: 5, marginVertical: height * 0.005, width: "80%", alignItems: "center" },
@@ -724,7 +724,7 @@ interface ProfileData {
   username: string;
   name: string;
   bio: string;
-  profilePicture: string | null;
+  ProfilePicture: string | null;
   url: string;
 }
 
@@ -740,7 +740,7 @@ function UserEditProfile() {
     username: profileStore.username || "",
     name: profileStore.name || "",
     bio: profileStore.bio || "",
-profilePicture: profileStore.profilePicture || null,
+    ProfilePicture: profileStore.ProfilePicture || null,
     url: profileStore.url || "",
   });
 
@@ -798,14 +798,25 @@ profilePicture: profileStore.profilePicture || null,
         username: data.data.username,
         name: data.data.name,
         bio: data.data.bio,
-        profilePicture: data.data.profilePicture,
+        ProfilePicture: data.data.ProfilePicture,
         url: data.data.url,
       });
+      // useProfileStore.setState({
+      //   username: data.data.username,
+      //   name: data.data.name,
+      //   bio: data.data.bio,
+      //   ProfilePicture: data.data.ProfilePicture
+      //     ? `${data.data.ProfilePicture}?t=${Date.now()}`
+      //     : null,
+      //   url: data.data.url,
+      // });
+
 
       setImageChanged(false);
       setShowImageOptions(false);
 
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile", data.data.username], });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       Alert.alert("Success", "Profile updated successfully!");
     },
@@ -829,18 +840,18 @@ profilePicture: profileStore.profilePicture || null,
       >
         <ScrollView style={styles.container}>
           {/* Profile Picture */}
-          <View style={styles.profilePictureContainer}>
+          <View style={styles.ProfilePictureContainer}>
             <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
               <View style={styles.profileImageWrapper}>
                 <Image
                   source={
-                    profileData.profilePicture
-                      ? { uri: profileData.profilePicture }
+                    profileData.ProfilePicture
+                      ? { uri: profileData.ProfilePicture }
                       : typeof theme.userImage === "number"
                         ? theme.userImage
                         : { uri: theme.userImage }
                   }
-                  style={styles.profilePicture}
+                  style={styles.ProfilePicture}
                 />
                 <View style={styles.cameraIcon}>
                   <Ionicons name="camera" size={width * 0.05} color="white" />
@@ -857,7 +868,7 @@ profilePicture: profileStore.profilePicture || null,
                 <TouchableOpacity style={styles.imageOption} onPress={() => pickImage("gallery")}>
                   <Text style={styles.imageOptionText}>Gallery</Text>
                 </TouchableOpacity>
-                {profileData.profilePicture && (
+                {profileData.ProfilePicture && (
                   <TouchableOpacity
                     style={[styles.imageOption, styles.deleteOption]}
                     onPress={deleteProfilePicture}
@@ -956,9 +967,9 @@ profilePicture: profileStore.profilePicture || null,
 const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },
-    profilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
+    ProfilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
     profileImageWrapper: { position: "relative", marginBottom: height * 0.015 },
-    profilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
+    ProfilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
     cameraIcon: { position: "absolute", right: 0, bottom: 0, backgroundColor: theme.buttonBg, borderRadius: width * 0.05, padding: width * 0.015 },
     imageOptionsContainer: { width: "100%", alignItems: "center", marginTop: height * 0.01 },
     imageOption: { backgroundColor: theme.inputBg, padding: height * 0.015, borderRadius: 5, marginVertical: height * 0.005, width: "80%", alignItems: "center" },
@@ -1036,7 +1047,7 @@ export default UserEditProfile;
 //         username: profileStore.username || "",
 //         name: profileStore.name || "",
 //         bio: profileStore.bio || "",
-//         ProfilePicture: profileStore.profilePicture || null,
+//         ProfilePicture: profileStore.ProfilePicture || null,
 //         url: profileStore.url || "",
 //       });
 //       setCharacterCount({
@@ -1048,7 +1059,7 @@ export default UserEditProfile;
 //       profileStore.username,
 //       profileStore.name,
 //       profileStore.bio,
-//       profileStore.profilePicture,
+//       profileStore.ProfilePicture,
 //       profileStore.url,
 //     ])
 //   );
@@ -1100,7 +1111,7 @@ export default UserEditProfile;
 //         username: data.data.username,
 //         name: data.data.name,
 //         bio: data.data.bio,
-//         profilePicture: data.data.ProfilePicture,
+//         ProfilePicture: data.data.ProfilePicture,
 //         url: data.data.url,
 //       });
 
@@ -1128,7 +1139,7 @@ export default UserEditProfile;
 //       >
 //         <ScrollView style={styles.container}>
 //           {/* Profile Picture */}
-//           <View style={styles.profilePictureContainer}>
+//           <View style={styles.ProfilePictureContainer}>
 //             <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
 //               <View style={styles.profileImageWrapper}>
 //                 <Image
@@ -1139,7 +1150,7 @@ export default UserEditProfile;
 //                       ? theme.userImage
 //                       : { uri: theme.userImage }
 //                   }
-//                   style={styles.profilePicture}
+//                   style={styles.ProfilePicture}
 //                 />
 //                 <View style={styles.cameraIcon}>
 //                   <Ionicons name="camera" size={width * 0.05} color="white" />
@@ -1255,9 +1266,9 @@ export default UserEditProfile;
 // const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
 //   StyleSheet.create({
 //     container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },
-//     profilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
+//     ProfilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
 //     profileImageWrapper: { position: "relative", marginBottom: height * 0.015 },
-//     profilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
+//     ProfilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
 //     cameraIcon: { position: "absolute", right: 0, bottom: 0, backgroundColor: theme.buttonBg, borderRadius: width * 0.05, padding: width * 0.015 },
 //     imageOptionsContainer: { width: "100%", alignItems: "center", marginTop: height * 0.01 },
 //     imageOption: { backgroundColor: theme.inputBg, padding: height * 0.015, borderRadius: 5, marginVertical: height * 0.005, width: "80%", alignItems: "center" },
