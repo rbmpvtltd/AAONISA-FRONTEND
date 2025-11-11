@@ -271,8 +271,6 @@ async function GetCurrentUser() {
 
   const apiUrl = createApiUrl("/users/profile/current");
   const { data } = await axios.get(apiUrl, config);
-  console.log(data);
-
   return data?.userProfile;
 
 }
