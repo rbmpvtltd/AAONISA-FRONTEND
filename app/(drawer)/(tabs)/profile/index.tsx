@@ -114,7 +114,8 @@ export default function MyProfileScreen() {
         onFollowToggle={() => {}}
       />
       <Tabs theme={theme} />
-      <PostGrid videos={profile?.videos ?? []} />
+      {/* <PostGrid videos={profile?.videos ?? []} /> */}
+            <PostGrid videos={profile?.videos || []} username={profile?.username} />
     </SafeAreaView>
   );
 }

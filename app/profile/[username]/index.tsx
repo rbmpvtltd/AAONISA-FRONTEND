@@ -51,7 +51,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     // backend data destructuring
     const profilePicture = profile.userProfile.ProfilePicture || null;
     console.log("new profilePicture", profilePicture);
-    
+
     const followersCount = profile.followers?.length || 0;
     const followingsCount = profile.followings?.length || 0;
 
@@ -177,76 +177,121 @@ export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
 );
 
 const VideoItem = ({
-  videoUrl,
-  id,
-  username,
+    videoUrl,
+    id,
+    username,
 }: {
-  videoUrl: string;
-  id: string;
-  username: string;
+    videoUrl: string;
+    id: string;
+    username: string;
 }) => {
-  const router = useRouter();
+    const router = useRouter();
 
-  const player = useVideoPlayer(videoUrl, (p) => {
-    p.loop = true;
-    p.muted = true;
-    p.pause();
-  });
-
-  return (
-    <TouchableOpacity
-      activeOpacity={0.9}
-      onPress={() =>
-        router.push(
-          `/profile/${username}/userReelsFeed/${id}`
-        )
-      }
-    >
-      <View style={styles.videoContainer}>
-        <VideoView
-          style={styles.postVideo}  
-          player={player}
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
-          contentFit="cover"
-          nativeControls={false}
-        />
-      </View>
-    </TouchableOpacity>
-  );
-};
-
-export const PostGrid: React.FC<{ videos: any[] }> = ({ videos }) => {
-    if (!videos || videos.length === 0) {
-        return (
-            <View style={{ alignItems: "center", marginTop: 50 }}>
-                <Text>No videos uploaded yet.</Text>
-            </View>
-        );
-    }
+    const player = useVideoPlayer(videoUrl, (p) => {
+        p.loop = true;
+        p.muted = true;
+        p.pause();
+    });
 
     return (
-        <FlatList
-            data={videos}
-            keyExtractor={(item: any) => item.uuid}
-            numColumns={3}
-            renderItem={({ item }) => {
-                if (item.videoUrl) {
-                    return <VideoItem videoUrl={item.videoUrl} id={item.uuid} username={item.username}
-            />
-                }
+        <TouchableOpacity
+            activeOpacity={0.9}
+            onPress={() => {
+                console.log("username is ", username, " id is ", id);
+                router.push(`/p/${username}/${id}`)
+                console.log(`/p/${username}/${id}`);
 
-                return (
-                    <Image
-                        source={{ uri: item.image }}
-                        style={styles.postImage}
-                    />
-                );
-            }}
-            showsVerticalScrollIndicator={false}
-        />
+            }
+
+            }
+        >
+            <View style={styles.videoContainer}>
+                <VideoView
+                    style={styles.postVideo}
+                    player={player}
+                    allowsFullscreen={false}
+                    allowsPictureInPicture={false}
+                    contentFit="cover"
+                    nativeControls={false}
+
+                    // arbaaz chouhan
+                />
+            </View>
+        </TouchableOpacity>
     );
 };
+
+// export const PostGrid: React.FC<{ videos: any[],  username?: string; }> = ({ videos }) => {
+//     if (!videos || videos.length === 0) {
+//         return (
+//             <View style={{ alignItems: "center", marginTop: 50 }}>
+//                 <Text>No videos uploaded yet.</Text>
+//             </View>
+//         );
+//     }
+
+//     return (
+//         <FlatList
+//             data={videos}
+//             keyExtractor={(item: any) => item.uuid}
+//             numColumns={3}
+//             renderItem={({ item }) => {
+//                 if (item.videoUrl) {
+//                     return <VideoItem videoUrl={item.videoUrl} id={item.uuid} username={item.username}
+//             />
+//                 }
+
+//                 return (
+//                     <Image
+//                         source={{ uri: item.image }}
+//                         style={styles.postImage}
+//                     />
+//                 );
+//             }}
+//             showsVerticalScrollIndicator={false}
+//         />
+//     );
+// };
+
+
+export const PostGrid: React.FC<{ videos: any[]; username: string }>
+    = ({ videos, username }) => {
+
+        if (!videos || videos.length === 0) {
+            return (
+                <View style={{ alignItems: "center", marginTop: 50 }}>
+                    <Text>No videos uploaded yet.</Text>
+                </View>
+            );
+        }
+
+        return (
+            <FlatList
+                data={videos}
+                keyExtractor={(item: any) => item.uuid}
+                numColumns={3}
+                renderItem={({ item }) => {
+                    if (item.videoUrl) {
+                        return (
+                            <VideoItem
+                                videoUrl={item.videoUrl}
+                                id={item.uuid}
+                                username={username}
+                            />
+                        );
+                    }
+
+                    return (
+                        <Image
+                            source={{ uri: item.image }}
+                            style={styles.postImage}
+                        />
+                    );
+                }}
+                showsVerticalScrollIndicator={false}
+            />
+        );
+    };
 
 
 export const ProfileScreen: React.FC = () => {
@@ -370,7 +415,7 @@ export const ProfileScreen: React.FC = () => {
                 isFollowing={isFollowing}
             />
             <Tabs theme={theme} />
-            <PostGrid videos={profile?.videos || []} />
+            <PostGrid videos={profile?.videos || []} username={profile?.username} />
         </SafeAreaView>
     );
 };
