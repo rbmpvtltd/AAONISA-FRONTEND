@@ -5,17 +5,17 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-  Alert,
-  Dimensions,
-  Image,
-  KeyboardAvoidingView,
-  Platform,
-  ScrollView,
-  StyleSheet,
-  Text,
-  TextInput,
-  TouchableOpacity,
-  View,
+    Alert,
+    Dimensions,
+    Image,
+    KeyboardAvoidingView,
+    Platform,
+    ScrollView,
+    StyleSheet,
+    Text,
+    TextInput,
+    TouchableOpacity,
+    View,
 } from "react-native";
 const { width, height } = Dimensions.get("window");
 
@@ -32,7 +32,7 @@ const UserEditProfile = () => {
         username: storeUsername,
         name: storeName,
         bio: storeBio,
-        profilePicture: storeProfilePicture,
+        ProfilePicture: storeProfilePicture,
         url: storeUrl,
     } = useProfileStore();
     const theme = useAppTheme();
@@ -85,7 +85,7 @@ const UserEditProfile = () => {
                     username: profileData.username,
                     name: profileData.name,
                     bio: profileData.bio,
-                    profilePicture: data.dataUri,
+                    ProfilePicture: data.dataUri,
                     url: profileData.url,
                 });
 

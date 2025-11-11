@@ -138,44 +138,8 @@ const [showOptions, setShowOptions] = React.useState(false);
 
 {/* Top Bar */}
 <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
- {/* <View style={styles.tabsContainer}>
-  {['Followings', 'News', 'Explore'].map((tab) => (
-    <TouchableOpacity
-      key={tab}
-      onPress={async () => {  // 👈 async lagaya
-        setActiveTab(tab as any);
-
-        let response;
-        switch (tab) {
-          case 'Followings':
-            response = await getCategoryReel('followings', 1, 10);
-            break;
-          case 'News':
-            response = await getCategoryReel('news', 1, 10);
-            break;
-          case 'Explore':
-            response = await getCategoryReel('explore', 1, 10);
-            break;
-        }
-
-        console.log("RESPONSE:", response); // ✅ yahan actual data milega
-      }}
-    >
-      <Text
-        style={[
-          styles.tabText,
-          activeTab === tab && styles.activeTabText,
-        ]}
-      >
-        {tab}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</View> */}
-
-
 <View style={styles.tabsContainer}>
-  {['Followings', 'News', 'Explore'].map((tab) => (
+  {['Explore', 'News', 'Followings'].map((tab) => (
     <TouchableOpacity
       key={tab}
       onPress={() => setActiveTab(tab as any)}

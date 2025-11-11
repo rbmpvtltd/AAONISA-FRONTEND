@@ -277,7 +277,7 @@ export interface ReelItem {
 interface ReelsState {
   reels: ReelItem[];
   currentIndex: number;
-  activeTab: 'Followings' | 'News' | 'Explore';
+  activeTab: 'Explore' | 'News' | 'Followings';
   isMuted: boolean;
   showIcon: boolean;
   fadeAnim: Animated.Value;
@@ -288,199 +288,18 @@ interface ReelsState {
   addComment: (id: string) => void;
   addShare: (id: string) => void;
   setCurrentIndex: (index: number) => void;
-  setActiveTab: (tab: 'Followings' | 'News' | 'Explore') => void;
+  setActiveTab: (tab: 'Explore' | 'News' | 'Followings') => void;
   toggleMute: () => void;
   setShowIcon: (val: boolean) => void;
   setAutoScroll: (value: boolean) => void; // NEW: setter function
 
-   fetchReelsByCategory: (category: 'followings' | 'news' | 'explore') => Promise<void>;
+   fetchReelsByCategory: (category: 'explore' | 'news' | 'followings') => Promise<void>;
   //   NEW: URL Management Functions
   updateReelURL: (reelId: string) => void;
 }
 
 export const useReelsStore = create<ReelsState>((set, get) => ({
-  reels: [
-    // {
-    //   id: '1',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2017.mp4",
-    //   user: {
-    //     username: 'traveler_jane',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
-    //   likes: 12500,
-    //   comments: 340,
-    //   shares: 89,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '2',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
-    //   user: {
-    //     username: 'foodie_mike',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
-    //   likes: 8900,
-    //   comments: 210,
-    //   shares: 45,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '3',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
-    //   user: {
-    //     username: 'fitness_guru',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Morning workout routine! 💪 #fitness #workout #health',
-    //   likes: 15600,
-    //   comments: 420,
-    //   shares: 120,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '4',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-    //   user: {
-    //     username: 'traveler_jane',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
-    //   likes: 12500,
-    //   comments: 340,
-    //   shares: 89,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '5',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-    //   user: {
-    //     username: 'foodie_mike',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
-    //   likes: 8900,
-    //   comments: 210,
-    //   shares: 45,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '6',
-    //   videoUrl:
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback13.mp4",
-    //   user: {
-    //     username: 'fitness_guru',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Morning workout routine! 💪 #fitness #workout #health',
-    //   likes: 15600,
-    //   comments: 420,
-    //   shares: 120,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '7',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback18.mp4",
-    //   user: {
-    //     username: 'traveler_jane',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
-    //   likes: 12500,
-    //   comments: 340,
-    //   shares: 89,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '8',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback3.mp4",
-    //   user: {
-    //     username: 'foodie_mike',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
-    //   likes: 8900,
-    //   comments: 210,
-    //   shares: 45,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '9',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback5.mp4",
-    //   user: {
-    //     username: 'fitness_guru',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Morning workout routine! 💪 #fitness #workout #health',
-    //   likes: 15600,
-    //   comments: 420,
-    //   shares: 120,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '10',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback7.mp4",
-    //   user: {
-    //     username: 'traveler_jane',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1494790108377-be9c29b29330?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Beautiful sunset at the beach 🌅 #travel #sunset #beach',
-    //   likes: 12500,
-    //   comments: 340,
-    //   shares: 89,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '11',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback9.mp4",
-    //   user: {
-    //     username: 'foodie_mike',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Delicious homemade pasta recipe! 🍝 #food #cooking #pasta',
-    //   likes: 8900,
-    //   comments: 210,
-    //   shares: 45,
-    //   isLiked: false,
-    // },
-    // {
-    //   id: '12',
-    //   videoUrl: 
-    //     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2017.mp4",
-    //   user: {
-    //     username: 'fitness_guru',
-    //     avatar:
-    //       'https://images.unsplash.com/photo-1584999734482-0361aecad844?fm=jpg&q=60&w=3000',
-    //   },
-    //   caption: 'Morning workout routine! 💪 #fitness #workout #health',
-    //   likes: 15600,
-    //   comments: 420,
-    //   shares: 120,
-    //   isLiked: false,
-    // },
-  ],
+  reels: [],
 
   currentIndex: 0,
   activeTab: 'Followings',
