@@ -32,7 +32,7 @@ const UserEditProfile = () => {
         username: storeUsername,
         name: storeName,
         bio: storeBio,
-        ProfilePicture: storeProfilePicture,
+            ProfilePicture: storeProfilePicture,
         url: storeUrl,
     } = useProfileStore();
     const theme = useAppTheme();

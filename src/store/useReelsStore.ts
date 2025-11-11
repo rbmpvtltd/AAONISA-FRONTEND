@@ -258,7 +258,6 @@
 import * as Linking from 'expo-linking';
 import { Animated } from 'react-native';
 import { create } from 'zustand';
-import { getCategoryReel } from '../api/reels-api';
 
 export interface ReelItem {
   id: string;
@@ -267,10 +266,10 @@ export interface ReelItem {
     username: string;
     avatar: string;
   };
-  caption?: string;
-  likes?: number;
-  comments?: number;
-  shares?: number;
+  caption: string;
+  likes: number;
+  comments: number;
+  shares: number;
   isLiked?: boolean;
 }
 
@@ -308,30 +307,6 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   fadeAnim: new Animated.Value(0),
    autoScroll: false,    
 
-fetchReelsByCategory: async (category) => {
-  try {
-    const res = await getCategoryReel(category, 1, 10);
-    console.log("API response for", category, ":", res);
-
-    const reelsData = Array.isArray(res?.data) ? res.data : [];
-    const cleanData = reelsData
-      .filter((item: any) => item && item.id && item.videoUrl)
-      .map((item : any) => ({
-        ...item,
-        likes: item.likesCount || 0,
-        comments: item.commentsCount || 0,
-        shares: item.sharesCount || 0,
-        isLiked: false,
-      }));
-
-    console.log("Cleaned Reels Data:", cleanData);
-    set({ reels: cleanData });
-  } catch (err) {
-    console.error("Error fetching reels:", err);
-    set({ reels: [] });
-  }
-},
-
   toggleLike: (id: string) =>
     set((state) => ({
       reels: state.reels.map((reel) =>
@@ -339,8 +314,7 @@ fetchReelsByCategory: async (category) => {
           ? {
             ...reel,
             isLiked: !reel.isLiked,
-             likes: (reel.likes ?? 0) + (reel.isLiked ? -1 : 1), 
-            // likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
+            likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
           }
           : reel
       ),
@@ -349,19 +323,14 @@ fetchReelsByCategory: async (category) => {
   addComment: (id: string) =>
     set((state) => ({
       reels: state.reels.map((reel) =>
-        reel.id === id ? 
-      // { ...reel, comments: reel.comments + 1 } : reel
-  { ...reel, comments: (reel.comments ?? 0) + 1 } : reel
+        reel.id === id ? { ...reel, comments: reel.comments + 1 } : reel
       ),
     })),
 
   addShare: (id: string) =>
     set((state) => ({
       reels: state.reels.map((reel) =>
-        // reel.id === id ? { ...reel, shares: reel.shares + 1 } : reel
-      reel.id === id
-        ? { ...reel, shares: (reel.shares ?? 0) + 1 } 
-        : reel
+        reel.id === id ? { ...reel, shares: reel.shares + 1 } : reel
       ),
     })),
 
