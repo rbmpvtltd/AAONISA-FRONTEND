@@ -62,7 +62,7 @@ const CommentPage = () => {
   });
   useEffect(() => {
   const fetchComments = async () => {
-    if (!currentUser.id) return; // wait until user is loaded ✅
+    if (!currentUser.id) return;
 
     try {
       const response = await getCommentsApi(postId);

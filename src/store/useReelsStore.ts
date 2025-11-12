@@ -261,6 +261,7 @@ import { getCategoryReel } from '../api/reels-api';
 
 export interface ReelItem {
   id: string;
+  uuid: string;
   videoUrl: string;
   user: {
     username: string;
@@ -331,19 +332,35 @@ fetchReelsByCategory: async (category) => {
   }
 },
 
+  // toggleLike: (id: string) =>
+  //   set((state) => ({
+  //     reels: state.reels.map((reel) =>
+  //       reel.id === id
+  //         ? {
+  //           ...reel,
+  //           isLiked: !reel.isLiked,
+  //            likes: (reel.likes ?? 0) + (reel.isLiked ? -1 : 1), 
+  //           // likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
+  //         }
+  //         : reel
+  //     ),
+  //   })),
   toggleLike: (id: string) =>
-    set((state) => ({
-      reels: state.reels.map((reel) =>
-        reel.id === id
-          ? {
-            ...reel,
-            isLiked: !reel.isLiked,
-             likes: (reel.likes ?? 0) + (reel.isLiked ? -1 : 1), 
-            // likes: reel.isLiked ? reel.likes - 1 : reel.likes + 1,
-          }
-          : reel
-      ),
-    })),
+  set((state) => ({
+    reels: state.reels.map((reel) => {
+      if (reel.uuid !== id) return reel;  // ✅ Correct unique key
+
+      const newLiked = !reel.isLiked;
+      const newLikesCount = (reel.likes ?? 0) + (newLiked ? 1 : -1);
+
+      return {
+        ...reel,
+        isLiked: newLiked,
+        likes: Math.max(0, newLikesCount), // ✅ avoids negative count
+      };
+    }),
+  })),
+
 
   addComment: (id: string) =>
     set((state) => ({

@@ -287,7 +287,7 @@
 // // // // //           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
 // // // // //         </TouchableOpacity>
 // // // // //       </View>
-          
+
 // // // // //       <BookmarkPanel />
 
 
@@ -585,7 +585,7 @@
 // // // //   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
 // // // //   const { username } = useProfileStore();
 // // // //   console.log("username in userrellfeed page", username);
-  
+
 // // // //   const [showOptions, setShowOptions] = useState(false);
 // // // //   const [viewed, setViewed] = useState(false);
 
@@ -971,9 +971,9 @@
 // // //   });
 
 // // //  console.log("data resived in userreelfeedpage",profile);
- 
+
 // // //   console.log("username risevid in userreelspage", username);
-  
+
 // // //   const videos = profile?.videos || [];
 // // //   const [currentIndex, setCurrentIndex] = useState<number>(0);
 
@@ -993,7 +993,7 @@
 
 // // //   console.log("user id  resive in userreelfeed page", id);
 // // //     console.log("user video  resive in userreelfeed page", videos);
-  
+
 
 // // //   // Auto scroll
 // // //   useEffect(() => {
@@ -1201,7 +1201,7 @@
 // //   }, [player, currentIndex, index]);
 
 
-  
+
 // //   return (
 // //     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: "black" }}>
 // //       <Pressable style={{ flex: 1 }} onPress={handleToggleMute}>
@@ -2687,7 +2687,7 @@
 //   const { id, username } = useLocalSearchParams();
 
 //   console.log("id username here in user post", id ,username);
-  
+
 //   const [isMuted, setIsMuted] = useState(false);
 //   const [currentIndex, setCurrentIndex] = useState(0);
 
@@ -2950,7 +2950,7 @@
 //   }, [currentIndex, index, isMuted]);
 
 //   return (
-  
+
 //   <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
 //   <Pressable
 //     style={{ flex: 1 }}
@@ -3192,6 +3192,8 @@
 // All Your Imports
 import { GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
+import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
+import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
 import { useIsFocused } from '@react-navigation/native';
@@ -3214,7 +3216,6 @@ import {
   View
 } from "react-native";
 import Ionicons from 'react-native-vector-icons/Ionicons';
-
 // Reel Item Component
 const UserReelItem = ({
   item,
@@ -3224,37 +3225,91 @@ const UserReelItem = ({
   handleToggleMute,
   showIcon,
   fadeAnim,
+  likeMutation,
   toggleLike,
   addComment,
+  currentUserId,
   addShare,
+  reelUsername,
+  profilePicture
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
   const { username } = useProfileStore();
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const [showOptions, setShowOptions] = React.useState(false);
-  
-  const player = useVideoPlayer(
-    { uri: item.videoUrl },
-    (instance) => {
-      instance.loop = true;
-      instance.volume = isMuted ? 0 : 1;
-    }
+  const markViewedMutation = useMarkViewedMutation();
+  const [viewed, setViewed] = useState(false);
+
+  const [liked, setLiked] = useState(
+    Array.isArray(item.likes)
+      ? item.likes.some((like: any) => like.user_id === currentUserId)
+      : false
   );
 
-  // Handle play/pause based on scroll
+  const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
+    instance.loop = true;
+    instance.volume = isMuted ? 0 : 1;
+  });
+
+  // Handle play/pause based on scroll safely
   useEffect(() => {
+    if (!player) return;
+
     if (currentIndex === index) {
-      player.currentTime = 0;
+      if (player.currentTime < 0.5) player.currentTime = 0;
       player.play();
       player.volume = isMuted ? 0 : 1;
     } else {
-      try {
-        player.pause();
-      } catch { }
+      try { player.pause(); } catch { }
       player.volume = 0;
     }
   }, [currentIndex, index, isMuted]);
+
+  const handleLike = async () => {
+    const newLiked = !liked;
+    setLiked(newLiked);
+
+    try {
+      await likeMutation.mutateAsync(item.uuid);
+    } catch (error) {
+      console.log("Like failed:", error);
+      setLiked(!newLiked);
+    }
+  };
+
+
+  useEffect(() => {
+    let frameId: number;
+
+    const checkTime = () => {
+      try {
+        // Only mark when current reel is active and playing
+        if (currentIndex === index && player?.playing) {
+          const time = player.currentTime;
+          if (!viewed && time >= 10) {
+            setViewed(true);
+            markViewedMutation.mutate(item.uuid);
+            console.log(`👀 User viewed reel: ${item.uuid} | Time watched: ${time}s`);
+          }
+        }
+      } catch (e) {
+        console.log("View check error:", e);
+      }
+
+      frameId = requestAnimationFrame(checkTime);
+    };
+
+    frameId = requestAnimationFrame(checkTime);
+    return () => cancelAnimationFrame(frameId);
+  }, [player, currentIndex, index, viewed]);
+
+  console.log("username in profile", reelUsername);
+  console.log("user item.ProfilePicture ", profilePicture);
+  console.log("user comment resived", item.comments);
+  console.log("user audio", item.audio);
+  
+
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -3267,7 +3322,10 @@ const UserReelItem = ({
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
           key={`video-${item.id}-${index}`}
           player={player}
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
           contentFit="cover"
+          nativeControls={false}
         />
 
         {/* Volume Icon */}
@@ -3286,7 +3344,7 @@ const UserReelItem = ({
       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
         <View style={styles.userInfo}>
           <Image
-            source={{ uri: item.profilePicture }}
+            source={{ uri: profilePicture }}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
@@ -3295,25 +3353,39 @@ const UserReelItem = ({
               borderColor: '#fff',
             }}
           />
-          <Text style={styles.username}>@{item.user?.username || username}</Text>
+
+          <Text style={styles.username}>{reelUsername}</Text>
         </View>
         <Text style={styles.caption}>{item.caption}</Text>
+        <View style={styles.musicInfo}>
+          <Text style={styles.musicIcon}>♪</Text>
+          <Text style={styles.musicText}>
+            {item.audio || "Original Sound"}
+          </Text>
+        </View>
       </View>
 
       {/* Right Actions - Improved Layout */}
       <View style={[styles.rightActions, { bottom: SCREEN_HEIGHT * 0.12 }]}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          disabled={likeMutation.isPending}
+          onPress={handleLike}
+        >
           <Ionicons
-            name={item.isLiked ? 'heart' : 'heart-outline'}
+            name={liked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}
-            color={item.isLiked ? 'red' : '#fff'}
+            color={liked ? '#FF0000' : '#fff'}
           />
-          <Text style={styles.actionText}>{item.likes?.length || 0}</Text>
+          <Text style={styles.actionText}>
+            {Array.isArray(item.likes) ? item.likes.length : 0}
+          </Text>
         </TouchableOpacity>
+
 
         <TouchableOpacity
           style={styles.actionButton}
-          onPress={() => router.push(`/comment/${item.id}`)}
+          onPress={() => router.push(`/comment/${item.uuid}`)}
         >
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
@@ -3324,8 +3396,8 @@ const UserReelItem = ({
           <Text style={styles.actionText}>{item.shares?.length || 0}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity 
-          style={[styles.actionButton, { marginTop: 8 }]} 
+        <TouchableOpacity
+          style={[styles.actionButton, { marginTop: 8 }]}
           onPress={() => setShowOptions(true)}
         >
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
@@ -3352,6 +3424,7 @@ const UserReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
+  const likeMutation = useLikeMutation();
 
   const { id, username } = useLocalSearchParams();
 
@@ -3364,6 +3437,8 @@ const UserReelsFeed = () => {
     queryFn: () => GetProfileUsername(username as string || ""),
     enabled: !!username,
   });
+
+console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
 
@@ -3412,6 +3487,8 @@ const UserReelsFeed = () => {
     }
   };
 
+
+
   // Mute on blur
   useEffect(() => {
     setIsMuted(!isFocused);
@@ -3448,9 +3525,12 @@ const UserReelsFeed = () => {
             handleToggleMute={handleToggleMute}
             showIcon={showIcon}
             fadeAnim={fadeAnim}
-            toggleLike={toggleLike}
+            toggleLike={(id: string) => likeMutation.mutate(id)}
             addComment={addComment}
             addShare={addShare}
+            likeMutation={likeMutation}
+            reelUsername={profile?.username}
+            profilePicture={profile?.userProfile?.ProfilePicture}
           />
         )}
         keyExtractor={(item, i) => item.id?.toString() ?? i.toString()}
@@ -3466,9 +3546,9 @@ const UserReelsFeed = () => {
 
 // Improved Styles
 const styles = StyleSheet.create({
-  container: { 
-    flex: 1, 
-    backgroundColor: 'black' 
+  container: {
+    flex: 1,
+    backgroundColor: 'black'
   },
   centerIcon: {
     position: "absolute",
@@ -3482,43 +3562,46 @@ const styles = StyleSheet.create({
     width: 70,
     height: 70,
   },
-  bottomContent: { 
-    position: 'absolute', 
-    left: '4%', 
+  bottomContent: {
+    position: 'absolute',
+    left: '4%',
     right: '20%',
     paddingHorizontal: 12,
   },
-  userInfo: { 
-    flexDirection: 'row', 
-    alignItems: 'center', 
-    marginBottom: 8 
+  userInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    marginBottom: 8
   },
-  username: { 
-    color: '#fff', 
-    fontSize: 16, 
+  username: {
+    color: '#fff',
+    fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
   },
-  caption: { 
-    color: '#fff', 
-    fontSize: 14, 
+  caption: {
+    color: '#fff',
+    fontSize: 14,
     marginBottom: 8,
     lineHeight: 18,
   },
-  rightActions: { 
-    position: 'absolute', 
-    right: '4%', 
+  musicInfo: { flexDirection: 'row', alignItems: 'center' },
+  musicIcon: { fontSize: 16, marginRight: 8, color: '#fff' },
+  musicText: { color: '#fff', fontSize: 14 },
+  rightActions: {
+    position: 'absolute',
+    right: '4%',
     alignItems: 'center',
     paddingHorizontal: 8,
   },
-  actionButton: { 
-    alignItems: 'center', 
+  actionButton: {
+    alignItems: 'center',
     marginBottom: 20,
     paddingVertical: 4,
   },
-  actionText: { 
-    color: '#fff', 
-    fontSize: 13, 
+  actionText: {
+    color: '#fff',
+    fontSize: 13,
     fontWeight: '600',
     marginTop: 4,
   },
