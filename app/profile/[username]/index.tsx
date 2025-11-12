@@ -214,45 +214,11 @@ const VideoItem = ({
                     contentFit="cover"
                     nativeControls={false}
 
-                    // arbaaz chouhan
                 />
             </View>
         </TouchableOpacity>
     );
 };
-
-// export const PostGrid: React.FC<{ videos: any[],  username?: string; }> = ({ videos }) => {
-//     if (!videos || videos.length === 0) {
-//         return (
-//             <View style={{ alignItems: "center", marginTop: 50 }}>
-//                 <Text>No videos uploaded yet.</Text>
-//             </View>
-//         );
-//     }
-
-//     return (
-//         <FlatList
-//             data={videos}
-//             keyExtractor={(item: any) => item.uuid}
-//             numColumns={3}
-//             renderItem={({ item }) => {
-//                 if (item.videoUrl) {
-//                     return <VideoItem videoUrl={item.videoUrl} id={item.uuid} username={item.username}
-//             />
-//                 }
-
-//                 return (
-//                     <Image
-//                         source={{ uri: item.image }}
-//                         style={styles.postImage}
-//                     />
-//                 );
-//             }}
-//             showsVerticalScrollIndicator={false}
-//         />
-//     );
-// };
-
 
 export const PostGrid: React.FC<{ videos: any[]; username: string }>
     = ({ videos, username }) => {
