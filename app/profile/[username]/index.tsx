@@ -8,6 +8,7 @@ import React, { useEffect, useState } from "react";
 import {
     ActivityIndicator,
     Dimensions,
+    FlatList,
     Image,
     Linking,
     StyleSheet,
@@ -15,7 +16,6 @@ import {
     TouchableOpacity,
     View
 } from "react-native";
-import { FlatList } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
 
@@ -176,54 +176,71 @@ export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
     </View>
 );
 
-const VideoItem = ({
-    videoUrl,
-    id,
-    username,
-}: {
-    videoUrl: string;
+type VideoItemProps = {
+    videoUrl?: string;
+    image?: string;
     id: string;
     username: string;
+    index: number;
+    onPressItem: (index: number) => void;
+};
+export const VideoItem: React.FC<VideoItemProps> = ({
+    videoUrl,
+    image,
+    id,
+    username,
+    index,
+    onPressItem,
 }) => {
-    const router = useRouter();
+      const [isLoading, setIsLoading] = useState(true);
+    const player = videoUrl
+        ? useVideoPlayer(videoUrl, (p) => {
+            p.loop = true;
+            p.muted = true;
+            p.pause();
+        })
+        : null;
 
-    const player = useVideoPlayer(videoUrl, (p) => {
-        p.loop = true;
-        p.muted = true;
-        p.pause();
-    });
+    useEffect(() => {
+        if (player) {
+            player.pause();
+            player.currentTime = 0;
+        }
+    }, [player]);
 
     return (
         <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => {
-                console.log("username is ", username, " id is ", id);
-                router.push(`/p/${username}/${id}`)
-                console.log(`/p/${username}/${id}`);
-
-            }
-
-            }
+            onPress={() => onPressItem(index)}
         >
             <View style={styles.videoContainer}>
-                <VideoView
-                    style={styles.postVideo}
-                    player={player}
-                    allowsFullscreen={false}
-                    allowsPictureInPicture={false}
-                    contentFit="cover"
-                    nativeControls={false}
-
-                />
+                {videoUrl && player ? (
+                    <VideoView
+                        style={styles.postVideo}
+                        player={player}
+                        allowsFullscreen={false}
+                        allowsPictureInPicture={false}
+                        contentFit="cover"
+                        nativeControls={false}
+                    />
+                ) : image ? (
+                    <Image source={{ uri: image }} style={styles.postImage} />
+                ) : null}
             </View>
         </TouchableOpacity>
     );
 };
 
-export const PostGrid: React.FC<{ videos: any[]; username: string }>
-    = ({ videos, username }) => {
+export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos, username }) => {
+    const router = useRouter();
+    const handlePressVideo = (index: number) => {
+        const video = videos[index];
+        if (!video) return;
 
-        if (!videos || videos.length === 0) {
+        router.push(`/p/${username}/${video.uuid}`);
+    };
+
+         if (!videos || videos.length === 0) {
             return (
                 <View style={{ alignItems: "center", marginTop: 50 }}>
                     <Text>No videos uploaded yet.</Text>
@@ -231,33 +248,31 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }>
             );
         }
 
-        return (
-            <FlatList
-                data={videos}
-                keyExtractor={(item: any) => item.uuid}
-                numColumns={3}
-                renderItem={({ item }) => {
-                    if (item.videoUrl) {
-                        return (
-                            <VideoItem
-                                videoUrl={item.videoUrl}
-                                id={item.uuid}
-                                username={username}
-                            />
-                        );
-                    }
+    return (
+        <FlatList
 
-                    return (
-                        <Image
-                            source={{ uri: item.image }}
-                            style={styles.postImage}
-                        />
-                    );
-                }}
-                showsVerticalScrollIndicator={false}
-            />
-        );
-    };
+            data={videos}
+            keyExtractor={(item: any) => item.uuid}
+            numColumns={3}
+            renderItem={({ item, index }) =>
+                item.videoUrl ? (
+                    <VideoItem
+                        videoUrl={item.videoUrl}
+                        id={item.uuid}
+                        username={username}
+                        index={index}
+                        onPressItem={handlePressVideo}
+                    />
+                ) : (
+                    <Image source={{ uri: item.image }} style={styles.postImage} />
+                )
+            }
+            showsVerticalScrollIndicator={false}
+        />
+    );
+};
+
+
 
 
 export const ProfileScreen: React.FC = () => {
@@ -357,6 +372,8 @@ export const ProfileScreen: React.FC = () => {
             </View>
         );
     }
+
+    
 
     // Determine if viewing own profile
     const isOwnProfile =
