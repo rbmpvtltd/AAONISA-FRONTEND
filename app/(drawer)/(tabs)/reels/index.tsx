@@ -44,7 +44,7 @@ const ReelItem = ({
   const {
     openBookmarkPanel,
   } = useBookmarkStore();
-  const videoKey = currentIndex === index ? `video-${item.uuid}-active` : `video-${item.uuid}`;
+  const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
 
   // create player
   const player = useVideoPlayer(

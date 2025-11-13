@@ -21,6 +21,7 @@ const uploadReel = async (formData: FormData) => {
       "Content-Type": "multipart/form-data",
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
+    timeout: 300000,
     withCredentials: true,
   });
 
