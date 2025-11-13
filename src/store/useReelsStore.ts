@@ -302,7 +302,7 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   reels: [],
 
   currentIndex: 0,
-  activeTab: 'Followings',
+  activeTab: 'Explore',
   isMuted: false,
   showIcon: false,
   fadeAnim: new Animated.Value(0),
