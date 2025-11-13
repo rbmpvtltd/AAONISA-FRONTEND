@@ -534,6 +534,7 @@ export default function ExploreMergedScreen() {
   const [visibleIds, setVisibleIds] = useState<Array<string | number>>([]);
   const LOAD_MORE_THRESHOLD = 480;
 
+
   const checkVisible = useCallback((scrollY: number) => {
     const visible: Array<string | number> = [];
     const topVisible = scrollY;
@@ -544,7 +545,8 @@ export default function ExploreMergedScreen() {
         ref?.measure?.((fx, fy, w, h, px, py) => {
           const itemTop = py;
           const itemBottom = py + h;
-          const visibleRatio = Math.max(0, Math.min(itemBottom, bottomVisible) - Math.max(itemTop, topVisible)) / Math.max(1, h);
+          const visibleRatio =
+            Math.max(0, Math.min(itemBottom, bottomVisible) - Math.max(itemTop, topVisible)) / Math.max(1, h);
           if (visibleRatio >= 0.3) visible.push(id);
         });
       } catch { }
@@ -601,22 +603,35 @@ export default function ExploreMergedScreen() {
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         {/* SEARCH BAR */}
-        <SearchBar theme={theme} searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchLoading={searchLoading} router={router} />
+        <SearchBar
+          theme={theme}
+          searchQuery={searchQuery}
+          setSearchQuery={setSearchQuery}
+          searchLoading={searchLoading}
+          router={router}
+        />
 
-        {debouncedQuery ? (
-          <SearchResults theme={theme} searchResults={searchResults} router={router} />
-        ) : (
+        {/* Always render both, but hide/show using conditional styles */}
+        <View style={{ flex: 1 }}>
+          <SearchResults
+            theme={theme}
+            searchResults={searchResults}
+            router={router}
+            style={{ display: debouncedQuery ? "flex" : "none" }}
+          />
+
           <ScrollView
-            ref={r => { (scrollViewRef.current = r) }}
+            ref={scrollViewRef}
             contentContainerStyle={{ padding: spacing }}
             onScroll={onScroll}
             scrollEventThrottle={100}
             showsVerticalScrollIndicator={false}
+            style={{ display: debouncedQuery ? "none" : "flex" }}
           >
             <View style={styles.masonryRow}>
               {columns.map((col, colIndex) => (
                 <View style={styles.column} key={`col-${colIndex}`}>
-                  {col.map((item, rowIndex) => (
+                  {col.map((item) => (
                     <MasonryCard
                       key={String(item.id)}
                       item={item}
@@ -626,15 +641,20 @@ export default function ExploreMergedScreen() {
                         if (!r) cardRefs.current.delete(item.id);
                         else cardRefs.current.set(item.id, r);
                       }}
-                      isPlayable={playableIds.includes(item.id) && visibleIds.includes(item.id)}
+                      // isPlayable={playableIds.includes(item.id) && visibleIds.includes(item.id)}
+                      isPlayable={visibleIds.includes(item.id)}
                     />
                   ))}
                 </View>
               ))}
             </View>
-            {isFetchingNextPage && <ActivityIndicator size="small" color={theme.text} style={{ padding: 12 }} />}
+
+            {isFetchingNextPage && (
+              <ActivityIndicator size="small" color={theme.text} style={{ padding: 12 }} />
+            )}
           </ScrollView>
-        )}
+        </View>
+
       </View>
     </SafeAreaView>
   );
@@ -702,49 +722,38 @@ const MasonryCard = React.memo(({ item, router, theme, registerRef, isPlayable }
   const INTERVAL_MS = 200;
   const loopIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
 
-  // ✅ useVideoPlayer **top-level**
+  // Hooks always run
   const player = useVideoPlayer(item.videoUrl || "", p => {
     p.muted = true;
-    p.loop = false;
+    p.loop = true;
   });
 
-  // --- Play/pause logic inside useEffect ---
+  // Play/pause logic inside effect
   useEffect(() => {
-    let mounted = true;
+    if (!player) return;
 
-    if (!isPlayable) {
-      try {
-        player?.pause();
-      } catch { }
+    if (isPlayable) {
+      try { player.play(); } catch { }
+      loopIntervalRef.current = setInterval(() => {
+        try {
+          const status = (player as any)?.status;
+          if (status?.currentTime >= PREVIEW_SECONDS) player?.replay();
+        } catch { }
+      }, INTERVAL_MS);
+    } else {
+      try { player.pause(); } catch { }
       if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
-      return;
     }
 
-    try {
-      player?.play();
-    } catch { }
-
-    loopIntervalRef.current = setInterval(() => {
-      try {
-        const status = (player as any)?.status;
-        if (status?.currentTime >= PREVIEW_SECONDS) {
-          player?.replay();
-        }
-      } catch { }
-    }, INTERVAL_MS);
-
     return () => {
-      mounted = false;
       if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
-      try {
-        player?.pause();
-      } catch { }
+      try { player.pause(); } catch { }
     };
   }, [isPlayable, player]);
 
-
-  // --- Hide thumbnail once loaded ---
+  // Hide thumbnail when video is ready
   useEffect(() => {
+    if (!player) return;
     const sub = player.addListener?.("statusChange", (status: any) => {
       if (status?.isLoaded && !status.isBuffering) setShowThumbnail(false);
     });
@@ -754,7 +763,10 @@ const MasonryCard = React.memo(({ item, router, theme, registerRef, isPlayable }
   const viewRef = useRef<View | null>(null);
   useEffect(() => { registerRef(viewRef.current); return () => registerRef(null); }, [registerRef]);
 
-  const itemHeight = useMemo(() => item.height || Math.max(160, Math.round((columnWidth * 16) / 9) + Math.round(Math.random() * 80) - 40), [item.height]);
+  const itemHeight = useMemo(
+    () => item.height || Math.max(160, Math.round((columnWidth * 16) / 9) + Math.round(Math.random() * 80) - 40),
+    [item.height]
+  );
 
   return (
     <TouchableOpacity
