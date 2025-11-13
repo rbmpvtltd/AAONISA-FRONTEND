@@ -182,19 +182,6 @@ const [showOptions, setShowOptions] = React.useState(false);
 
       {/* Right Actions */}
       <View style={[styles.rightActions, { bottom: rightActionsBottom }]}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Image
-            source={{ uri: item.user.avatar }}
-            style={{
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              borderRadius: AVATAR_SIZE / 2,
-              borderWidth: 2,
-              borderColor: '#fff',
-            }}
-          />
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
           <Ionicons
             name={item.isLiked ? 'heart' : 'heart-outline'}
@@ -216,10 +203,6 @@ const [showOptions, setShowOptions] = React.useState(false);
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
-{/* 
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
-        </TouchableOpacity> */}
 
  <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
   <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
@@ -241,7 +224,7 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id } = useLocalSearchParams(); 
+  const { id} = useLocalSearchParams(); 
 
   const {
     reels,
@@ -262,6 +245,15 @@ const ReelsFeed = () => {
     fetchReelsByCategory,
   } = useReelsStore();
 
+// // explore active 
+// useEffect(() => {
+//   if (source === "explore") {
+//     setActiveTab("Explore");
+//   }
+// }, [source]);
+
+
+// not following user redirect explpore tab
 useEffect(() => {
   // jab activeTab Followings hai aur data empty aaya
   if (activeTab === 'Followings' && reels.length === 0) {
@@ -271,6 +263,7 @@ useEffect(() => {
 }, [reels, activeTab]);
 
 
+// active tab
 useEffect(() => {
   fetchReelsByCategory(activeTab.toLowerCase() as any);
 }, [activeTab]);
