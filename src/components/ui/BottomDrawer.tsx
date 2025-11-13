@@ -125,7 +125,7 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl }: any) => {
+const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl,reelId }: any) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const theme = useAppTheme();
   const [showSharePanel, setShowSharePanel] = useState(false);
@@ -139,7 +139,6 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl }: any) => {
   ];
 
   const [activePlatforms, setActivePlatforms] = useState<any[]>([]);
-
   useEffect(() => {
     const checkApps = async () => {
       const available: any[] = [];
