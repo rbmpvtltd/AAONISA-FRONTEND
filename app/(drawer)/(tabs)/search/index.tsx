@@ -491,11 +491,10 @@ const { width, height: WINDOW_HEIGHT } = Dimensions.get("window");
 const numColumns = 3;
 const spacing = 8;
 const columnWidth = Math.floor((width - spacing * (numColumns + 1)) / numColumns);
+const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
 type VideoItem = { id: string | number; videoUrl?: string; thumbnailUrl?: string; height?: number; title?: string };
 type ExplorePage = { data: VideoItem[]; hasMore: boolean };
-
-const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
 export default function ExploreMergedScreen() {
   const theme = useAppTheme();
@@ -522,7 +521,14 @@ export default function ExploreMergedScreen() {
   });
 
   // --- Infinite explore videos API ---
-  const { data, isLoading: videoLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, } = useInfiniteQuery<ExplorePage, Error, import("@tanstack/react-query").InfiniteData<ExplorePage>, string[], number>({ queryKey: ["exploreVideos"], queryFn: async ({ pageParam = 1 }: { pageParam?: number }) => getCategoryReel("explore", pageParam, 18), getNextPageParam: (lastPage, allPages) => lastPage.hasMore ? allPages.length + 1 : undefined, initialPageParam: 1, }); const videos = useMemo(() => data?.pages?.flatMap(p => p.data) ?? [], [data]);
+  const { data, isLoading: videoLoading, isError, fetchNextPage, hasNextPage, isFetchingNextPage, refetch, } = useInfiniteQuery<ExplorePage, Error, import("@tanstack/react-query").InfiniteData<ExplorePage>, string[], number>({
+    queryKey: ["exploreVideos"],
+    queryFn: async ({ pageParam = 1 }) => getCategoryReel("explore", pageParam, 18),
+    getNextPageParam: (lastPage, allPages) => lastPage.hasMore ? allPages.length + 1 : undefined,
+    initialPageParam: 1,
+  });
+
+  const videos = useMemo(() => data?.pages?.flatMap(p => p.data) ?? [], [data]);
   const columns = useMemo(() => {
     const cols: VideoItem[][] = Array.from({ length: numColumns }, () => []);
     videos.forEach((v, i) => cols[i % numColumns].push(v));
@@ -534,7 +540,7 @@ export default function ExploreMergedScreen() {
   const [visibleIds, setVisibleIds] = useState<Array<string | number>>([]);
   const LOAD_MORE_THRESHOLD = 480;
 
-
+  // --- Check which videos are visible ---
   const checkVisible = useCallback((scrollY: number) => {
     const visible: Array<string | number> = [];
     const topVisible = scrollY;
@@ -549,7 +555,7 @@ export default function ExploreMergedScreen() {
             Math.max(0, Math.min(itemBottom, bottomVisible) - Math.max(itemTop, topVisible)) / Math.max(1, h);
           if (visibleRatio >= 0.3) visible.push(id);
         });
-      } catch { }
+      } catch {}
     }
 
     setTimeout(() => {
@@ -579,46 +585,13 @@ export default function ExploreMergedScreen() {
   if (videoLoading) return <LoadingScreen theme={theme} />;
   if (isError) return <ErrorScreen theme={theme} refetch={refetch} />;
 
-  // --- Determine playable video ids (top-right, center, bottom-left) ---
-  const playableIds = useMemo(() => {
-    if (!columns.length) return [];
-    const lastCol = columns.length - 1;
-    const firstCol = 0;
-    const playable: Array<string | number> = [];
-
-    columns.forEach((col, colIndex) => {
-      col.forEach((item, rowIndex) => {
-        if (rowIndex === 0 && colIndex === lastCol) playable.push(item.id); // top-right
-        if (rowIndex === col.length - 1 && colIndex === firstCol) playable.push(item.id); // bottom-left
-      });
-    });
-
-    const allVideos = columns.flat();
-    if (allVideos.length) playable.push(allVideos[Math.floor(allVideos.length / 2)].id); // center
-
-    return playable;
-  }, [columns]);
-
   return (
     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        {/* SEARCH BAR */}
-        <SearchBar
-          theme={theme}
-          searchQuery={searchQuery}
-          setSearchQuery={setSearchQuery}
-          searchLoading={searchLoading}
-          router={router}
-        />
+        <SearchBar theme={theme} searchQuery={searchQuery} setSearchQuery={setSearchQuery} searchLoading={searchLoading} router={router} />
 
-        {/* Always render both, but hide/show using conditional styles */}
         <View style={{ flex: 1 }}>
-          <SearchResults
-            theme={theme}
-            searchResults={searchResults}
-            router={router}
-            style={{ display: debouncedQuery ? "flex" : "none" }}
-          />
+          <SearchResults theme={theme} searchResults={searchResults} router={router} style={{ display: debouncedQuery ? "flex" : "none" }} />
 
           <ScrollView
             ref={scrollViewRef}
@@ -641,20 +614,16 @@ export default function ExploreMergedScreen() {
                         if (!r) cardRefs.current.delete(item.id);
                         else cardRefs.current.set(item.id, r);
                       }}
-                      // isPlayable={playableIds.includes(item.id) && visibleIds.includes(item.id)}
-                      isPlayable={visibleIds.includes(item.id)}
+                      isPlayable={visibleIds.includes(item.id)} // Safe boolean prop
                     />
                   ))}
                 </View>
               ))}
             </View>
 
-            {isFetchingNextPage && (
-              <ActivityIndicator size="small" color={theme.text} style={{ padding: 12 }} />
-            )}
+            {isFetchingNextPage && <ActivityIndicator size="small" color={theme.text} style={{ padding: 12 }} />}
           </ScrollView>
         </View>
-
       </View>
     </SafeAreaView>
   );
@@ -702,8 +671,8 @@ const SearchBar = ({ theme, searchQuery, setSearchQuery, searchLoading, router }
   </View>
 );
 
-const SearchResults = ({ theme, searchResults, router }: any) => (
-  <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 40 }}>
+const SearchResults = ({ theme, searchResults, router, style }: any) => (
+  <ScrollView style={style} contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 40 }}>
     {searchResults.map((u: any) => (
       <TouchableOpacity key={u.id} style={[styles.userItem, { backgroundColor: theme.buttonBg }]} onPress={() => router.push(`/profile/${u.username}`)}>
         <Image source={{ uri: u.userProfile?.ProfilePicture || DEFAULT_THUMBNAIL }} style={styles.avatar} />
@@ -718,37 +687,17 @@ const SearchResults = ({ theme, searchResults, router }: any) => (
 
 const MasonryCard = React.memo(({ item, router, theme, registerRef, isPlayable }: any) => {
   const [showThumbnail, setShowThumbnail] = useState(true);
-  const PREVIEW_SECONDS = 3;
-  const INTERVAL_MS = 200;
-  const loopIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
 
-  // Hooks always run
   const player = useVideoPlayer(item.videoUrl || "", p => {
     p.muted = true;
-    p.loop = true;
+    p.loop = true; // continuous loop
   });
 
-  // Play/pause logic inside effect
+  // Play/pause based on visibility
   useEffect(() => {
     if (!player) return;
-
-    if (isPlayable) {
-      try { player.play(); } catch { }
-      loopIntervalRef.current = setInterval(() => {
-        try {
-          const status = (player as any)?.status;
-          if (status?.currentTime >= PREVIEW_SECONDS) player?.replay();
-        } catch { }
-      }, INTERVAL_MS);
-    } else {
-      try { player.pause(); } catch { }
-      if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
-    }
-
-    return () => {
-      if (loopIntervalRef.current) clearInterval(loopIntervalRef.current);
-      try { player.pause(); } catch { }
-    };
+    if (isPlayable) player.play();
+    else player.pause();
   }, [isPlayable, player]);
 
   // Hide thumbnail when video is ready
@@ -761,7 +710,10 @@ const MasonryCard = React.memo(({ item, router, theme, registerRef, isPlayable }
   }, [player]);
 
   const viewRef = useRef<View | null>(null);
-  useEffect(() => { registerRef(viewRef.current); return () => registerRef(null); }, [registerRef]);
+  useEffect(() => {
+    registerRef(viewRef.current);
+    return () => registerRef(null);
+  }, [registerRef]);
 
   const itemHeight = useMemo(
     () => item.height || Math.max(160, Math.round((columnWidth * 16) / 9) + Math.round(Math.random() * 80) - 40),
@@ -781,7 +733,6 @@ const MasonryCard = React.memo(({ item, router, theme, registerRef, isPlayable }
     </TouchableOpacity>
   );
 });
-
 
 const styles = StyleSheet.create({
   safe: { flex: 1 },
