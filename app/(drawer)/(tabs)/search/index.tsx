@@ -461,8 +461,8 @@
 //   row: { flexDirection: "row", justifyContent: "space-between" },
 //   column: { gap: spacing },
 // });
-// ExploreScreen.tsx
-// // ExploreMergedScreen.tsx
+
+
 import { Ionicons } from "@expo/vector-icons";
 import { useInfiniteQuery, useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
