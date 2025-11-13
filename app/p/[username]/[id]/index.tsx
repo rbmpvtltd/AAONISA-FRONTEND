@@ -3308,7 +3308,7 @@ const UserReelItem = ({
   console.log("user item.ProfilePicture ", profilePicture);
   console.log("user comment resived", item.comments);
   console.log("user audio", item.audio);
-  
+
 
 
   return (
@@ -3419,7 +3419,7 @@ const UserReelItem = ({
   );
 };
 
-// Full Feed Component
+// Feed Component
 const UserReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
@@ -3438,7 +3438,8 @@ const UserReelsFeed = () => {
     enabled: !!username,
   });
 
-console.log("profile.videos.audio", profile?.videos?.audio);
+  
+  console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
 
@@ -3457,13 +3458,19 @@ console.log("profile.videos.audio", profile?.videos?.audio);
   useEffect(() => {
     if (!videos.length || !id) return;
 
-    const startIdx = videos.findIndex((v: any) => v.id === id);
+    // uuid se match karo
+    const startIdx = videos.findIndex((v: any) => v.uuid === id);
 
     if (startIdx > -1) {
       setCurrentIndex(startIdx);
+      // Thoda delay do taaki FlatList ready ho
       setTimeout(() => {
-        flatListRef.current?.scrollToIndex({ index: startIdx, animated: false });
-      }, 50);
+        flatListRef.current?.scrollToIndex({
+          index: startIdx,
+          animated: false,
+          viewPosition: 0,
+        });
+      }, 100);
     }
   }, [id, videos]);
 
@@ -3471,6 +3478,7 @@ console.log("profile.videos.audio", profile?.videos?.audio);
   const updateURL = (idx: number) => {
     const reel = videos[idx];
     if (!reel) return;
+    // router.replace(`/p/${username}/${reel.uuid}`);
 
     router.setParams({ id: reel.id, username: username });
     updateReelURL(reel.id);
@@ -3515,6 +3523,15 @@ console.log("profile.videos.audio", profile?.videos?.audio);
 
       <FlatList
         ref={flatListRef}
+        onScrollToIndexFailed={(info) => {
+          const wait = new Promise(resolve => setTimeout(resolve, 500));
+          wait.then(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+            });
+          });
+        }}
         data={videos}
         renderItem={({ item, index }) => (
           <UserReelItem
@@ -3525,7 +3542,7 @@ console.log("profile.videos.audio", profile?.videos?.audio);
             handleToggleMute={handleToggleMute}
             showIcon={showIcon}
             fadeAnim={fadeAnim}
-            toggleLike={(id: string) => likeMutation.mutate(id)}
+            toggleLike={(uuid: string) => likeMutation.mutate(uuid)}
             addComment={addComment}
             addShare={addShare}
             likeMutation={likeMutation}
@@ -3533,7 +3550,8 @@ console.log("profile.videos.audio", profile?.videos?.audio);
             profilePicture={profile?.userProfile?.ProfilePicture}
           />
         )}
-        keyExtractor={(item, i) => item.id?.toString() ?? i.toString()}
+        keyExtractor={(item) => item.uuid}
+        // keyExtractor={(item, i) => item.id?.toString() ?? i.toString()}
         pagingEnabled
         showsVerticalScrollIndicator={false}
         snapToInterval={SCREEN_HEIGHT}
