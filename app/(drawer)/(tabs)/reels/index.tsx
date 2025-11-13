@@ -263,6 +263,15 @@ const ReelsFeed = () => {
   } = useReelsStore();
 
 useEffect(() => {
+  // jab activeTab Followings hai aur data empty aaya
+  if (activeTab === 'Followings' && reels.length === 0) {
+    console.log("No followings found, switching to Explore...");
+    setActiveTab('Explore');
+  }
+}, [reels, activeTab]);
+
+
+useEffect(() => {
   fetchReelsByCategory(activeTab.toLowerCase() as any);
 }, [activeTab]);
 
