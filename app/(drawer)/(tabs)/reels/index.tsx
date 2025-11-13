@@ -180,19 +180,6 @@ const ReelItem = ({
 
       {/* Right Actions */}
       <View style={[styles.rightActions, { bottom: rightActionsBottom }]}>
-        <TouchableOpacity style={styles.actionButton}>
-          <Image
-            source={{ uri: item.user.avatar }}
-            style={{
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              borderRadius: AVATAR_SIZE / 2,
-              borderWidth: 2,
-              borderColor: '#fff',
-            }}
-          />
-        </TouchableOpacity>
-
         <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
           <Ionicons
             name={item.isLiked ? 'heart' : 'heart-outline'}
