@@ -2,7 +2,7 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 
-export default function ProfileLayout() {
+export default function UserLayout() {
   const theme = useAppTheme();
 
   return (
@@ -23,17 +23,27 @@ export default function ProfileLayout() {
           },
         }}
       >
-        <Stack.Screen
-          name="[username]"
+      
+         <Stack.Screen
+          name="index"
           options={{
+            title: "index",
             headerShown: false,
           }}
         />
 
         <Stack.Screen
-          name="edit"
+          name="followers"
           options={{
-            title: "Edit Profile",
+            title: "followers",
+            headerShown: true,
+          }}
+        />
+
+          <Stack.Screen
+          name="followings"
+          options={{
+            title: "followings",
             headerShown: true,
           }}
         />

@@ -193,7 +193,6 @@ const FollowersScreen = () => {
   const followers: Follower[] = Array.isArray(data?.followers) ? data.followers : [];
 console.log("Followers count:", followers?.length ?? 0);
 
-
   const handleFollow = (id: string) => {
     if (followMutation.isPending) return;
     followMutation.mutate(id);
@@ -257,7 +256,7 @@ console.log("Followers count:", followers?.length ?? 0);
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 50 },
+        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 20 },
       ]}
     >
       <Text style={[styles.header, { color: theme.text }]}>
