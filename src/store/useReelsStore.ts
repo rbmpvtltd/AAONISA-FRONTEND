@@ -349,7 +349,8 @@ fetchReelsByCategory: async (category) => {
   toggleLike: (id: string) =>
   set((state) => ({
     reels: state.reels.map((reel) => {
-      if (reel.uuid !== id) return reel;  // ✅ Correct unique key
+      // if (reel.uuid !== id || reel.id !== id) return reel;  // ✅ Correct unique key
+if (reel.uuid !== id && reel.id !== id) return reel;
 
       const newLiked = !reel.isLiked;
       const newLikesCount = (reel.likes ?? 0) + (newLiked ? 1 : -1);

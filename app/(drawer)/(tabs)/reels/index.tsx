@@ -1,11 +1,14 @@
+import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useIsFocused } from '@react-navigation/native';
+import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -29,6 +32,8 @@ const ReelItem = ({
   showIcon,
   fadeAnim,
   toggleLike,
+  likeMutation,
+  currentUserId,
   addComment,
   addShare,
   activeTab,
@@ -45,25 +50,56 @@ const ReelItem = ({
     openBookmarkPanel,
   } = useBookmarkStore();
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
+  const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+
+  const [liked, setLiked] = useState(
+    Array.isArray(item.likes)
+      ? item.likes.some((like: any) => like.user_id === currentUserId)
+      : false
+  );
+  console.log("REEL id:", item.id || item.uuid);
 
   // create player
+  // const player = useVideoPlayer(
+  //   typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
+  //   (playerInstance) => {
+  //     playerInstance.loop = true;
+  //     playerInstance.volume = isMuted ? 0 : 1;
+  //   }
+  // );
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
-    (playerInstance) => {
-      playerInstance.loop = true;
-      playerInstance.volume = isMuted ? 0 : 1;
+    (p) => {
+      p.loop = true;
     }
   );
 
+  useEffect(() => {
+    player.volume = isMuted ? 0 : 1;
+  }, [isMuted]);
+
+
   // autoplay control
   useEffect(() => {
-    if (currentIndex === index) {
-      player.currentTime = 0;
-      player.play();
-    } else {
-      player.pause();
-    }
+    if (!player) return;
+
+    requestAnimationFrame(() => {
+      if (currentIndex === index) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    });
   }, [currentIndex, index]);
+
+  // useEffect(() => {
+  //   if (currentIndex === index) {
+  //     player.currentTime = 0;
+  //     player.play();
+  //   } else {
+  //     player.pause();
+  //   }
+  // }, [currentIndex, index]);
 
   // mute/unmute
   useEffect(() => {
@@ -78,13 +114,44 @@ const ReelItem = ({
 
   const videoPosition = useRef(0);
 
+  // const handlePressIn = () => {
+  //   player.pause();
+  // };
+
+  // const handlePressOut = () => {
+  //   player.play();
+  // };
+
   const handlePressIn = () => {
-    player.pause();
+    requestAnimationFrame(() => player.pause());
   };
 
   const handlePressOut = () => {
-    player.play();
+    requestAnimationFrame(() => player.play());
   };
+
+
+  const handleLike = async () => {
+    const newLiked = !liked;
+    setLiked(newLiked);
+
+    const prevCount = likesCount;
+
+    // optimistic update
+    setLikesCount(newLiked ? prevCount + 1 : Math.max(0, prevCount - 1));
+
+    try {
+      await likeMutation.mutateAsync(item.uuid || item.id);
+    } catch (error) {
+      // revert
+      setLiked(!newLiked);
+      setLikesCount(prevCount);
+    }
+  };
+
+  console.log("item.likes", item.likesCount);
+  console.log("comment count", item.comments?.length);
+
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -117,9 +184,31 @@ const ReelItem = ({
 
       {/* Top Bar */}
       {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+          <View style={styles.tabsContainer}>
+            {['Followings', 'News', 'Explore'].map((tab) => (
+              <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.activeTabText,
+                  ]}
+                >
+                  {tab}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View> */}
+
+
+      {/* Top Bar */}
+      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
-          {['Followings', 'News', 'Explore'].map((tab) => (
-            <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
+          {['Explore', 'News', 'Followings'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab as any)}
+            >
               <Text
                 style={[
                   styles.tabText,
@@ -167,9 +256,23 @@ const ReelItem = ({
               marginRight: 8,
             }}
           />
-          <Text style={styles.username}>@{item.user.username}</Text>
+          <Text style={styles.username}>{item.user.username}</Text>
         </View>
-        <Text style={styles.caption}>{item.caption}</Text>
+        {/* <Text style={styles.caption}>{item.caption}</Text> */}
+        <Text style={styles.caption}>
+          {showFullCaption
+            ? item.caption
+            : item.caption?.slice(0, 100)}
+        </Text>
+
+        {item.caption?.length > 100 && (
+          <Text
+            style={{ color: "#ccc", marginTop: 4 }}
+            onPress={() => setShowFullCaption(!showFullCaption)}
+          >
+            {showFullCaption ? "Less" : "More"}
+          </Text>
+        )}
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
@@ -180,13 +283,21 @@ const ReelItem = ({
 
       {/* Right Actions */}
       <View style={[styles.rightActions, { bottom: rightActionsBottom }]}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          disabled={likeMutation.isPending}
+          onPress={handleLike}
+        >
           <Ionicons
-            name={item.isLiked ? 'heart' : 'heart-outline'}
+            name={liked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}
-            color={item.isLiked ? 'red' : '#fff'}
+            color={liked ? '#FF0000' : '#fff'}
           />
-          <Text style={styles.actionText}>{formatNumber(item.likes)}</Text>
+          <Text style={styles.actionText}>
+            {/* {Array.isArray(item.likes) ? item.likesCount : 0} */}
+            {likesCount}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -194,7 +305,9 @@ const ReelItem = ({
           onPress={() => router.push(`/comment/${item.id}`)}
         >
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatNumber(item.comments)}</Text>
+          <Text style={styles.actionText}>
+            {item.commentsCount}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => addShare(item.id)}>
@@ -354,6 +467,17 @@ const ReelsFeed = () => {
       }, 1200);
     });
   };
+  // const currentUserId = useProfileStore(state => state.userId);
+
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+  const currentUserId = currentUser?.userProfile?.id
+
+  console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
+
 
   return (
     <View style={styles.container}>

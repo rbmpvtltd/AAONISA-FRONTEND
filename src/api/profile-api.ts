@@ -349,7 +349,7 @@ const markViewed = async (storyId: string) => {
   }
 };
 
-const likeDislike = async (storyId: string) => {
+const likeDislike = async (storyId: string,) => {
   const token = await getToken();
   const config = {
     headers: {
