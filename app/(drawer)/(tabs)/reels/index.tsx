@@ -1,11 +1,14 @@
+import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useIsFocused } from '@react-navigation/native';
+import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useRef } from 'react';
+import React, { useEffect, useRef, useState } from 'react';
 import {
   Animated,
   FlatList,
@@ -29,43 +32,76 @@ const ReelItem = ({
   showIcon,
   fadeAnim,
   toggleLike,
+  likeMutation,
+  currentUserId,
   addComment,
   addShare,
   activeTab,
   setActiveTab,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
-const [showOptions, setShowOptions] = React.useState(false);
+  const [showOptions, setShowOptions] = React.useState(false);
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
   const rightActionsBottom = SCREEN_HEIGHT * 0.12;
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
-   const {
-      openBookmarkPanel,
-    } = useBookmarkStore();
+  const {
+    openBookmarkPanel,
+  } = useBookmarkStore();
 
-
+  const [showFullCaption, setShowFullCaption] = useState(false);
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
+  const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+
+  const [liked, setLiked] = useState(
+    Array.isArray(item.likes)
+      ? item.likes.some((like: any) => like.user_id === currentUserId)
+      : false
+  );
+  console.log("REEL id:", item.id || item.uuid);
 
   // create player
+  // const player = useVideoPlayer(
+  //   typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
+  //   (playerInstance) => {
+  //     playerInstance.loop = true;
+  //     playerInstance.volume = isMuted ? 0 : 1;
+  //   }
+  // );
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
-    (playerInstance) => {
-      playerInstance.loop = true;
-      playerInstance.volume = isMuted ? 0 : 1;
+    (p) => {
+      p.loop = true;
     }
   );
 
+  useEffect(() => {
+    player.volume = isMuted ? 0 : 1;
+  }, [isMuted]);
+
+
   // autoplay control
   useEffect(() => {
-    if (currentIndex === index) {
-      player.currentTime = 0;
-      player.play();
-    } else {
-      player.pause();
-    }
+    if (!player) return;
+
+    requestAnimationFrame(() => {
+      if (currentIndex === index) {
+        player.play();
+      } else {
+        player.pause();
+      }
+    });
   }, [currentIndex, index]);
+
+  // useEffect(() => {
+  //   if (currentIndex === index) {
+  //     player.currentTime = 0;
+  //     player.play();
+  //   } else {
+  //     player.pause();
+  //   }
+  // }, [currentIndex, index]);
 
   // mute/unmute
   useEffect(() => {
@@ -80,13 +116,44 @@ const [showOptions, setShowOptions] = React.useState(false);
 
   const videoPosition = useRef(0);
 
+  // const handlePressIn = () => {
+  //   player.pause();
+  // };
+
+  // const handlePressOut = () => {
+  //   player.play();
+  // };
+
   const handlePressIn = () => {
-    player.pause();
+    requestAnimationFrame(() => player.pause());
   };
 
   const handlePressOut = () => {
-    player.play();
+    requestAnimationFrame(() => player.play());
   };
+
+
+  const handleLike = async () => {
+    const newLiked = !liked;
+    setLiked(newLiked);
+
+    const prevCount = likesCount;
+
+    // optimistic update
+    setLikesCount(newLiked ? prevCount + 1 : Math.max(0, prevCount - 1));
+
+    try {
+      await likeMutation.mutateAsync(item.uuid || item.id);
+    } catch (error) {
+      // revert
+      setLiked(!newLiked);
+      setLikesCount(prevCount);
+    }
+  };
+
+  console.log("item.likes", item.likesCount);
+  console.log("comment count", item.comments?.length);
+
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -119,9 +186,31 @@ const [showOptions, setShowOptions] = React.useState(false);
 
       {/* Top Bar */}
       {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+          <View style={styles.tabsContainer}>
+            {['Followings', 'News', 'Explore'].map((tab) => (
+              <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
+                <Text
+                  style={[
+                    styles.tabText,
+                    activeTab === tab && styles.activeTabText,
+                  ]}
+                >
+                  {tab}
+                </Text>
+              </TouchableOpacity>
+            ))}
+          </View>
+        </View> */}
+
+
+      {/* Top Bar */}
+      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
-          {['Followings', 'News', 'Explore'].map((tab) => (
-            <TouchableOpacity key={tab} onPress={() => setActiveTab(tab as any)}>
+          {['Explore', 'News', 'Followings'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab as any)}
+            >
               <Text
                 style={[
                   styles.tabText,
@@ -133,35 +222,13 @@ const [showOptions, setShowOptions] = React.useState(false);
             </TouchableOpacity>
           ))}
         </View>
-      </View> */}
-
-
-{/* Top Bar */}
-<View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
-<View style={styles.tabsContainer}>
-  {['Explore', 'News', 'Followings'].map((tab) => (
-    <TouchableOpacity
-      key={tab}
-      onPress={() => setActiveTab(tab as any)}
-    >
-      <Text
-        style={[
-          styles.tabText,
-          activeTab === tab && styles.activeTabText,
-        ]}
-      >
-        {tab}
-      </Text>
-    </TouchableOpacity>
-  ))}
-</View>
-</View>
+      </View>
 
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
           <Image
-            source={{ uri: item.user.profilePic}}
+            source={{ uri: item.user.profilePic }}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,
@@ -169,9 +236,23 @@ const [showOptions, setShowOptions] = React.useState(false);
               marginRight: 8,
             }}
           />
-          <Text style={styles.username}>@{item.user.username}</Text>
+          <Text style={styles.username}>{item.user.username}</Text>
         </View>
-        <Text style={styles.caption}>{item.caption}</Text>
+        {/* <Text style={styles.caption}>{item.caption}</Text> */}
+        <Text style={styles.caption}>
+          {showFullCaption
+            ? item.caption
+            : item.caption?.slice(0, 100)}
+        </Text>
+
+        {item.caption?.length > 100 && (
+          <Text
+            style={{ color: "#ccc", marginTop: 4 }}
+            onPress={() => setShowFullCaption(!showFullCaption)}
+          >
+            {showFullCaption ? "Less" : "More"}
+          </Text>
+        )}
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
@@ -182,13 +263,21 @@ const [showOptions, setShowOptions] = React.useState(false);
 
       {/* Right Actions */}
       <View style={[styles.rightActions, { bottom: rightActionsBottom }]}>
-        <TouchableOpacity style={styles.actionButton} onPress={() => toggleLike(item.id)}>
+
+        <TouchableOpacity
+          style={styles.actionButton}
+          disabled={likeMutation.isPending}
+          onPress={handleLike}
+        >
           <Ionicons
-            name={item.isLiked ? 'heart' : 'heart-outline'}
+            name={liked ? 'heart' : 'heart-outline'}
             size={ACTION_ICON_SIZE}
-            color={item.isLiked ? 'red' : '#fff'}
+            color={liked ? '#FF0000' : '#fff'}
           />
-          <Text style={styles.actionText}>{formatNumber(item.likes)}</Text>
+          <Text style={styles.actionText}>
+            {/* {Array.isArray(item.likes) ? item.likesCount : 0} */}
+            {likesCount}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -196,7 +285,9 @@ const [showOptions, setShowOptions] = React.useState(false);
           onPress={() => router.push(`/comment/${item.id}`)}
         >
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatNumber(item.comments)}</Text>
+          <Text style={styles.actionText}>
+            {item.commentsCount}
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => addShare(item.id)}>
@@ -204,18 +295,18 @@ const [showOptions, setShowOptions] = React.useState(false);
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
 
- <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
-  <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
-</TouchableOpacity>
-  </View>
- 
-  <BottomDrawer
-  visible={showOptions}
-  onClose={() =>{setShowOptions(false)}}
-  onSave={() => {openBookmarkPanel(item.id); setShowOptions(false)}}
-  onReport={() => console.log("Reported")}
-  onShare={() => console.log("Shared")}
-/>    
+        <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
+          <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
+        </TouchableOpacity>
+      </View>
+
+      <BottomDrawer
+        visible={showOptions}
+        onClose={() => { setShowOptions(false) }}
+        onSave={() => { openBookmarkPanel(item.id); setShowOptions(false) }}
+        onReport={() => console.log("Reported")}
+        onShare={() => console.log("Shared")}
+      />
     </View>
   );
 };
@@ -224,7 +315,8 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id} = useLocalSearchParams(); 
+  const { id } = useLocalSearchParams();
+  const likeMutation = useLikeMutation();
 
   const {
     reels,
@@ -245,66 +337,70 @@ const ReelsFeed = () => {
     fetchReelsByCategory,
   } = useReelsStore();
 
-// // explore active 
-// useEffect(() => {
-//   if (source === "explore") {
-//     setActiveTab("Explore");
-//   }
-// }, [source]);
 
 
-// not following user redirect explpore tab
-useEffect(() => {
-  // jab activeTab Followings hai aur data empty aaya
-  if (activeTab === 'Followings' && reels.length === 0) {
-    console.log("No followings found, switching to Explore...");
-    setActiveTab('Explore');
-  }
-}, [reels, activeTab]);
+  // // explore active 
+  // useEffect(() => {
+  //   if (source === "explore") {
+  //     setActiveTab("Explore");
+  //   }
+  // }, [source]);
 
 
-// active tab
-useEffect(() => {
-  fetchReelsByCategory(activeTab.toLowerCase() as any);
-}, [activeTab]);
+  // not following user redirect explpore tab
+  useEffect(() => {
+    // jab activeTab Followings hai aur data empty aaya
+    if (activeTab === 'Followings' && reels.length === 0) {
+      console.log("No followings found, switching to Explore...");
+      setActiveTab('Explore');
+    }
+  }, [reels, activeTab]);
+
+
+  // active tab
+  useEffect(() => {
+    fetchReelsByCategory(activeTab.toLowerCase() as any);
+  }, [activeTab]);
 
 
   // auto scroll 
-useEffect(() => {
-  let interval: any;
+  useEffect(() => {
+    let interval: any;
 
-  if (autoScroll && reels.length > 0) {
-    interval = setInterval(() => {
-      const nextIndex =
-        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+    if (autoScroll && reels.length > 0) {
+      interval = setInterval(() => {
+        const nextIndex =
+          currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
 
-      setCurrentIndex(nextIndex);
+        setCurrentIndex(nextIndex);
 
-      flatListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
-      });
+        flatListRef.current?.scrollToIndex({
+          index: nextIndex,
+          animated: true,
+        });
 
-      updateURL(nextIndex);
-    }, 10000);
-  }
+        updateURL(nextIndex);
+      }, 10000);
+    }
 
-  return () => clearInterval(interval);
-}, [autoScroll, reels, currentIndex]);
+    return () => clearInterval(interval);
+  }, [autoScroll, reels, currentIndex]);
 
 
 
   // NEW: URL update function
   const updateURL = (index: number) => {
     if (reels[index]) {
-      const reelId = reels[index].id;
-      
+      // const reelId = reels[index].id;
+      const reelId = reels[index].uuid || reels[index].id;
+
+
       // Method 1: Expo Router setParams (Recommended)
       router.setParams({ id: reelId });
-      
+
       // Method 2: Store mein bhi update karo for logging
       updateReelURL(reelId);
-      
+
       // console.log('🎬 Reel Changed:', reelId, 'URL Updated');
     }
   };
@@ -337,7 +433,7 @@ useEffect(() => {
   const handleScroll = (event: any) => {
     const offsetY = event.nativeEvent.contentOffset.y;
     const index = Math.round(offsetY / SCREEN_HEIGHT);
-    
+
     if (index !== currentIndex) {
       setCurrentIndex(index);
       updateURL(index); // URL update karo
@@ -363,6 +459,17 @@ useEffect(() => {
       }, 1200);
     });
   };
+  // const currentUserId = useProfileStore(state => state.userId);
+
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+  const currentUserId = currentUser?.userProfile?.id
+
+  console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
+
 
   return (
     <View style={styles.container}>
@@ -371,25 +478,28 @@ useEffect(() => {
         ref={flatListRef}
         // data={reels || []}
         data={Array.isArray(reels) ? reels.filter(r => r?.id) : []}
-          keyExtractor={(item, index) => (item?.id ? String(item.id) : `key-${index}`)}
+        keyExtractor={(item, index) => (item?.id ? String(item.id) : `key-${index}`)}
         renderItem={({ item, index }) => {
-             if (!item) return null;
-          return(
-          <ReelItem
-            item={item}
-            index={index}
-            currentIndex={currentIndex}
-            isMuted={isMuted}
-            handleToggleMute={handleToggleMute}
-            showIcon={showIcon}
-            fadeAnim={fadeAnim}
-            toggleLike={toggleLike}
-            addComment={addComment}
-            addShare={addShare}
-            activeTab={activeTab}
-            setActiveTab={setActiveTab}
-          />
-        )}}
+          if (!item) return null;
+          return (
+            <ReelItem
+              item={item}
+              index={index}
+              currentIndex={currentIndex}
+              isMuted={isMuted}
+              handleToggleMute={handleToggleMute}
+              showIcon={showIcon}
+              fadeAnim={fadeAnim}
+              toggleLike={(id: string) => likeMutation.mutate(id)}
+              likeMutation={likeMutation}
+              addComment={addComment}
+              addShare={addShare}
+              activeTab={activeTab}
+              setActiveTab={setActiveTab}
+              currentUserId={currentUserId}
+            />
+          )
+        }}
         // keyExtractor={(item) => item.id.toString()}
         pagingEnabled
         showsVerticalScrollIndicator={false}
@@ -412,7 +522,7 @@ useEffect(() => {
         }}
       />
       <BookmarkPanel
-      /> 
+      />
     </View>
   );
 };
@@ -472,37 +582,37 @@ const styles = StyleSheet.create({
     fontWeight: '700',
   },
   overlay: {
-  position: 'absolute',
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  justifyContent: 'flex-end',
-  backgroundColor: 'rgba(0,0,0,0.5)',
-  zIndex: 999,
-},
-overlayBackground: {
-  flex: 1,
-},
-bottomDrawer: {
-  backgroundColor: '#1a1a1a',
-  borderTopLeftRadius: 16,
-  borderTopRightRadius: 16,
-  paddingVertical: 20,
-  paddingHorizontal: 20,
-},
-optionButton: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  paddingVertical: 12,
-  borderBottomWidth: 0.4,
-  borderBottomColor: '#333',
-},
-optionText: {
-  color: '#fff',
-  fontSize: 16,
-  marginLeft: 12,
-},
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    justifyContent: 'flex-end',
+    backgroundColor: 'rgba(0,0,0,0.5)',
+    zIndex: 999,
+  },
+  overlayBackground: {
+    flex: 1,
+  },
+  bottomDrawer: {
+    backgroundColor: '#1a1a1a',
+    borderTopLeftRadius: 16,
+    borderTopRightRadius: 16,
+    paddingVertical: 20,
+    paddingHorizontal: 20,
+  },
+  optionButton: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 12,
+    borderBottomWidth: 0.4,
+    borderBottomColor: '#333',
+  },
+  optionText: {
+    color: '#fff',
+    fontSize: 16,
+    marginLeft: 12,
+  },
 
 });
 
