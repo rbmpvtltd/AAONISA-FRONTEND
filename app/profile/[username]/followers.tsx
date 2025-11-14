@@ -27,7 +27,7 @@
 //   const { width } = useWindowDimensions();
 //   const queryClient = useQueryClient();
 
-  
+
 
 //   const avatarSize = width > 400 ? 60 : 50;
 //   const padding = width > 400 ? 20 : 16;
@@ -63,7 +63,7 @@
 //       </View>
 //     );
 
-  
+
 //   const followers: Follower[] = data?.followers || [];
 //   console.log('Followers count:', followers.length);
 
@@ -187,23 +187,44 @@ const FollowersScreen = () => {
       </View>
     );
 
-  const followers: Follower[] = data?.followers || [];
-  console.log('Followers count:', followers.length);
+  // const followers: Follower[] = data?.followers || [];
+  // console.log('Followers count:', followers.length);
+
+  const followers: Follower[] = Array.isArray(data?.followers) ? data.followers : [];
+console.log("Followers count:", followers?.length ?? 0);
 
   const handleFollow = (id: string) => {
     if (followMutation.isPending) return;
     followMutation.mutate(id);
   };
 
-  const handleProfilePress = (username: string) => {
-    router.push(`/profile/${username}`);
+  // const handleProfilePress = (username: string) => {
+  //   router.push(`/profile/${username}`);
+  // };
+
+  const handleProfilePress = (username?: string) => {
+    if (!username) {
+      console.warn("Invalid username for profile navigation");
+      return;
+    }
+    try {
+      router.push(`/profile/${username.toLowerCase()}`);
+    } catch (err) {
+      console.error("Navigation error:", err);
+    }
   };
+
 
   const renderFollower = ({ item }: { item: Follower }) => (
     <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
       <View style={[styles.userRow, { borderBottomColor: theme.inputBorder }]}>
         <Image
-          source={{ uri: item.profilepicture || 'https://via.placeholder.com/150' }}
+          // source={{ uri: item.profilepicture || 'https://via.placeholder.com/150' }}
+          source={
+            item.profilepicture
+              ? { uri: item.profilepicture }
+              : require("@/assets/darkThemeUser.jpg") // fallback image
+          }
           style={{
             width: avatarSize,
             height: avatarSize,
@@ -235,7 +256,7 @@ const FollowersScreen = () => {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 50 },
+        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 20 },
       ]}
     >
       <Text style={[styles.header, { color: theme.text }]}>

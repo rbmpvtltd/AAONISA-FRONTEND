@@ -205,6 +205,7 @@
 
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { registerForPushNotificationsAsync } from "@/src/utils/notification";
+import { requestAllPermissions } from "@/src/utils/requestAllPermissions";
 import { createApiUrl } from "@/util";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
@@ -215,8 +216,8 @@ import {
   useRouter,
   useSegments,
 } from "expo-router";
-import React from "react";
-import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
+import React, { useEffect } from "react";
+import { ActivityIndicator, Alert, StatusBar, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
 /* -------------------------------------------------
    1. TanStack Query Client (Global Cache)
@@ -247,6 +248,20 @@ export default function RootLayout() {
 
   const [initializing, setInitializing] = React.useState(true);
   const [navigated, setNavigated] = React.useState(false);
+
+useEffect(() => {
+    (async () => {
+      const perms = await requestAllPermissions();
+
+      if (!perms.hasCamera || !perms.hasMic || !perms.hasMedia) {
+        Alert.alert(
+          "Permissions Required",
+          "Please allow camera, microphone and gallery permissions in App Settings."
+        );
+      }
+    })();
+  }, []);
+
 
   const sendToken = async (pushToken: string) => {
     const config = {

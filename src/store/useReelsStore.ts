@@ -377,7 +377,7 @@ if (reel.uuid !== id && reel.id !== id) return reel;
     set((state) => ({
       reels: state.reels.map((reel) =>
         // reel.id === id ? { ...reel, shares: reel.shares + 1 } : reel
-      reel.id === id
+      reel.uuid === id
         ? { ...reel, shares: (reel.shares ?? 0) + 1 } 
         : reel
       ),

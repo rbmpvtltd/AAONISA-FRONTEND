@@ -22,7 +22,7 @@ interface Following {
 }
 
 const FollowingScreen = () => {
-  const { username } = useLocalSearchParams<{ username: string }>();
+  const { username } = useLocalSearchParams<{ username?: string }>();
   const theme = useAppTheme();
   const router = useRouter();
   const { width } = useWindowDimensions();
@@ -32,12 +32,16 @@ const FollowingScreen = () => {
   const padding = width > 400 ? 20 : 16;
 
   // ✅ Fetch profile data (includes followings)
-  const { data, isPending, isError } = useQuery({
-    queryKey: ['userProfile', username],
-    queryFn: () => GetProfileUsername(username),
-    enabled: !!username,
-  });
-
+  // const { data, isPending, isError } = useQuery({
+  //   queryKey: ['userProfile', username],
+  //   queryFn: () => GetProfileUsername(username),
+  //   enabled: !!username,
+  // });
+const { data, isPending, isError } = useQuery({
+  queryKey: ['userProfile', username],
+  queryFn: () => GetProfileUsername(username!),
+  enabled: !!username, // <== ye line important hai!
+});
  
   // ✅ Unfollow user mutation
   const unfollowMutation = useMutation({
@@ -63,7 +67,9 @@ const FollowingScreen = () => {
       </View>
     );
 
-  const followings: Following[] = data?.followings || [];
+  // const followings: Following[] = data?.followings || [];
+  const followings: Following[] = Array.isArray(data?.followings) ? data.followings : [];
+
 
   if (!followings.length) {
     return (
@@ -124,7 +130,7 @@ const FollowingScreen = () => {
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 50 },
+        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 10 },
       ]}
     >
       <Text style={[styles.header, { color: theme.text }]}>

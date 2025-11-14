@@ -19,7 +19,10 @@ export default {
        "useNextNotificationsApi": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+         "READ_EXTERNAL_STORAGE",
+          "WRITE_EXTERNAL_STORAGE"
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.AaoNiSa",
@@ -55,7 +58,7 @@ export default {
     },
     "extra": {
       "router": {},
-      // "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
+      "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api",
       "eas": {
         "projectId":  process.env.EAS_PROJECT_ID,
         "owner" :	"rbm.jodhpur03"

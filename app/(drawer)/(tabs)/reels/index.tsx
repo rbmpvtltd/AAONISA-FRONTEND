@@ -49,8 +49,6 @@ const ReelItem = ({
   const {
     openBookmarkPanel,
   } = useBookmarkStore();
-
-  const [showFullCaption, setShowFullCaption] = useState(false);
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
 
@@ -222,6 +220,28 @@ const ReelItem = ({
             </TouchableOpacity>
           ))}
         </View>
+      </View> */}
+
+
+      {/* Top Bar */}
+      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+        <View style={styles.tabsContainer}>
+          {['Explore', 'News', 'Followings'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab as any)}
+            >
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
 
       {/* Bottom Content */}
@@ -294,6 +314,10 @@ const ReelItem = ({
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
+        {/* 
+        <TouchableOpacity style={styles.actionButton}>
+          <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
+        </TouchableOpacity> */}
 
         <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
@@ -302,11 +326,16 @@ const ReelItem = ({
 
       <BottomDrawer
         visible={showOptions}
-        onClose={() => { setShowOptions(false) }}
-        onSave={() => { openBookmarkPanel(item.id); setShowOptions(false) }}
-        onReport={() => console.log("Reported")}
-        onShare={() => console.log("Shared")}
+        onClose={() => setShowOptions(false)}
+        onSave={() => {
+          openBookmarkPanel(item.id);
+          setShowOptions(false);
+        }}
+        onReport={() => console.log("Reported:", item.id)}
+        reelId={item.id}
+        reelUrl={item.videoUrl} // 👈 add this too for share/download
       />
+
     </View>
   );
 };
@@ -316,7 +345,6 @@ const ReelsFeed = () => {
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
   const { id } = useLocalSearchParams();
-  const likeMutation = useLikeMutation();
 
   const {
     reels,
@@ -337,17 +365,6 @@ const ReelsFeed = () => {
     fetchReelsByCategory,
   } = useReelsStore();
 
-
-
-  // // explore active 
-  // useEffect(() => {
-  //   if (source === "explore") {
-  //     setActiveTab("Explore");
-  //   }
-  // }, [source]);
-
-
-  // not following user redirect explpore tab
   useEffect(() => {
     // jab activeTab Followings hai aur data empty aaya
     if (activeTab === 'Followings' && reels.length === 0) {
@@ -357,7 +374,6 @@ const ReelsFeed = () => {
   }, [reels, activeTab]);
 
 
-  // active tab
   useEffect(() => {
     fetchReelsByCategory(activeTab.toLowerCase() as any);
   }, [activeTab]);
@@ -391,17 +407,9 @@ const ReelsFeed = () => {
   // NEW: URL update function
   const updateURL = (index: number) => {
     if (reels[index]) {
-      // const reelId = reels[index].id;
-      const reelId = reels[index].uuid || reels[index].id;
-
-
-      // Method 1: Expo Router setParams (Recommended)
+      const reelId = reels[index].id;
       router.setParams({ id: reelId });
-
-      // Method 2: Store mein bhi update karo for logging
       updateReelURL(reelId);
-
-      // console.log('🎬 Reel Changed:', reelId, 'URL Updated');
     }
   };
 
@@ -490,13 +498,11 @@ const ReelsFeed = () => {
               handleToggleMute={handleToggleMute}
               showIcon={showIcon}
               fadeAnim={fadeAnim}
-              toggleLike={(id: string) => likeMutation.mutate(id)}
-              likeMutation={likeMutation}
+              toggleLike={toggleLike}
               addComment={addComment}
               addShare={addShare}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
-              currentUserId={currentUserId}
             />
           )
         }}

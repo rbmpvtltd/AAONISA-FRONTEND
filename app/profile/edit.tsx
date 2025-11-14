@@ -699,7 +699,6 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
@@ -720,6 +719,7 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
 
+
 interface ProfileData {
   username: string;
   name: string;
@@ -734,6 +734,19 @@ function UserEditProfile() {
 
   // ✅ Get Zustand store
   const profileStore = useProfileStore();
+
+
+  // ====================================
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  //     if (status !== "granted") {
+  //       Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
+  //     }
+  //   })();
+  // }, []);
+  // ====================================
+
 
   // ✅ Local state initialized from store
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -787,29 +800,37 @@ function UserEditProfile() {
   // ✅ Mutation to update profile
   const updateMutation = useMutation({
     mutationFn: () => updateProfile(profileData, imageChanged),
-    onSuccess: (data: any) => {
-      if (!data?.data) {
-        Alert.alert("Error", "Invalid server response");
-        return;
-      }
+    // onSuccess: (data: any) => {
+    //   if (!data?.data) {
+    //     Alert.alert("Error", "Invalid server response");
+    //     return;
+    //   }
 
-      // ✅ Update Zustand store
-      useProfileStore.setState({
-        username: data.data.username,
-        name: data.data.name,
-        bio: data.data.bio,
-        ProfilePicture: data.data.ProfilePicture,
-        url: data.data.url,
-      });
-      // useProfileStore.setState({
-      //   username: data.data.username,
-      //   name: data.data.name,
-      //   bio: data.data.bio,
-      //   ProfilePicture: data.data.ProfilePicture
-      //     ? `${data.data.ProfilePicture}?t=${Date.now()}`
-      //     : null,
-      //   url: data.data.url,
-      // });
+    //   // ✅ Update Zustand store
+    //   useProfileStore.setState({
+    //     username: data.data.username,
+    //     name: data.data.name,
+    //     bio: data.data.bio,
+    //     ProfilePicture: data.data.ProfilePicture,
+    //     url: data.data.url,
+    //   });
+     
+    // =============================================
+onSuccess: (data: any) => {
+  const user = data?.data;
+  if (!user) {
+    Alert.alert("Error", "Invalid server response");
+    return;
+  }
+
+  useProfileStore.setState({
+    username: user.username || "",
+    name: user.name || "",
+    bio: user.bio || "",
+    ProfilePicture: user.ProfilePicture || null,
+    url: user.url || "",
+  });
+// =============================================
 
 
       setImageChanged(false);
@@ -843,7 +864,7 @@ function UserEditProfile() {
           <View style={styles.ProfilePictureContainer}>
             <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
               <View style={styles.profileImageWrapper}>
-                <Image
+                {/* <Image
                   source={
                     profileData.ProfilePicture
                       ? { uri: profileData.ProfilePicture }
@@ -852,7 +873,21 @@ function UserEditProfile() {
                         : { uri: theme.userImage }
                   }
                   style={styles.ProfilePicture}
+                /> */}
+
+                <Image
+                  source={
+                    profileData.ProfilePicture
+                      ? { uri: profileData.ProfilePicture }
+                      : theme.userImage
+                        ? (typeof theme.userImage === "number" ? theme.userImage : { uri: theme.userImage })
+                        : require("@/assets/darkThemeUser.jpg") // fallback
+                  }
+                  style={styles.ProfilePicture}
                 />
+
+
+
                 <View style={styles.cameraIcon}>
                   <Ionicons name="camera" size={width * 0.05} color="white" />
                 </View>
@@ -967,7 +1002,7 @@ function UserEditProfile() {
 const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },
-    ProfilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
+    ProfilePictureContainer: { alignItems: "center" },
     profileImageWrapper: { position: "relative", marginBottom: height * 0.015 },
     ProfilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
     cameraIcon: { position: "absolute", right: 0, bottom: 0, backgroundColor: theme.buttonBg, borderRadius: width * 0.05, padding: width * 0.015 },

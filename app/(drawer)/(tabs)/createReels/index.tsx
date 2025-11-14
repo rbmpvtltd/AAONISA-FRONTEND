@@ -1,8 +1,5 @@
-import { Audio } from 'expo-av';
-import { useCameraPermissions } from 'expo-camera';
-import * as MediaLibrary from 'expo-media-library';
-import { useEffect, useState } from 'react';
-import { Alert, Dimensions, PermissionStatus, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
+import { useState } from 'react';
+import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
 import CameraScreen from './recordPage';
 import { VideoPreview } from './videoUploadPage';
@@ -42,49 +39,49 @@ const musicOptions: MusicOption[] = [
 ];
 
 export default function CreateReel() {
-  const [permission, requestPermission] = useCameraPermissions();
+  // const [permission, requestPermission] = useCameraPermissions();
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [contentType, setContentType] = useState<ContentType>('reels');
   
-  const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
-  const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
+  // const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
+  // const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
   
 
-  useEffect(() => {
-    // Request all necessary permissions when component mounts
-    (async () => {
-      try {
-        // Request camera permission
-        const cameraPermission = await requestPermission();
-        const cameraStatus = cameraPermission.status as PermissionStatus;
-        setHasCameraPermission(cameraStatus === 'granted');
+  // useEffect(() => {
+  //   // Request all necessary permissions when component mounts
+  //   (async () => {
+  //     try {
+  //       // Request camera permission
+  //       const cameraPermission = await requestPermission();
+  //       const cameraStatus = cameraPermission.status as PermissionStatus;
+  //       setHasCameraPermission(cameraStatus === 'granted');
         
-        // Request media library permission
-        const mediaPermission = await MediaLibrary.requestPermissionsAsync();
-        const mediaStatus = mediaPermission.status as PermissionStatus;
+  //       // Request media library permission
+  //       const mediaPermission = await MediaLibrary.requestPermissionsAsync();
+  //       const mediaStatus = mediaPermission.status as PermissionStatus;
         
-        // Request microphone permission for audio recording
-        const microphonePermission = await Audio.requestPermissionsAsync();
-        const microphoneStatus = microphonePermission.granted;
-        setHasMicrophonePermission(microphoneStatus);
+  //       // Request microphone permission for audio recording
+  //       const microphonePermission = await Audio.requestPermissionsAsync();
+  //       const microphoneStatus = microphonePermission.granted;
+  //       setHasMicrophonePermission(microphoneStatus);
         
-        if (cameraStatus !== 'granted' || mediaStatus !== 'granted' || !microphoneStatus) {
-          Alert.alert(
-            'Permissions required', 
-            'Please grant all permissions (camera, media library, and microphone)'
-          );
-        }
-      } catch (error) {
-        console.error('Permission error:', error);
-        Alert.alert('Permission Error', 'Failed to request necessary permissions. Please check app settings.');
-      }
-    })();
+  //       if (cameraStatus !== 'granted' || mediaStatus !== 'granted' || !microphoneStatus) {
+  //         Alert.alert(
+  //           'Permissions required', 
+  //           'Please grant all permissions (camera, media library, and microphone)'
+  //         );
+  //       }
+  //     } catch (error) {
+  //       console.error('Permission error:', error);
+  //       Alert.alert('Permission Error', 'Failed to request necessary permissions. Please check app settings.');
+  //     }
+  //   })();
     
-    return () => {
-      // Clean up music sound when component unmounts
+  //   return () => {
+  //     // Clean up music sound when component unmounts
       
-    };
-  }, []);
+  //   };
+  // }, []);
 
   
   
@@ -123,21 +120,21 @@ export default function CreateReel() {
 
   
   // Show loading while permission is being checked
-  if (hasCameraPermission === null) {
-    return <View style={styles.container} />;
-  }
+  // if (hasCameraPermission === null) {
+  //   return <View style={styles.container} />;
+  // }
 
   // Show permission UI if needed
-  if (!hasCameraPermission) {
-    return (
-      <View style={styles.container}>
-        <Text style={styles.message}>We need your permission to show the camera</Text>
-        <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
-          <Text style={styles.permissionButtonText}>Grant Permission</Text>
-        </TouchableOpacity>
-      </View>
-    );
-  }
+  // if (!hasCameraPermission) {
+  //   return (
+  //     <View style={styles.container}>
+  //       <Text style={styles.message}>We need your permission to show the camera</Text>
+  //       <TouchableOpacity style={styles.permissionButton} onPress={requestPermission}>
+  //         <Text style={styles.permissionButtonText}>Grant Permission</Text>
+  //       </TouchableOpacity>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={styles.container}>
