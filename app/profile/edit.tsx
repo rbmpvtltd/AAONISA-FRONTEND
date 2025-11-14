@@ -700,7 +700,7 @@ import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import * as ImagePicker from "expo-image-picker";
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -737,14 +737,14 @@ function UserEditProfile() {
 
 
   // ====================================
-  useEffect(() => {
-    (async () => {
-      const { status } = await ImagePicker.requestCameraPermissionsAsync();
-      if (status !== "granted") {
-        Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
-      }
-    })();
-  }, []);
+  // useEffect(() => {
+  //   (async () => {
+  //     const { status } = await ImagePicker.requestCameraPermissionsAsync();
+  //     if (status !== "granted") {
+  //       Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
+  //     }
+  //   })();
+  // }, []);
   // ====================================
 
 
@@ -1002,7 +1002,7 @@ onSuccess: (data: any) => {
 const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },
-    ProfilePictureContainer: { marginTop: height * 0.02, alignItems: "center", marginBottom: height * 0.02 },
+    ProfilePictureContainer: { alignItems: "center" },
     profileImageWrapper: { position: "relative", marginBottom: height * 0.015 },
     ProfilePicture: { width: width * 0.28, height: width * 0.28, borderRadius: (width * 0.28) / 2, borderWidth: 1, borderColor: theme.inputBorder },
     cameraIcon: { position: "absolute", right: 0, bottom: 0, backgroundColor: theme.buttonBg, borderRadius: width * 0.05, padding: width * 0.015 },

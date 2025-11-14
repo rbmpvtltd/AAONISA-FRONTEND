@@ -130,7 +130,7 @@ const { data, isPending, isError } = useQuery({
     <View
       style={[
         styles.container,
-        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 50 },
+        { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 10 },
       ]}
     >
       <Text style={[styles.header, { color: theme.text }]}>
