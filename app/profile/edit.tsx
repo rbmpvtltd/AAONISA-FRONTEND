@@ -719,14 +719,6 @@ import { SafeAreaView } from "react-native-safe-area-context";
 
 const { width, height } = Dimensions.get("window");
 
-useEffect(() => {
-  (async () => {
-    const { status } = await ImagePicker.requestCameraPermissionsAsync();
-    if (status !== "granted") {
-      Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
-    }
-  })();
-}, []);
 
 interface ProfileData {
   username: string;
@@ -742,6 +734,19 @@ function UserEditProfile() {
 
   // ✅ Get Zustand store
   const profileStore = useProfileStore();
+
+
+  // ====================================
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
+      }
+    })();
+  }, []);
+  // ====================================
+
 
   // ✅ Local state initialized from store
   const [profileData, setProfileData] = useState<ProfileData>({
@@ -795,29 +800,37 @@ function UserEditProfile() {
   // ✅ Mutation to update profile
   const updateMutation = useMutation({
     mutationFn: () => updateProfile(profileData, imageChanged),
-    onSuccess: (data: any) => {
-      if (!data?.data) {
-        Alert.alert("Error", "Invalid server response");
-        return;
-      }
+    // onSuccess: (data: any) => {
+    //   if (!data?.data) {
+    //     Alert.alert("Error", "Invalid server response");
+    //     return;
+    //   }
 
-      // ✅ Update Zustand store
-      useProfileStore.setState({
-        username: data.data.username,
-        name: data.data.name,
-        bio: data.data.bio,
-        ProfilePicture: data.data.ProfilePicture,
-        url: data.data.url,
-      });
-      // useProfileStore.setState({
-      //   username: data.data.username,
-      //   name: data.data.name,
-      //   bio: data.data.bio,
-      //   ProfilePicture: data.data.ProfilePicture
-      //     ? `${data.data.ProfilePicture}?t=${Date.now()}`
-      //     : null,
-      //   url: data.data.url,
-      // });
+    //   // ✅ Update Zustand store
+    //   useProfileStore.setState({
+    //     username: data.data.username,
+    //     name: data.data.name,
+    //     bio: data.data.bio,
+    //     ProfilePicture: data.data.ProfilePicture,
+    //     url: data.data.url,
+    //   });
+     
+    // =============================================
+onSuccess: (data: any) => {
+  const user = data?.data;
+  if (!user) {
+    Alert.alert("Error", "Invalid server response");
+    return;
+  }
+
+  useProfileStore.setState({
+    username: user.username || "",
+    name: user.name || "",
+    bio: user.bio || "",
+    ProfilePicture: user.ProfilePicture || null,
+    url: user.url || "",
+  });
+// =============================================
 
 
       setImageChanged(false);
@@ -851,7 +864,7 @@ function UserEditProfile() {
           <View style={styles.ProfilePictureContainer}>
             <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
               <View style={styles.profileImageWrapper}>
-                <Image
+                {/* <Image
                   source={
                     profileData.ProfilePicture
                       ? { uri: profileData.ProfilePicture }
@@ -860,7 +873,21 @@ function UserEditProfile() {
                         : { uri: theme.userImage }
                   }
                   style={styles.ProfilePicture}
+                /> */}
+
+                <Image
+                  source={
+                    profileData.ProfilePicture
+                      ? { uri: profileData.ProfilePicture }
+                      : theme.userImage
+                        ? (typeof theme.userImage === "number" ? theme.userImage : { uri: theme.userImage })
+                        : require("@/assets/darkThemeUser.jpg") // fallback
+                  }
+                  style={styles.ProfilePicture}
                 />
+
+
+
                 <View style={styles.cameraIcon}>
                   <Ionicons name="camera" size={width * 0.05} color="white" />
                 </View>

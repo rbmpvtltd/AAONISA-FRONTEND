@@ -46,7 +46,7 @@ ios/
 *.aab
 build/
 
-assets/
+# assets/
 
 # Firebase Android config
 google-services.json

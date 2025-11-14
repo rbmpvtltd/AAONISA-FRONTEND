@@ -19,7 +19,10 @@ export default {
        "useNextNotificationsApi": true,
       "permissions": [
         "android.permission.CAMERA",
-        "android.permission.RECORD_AUDIO"
+        "android.permission.RECORD_AUDIO",
+        "CAMERA",
+         "READ_EXTERNAL_STORAGE",
+          "WRITE_EXTERNAL_STORAGE"
       ],
       "edgeToEdgeEnabled": true,
       "package": "com.anonymous.AaoNiSa",
