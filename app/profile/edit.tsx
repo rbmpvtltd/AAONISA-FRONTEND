@@ -3,8 +3,8 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useMutation, useQueryClient } from "@tanstack/react-query";
-// import * as ImagePicker from "expo-image-picker";
-import { useState } from "react";
+import * as ImagePicker from "expo-image-picker";
+import { useEffect, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -41,14 +41,14 @@ function UserEditProfile() {
 
 
   // ====================================
-  // useEffect(() => {
-  //   (async () => {
-  //     const { status } = await ImagePicker.requestCameraPermissionsAsync();
-  //     if (status !== "granted") {
-  //       Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
-  //     }
-  //   })();
-  // }, []);
+  useEffect(() => {
+    (async () => {
+      const { status } = await ImagePicker.requestCameraPermissionsAsync();
+      if (status !== "granted") {
+        Alert.alert("Permission required", "Camera permission is needed to change your profile photo.");
+      }
+    })();
+  }, []);
   // ====================================
 
 
@@ -69,16 +69,21 @@ function UserEditProfile() {
   });
 
   // ✅ Pick image
-  // const pickImage = async (type: "camera" | "gallery") => {
-  //   let result;
-  //   if (type === "camera") {
-  //     result = await ImagePicker.launchCameraAsync({
-  //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
-  //       allowsEditing: true,
-  //       aspect: [1, 1],
-  //       quality: 1,
-  //     });
-  //   } else {
+  const pickImage = async (type: "camera" | "gallery") => {
+    let result;
+    if (type === "camera") {
+      result = await ImagePicker.launchCameraAsync({
+        mediaTypes: ImagePicker.MediaTypeOptions.Images,
+        allowsEditing: true,
+        aspect: [1, 1],
+        quality: 1,
+      });
+    }else {
+      console.log("hello")
+    } 
+    
+    
+    //  else {
   //     result = await ImagePicker.launchImageLibraryAsync({
   //       mediaTypes: ImagePicker.MediaTypeOptions.Images,
   //       allowsEditing: true,
@@ -87,19 +92,19 @@ function UserEditProfile() {
   //     });
   //   }
 
-  //   if (!result.canceled) {
-  //     const uri = result.assets[0].uri;
-  //     setProfileData((prev) => ({ ...prev, ProfilePicture: uri }));
-  //     setImageChanged(true);
-  //   }
-  // };
+    // if (!result.canceled) {
+    //   const uri = result.assets[0].uri;
+    //   setProfileData((prev) => ({ ...prev, ProfilePicture: uri }));
+    //   setImageChanged(true);
+    // }
+  };
 
-  // // ✅ Delete profile picture
-  // const deleteProfilePicture = () => {
-  //   setProfileData((prev) => ({ ...prev, ProfilePicture: null }));
-  //   setImageChanged(true);
-  //   setShowImageOptions(false);
-  // };
+  // ✅ Delete profile picture
+  const deleteProfilePicture = () => {
+    setProfileData((prev) => ({ ...prev, ProfilePicture: null }));
+    setImageChanged(true);
+    setShowImageOptions(false);
+  };
 
   // ✅ Mutation to update profile
   const updateMutation = useMutation({
@@ -201,8 +206,8 @@ onSuccess: (data: any) => {
             {/* Image Options */}
             {showImageOptions && (
               <View style={styles.imageOptionsContainer}>
-                <TouchableOpacity style={styles.imageOption} >
-                  <Text style={styles.imageOptionText}>Camera</Text>
+                <TouchableOpacity style={styles.imageOption} onPress={() => pickImage("camera")} >
+                  <Text style={styles.imageOptionText} >Camera</Text>
                 </TouchableOpacity>
                 <TouchableOpacity style={styles.imageOption} >
                   <Text style={styles.imageOptionText}>Gallery</Text>
@@ -210,7 +215,7 @@ onSuccess: (data: any) => {
                 {profileData.ProfilePicture && (
                   <TouchableOpacity
                     style={[styles.imageOption, styles.deleteOption]}
-                    // onPress={deleteProfilePicture}
+                    onPress={deleteProfilePicture}
                   >
                     <Text style={styles.deleteOptionText}>Delete</Text>
                   </TouchableOpacity>
