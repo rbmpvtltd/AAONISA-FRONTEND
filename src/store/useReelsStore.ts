@@ -212,7 +212,7 @@
 
 //   setReels: (newReels) => set({ reels: newReels }),
 //   // setLoading: (val: boolean) => set({ loading: val }),
-  
+
 //   currentIndex: 0,
 //   activeTab: 'Followings',
 //   isMuted: false,
@@ -258,7 +258,6 @@
 import * as Linking from 'expo-linking';
 import { Animated } from 'react-native';
 import { create } from 'zustand';
-import { getCategoryReel } from '../api/reels-api';
 
 export interface ReelItem {
   id: string;
@@ -269,8 +268,8 @@ export interface ReelItem {
     avatar: string;
   };
   caption?: string;
-  likes?: number;
-  comments?: number;
+  // likes?: number;
+  // comments?: number;
   shares?: number;
   isLiked?: boolean;
 }
@@ -282,11 +281,11 @@ interface ReelsState {
   isMuted: boolean;
   showIcon: boolean;
   fadeAnim: Animated.Value;
-    autoScroll: boolean;                 // NEW: auto scroll toggle
+  autoScroll: boolean;                 // NEW: auto scroll toggle
 
   // Actions
-  toggleLike: (id: string) => void;
-  addComment: (id: string) => void;
+  // toggleLike: (id: string) => void;
+  // addComment: (id: string) => void;
   addShare: (id: string) => void;
   setCurrentIndex: (index: number) => void;
   setActiveTab: (tab: 'Explore' | 'News' | 'Followings') => void;
@@ -294,44 +293,44 @@ interface ReelsState {
   setShowIcon: (val: boolean) => void;
   setAutoScroll: (value: boolean) => void; // NEW: setter function
 
-   fetchReelsByCategory: (category: 'explore' | 'news' | 'followings') => Promise<void>;
+  //  fetchReelsByCategory: (category: 'explore' | 'news' | 'followings') => Promise<void>;
+
   //   NEW: URL Management Functions
   updateReelURL: (reelId: string) => void;
 }
 
 export const useReelsStore = create<ReelsState>((set, get) => ({
   reels: [],
-
   currentIndex: 0,
   activeTab: 'Explore',
   isMuted: false,
   showIcon: false,
   fadeAnim: new Animated.Value(0),
-   autoScroll: false,    
+  autoScroll: false,
 
-fetchReelsByCategory: async (category) => {
-  try {
-    const res = await getCategoryReel(category, 1, 10);
-    console.log("API response for", category, ":", res);
+  // fetchReelsByCategory: async (category) => {
+  //   try {
+  //     const res = await getCategoryReel(category, 1, 10);
+  //     console.log("API response for", category, ":", res);
 
-    const reelsData = Array.isArray(res?.data) ? res.data : [];
-    const cleanData = reelsData
-      .filter((item: any) => item && item.id && item.videoUrl)
-      .map((item : any) => ({
-        ...item,
-        likes: item.likesCount || 0,
-        comments: item.commentsCount || 0,
-        shares: item.sharesCount || 0,
-        isLiked: false,
-      }));
+  //     const reelsData = Array.isArray(res?.data) ? res.data : [];
+  //     const cleanData = reelsData
+  //       .filter((item: any) => item && item.id && item.videoUrl)
+  //       .map((item : any) => ({
+  //         ...item,
+  //         likes: item.likesCount || 0,
+  //         comments: item.commentsCount || 0,
+  //         shares: item.sharesCount || 0,
+  //         isLiked: false,
+  //       }));
 
-    console.log("Cleaned Reels Data:", cleanData);
-    set({ reels: cleanData });
-  } catch (err) {
-    console.error("Error fetching reels:", err);
-    set({ reels: [] });
-  }
-},
+  //     console.log("Cleaned Reels Data:", cleanData);
+  //     set({ reels: cleanData });
+  //   } catch (err) {
+  //     console.error("Error fetching reels:", err);
+  //     set({ reels: [] });
+  //   }
+  // },
 
   // toggleLike: (id: string) =>
   //   set((state) => ({
@@ -346,40 +345,42 @@ fetchReelsByCategory: async (category) => {
   //         : reel
   //     ),
   //   })),
-  toggleLike: (id: string) =>
-  set((state) => ({
-    reels: state.reels.map((reel) => {
-      // if (reel.uuid !== id || reel.id !== id) return reel;  // ✅ Correct unique key
-if (reel.uuid !== id && reel.id !== id) return reel;
-
-      const newLiked = !reel.isLiked;
-      const newLikesCount = (reel.likes ?? 0) + (newLiked ? 1 : -1);
-
-      return {
-        ...reel,
-        isLiked: newLiked,
-        likes: Math.max(0, newLikesCount), // ✅ avoids negative count
-      };
-    }),
-  })),
 
 
-  addComment: (id: string) =>
-    set((state) => ({
-      reels: state.reels.map((reel) =>
-        reel.id === id ? 
-      // { ...reel, comments: reel.comments + 1 } : reel
-  { ...reel, comments: (reel.comments ?? 0) + 1 } : reel
-      ),
-    })),
+  // toggleLike: (id: string) =>
+  //   set((state) => ({
+  //     reels: state.reels.map((reel) => {
+  //       // if (reel.uuid !== id || reel.id !== id) return reel;  // ✅ Correct unique key
+  //       if (reel.uuid !== id && reel.id !== id) return reel;
+
+  //       const newLiked = !reel.isLiked;
+  //       const newLikesCount = (reel.likes ?? 0) + (newLiked ? 1 : -1);
+
+  //       return {
+  //         ...reel,
+  //         isLiked: newLiked,
+  //         likes: Math.max(0, newLikesCount), // ✅ avoids negative count
+  //       };
+  //     }),
+  //   })),
+
+
+  // addComment: (id: string) =>
+  //   set((state) => ({
+  //     reels: state.reels.map((reel) =>
+  //       reel.id === id ?
+  //         // { ...reel, comments: reel.comments + 1 } : reel
+  //         { ...reel, comments: (reel.comments ?? 0) + 1 } : reel
+  //     ),
+  //   })),
 
   addShare: (id: string) =>
     set((state) => ({
       reels: state.reels.map((reel) =>
         // reel.id === id ? { ...reel, shares: reel.shares + 1 } : reel
-      reel.uuid === id
-        ? { ...reel, shares: (reel.shares ?? 0) + 1 } 
-        : reel
+        reel.uuid === id
+          ? { ...reel, shares: (reel.shares ?? 0) + 1 }
+          : reel
       ),
     })),
 
@@ -387,14 +388,16 @@ if (reel.uuid !== id && reel.id !== id) return reel;
   setActiveTab: (tab) => set({ activeTab: tab }),
   toggleMute: () => set({ isMuted: !get().isMuted }),
   setShowIcon: (val: boolean) => set({ showIcon: val }),
-    setAutoScroll: (value: boolean) => set({ autoScroll: value }), 
+  setAutoScroll: (value: boolean) => set({ autoScroll: value }),
+   resetReels: () => set({ currentIndex: 0, reels: [] }),
+
 
   //  NEW: URL Update Function
   updateReelURL: (reelId: string) => {
     // Expo Router ke through URL update karo
     const currentState = get();
     // console.log('URL Updated to Reel:', reelId);
-    
+
     // Deep link URL create karo (for sharing purposes)
     const deepLinkUrl = Linking.createURL(`/reels/${reelId}`);
     // console.log('Deep Link:', deepLinkUrl);

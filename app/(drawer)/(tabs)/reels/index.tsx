@@ -1,6 +1,7 @@
 import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
@@ -8,8 +9,9 @@ import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
-import { useEffect, useRef, useState } from 'react';
+import React, { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   FlatList,
   Image,
@@ -21,8 +23,8 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import { ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import React = require('react');
 
 const ReelItem = ({
   item,
@@ -35,7 +37,7 @@ const ReelItem = ({
   toggleLike,
   likeMutation,
   currentUserId,
-  addComment,
+  // addComment,
   addShare,
   activeTab,
   setActiveTab,
@@ -47,13 +49,11 @@ const ReelItem = ({
   const topBarPaddingTop = SCREEN_HEIGHT * 0.05;
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
-  const {
-    openBookmarkPanel,
-  } = useBookmarkStore();
+  const { openBookmarkPanel, } = useBookmarkStore();
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const [showFullCaption, setShowFullCaption] = useState(false);
-
+  const isFocused = useIsFocused();
 
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -75,18 +75,35 @@ const ReelItem = ({
   }, [isMuted]);
 
 
-  // autoplay control
+  // useEffect(() => {
+  //   if (!player) return;
+
+  //   if (currentIndex === index) {
+  //     if (player.currentTime < 0.5) player.currentTime = 0;
+  //     player.play();
+  //     player.volume = isMuted ? 0 : 1;
+  //   } else {
+  //     try { player.pause(); } catch { }
+  //     player.volume = 0;
+  //   }
+  // }, [currentIndex, index, isMuted]);
+
   useEffect(() => {
     if (!player) return;
 
-    requestAnimationFrame(() => {
-      if (currentIndex === index) {
-        player.play();
-      } else {
-        player.pause();
-      }
-    });
-  }, [currentIndex, index]);
+    if (!isFocused) {
+      player.pause();
+      return;
+    }
+
+    if (currentIndex === index) {
+      player.play();
+      player.volume = isMuted ? 0 : 1;
+    } else {
+      player.pause();
+      player.volume = 0;
+    }
+  }, [isFocused, currentIndex, index, isMuted]);
 
   // mute/unmute
 
@@ -106,32 +123,22 @@ const ReelItem = ({
     player.play();
   };
 
-  // const handlePressIn = () => {
-  //   requestAnimationFrame(() => player.pause());
-  // };
-
-  // const handlePressOut = () => {
-  //   requestAnimationFrame(() => player.play());
-  // };
-
-
   const handleLike = async () => {
     const newLiked = !liked;
+
+    // UI update
     setLiked(newLiked);
-
-    const prevCount = likesCount;
-
-    // optimistic update
-    setLikesCount(newLiked ? prevCount + 1 : Math.max(0, prevCount - 1));
+    setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
 
     try {
       await likeMutation.mutateAsync(item.uuid || item.id);
-    } catch (error) {
-      // revert
+    } catch (err) {
+      // revert on error
       setLiked(!newLiked);
-      setLikesCount(prevCount);
+      setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
     }
   };
+
 
   console.log("item.likes", item.likesCount);
   console.log("comment count", item.commentsCount);
@@ -167,7 +174,7 @@ const ReelItem = ({
         )}
       </Pressable>
 
-  
+
       {/* Top Bar */}
       <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
@@ -206,28 +213,39 @@ const ReelItem = ({
         {/* <Text style={styles.caption}>{item.caption}</Text> */}
 
         <View style={{ marginBottom: 8 }}>
-          {/* Caption Text */}
-          <Text
-            style={styles.caption}
-            numberOfLines={showFullCaption ? undefined : 2}
-          >
-            {item.caption}
-          </Text>
+          {/* NORMAL caption (2 lines only) */}
+          {!showFullCaption && (
+            <>
+              <Text style={styles.caption} numberOfLines={2}>
+                {item.caption}
+              </Text>
 
-          {/* More Button */}
-          {!showFullCaption && item.caption?.length > 100 && (
-            <TouchableOpacity onPress={() => setShowFullCaption(true)}>
-              <Text style={{ color: "#ccc", marginTop: 4 }}>More</Text>
-            </TouchableOpacity>
+              {item.caption?.length > 100 && (
+                <TouchableOpacity onPress={() => setShowFullCaption(true)}>
+                  <Text style={{ color: "#ccc", marginTop: 4 }}>More</Text>
+                </TouchableOpacity>
+              )}
+            </>
           )}
 
-          {/* Less Button */}
-          {showFullCaption && item.caption?.length > 100 && (
-            <TouchableOpacity onPress={() => setShowFullCaption(false)}>
-              <Text style={{ color: "#ccc", marginTop: 4 }}>Less</Text>
-            </TouchableOpacity>
+          {/* EXPANDED caption with SCROLL like Instagram */}
+          {showFullCaption && (
+            <View style={{ maxHeight: 200 }}>
+              {/* caption scrollable */}
+              <ScrollView nestedScrollEnabled={true}>
+                <Text style={styles.caption}>{item.caption}</Text>
+              </ScrollView>
+
+              {/* LESS button */}
+              {item.caption?.length > 100 && (
+                <TouchableOpacity onPress={() => setShowFullCaption(false)}>
+                  <Text style={{ color: "#ccc", marginTop: 4 }}>Less</Text>
+                </TouchableOpacity>
+              )}
+            </View>
           )}
         </View>
+
 
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
@@ -251,7 +269,6 @@ const ReelItem = ({
             color={liked ? '#FF0000' : '#fff'}
           />
           <Text style={styles.actionText}>
-            {/* {Array.isArray(item.likes) ? item.likesCount : 0} */}
             {likesCount}
           </Text>
         </TouchableOpacity>
@@ -284,10 +301,10 @@ const ReelItem = ({
         visible={showOptions}
         onClose={() => setShowOptions(false)}
         onSave={() => {
-          openBookmarkPanel(item.id);
+          openBookmarkPanel(item.id || item.uuid);
           setShowOptions(false);
         }}
-        onReport={() => console.log("Reported:", item.id)}
+        onReport={() => console.log("Reported:", item.id || item.uuid)}
         reelId={item.id}
         reelUrl={item.videoUrl} // add this too for share/download
       />
@@ -304,9 +321,8 @@ const ReelsFeed = () => {
   const likeMutation = useLikeMutation();
 
   const {
-    reels,
-    toggleLike,
-    addComment,
+    // toggleLike,
+    // addComment,
     addShare,
     currentIndex,
     setCurrentIndex,
@@ -317,10 +333,30 @@ const ReelsFeed = () => {
     showIcon,
     setShowIcon,
     fadeAnim,
-    updateReelURL, //NEW: URL update function
+    updateReelURL,
+
+    //NEW: URL update function
     autoScroll,
-    fetchReelsByCategory,
   } = useReelsStore();
+
+
+  // const { data: reels = [], isLoading } = useReelsByCategory(activeTab);
+
+  // const { data: reels = [], isLoading, isError } =
+  //   useReelsByCategory(activeTab.toLowerCase());
+
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    refetch,
+  } = useReelsByCategory(activeTab.toLowerCase());
+
+  const reels = data?.pages.flatMap((p: any) => p.reels) || [];
+
 
   useEffect(() => {
     // jab activeTab Followings hai aur data empty aaya
@@ -330,86 +366,143 @@ const ReelsFeed = () => {
     }
   }, [reels, activeTab]);
 
-
-  useEffect(() => {
-    fetchReelsByCategory(activeTab.toLowerCase() as any);
-  }, [activeTab]);
+  // useEffect(() => {
+  //   fetchReelsByCategory(activeTab.toLowerCase() as any);
+  // }, [activeTab]);
 
 
   // auto scroll 
-  useEffect(() => {
-    let interval: any;
+  // useEffect(() => {
+  //   let interval: any;
 
-    if (autoScroll && reels.length > 0) {
-      interval = setInterval(() => {
-        const nextIndex =
-          currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+  //   if (autoScroll && reels.length > 0) {
+  //     interval = setInterval(() => {
+  //       const nextIndex =
+  //         currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
 
-        setCurrentIndex(nextIndex);
+  //       setCurrentIndex(nextIndex);
 
-        flatListRef.current?.scrollToIndex({
-          index: nextIndex,
-          animated: true,
-        });
+  //       flatListRef.current?.scrollToIndex({
+  //         index: nextIndex,
+  //         animated: true,
+  //       });
 
-        updateURL(nextIndex);
-      }, 10000);
-    }
+  //       updateURL(nextIndex);
+  //     }, 10000);
+  //   }
 
-    return () => clearInterval(interval);
-  }, [autoScroll, reels, currentIndex]);
+  //   return () => clearInterval(interval);
+  // }, [autoScroll, reels, currentIndex]);
 
+  // useEffect(() => {
+  //   if (!autoScroll || reels.length === 0) return;
+
+  //   const interval = setInterval(() => {
+  //     const prevIndex = currentIndex;
+
+  //     const nextIndex =
+  //       prevIndex + 1 < reels.length ? prevIndex + 1 : 0;
+
+  //     setCurrentIndex(nextIndex);
+
+  //     flatListRef.current?.scrollToIndex({
+  //       index: nextIndex,
+  //       animated: true,
+  //     });
+
+  //     updateURL(nextIndex);
+  //   }, 10000);
+
+  //   return () => clearInterval(interval);
+  // }, [autoScroll, reels.length]);
 
 
   // NEW: URL update function
   const updateURL = (index: number) => {
-    if (reels[index]) {
-      const reelId = reels[index].id || reels[index].uuid;
+    if (!reels[index]) return;
 
-      router.setParams({ id: reelId });
-      updateReelURL(reelId);
-      // console.log("reelId updated",router.setParams({ id: reelId }));
-    }
+    const reelId = reels[index].id || reels[index].uuid;
+
+    if (String(id) === String(reelId)) return;
+
+    router.setParams({ id: reelId });
+    // console.log("reelId updated",router.setParams({ id: reelId }));
+    updateReelURL(reelId);
   };
 
-  useEffect(() => {
-    if (id && reels.length > 0) {
-      const index = reels.findIndex((r) => r.id == id);
-      if (index !== -1) {
-        setCurrentIndex(index);
-        setTimeout(() => {
-          try {
-            // flatListRef.current?.scrollToIndex({ index, animated: false });
-            if (index >= 0 && index < reels.length) {
-   flatListRef.current?.scrollToIndex({ index, animated: false });
-}
 
-          } catch (error) {
-            console.warn("Scroll error:", error);
-          }
-        }, 100);
-      }
-    }
-  }, [id, reels]);
+  // useEffect(() => {
+  //   if (id && reels.length > 0) {
+  //     const index = reels.findIndex((r: any) => r.id == id);
+  //     if (index !== -1) {
+  //       setCurrentIndex(index);
+  //       setTimeout(() => {
+  //         try {
+  //           // flatListRef.current?.scrollToIndex({ index, animated: false });
+  //           if (index >= 0 && index < reels.length) {
+  //             flatListRef.current?.scrollToIndex({ index, animated: false });
+  //           }
 
+  //         } catch (error) {
+  //           console.warn("Scroll error:", error);
+  //         }
+  //       }, 100);
+  //     }
+  //   }
+  // }, [id, reels]);
   useEffect(() => {
-    if (!isFocused) {
-      if (!isMuted) toggleMute();
-    } else {
-      if (isMuted) toggleMute();
-    }
-  }, [isFocused]);
+    if (!autoScroll || reels.length === 0) return;
+
+    const interval = setInterval(() => {
+      const nextIndex =
+        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+      setCurrentIndex(nextIndex);
+
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
+
+      updateURL(nextIndex);
+    }, 10000);
+
+    return () => clearInterval(interval);
+  }, [autoScroll, reels.length]);
+
 
   //  UPDATED: Scroll handler with URL update
-  const handleScroll = (event: any) => {
-    const offsetY = event.nativeEvent.contentOffset.y;
-    const index = Math.round(offsetY / SCREEN_HEIGHT);
+  // const handleScroll = (event: any) => {
+  //   const offsetY = event.nativeEvent.contentOffset.y;
+  //   const index = Math.round(offsetY / SCREEN_HEIGHT);
 
-    if (index !== currentIndex) {
+  //   if (index !== currentIndex) {
+  //     setCurrentIndex(index);
+  //     updateURL(index); // URL update karo
+  //   }
+  // };
+  // const handleScroll = (event: any) => {
+  //   const offsetY = event.nativeEvent.contentOffset.y;
+  //   const index = Math.round(offsetY / SCREEN_HEIGHT);
+
+  //   if (index === currentIndex) return; // 🔥 STOP infinite loop here
+
+  //   setCurrentIndex(index);
+
+  //   // URL update only when absolutely needed
+  //   if (reels[index]) {
+  //     updateURL(index);
+  //   }
+  // };
+  const handleScroll = (event: any) => {
+    const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
+
+    if (index !== currentIndex && reels[index]) {
       setCurrentIndex(index);
-      updateURL(index); // URL update karo
+      updateURL(index);
     }
   };
+
 
   // mute/unmute animation
   const handleToggleMute = () => {
@@ -418,16 +511,16 @@ const ReelsFeed = () => {
 
     Animated.timing(fadeAnim, {
       toValue: 1,
-      duration: 200,
+      duration: 150,
       useNativeDriver: true,
     }).start(() => {
       setTimeout(() => {
         Animated.timing(fadeAnim, {
           toValue: 0,
-          duration: 500,
+          duration: 400,
           useNativeDriver: true,
         }).start(() => setShowIcon(false));
-      }, 1200);
+      }, 800);
     });
   };
   // const currentUserId = useProfileStore(state => state.userId);
@@ -439,7 +532,24 @@ const ReelsFeed = () => {
 
   const currentUserId = currentUser?.userProfile?.id
 
-  console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
+  // console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
+
+  if (isLoading)
+    return (
+      // <View style={styles.loadingContainer}>
+      //   <Text style={styles.loadingText}>Loading...</Text>
+      // </View>
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" />
+      </View>
+    );
+
+  if (isError)
+    return (
+      <View style={styles.errorContainer}>
+        <Text style={styles.errorText}>Error loading reels</Text>
+      </View>
+    );
 
 
   return (
@@ -463,9 +573,9 @@ const ReelsFeed = () => {
               fadeAnim={fadeAnim}
               currentUserId={currentUserId}
               // toggleLike={toggleLike}
-              toggleLike={(id: string) => likeMutation.mutate(id)}
+              // toggleLike={(id: string) => likeMutation.mutate(id)}
               likeMutation={likeMutation}
-              addComment={addComment}
+              // addComment={addComment}
               addShare={addShare}
               activeTab={activeTab}
               setActiveTab={setActiveTab}
@@ -484,6 +594,7 @@ const ReelsFeed = () => {
           offset: SCREEN_HEIGHT * index,
           index,
         })}
+
         // NEW: Extra safety for URL update
         onMomentumScrollEnd={(event) => {
           const offsetY = event.nativeEvent.contentOffset.y;
@@ -492,6 +603,17 @@ const ReelsFeed = () => {
             updateURL(index);
           }
         }}
+        onEndReached={() => {
+          if (hasNextPage) fetchNextPage();
+        }}
+        onEndReachedThreshold={0.4}
+        ListFooterComponent={
+          isFetchingNextPage ? (
+            <View style={{ padding: 20 }}>
+              <Text style={{ color: "#fff" }}>Loading more...</Text>
+            </View>
+          ) : null
+        }
       />
       <BookmarkPanel
       />
@@ -585,6 +707,33 @@ const styles = StyleSheet.create({
     fontSize: 16,
     marginLeft: 12,
   },
+  loadingContainer: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+  },
+
+  loadingText: {
+    color: "#fff",
+    fontSize: 18,
+    fontWeight: "600",
+  },
+  errorContainer: {
+    flex: 1,
+    backgroundColor: "black",
+    justifyContent: "center",
+    alignItems: "center",
+    paddingHorizontal: 20,
+  },
+
+  errorText: {
+    color: "red",
+    fontSize: 16,
+    textAlign: "center",
+    fontWeight: "600",
+  },
+
 
 });
 
