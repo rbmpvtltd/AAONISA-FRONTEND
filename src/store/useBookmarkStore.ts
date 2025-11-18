@@ -19,7 +19,6 @@ interface BookmarkStore {
 
   openBookmarkPanel: (reel: Reel) => void;
   closePanel: () => void;
-
   addCategory: (name: string) => void;
   saveToCategory: (categoryId: string) => void;
 
