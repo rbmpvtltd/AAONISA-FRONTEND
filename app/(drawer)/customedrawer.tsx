@@ -10,10 +10,7 @@ import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 export default function CustomDrawer(props: any) {
-  // const theme = useAppTheme();
-  // const [darkMode, setDarkMode] = useState(false);
-
-
+ 
 const { theme: themeMode, toggleTheme } = useThemeStore();
 const theme = useAppTheme();
 
@@ -30,13 +27,36 @@ const theme = useAppTheme();
       }
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
-      Alert.alert("Logged out successfully!"); 
       router.replace("/auth/login");
+
+      setTimeout(() => {
+      Alert.alert("Logged out successfully!"); 
+      },1500);
+
     } catch (error) {
       console.error("Logout Error:", error);
       Alert.alert("Logout failed, please try again!");
     }
   };
+
+  const confirmLogout = () => {
+  Alert.alert(
+    "Log out",
+    "Are you sure you want to log out?",
+    [
+      {
+        text: "Cancel",
+        style: "cancel",
+      },
+      {
+        text: "OK",
+        onPress: handleLogout,
+      },
+    ],
+    { cancelable: true }
+  );
+};
+
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -113,7 +133,7 @@ const theme = useAppTheme();
           </View>
 
           {/* Online Status */}
-          <View
+          {/* <View
             style={{
               flexDirection: "row",
               alignItems: "center",
@@ -126,7 +146,7 @@ const theme = useAppTheme();
               Online Status
             </Text>
             <Switch value={onlineStatus} onValueChange={setOnlineStatus} />
-          </View>
+          </View> */}
 
           {/* Auto Scroll */}
           <View
@@ -154,7 +174,7 @@ const theme = useAppTheme();
           }}
         >
           <TouchableOpacity
-            onPress={handleLogout}
+            onPress={confirmLogout}
             style={{ flexDirection: "row", alignItems: "center" }}
           >
             <Ionicons name="log-out-outline" size={22} color="red" />
