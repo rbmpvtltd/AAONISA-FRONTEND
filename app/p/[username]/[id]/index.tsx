@@ -164,6 +164,12 @@ const UserReelItem = ({
       {/* Bottom Info */}
       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
         <View style={styles.userInfo}>
+           <TouchableOpacity
+                      style={{ flexDirection: 'row', alignItems: 'center' }}
+                      onPress={() => {
+                        router.push(`/profile`);
+                      }}
+                    >
           <Image
             source={{ uri: profilePicture }}
             style={{
@@ -176,6 +182,7 @@ const UserReelItem = ({
           />
 
           <Text style={styles.username}>{reelUsername}</Text>
+          </TouchableOpacity>
         </View>
         {/* <Text style={styles.caption}>{item.caption}</Text> */}
         <View style={{ marginBottom: 8 }}>

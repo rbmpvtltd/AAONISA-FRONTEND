@@ -199,16 +199,23 @@ const ReelItem = ({
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
-          <Image
-            source={{ uri: item.user.profilePic }}
-            style={{
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              borderRadius: AVATAR_SIZE / 2,
-              marginRight: 8,
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+            onPress={() => {
+              router.push(`/profile/${item.user.username}`);
             }}
-          />
-          <Text style={styles.username}>{item.user.username}</Text>
+          >
+            <Image
+              source={{ uri: item.user.profilePic }}
+              style={{
+                width: AVATAR_SIZE,
+                height: AVATAR_SIZE,
+                borderRadius: AVATAR_SIZE / 2,
+                marginRight: 8,
+              }}
+            />
+            <Text style={styles.username}>{item.user.username}</Text>
+          </TouchableOpacity>
         </View>
         {/* <Text style={styles.caption}>{item.caption}</Text> */}
 
@@ -356,15 +363,20 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-
-
-  useEffect(() => {
-    // jab activeTab Followings hai aur data empty aaya
-    if (activeTab === 'Followings' && reels.length === 0) {
-      console.log("No followings found, switching to Explore...");
+    useEffect(() => {
+    if (activeTab === 'Followings' && !isLoading && reels.length === 0) {
+      console.log("No followings content, redirecting to Explore...");
       setActiveTab('Explore');
     }
-  }, [reels, activeTab]);
+  }, [reels, activeTab, isLoading]);
+
+  // useEffect(() => {
+  //   // jab activeTab Followings hai aur data empty aaya
+  //   if (activeTab === 'Followings' && reels.length === 0) {
+  //     console.log("No followings found, switching to Explore...");
+  //     setActiveTab('Explore');
+  //   }
+  // }, [reels, activeTab]);
 
   // useEffect(() => {
   //   fetchReelsByCategory(activeTab.toLowerCase() as any);
