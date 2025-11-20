@@ -703,7 +703,7 @@ function UserEditProfile() {
   const theme = useAppTheme();
   const queryClient = useQueryClient();
 
-  // ✅ Get Zustand store
+  //  Get Zustand store
   const profileStore = useProfileStore();
 
 
@@ -719,7 +719,7 @@ function UserEditProfile() {
   // ====================================
 
 
-  // ✅ Local state initialized from store
+  //  Local state initialized from store
   const [profileData, setProfileData] = useState<ProfileData>({
     username: profileStore.username || "",
     name: profileStore.name || "",
@@ -735,7 +735,7 @@ function UserEditProfile() {
     url: profileStore.url?.length || 0,
   });
 
-  // ✅ Pick image
+  //  Pick image
   const pickImage = async (type: "camera" | "gallery") => {
     let result;
     if (type === "camera") {
@@ -761,14 +761,14 @@ function UserEditProfile() {
     }
   };
 
-  // ✅ Delete profile picture
+  //  Delete profile picture
   const deleteProfilePicture = () => {
     setProfileData((prev) => ({ ...prev, ProfilePicture: null }));
     setImageChanged(true);
     setShowImageOptions(false);
   };
 
-  // ✅ Mutation to update profile
+  //  Mutation to update profile
   const updateMutation = useMutation({
     mutationFn: () => updateProfile(profileData, imageChanged),
     // onSuccess: (data: any) => {
@@ -777,7 +777,7 @@ function UserEditProfile() {
     //     return;
     //   }
 
-    //   // ✅ Update Zustand store
+    //   //  Update Zustand store
     //   useProfileStore.setState({
     //     username: data.data.username,
     //     name: data.data.name,
@@ -894,7 +894,7 @@ onSuccess: (data: any) => {
               placeholder="Enter username"
               placeholderTextColor={theme.placeholder}
               value={profileData.username}
-              onChangeText={(text) => setProfileData((prev) => ({ ...prev, username: text }))}
+              onChangeText={(text) => setProfileData((prev) => ({ ...prev, username: text.toLocaleLowerCase() }))}
             />
           </View>
 
@@ -969,7 +969,7 @@ onSuccess: (data: any) => {
   );
 }
 
-// ✅ Styles
+//  Styles
 const createStyles = (theme: ReturnType<typeof useAppTheme>) =>
   StyleSheet.create({
     container: { flex: 1, backgroundColor: theme.background, paddingHorizontal: width * 0.05 },

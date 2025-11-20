@@ -139,7 +139,7 @@ const handleSendPhoneOtp = async () => {
           placeholderTextColor={theme.placeholder}
           value={email}
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
-          onChangeText={setEmail}
+          onChangeText={(text) => setEmail(text.trim().toLocaleLowerCase())}
         />
 
         {/* OTP for email */}
@@ -177,7 +177,7 @@ const handleSendPhoneOtp = async () => {
           placeholderTextColor={theme.placeholder}
           value={phone}
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
-          onChangeText={setPhone}
+          onChangeText={(num) => setPhone(num.trim())}
         />
 
         {/* OTP for phone */}

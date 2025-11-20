@@ -170,7 +170,7 @@ const handleSendOtp = async () => {
           placeholderTextColor={theme.placeholder}
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
           value={emailOrPhone}
-          onChangeText={setEmailOrPhone}
+          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
         />
 
         {otpSent && (
