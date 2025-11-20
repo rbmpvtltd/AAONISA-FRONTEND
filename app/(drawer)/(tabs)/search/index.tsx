@@ -428,7 +428,7 @@ export default function ExploreScreen() {
             placeholder="Search users"
             placeholderTextColor={theme.text}
             value={searchQuery}
-            onChangeText={setSearchQuery}
+            onChangeText={(text) => setSearchQuery(text.trim().toLocaleLowerCase())}
             autoCapitalize="none"
           />
           {searchQuery ? (
@@ -441,7 +441,19 @@ export default function ExploreScreen() {
 
         {/* SEARCH RESULTS */}
         {debouncedQuery ? (
-          <ScrollView contentContainerStyle={{ paddingHorizontal: 12, paddingBottom: 40 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: 40 }}>
+
+            {/*  NO RESULTS FOUND */}
+            {!searchLoading && searchResults.length === 0 ? (
+              <View style={{   flex: 1, alignItems: "center",  justifyContent: "center"}}>
+                <Ionicons name="search-outline" size={50} color={theme.subtitle} />
+                <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
+                  No results found
+                </Text>
+              </View>
+            ) : null}
+
+            {/*  SEARCH RESULTS LIST */}
             {searchResults.map((u: any) => (
               <TouchableOpacity
                 key={u.id}

@@ -127,7 +127,7 @@ const Login = () => {
             },
           ]}
           value={emailOrPhone}
-          onChangeText={setEmailOrPhone}
+          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
         />
 
         <TextInput

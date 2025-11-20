@@ -133,7 +133,7 @@ const Register = () => {
             { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
           ]}
           value={emailOrPhone}
-          onChangeText={setEmailOrPhone}
+          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
         />
 
         {otpSent ? (
@@ -224,7 +224,7 @@ const Register = () => {
             { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
           ]}
           value={username}
-          onChangeText={setUsername}
+          onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
         />
 
         <TextInput
