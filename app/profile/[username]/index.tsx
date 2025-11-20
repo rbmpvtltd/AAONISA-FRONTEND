@@ -2,7 +2,7 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams, useNavigation, useRouter } from "expo-router";
+import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useState } from "react";
 import {
@@ -150,12 +150,42 @@ export const UserInfo: React.FC<{
             ) : null}
 
             {/* 🔹 Follow / Unfollow Button */}
-            {!isOwnProfile && (
+            {/* {!isOwnProfile && (
                 <TouchableOpacity onPress={onFollowToggle} style={[styles.followButton, { backgroundColor: isFollowing ? theme.buttonBg : theme.buttonBg }]}>
                     <Text style={{ color: "#fff", fontWeight: "600" }}>
                         {isFollowing ? "Following" : "Follow"}
                     </Text>
                 </TouchableOpacity>
+            )} */}
+
+            {!isOwnProfile && (
+                <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
+
+                    {/* Follow Button */}
+                    <TouchableOpacity
+                        onPress={onFollowToggle}
+                        style={[styles.followButton, { flex: 1 }]}
+                    >
+                        <Text style={{ color: "#fff", fontWeight: "600", textAlign: "center" }}>
+                            {isFollowing ? "Following" : "Follow"}
+                        </Text>
+                    </TouchableOpacity>
+
+                    {/* Message Button */}
+                    <TouchableOpacity
+                        onPress={() => router.push(`/chat/${profile.id}`)}
+                        style={[styles.messageButton, {
+                            flex: 1,
+                            backgroundColor: theme.searchBg,
+
+                        }]}
+                    >
+                        <Text style={{ color: theme.text, fontWeight: "600", textAlign: "center" }}>
+                            Message
+                        </Text>
+                    </TouchableOpacity>
+
+                </View>
             )}
         </View>
     );
@@ -192,7 +222,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({
     index,
     onPressItem,
 }) => {
-      const [isLoading, setIsLoading] = useState(true);
+    const [isLoading, setIsLoading] = useState(true);
     const player = videoUrl
         ? useVideoPlayer(videoUrl, (p) => {
             p.loop = true;
@@ -240,13 +270,13 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
         router.push(`/p/${username}/${video.uuid}`);
     };
 
-         if (!videos || videos.length === 0) {
-            return (
-                <View style={{ alignItems: "center", marginTop: 50 }}>
-                    <Text>No videos uploaded yet.</Text>
-                </View>
-            );
-        }
+    if (!videos || videos.length === 0) {
+        return (
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+                <Text>No videos uploaded yet.</Text>
+            </View>
+        );
+    }
 
     return (
         <FlatList
@@ -373,7 +403,7 @@ export const ProfileScreen: React.FC = () => {
         );
     }
 
-    
+
 
     // Determine if viewing own profile
     const isOwnProfile =
@@ -453,12 +483,18 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         marginTop: height * 0.01,
-        gap: width * 0.02,
+        // gap: width * 0.02,
         backgroundColor: "#3498db",
         borderRadius: 5,
         padding: 10,
         textAlign: "center",
         fontSize: 16
+    },
+    messageButton: {
+        marginTop: height * 0.01,
+        borderRadius: 5,
+        paddingVertical: 10,
+        justifyContent: "center",
     },
     statNumber: {
         fontSize: 16 * fontScale,
