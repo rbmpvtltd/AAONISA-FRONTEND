@@ -1,8 +1,8 @@
+import { getAllUsers } from '@/src/api/chat-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
-import { useChatStore } from '@/src/store/useChatStore';
 import { ChatSummary } from '@/src/types/chatType';
+import { useQuery } from '@tanstack/react-query';
 import { router } from 'expo-router';
-import React from 'react';
 import {
   FlatList,
   Image,
@@ -73,32 +73,45 @@ function ChatRow({
 
 export default function ChatListScreen() {
   const theme = useAppTheme();
-  const { width, height } = useWindowDimensions();
-  const { chats } = useChatStore();
+  const { width } = useWindowDimensions();
 
-  // Responsive sizing logic
+  const { data, isLoading, isError } = useQuery({
+    queryKey: ["allUsers"],
+    queryFn: () => getAllUsers(),
+  });
+
+  console.log("All users:", data);
+  
+  
   const avatarSize = width < 360 ? 44 : width < 400 ? 50 : 60;
-  const headerFontSize = width < 360 ? 18 : width < 400 ? 20 : 24;
   const nameFontSize = width < 360 ? 14 : width < 400 ? 15 : 16;
   const msgFontSize = width < 360 ? 12 : width < 400 ? 13 : 14;
   const padding = width < 360 ? 12 : width < 400 ? 16 : 20;
 
+  if (isLoading)
+    return <Text style={{ color: theme.text, marginTop: 20, textAlign: "center" }}>Loading...</Text>;
+
+  if (isError)
+    return (
+      <Text style={{ color: "red", marginTop: 20, textAlign: "center" }}>
+        Failed to load users
+      </Text>
+    );
+
+  // STEP: Convert API format → ChatSummary format
+  const chatList = data?.map((u: any) => ({
+    id: u.id,
+    name: u.userProfile?.name || u.username,
+    avatar: u.userProfile?.ProfilePicture,
+    lastMessage: "Start chatting...", // default msg
+    unread: 0, // default
+  }));
+
+  
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
-      {/* <Text
-        style={[
-          styles.header,
-          { fontSize: headerFontSize, color: theme.text, paddingHorizontal: padding },
-        ]}
-      >
-        Chats
-      </Text> */}
-
-         {/* <Stack.Screen name="chat" options={{ title: "Chats" }} /> */}
-
-
       <FlatList
-        data={chats}
+        data={chatList}
         keyExtractor={(i) => i.id}
         renderItem={({ item }) => (
           <ChatRow
@@ -109,8 +122,10 @@ export default function ChatListScreen() {
             msgFontSize={msgFontSize}
             onPress={() =>
               router.push({
-                pathname: '/chat/[chatId]',
-                params: { chatId: item.id, chatName: item.name },
+                pathname: "/chat/[id]",
+                params: {
+                  id: item.id,
+                },
               })
             }
           />
@@ -124,6 +139,7 @@ export default function ChatListScreen() {
     </View>
   );
 }
+
 
 const styles = StyleSheet.create({
   container: { flex: 1 },

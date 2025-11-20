@@ -38,7 +38,7 @@ export default function ChatLayout() {
 
         {/* Chat Detail */}
         <Stack.Screen
-          name="[chatId]"
+          name="[id]"
           options={{
             title: "Chat Detail",
           }}
