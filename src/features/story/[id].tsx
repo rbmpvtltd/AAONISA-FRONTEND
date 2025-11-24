@@ -457,22 +457,64 @@ export default function StoryViewPage() {
     return () => anim.stop();
   }, [currentIndex]);
 
+  // const handleNext = () => {
+  //   if (currentIndex < storyList.length - 1) {
+  //     // console.log("➡ Next story");
+  //     setCurrentIndex((i) => i + 1);
+  //   } else {
+  //     // console.log("🏁 End of stories, going back");
+  //     router.back();
+  //   }
+  // };
+
+  // const handlePrevious = () => {
+  //   if (currentIndex > 0) {
+  //     // console.log("⬅ Previous story");
+  //     setCurrentIndex((i) => i - 1);
+  //   } else {
+  //     // console.log("🏁 First story, going back");
+  //     router.back();
+  //   }
+  // };
+
+
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
-      // console.log("➡ Next story");
       setCurrentIndex((i) => i + 1);
+      return;
+    }
+
+    const currentUserIndex = userStories.findIndex((u) => u.username === userStory?.username);
+
+    // Move to next user
+    if (currentUserIndex < userStories.length - 1) {
+      const nextUser = userStories[currentUserIndex + 1];
+      const nextStory =
+        nextUser.stories.find((s) => !s.viewed) || nextUser.stories[0];
+
+      router.replace(`/story/${nextStory.id}`);
     } else {
-      // console.log("🏁 End of stories, going back");
+      // End of last user
       router.back();
     }
   };
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
-      // console.log("⬅ Previous story");
       setCurrentIndex((i) => i - 1);
+      return;
+    }
+
+    const currentUserIndex = userStories.findIndex((u) => u.username === userStory?.username);
+
+    // Move back to previous user
+    if (currentUserIndex > 0) {
+      const prevUser = userStories[currentUserIndex - 1];
+      const prevStory = prevUser.stories[prevUser.stories.length - 1];
+
+      router.replace(`/story/${prevStory.id}`);
     } else {
-      // console.log("🏁 First story, going back");
+      // First user's first story → exit
       router.back();
     }
   };
@@ -484,7 +526,6 @@ export default function StoryViewPage() {
   };
 
   const handleLongPressOut = () => {
-    console.log("▶ Resume story");
     setPaused(false);
     player.play();
   };
@@ -496,6 +537,7 @@ export default function StoryViewPage() {
       </View>
     );
   }
+  
 
   return (
     <View style={styles.container}>
@@ -519,8 +561,8 @@ export default function StoryViewPage() {
                   i === currentIndex
                     ? { flex: progress }
                     : i < currentIndex
-                    ? { flex: 1 }
-                    : { flex: 0 },
+                      ? { flex: 1 }
+                      : { flex: 0 },
                 ]}
               />
             </View>
@@ -529,8 +571,15 @@ export default function StoryViewPage() {
 
         {/* User info */}
         <View style={styles.userRow}>
-          <Image source={{ uri: userStory.profilePic }} style={styles.profileImg} />
-          <Text style={styles.username}>{userStory.username}</Text>
+          <TouchableOpacity
+            style={{ flexDirection: "row", alignItems: "center" }}
+            onPress={() => {
+              router.push(`/profile/${userStory.username}`);
+            }}
+          >
+            <Image source={{ uri: userStory.profilePic }} style={styles.profileImg} />
+            <Text style={styles.username}>{userStory.username}</Text>
+          </TouchableOpacity>
         </View>
 
         {/* Close */}

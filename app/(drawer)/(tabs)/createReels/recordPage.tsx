@@ -1,6 +1,6 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView } from "expo-camera"; // assuming expo-camera
-import React, { useRef, useState } from "react";
+import { useRef, useState } from "react";
 import { Alert, PanResponder, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // agar aap koi aur package use kar rahe ho toh yahan change kar lena
 import * as ImagePicker from "expo-image-picker";
@@ -116,7 +116,7 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
 
             // Open gallery with only video filter
             const result = await ImagePicker.launchImageLibraryAsync({
-                mediaTypes: ImagePicker.MediaTypeOptions.Videos,
+                mediaTypes: ["videos"],
                 allowsEditing: false,
                 quality: 1,
             });

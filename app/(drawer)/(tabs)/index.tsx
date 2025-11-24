@@ -74,49 +74,6 @@ const HomePage = () => {
   const { setPhotos, toggleMute } = useFeedStore();
   const { setCategories } = useBookmarkStore();
 
-  // useEffect(() => {
-  //   setUserStory({
-  //     username: "adnan_dev",
-  //     profilePic: "https://randomuser.me/api/portraits/men/32.jpg",
-  //     stories: [
-  //       {
-  //         id: 1,
-  //         videoUrl:
-  //           "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-  //         duration: 10000,
-  //         viewed: false,
-  //       },
-  //       {
-  //         id: 2,
-  //         videoUrl:
-  //           "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-  //         duration: 7000,
-  //         viewed: false,
-  //       },
-  //        {
-  //         id: 3,
-  //         videoUrl:
-  //       "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-  //         duration: 7000,
-  //         viewed: false,
-  //       },
-  //        {
-  //         id: 4,
-  //         videoUrl:
-  //       "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-  //         duration: 7000,
-  //         viewed: false,
-  //       },
-  //        {
-  //         id: 5,
-  //         videoUrl:
-  //            "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback13.mp4",
-  //         duration: 7000,
-  //         viewed: false,
-  //       },
-  //     ],
-  //   });
-  // }, []);
 
   useEffect(() => {
     async function loadStories() {

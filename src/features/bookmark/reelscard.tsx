@@ -1,6 +1,6 @@
 import { ResizeMode, Video } from "expo-av";
 import { useLocalSearchParams, useRouter } from "expo-router";
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { useBookmarkStore } from "../../store/useBookmarkStore"; // <-- apne path ke hisab se adjust karo
 

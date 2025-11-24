@@ -36,7 +36,6 @@
 
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { router } from "expo-router";
-import React from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 export const StoryList = ({ theme }: { theme: any }) => {
