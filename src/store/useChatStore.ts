@@ -81,6 +81,7 @@ type ChatState = {
   chats: ChatSummary[];                     // all chat users
   messages: Record<string, Message[]>;      // chatId → messages[]
   selectedMessage: Message | null;
+  clearMessages: (chatId: string) => void;
 
   // setters
   setSelectedMessage: (msg: Message | null) => void;
@@ -93,8 +94,8 @@ type ChatState = {
 };
 
 export const useChatStore = create<ChatState>((set) => ({
-  chats: [],           // 🔥 no dummy
-  messages: {},        // 🔥 no dummy
+  chats: [],        
+  messages: {},     
   selectedMessage: null,
 
   // select message
@@ -104,13 +105,42 @@ export const useChatStore = create<ChatState>((set) => ({
   setChats: (chats) => set({ chats }),
 
   // add incoming/outgoing messages
+  // addMessage: (chatId, msg) =>
+  //   set((state) => ({
+  //     messages: {
+  //       ...state.messages,
+  //       [chatId]: [...(state.messages[chatId] ?? []), msg],
+  //     },
+  //   })),
+
   addMessage: (chatId, msg) =>
-    set((state) => ({
+  set((state) => {
+    const existingMessages = state.messages[chatId] ?? [];
+    
+    // ✅ Check if message already exists
+    const isDuplicate = existingMessages.some((m) => m.id === msg.id);
+    
+    if (isDuplicate) {
+      console.log('⚠️ Duplicate message ignored:', msg.id);
+      return state; // Don't add duplicate
+    }
+
+    return {
       messages: {
         ...state.messages,
-        [chatId]: [...(state.messages[chatId] ?? []), msg],
+        [chatId]: [...existingMessages, msg],
       },
-    })),
+    };
+  }),
+
+
+  clearMessages: (chatUserId: string) => 
+  set((state) => ({
+    messages: {
+      ...state.messages,
+      [chatUserId]: [],
+    },
+  })),
 
   // delete only for me
   deleteMessageForMe: (chatId, msgId) =>

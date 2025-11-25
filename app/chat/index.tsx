@@ -80,9 +80,15 @@ export default function ChatListScreen() {
     queryFn: () => getAllUsers(),
   });
 
-  console.log("All users:", data);
-  
-  
+
+  //   const { data, isLoading , isError} = useQuery({
+  //   queryKey: ["sessions"],
+  //   queryFn: () => getUserSessionsWithLatestMessage(),
+  // });
+
+  // console.log("All users:", data);
+
+
   const avatarSize = width < 360 ? 44 : width < 400 ? 50 : 60;
   const nameFontSize = width < 360 ? 14 : width < 400 ? 15 : 16;
   const msgFontSize = width < 360 ? 12 : width < 400 ? 13 : 14;
@@ -107,7 +113,7 @@ export default function ChatListScreen() {
     unread: 0, // default
   }));
 
-  
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
