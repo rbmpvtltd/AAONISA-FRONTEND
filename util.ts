@@ -1,4 +1,3 @@
-
 function createApiUrl(url: string) {
     // __DEV__ is true if we using localhost and false on production
     if (__DEV__) {

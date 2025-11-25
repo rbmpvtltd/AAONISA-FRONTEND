@@ -1,6 +1,7 @@
 import { expoTokenUnassign } from "@/src/api/auth-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useReelsStore } from "@/src/store/useReelsStore";
+import { useProfileStore } from "@/src/store/userProfileStore";
 import { useThemeStore } from "@/src/store/useThemeStore";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -9,8 +10,10 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import { queryClient } from "../_layout";
+
+
 export default function CustomDrawer(props: any) {
- 
 const { theme: themeMode, toggleTheme } = useThemeStore();
 const theme = useAppTheme();
 
@@ -25,8 +28,15 @@ const theme = useAppTheme();
       if (pushToken) {
         await expoTokenUnassign(pushToken);
       }
+
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
+
+   useProfileStore.getState().resetProfile();
+
+    queryClient.clear();
+    queryClient.invalidateQueries();
+
       router.replace("/auth/login");
 
       setTimeout(() => {
