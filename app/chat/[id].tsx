@@ -1713,7 +1713,7 @@ const styles = StyleSheet.create({
     borderWidth: 1,
     borderRadius: 20,
     maxHeight: 100,
-    marginBottom: 20,
+    marginBottom: 30,
   },
   sendBtn: {
     borderRadius: 20,
