@@ -365,6 +365,7 @@
 // });
 
 // // ==========================================================================================================
+
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { Ionicons } from "@expo/vector-icons";
 import { useLocalSearchParams, useRouter } from "expo-router";
@@ -397,28 +398,28 @@ export default function StoryViewPage() {
   const progress = useRef(new Animated.Value(0)).current;
   const [paused, setPaused] = useState(false);
 
-  // ✅ Always call hook at top level
+  //  Always call hook at top level
   const player = useVideoPlayer("");
 
   const currentStory = storyList[currentIndex];
 
-  // ✅ Set initial index only once on mount
+  //  Set initial index only once on mount
   useEffect(() => {
     if (userStory && id) {
       const idx = userStory.stories.findIndex((s) => s.id === id);
       if (idx !== -1) {
-        // console.log("✅ Initial story index:", idx);
+        // console.log(" Initial story index:", idx);
         setCurrentIndex(idx);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, []);
 
-  // ✅ Load new video on currentIndex change
+  //  Load new video on currentIndex change
   useEffect(() => {
     if (!currentStory || !player) return;
 
-    // console.log("🎬 Loading story:", currentStory.id);
+    // console.log(" Loading story:", currentStory.id);
 
     const loadVideo = async () => {
       if (player.replaceAsync) {
@@ -433,7 +434,7 @@ export default function StoryViewPage() {
     loadVideo();
   }, [currentStory, paused]);
 
-  // ✅ Progress animation
+  //  Progress animation
   useEffect(() => {
     if (!currentStory) return;
 
@@ -442,7 +443,6 @@ export default function StoryViewPage() {
     progress.stopAnimation();
     progress.setValue(0);
 
-    // console.log("⏱ Starting progress for:", currentStory.id);
 
     const anim = Animated.timing(progress, {
       toValue: 1,
@@ -456,27 +456,6 @@ export default function StoryViewPage() {
 
     return () => anim.stop();
   }, [currentIndex]);
-
-  // const handleNext = () => {
-  //   if (currentIndex < storyList.length - 1) {
-  //     // console.log("➡ Next story");
-  //     setCurrentIndex((i) => i + 1);
-  //   } else {
-  //     // console.log("🏁 End of stories, going back");
-  //     router.back();
-  //   }
-  // };
-
-  // const handlePrevious = () => {
-  //   if (currentIndex > 0) {
-  //     // console.log("⬅ Previous story");
-  //     setCurrentIndex((i) => i - 1);
-  //   } else {
-  //     // console.log("🏁 First story, going back");
-  //     router.back();
-  //   }
-  // };
-
 
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
@@ -520,7 +499,7 @@ export default function StoryViewPage() {
   };
 
   const handleLongPressIn = () => {
-    // console.log("⏸ Pause story");
+    // console.log(" Pause story");
     setPaused(true);
     player.pause();
   };
@@ -583,9 +562,9 @@ export default function StoryViewPage() {
         </View>
 
         {/* Close */}
-        <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
+        {/* <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
           <Ionicons name="close" size={26} color="#fff" />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
       </View>
 
       {/* Tap left/right */}
@@ -600,8 +579,18 @@ export default function StoryViewPage() {
           delayLongPress={150}
         />
       </View>
+
+
+        {/* Close button ko alag, upar layer me dikhaye */}
+  <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+    <View style={{ position: "absolute", top: 55, right: 10 }}>
+      <TouchableOpacity onPress={() => router.back()}>
+        <Ionicons name="close" size={26} color="#fff" />
+      </TouchableOpacity>
     </View>
-  );
+  </View>
+    </View>
+  );  
 }
 
 const styles = StyleSheet.create({

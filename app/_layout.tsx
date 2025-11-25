@@ -81,6 +81,7 @@ import {
   useRouter,
   useSegments,
 } from "expo-router";
+import { jwtDecode } from "jwt-decode";
 import React, { useEffect } from "react";
 import { ActivityIndicator, Alert, StatusBar, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
@@ -89,7 +90,7 @@ import { GestureHandlerRootView } from "react-native-gesture-handler";
 /* -------------------------------------------------
    1. TanStack Query Client (Global Cache)
    ------------------------------------------------- */
-const queryClient = new QueryClient({
+export const queryClient = new QueryClient({
   defaultOptions: {
     queries: {
       retry: 1,
@@ -116,6 +117,43 @@ export default function RootLayout() {
   const [initializing, setInitializing] = React.useState(true);
   const [navigated, setNavigated] = React.useState(false);
 
+
+
+  const checkTokenExpiry = async (router: any) => {
+  try {
+    const accessToken = await AsyncStorage.getItem("accessToken");
+
+    if (!accessToken) {
+      console.log("❌ No token found");
+      router.replace("/auth/login");
+      return;
+    }
+
+    const decoded: any = jwtDecode(accessToken);
+    const now = Date.now() / 1000;
+
+    console.log("⏳ Time Left:", decoded.exp - now);
+
+    if (decoded.exp < now) {
+      console.log("⛔ Token Expired -> Logging out");
+      await AsyncStorage.removeItem("accessToken");
+      router.replace("/auth/login");
+    }
+  } catch (err) {
+    await AsyncStorage.removeItem("accessToken");
+    router.replace("/auth/login");
+  }
+};
+
+useEffect(() => {
+  const interval = setInterval(() => {
+    checkTokenExpiry(router);
+  }, 20000); // 20 sec
+
+  return () => clearInterval(interval);
+}, []);
+
+
 useEffect(() => {
     (async () => {
       const perms = await requestAllPermissions();
@@ -128,18 +166,6 @@ useEffect(() => {
       }
     })();
   }, []);
-
-
- // Token Expire Auto Logout Every 30 Seconds
-// useEffect(() => {
-//   if (initializing) return;
-
-//   const interval = setInterval(() => {
-//     checkTokenExpire(); // yaha se token expire hote hi logout ho jayega
-//   }, 30000); // 30 sec
-
-//   return () => clearInterval(interval);
-// }, [initializing]);
 
 
   const sendToken = async (pushToken: string) => {
