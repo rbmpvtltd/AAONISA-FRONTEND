@@ -1,7 +1,7 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { Ionicons } from "@expo/vector-icons";
 import { Tabs, useNavigation, useRouter } from "expo-router";
-import { StatusBar, TouchableOpacity, View } from "react-native";
+import { Image, StatusBar, TouchableOpacity, View } from "react-native";
 
 export default function TabsLayout() {
   const router = useRouter();
@@ -56,7 +56,13 @@ export default function TabsLayout() {
           name="index"
           options={{
             headerShown: true,
-            headerTitle: "Aao Ni Sa",
+            // headerTitle: "Aao Ni Sa",
+            headerTitle: () => (
+      <Image
+        source={require("@/assets/images/name hithoye remove bg.png")}
+        style={{ width: 100, height: 40,  alignItems: "flex-start" }}
+      />
+    ),
             headerTitleStyle: {
               fontWeight: "700",
               fontSize: 20,
@@ -156,29 +162,6 @@ export default function TabsLayout() {
             ),
           }}
         />
-        {/* <Tabs.Screen
-          name="bookmark"
-          options={{
-            headerShown: false,
-            title: "Profile",
-            tabBarIcon: ({ focused }) => (
-              <Ionicons
-                name={focused ? "person" : "person-outline"}
-                size={24}
-                color={focused ? theme.text : theme.subtitle}
-              />
-            ),
-          }}
-        /> */}
-
-        {/* <Tabs.Screen
-          name="story/[id]"
-          options={{
-            headerShown: false,
-            tabBarStyle: { display: "none" },
-            tabBarButton: () => null, // hides the tab from Tab Bar
-          }}
-        /> */}
       </Tabs>
     </>
   );
