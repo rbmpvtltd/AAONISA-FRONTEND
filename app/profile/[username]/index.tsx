@@ -676,11 +676,8 @@ export const UserInfo = memo<{
             const link = user.url.startsWith("http") ? user.url : `https://${user.url}`;
             Linking.openURL(link).catch(() => console.log("Failed to open URL"));
         }
-    }, [user?.url]);
-
-    const handleMessagePress = useCallback(() => {
-        router.push(`/chat/${profile.id}`);
-    }, [profile.id]);
+    };
+    console.log("iiiiiiiiiiiiiiiiiii", profile.id);
 
     return (
         <View style={styles.userInfo}>
@@ -709,8 +706,18 @@ export const UserInfo = memo<{
                     </TouchableOpacity>
 
                     <TouchableOpacity
-                        onPress={handleMessagePress}
-                        style={[styles.messageButton, { backgroundColor: theme.searchBg }]}
+                        // onPress={() => router.push(`/chat/${profile.id}`)}
+                        onPress={() => router.push({
+                            pathname: "/chat/[id]",
+                            params: {
+                                id: profile.id,
+                            }
+                        })}
+                        style={[styles.messageButton, {
+                            flex: 1,
+                            backgroundColor: theme.searchBg,
+
+                        }]}
                     >
                         <Text style={[styles.buttonText, { color: theme.text }]}>
                             Message
