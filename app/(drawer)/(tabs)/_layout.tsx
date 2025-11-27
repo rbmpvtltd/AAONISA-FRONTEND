@@ -57,12 +57,14 @@ export default function TabsLayout() {
           options={{
             headerShown: true,
             // headerTitle: "Aao Ni Sa",
-            headerTitle: () => (
-      <Image
-        source={require("@/assets/images/name hithoye remove bg.png")}
-        style={{ width: 100, height: 40,  alignItems: "flex-start" }}
-      />
-    ),
+            headerLeft: () => (
+              <Image
+                source={require("@/assets/images/name hithoye.png")}
+                style={{ width: 100, height: 110, marginLeft : 10, }}
+                resizeMode="contain"
+              />
+            ),
+            headerTitle: "",
             headerTitleStyle: {
               fontWeight: "700",
               fontSize: 20,
