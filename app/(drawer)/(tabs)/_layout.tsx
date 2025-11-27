@@ -59,7 +59,7 @@ export default function TabsLayout() {
             // headerTitle: "Aao Ni Sa",
             headerLeft: () => (
               <Image
-                source={require("@/assets/images/Name-Hithoye.png")}
+                source={require("@/assets/images/name-hithoye.png")}
                 style={{ width: 100, height: 110, marginLeft : 10, }}
                 resizeMode="contain"
               />
