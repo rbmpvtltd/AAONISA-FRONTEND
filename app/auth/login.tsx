@@ -3,8 +3,9 @@ import { useAuthStore } from "@/src/store/useAuthStore";
 import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
 import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
 import { useProfileStore } from "@/src/store/userProfileStore";
+import { Ionicons } from "@expo/vector-icons";
 import { Link, useRouter } from "expo-router";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import {
   Alert,
   KeyboardAvoidingView,
@@ -33,6 +34,8 @@ const loginSchema = z.object({
 const Login = () => {
   const router = useRouter();
   const theme = useAppTheme();
+  const [showPassword, setShowPassword] = useState(false);
+
 
   const {
     emailOrPhone,
@@ -130,7 +133,7 @@ const Login = () => {
           onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
         />
 
-        <TextInput
+        {/* <TextInput
           placeholder="Password"
           placeholderTextColor={theme.placeholder}
           style={[
@@ -144,7 +147,43 @@ const Login = () => {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
-        />
+        /> */}
+
+        <View style={{ position: "relative" }}>
+  <TextInput
+    placeholder="Password"
+    placeholderTextColor={theme.placeholder}
+    style={[
+      styles.input,
+      {
+        backgroundColor: theme.inputBg,
+        borderColor: theme.inputBorder,
+        color: theme.text,
+        paddingRight: 45, // space for eye icon
+      },
+    ]}
+    secureTextEntry={!showPassword} // <-- eye toggle
+    value={password}
+    onChangeText={setPassword}
+  />
+
+  {/* Eye Icon Button */}
+  <TouchableOpacity
+    onPress={() => setShowPassword(!showPassword)}
+    style={{
+      position: "absolute",
+      right: 12,
+      top: 15,
+    }}
+  >
+   <Ionicons 
+  name={showPassword ? "eye-off" : "eye"} 
+  size={22} 
+  color={theme.placeholder} 
+/>
+  </TouchableOpacity>
+</View>
+
 
         <TouchableOpacity
           style={styles.forgotButton}
