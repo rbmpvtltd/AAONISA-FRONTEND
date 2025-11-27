@@ -1,5 +1,6 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
@@ -32,6 +33,7 @@ const registerSchema = z.object({
 const Register = () => {
   const router = useRouter();
   const theme = useAppTheme();
+  const [showPassword, setShowPassword] = React.useState(false);
 
   const {
     emailOrPhone,
@@ -227,7 +229,7 @@ const Register = () => {
           onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
         />
 
-        <TextInput
+        {/* <TextInput
           placeholder="Create Password"
           placeholderTextColor={theme.placeholder}
           style={[
@@ -237,7 +239,42 @@ const Register = () => {
           secureTextEntry
           value={password}
           onChangeText={setPassword}
-        />
+        /> */}
+
+        <View style={{ position: "relative" }}>
+  <TextInput
+    placeholder="Create Password"
+    placeholderTextColor={theme.placeholder}
+    style={[
+      styles.input,
+      {
+        backgroundColor: theme.inputBg,
+        borderColor: theme.inputBorder,
+        color: theme.text,
+        paddingRight: 45, // space for eye icon
+      },
+    ]}
+    secureTextEntry={!showPassword}
+    value={password}
+    onChangeText={setPassword}
+  />
+
+  <TouchableOpacity
+    onPress={() => setShowPassword(!showPassword)}
+    style={{
+      position: "absolute",
+      right: 12,
+      top: 18,
+    }}
+  >
+    <Ionicons
+      name={showPassword ? "eye-off" : "eye"}
+      size={22}
+      color={theme.placeholder}
+    />
+  </TouchableOpacity>
+</View>
+
 
         <Text style={[styles.policy, { color: theme.subtitle }]}>
           By Sign up, you agree to our Terms, Privacy Policy and Cookies Policy

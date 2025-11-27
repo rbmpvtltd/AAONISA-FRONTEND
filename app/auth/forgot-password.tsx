@@ -1,4 +1,5 @@
 import { useAuthStore } from "@/src/store/useAuthStore";
+import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
@@ -32,6 +33,8 @@ const forgotSchema = z.object({
 const ForgotPassword = () => {
   const router = useRouter();
   const theme = useAppTheme();
+  const [showNewPassword, setShowNewPassword] = React.useState(false);
+
 
   const {
     emailOrPhone,
@@ -250,14 +253,49 @@ const handleSendOtp = async () => {
           <Text style={[styles.verifyText, { color: theme.buttonText }]}>Verify OTP</Text>
         </TouchableOpacity>
 
-        <TextInput
+        {/* <TextInput
           placeholder="Enter New Password"
           placeholderTextColor={theme.placeholder}
           secureTextEntry
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
           value={newPassword}
           onChangeText={setNewPassword}
-        />
+        /> */}
+
+        <View style={{ position: "relative" }}>
+  <TextInput
+    placeholder="Enter New Password"
+    placeholderTextColor={theme.placeholder}
+    secureTextEntry={!showNewPassword}
+    style={[
+      styles.input,
+      {
+        backgroundColor: theme.inputBg,
+        borderColor: theme.inputBorder,
+        color: theme.text,
+        paddingRight: 45, // space for eye icon
+      },
+    ]}
+    value={newPassword}
+    onChangeText={setNewPassword}
+  />
+
+  <TouchableOpacity
+    onPress={() => setShowNewPassword(!showNewPassword)}
+    style={{
+      position: "absolute",
+      right: 12,
+      top: 18,
+    }}
+  >
+    <Ionicons
+      name={showNewPassword ? "eye-off" : "eye"}
+      size={22}
+      color={theme.placeholder}
+    />
+  </TouchableOpacity>
+</View>
+
 
         <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleResetPassword}>
           <Text style={[styles.signUpText, { color: theme.buttonText }]}>Reset Password</Text>
