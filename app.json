@@ -5,10 +5,10 @@
     "slug": "HitHoy",
     "version": "1.0.0",
     "orientation": "portrait",
-    "icon": "./assests/icon hithoye.png",
+    "icon": "./assets/Icon-Hithoye.png",
     "scheme": "justsearchapp",
     "splash": {
-      "image": "./assets/logo-with-name.png",
+      "image": "./assets/Logo-With-Name.png",
       "resizeMode": "contain",
       "backgroundColor": "#ffffff"
     },
@@ -28,7 +28,7 @@
         "WRITE_EXTERNAL_STORAGE"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/logo-with-name.png",
+        "foregroundImage": "./assets/Logo-With-Name.png",
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
@@ -38,7 +38,7 @@
     "web": {
       "bundler": "metro",
       "output": "static",
-      "favicon": "./assets/icon hithoye.png"
+      "favicon": "./assets/Icon-Hithoye.png"
     },
     "plugins": [
       "expo-router",
