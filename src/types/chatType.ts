@@ -11,4 +11,5 @@ export type ChatSummary = {
   avatar?: string;
   lastMessage: string;
   unread?: number;
+  sessionId: string;
 };

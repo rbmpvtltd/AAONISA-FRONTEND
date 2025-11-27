@@ -53,6 +53,27 @@ async function chatSessionId(senderId: string, receiverId: string) {
   return data;
 }
 
+async function getUserSessionsWithLatestMessage() {
+  const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  };
+
+  const apiUrl = createApiUrl('/chat/get-all-sessions');
+
+  // Body mein senderId aur receiverId bhejo
+  const { data } = await axios.get(apiUrl, config);
+
+  console.log("Session data:", data);
+
+  return data;
+}
+
+
    async function getSessionMessages(sessionId : string) {
   const token = await getToken();
 
@@ -105,5 +126,5 @@ async function chatSessionId(senderId: string, receiverId: string) {
 };
 
 
-export { chatSessionId, deleteMessageForEveryoneAPI, deleteMessageForMeAPI, getAllUsers, getSessionMessages };
+export { chatSessionId, deleteMessageForEveryoneAPI, deleteMessageForMeAPI, getAllUsers, getSessionMessages, getUserSessionsWithLatestMessage };
 
