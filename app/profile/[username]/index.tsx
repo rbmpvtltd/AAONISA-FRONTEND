@@ -133,6 +133,7 @@ export const UserInfo: React.FC<{
             Linking.openURL(link).catch(() => console.log("Failed to open URL"));
         }
     };
+    console.log("iiiiiiiiiiiiiiiiiii", profile.id);
 
     return (
         <View style={styles.userInfo}>
@@ -173,7 +174,13 @@ export const UserInfo: React.FC<{
 
                     {/* Message Button */}
                     <TouchableOpacity
-                        onPress={() => router.push(`/chat/${profile.id}`)}
+                        // onPress={() => router.push(`/chat/${profile.id}`)}
+                        onPress={() => router.push({
+                            pathname: "/chat/[id]",
+                            params: {
+                                id: profile.id,
+                            }
+                        })}
                         style={[styles.messageButton, {
                             flex: 1,
                             backgroundColor: theme.searchBg,
