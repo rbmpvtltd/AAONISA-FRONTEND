@@ -44,26 +44,26 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [isUploading, setIsUploading] = useState(false);
 
 
-  
-    function colorNameToHex(color: string): string {
-        const ctx = document.createElement('canvas').getContext('2d');
-        if (!ctx) return '#FFFFFF';
-        ctx.fillStyle = color;
-        return ctx.fillStyle; // always returns hex, e.g., "red" → "#ff0000"
-    }
 
-    function filterNameToHex(filter: string): string {
-        switch (filter?.toLowerCase()) {
-            case "warm": return "#FFA500"; // orange
-            case "cool": return "#0000FF"; // blue
-            case "grayscale": return "#808080"; // gray
-            case "vintage": return "#FFC0CB"; // pink
-            case "sepia": return "#704214"; // brown
-            case "bright": return "#FFFFFF"; // white
-            case "dark": return "#000000"; // black
-            default: return "#00000000"; // transparent fallback
-        }
+  function colorNameToHex(color: string): string {
+    const ctx = document.createElement('canvas').getContext('2d');
+    if (!ctx) return '#FFFFFF';
+    ctx.fillStyle = color;
+    return ctx.fillStyle; // always returns hex, e.g., "red" → "#ff0000"
+  }
+
+  function filterNameToHex(filter: string): string {
+    switch (filter?.toLowerCase()) {
+      case "warm": return "#FFA500"; // orange
+      case "cool": return "#0000FF"; // blue
+      case "grayscale": return "#808080"; // gray
+      case "vintage": return "#FFC0CB"; // pink
+      case "sepia": return "#704214"; // brown
+      case "bright": return "#FFFFFF"; // white
+      case "dark": return "#000000"; // black
+      default: return "#00000000"; // transparent fallback
     }
+  }
 
   const handleUpload = async () => {
     if (!localTitle.trim() && !localCaption.trim()) {
@@ -88,7 +88,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       return;
     }
 
-      setIsUploading(true); 
+    setIsUploading(true);
 
     // const compressedUri = await VideoCompressor.compress(videoUri, {
     //   compressionMethod: 'auto',
@@ -106,7 +106,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       name: filename,
       type: `video/${fileType}`,
     } as any);
-        const hexFilterColor = filterNameToHex(filter);
+    const hexFilterColor = filterNameToHex(filter);
 
     // Other metadata
     formData.append("contentType", contentType);
@@ -142,9 +142,9 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     } catch (err: any) {
       console.error("Upload failed:", err?.response?.data || err.message);
       alert("Upload failed, check console");
-    }finally {
-    setIsUploading(false);
-  }
+    } finally {
+      setIsUploading(false);
+    }
   };
 
 
@@ -152,6 +152,15 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   // responsive scale factors
   const fontScale = width / 400; // adjust text size
   const paddingScale = width / 375; // adjust padding/margin
+
+  const handleCaptionChange = (text: string) => {
+    const words = text.trim().split(/\s+/);
+
+    if (words.length <= 50) {
+      setLocalCaption(text);
+    }
+  };
+
 
   return (
     <KeyboardAvoidingView
@@ -234,8 +243,21 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
             placeholder="Write your caption here..."
             placeholderTextColor={theme.placeholder}
             value={localCaption}
-            onChangeText={setLocalCaption}
+            onChangeText={handleCaptionChange}
           />
+
+          <View style = {{alignItems : "flex-end"}}>
+            <Text
+              style={{
+                color: theme.placeholder,
+                fontSize: 12 * fontScale,
+                marginBottom: 12,
+              }}>
+              {localCaption.trim() === ""
+                ? "0 / 50 "
+                : `${localCaption.trim().split(/\s+/).length} / 50 words`}
+            </Text>
+          </View>
 
           {/* Hashtags input */}
           <Text style={[styles.label, { color: theme.text, fontSize: 14 * fontScale }]}>
@@ -302,15 +324,15 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
           </TouchableOpacity>
         </ScrollView>
       </View>
-        {isUploading && (
-      <View style={styles.loadingOverlay}>
-        <View style={[styles.loadingBox,{backgroundColor :theme.background}]}>
-          {/* <Ionicons name="cloud-upload-outline" size={50} color={theme.buttonBg} /> */}
-          <ActivityIndicator size="large" color={theme.buttonBg} />
-          <Text style={[styles.loadingText, { color: theme.text }]}>Uploding...</Text>
+      {isUploading && (
+        <View style={styles.loadingOverlay}>
+          <View style={[styles.loadingBox, { backgroundColor: theme.background }]}>
+            {/* <Ionicons name="cloud-upload-outline" size={50} color={theme.buttonBg} /> */}
+            <ActivityIndicator size="large" color={theme.buttonBg} />
+            <Text style={[styles.loadingText, { color: theme.text }]}>Uploding...</Text>
+          </View>
         </View>
-      </View>
-    )}
+      )}
     </KeyboardAvoidingView>
   );
 };
@@ -350,26 +372,26 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
   },
   loadingOverlay: {
-  position: "absolute",
-  top: 0,
-  left: 0,
-  right: 0,
-  bottom: 0,
-  backgroundColor: "rgba(0,0,0,0.5)",
-  justifyContent: "center",
-  alignItems: "center",
-  zIndex: 10,
-},
-loadingBox: {
-  padding: 20,
-  borderRadius: 16,
-  alignItems: "center",
-},
-loadingText: {
-  marginTop: 10,
-  fontSize: 16,
-  fontWeight: "600",
-},
+    position: "absolute",
+    top: 0,
+    left: 0,
+    right: 0,
+    bottom: 0,
+    backgroundColor: "rgba(0,0,0,0.5)",
+    justifyContent: "center",
+    alignItems: "center",
+    zIndex: 10,
+  },
+  loadingBox: {
+    padding: 20,
+    borderRadius: 16,
+    alignItems: "center",
+  },
+  loadingText: {
+    marginTop: 10,
+    fontSize: 16,
+    fontWeight: "600",
+  },
 });
 
 export default FinalUpload;

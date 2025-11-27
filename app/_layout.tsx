@@ -146,12 +146,20 @@ export default function RootLayout() {
 };
 
 useEffect(() => {
+  // ✅ Sirf tab check karo jab user auth pages par nahi hai
+  const inAuthGroup = segments[0] === "auth";
+  
+  if (inAuthGroup) {
+    console.log("🚫 Skipping token check on auth pages");
+    return; // Auth pages par token check mat karo
+  }
+
   const interval = setInterval(() => {
     checkTokenExpiry(router);
   }, 20000); // 20 sec
 
   return () => clearInterval(interval);
-}, []);
+}, [segments]); // ✅ segments ko dependency mein add karo
 
 
 useEffect(() => {

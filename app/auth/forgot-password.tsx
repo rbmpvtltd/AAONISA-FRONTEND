@@ -160,7 +160,7 @@ const handleSendOtp = async () => {
       keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
     >
       <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={[styles.logo, { color: theme.text }]}>AAO NI SA</Text>
+        <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
         <Text style={[styles.subtitle, { color: theme.subtitle }]}>
           Reset your password using OTP
         </Text>
