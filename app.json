@@ -66,7 +66,7 @@
     },
     "extra": {
       "router": {},
-      "EXPO_PUBLIC_LOCAL_API_URL": "https://api.aaonisaa.com/api",
+      "EXPO_PUBLIC_LOCAL_API_URL": "https://hithoy-backend.justsearch.net.in/api",
       "eas": {
         "owner": "rbm.jodhpur03",
         "projectId": "56c200f2-bdaa-4915-a657-b92ed431b7f4"

@@ -14,7 +14,7 @@
         "node": "20.19.4",
        "env" : {
            "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON",
-           "EXPO_PUBLIC_LOCAL_API_URL":"https://api.aaonisaa.com/api"
+           "EXPO_PUBLIC_LOCAL_API_URL":"https://hithoy-backend.justsearch.net.in/api"
         },
       "android": {
         "buildType": "apk"
