@@ -167,7 +167,7 @@ export default function ChatDetailScreen() {
   const flatRef = useRef<FlatList<any>>(null);
   const currentUserIdRef = useRef<string | undefined>(CURRENT_USER_ID);
   const currentRoomIdRef = useRef<string | null>(null);
-  const sessionIdRef = useRef<number | null>(null);
+  const sessionIdRef = useRef(null);
   // const messagesLoadedRef = useRef(false);
 
   // Update current user ref when user changes
