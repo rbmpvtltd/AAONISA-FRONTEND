@@ -74,92 +74,61 @@
 //     })),
 // }));
 
-import { create } from 'zustand';
-import { ChatSummary, Message } from '../types/chatType';
+// src/store/useChatStore.ts
+import { create } from "zustand";
+
+export type Message = {
+  id: string;
+  fromMe: boolean;
+  text: string;
+  createdAt: number;
+};
+
+export type ChatSummary = { id: string; name: string; lastMessage?: string };
 
 type ChatState = {
-  chats: ChatSummary[];                     // all chat users
-  messages: Record<string, Message[]>;      // chatId → messages[]
+  chats: ChatSummary[];
+  messages: Record<string, Message[]>;
   selectedMessage: Message | null;
-  clearMessages: (chatId: string) => void;
 
-  // setters
   setSelectedMessage: (msg: Message | null) => void;
   setChats: (chats: ChatSummary[]) => void;
-
-  // message actions
   addMessage: (chatId: string, msg: Message) => void;
   deleteMessageForMe: (chatId: string, msgId: string) => void;
   deleteMessageForEveryone: (chatId: string, msgId: string) => void;
+  clearMessages: (chatId: string) => void;
 };
 
 export const useChatStore = create<ChatState>((set) => ({
-  chats: [],        
-  messages: {},     
+  chats: [],
+  messages: {},
   selectedMessage: null,
 
-  // select message
   setSelectedMessage: (msg) => set({ selectedMessage: msg }),
-
-  // set chat list (from API)
   setChats: (chats) => set({ chats }),
 
-  // add incoming/outgoing messages
-  // addMessage: (chatId, msg) =>
-  //   set((state) => ({
-  //     messages: {
-  //       ...state.messages,
-  //       [chatId]: [...(state.messages[chatId] ?? []), msg],
-  //     },
-  //   })),
-
+  // ✅ Add message with duplicate check
   addMessage: (chatId, msg) =>
-  set((state) => {
-    const existingMessages = state.messages[chatId] ?? [];
-    
-    // ✅ Check if message already exists
-    const isDuplicate = existingMessages.some((m) => m.id === msg.id);
-    
-    if (isDuplicate) {
-      console.log('⚠️ Duplicate message ignored:', msg.id);
-      return state; // Don't add duplicate
-    }
+    set((state) => {
+      const existing = state.messages[chatId] ?? [];
+      if (existing.some((m) => m.id === msg.id)) return state; // ignore duplicate
+      return { messages: { ...state.messages, [chatId]: [...existing, msg] } };
+    }),
 
-    return {
-      messages: {
-        ...state.messages,
-        [chatId]: [...existingMessages, msg],
-      },
-    };
-  }),
+  clearMessages: (chatId) =>
+    set((state) => ({ messages: { ...state.messages, [chatId]: [] } })),
 
-
-  clearMessages: (chatUserId: string) => 
-  set((state) => ({
-    messages: {
-      ...state.messages,
-      [chatUserId]: [],
-    },
-  })),
-
-  // delete only for me
   deleteMessageForMe: (chatId, msgId) =>
     set((state) => ({
-      messages: {
-        ...state.messages,
-        [chatId]: state.messages[chatId]?.filter((m) => m.id !== msgId) ?? [],
-      },
+      messages: { ...state.messages, [chatId]: state.messages[chatId]?.filter((m) => m.id !== msgId) ?? [] },
       selectedMessage: null,
     })),
 
-  // delete for everyone
   deleteMessageForEveryone: (chatId, msgId) =>
     set((state) => ({
       messages: {
         ...state.messages,
-        [chatId]: state.messages[chatId]?.map((m) =>
-          m.id === msgId ? { ...m, text: 'This message was deleted' } : m
-        ) ?? [],
+        [chatId]: state.messages[chatId]?.map((m) => (m.id === msgId ? { ...m, text: "This message was deleted" } : m)) ?? [],
       },
       selectedMessage: null,
     })),
