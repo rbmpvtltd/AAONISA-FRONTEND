@@ -857,8 +857,6 @@ onSuccess: (data: any) => {
                   style={styles.ProfilePicture}
                 />
 
-
-
                 <View style={styles.cameraIcon}>
                   <Ionicons name="camera" size={width * 0.05} color="white" />
                 </View>
