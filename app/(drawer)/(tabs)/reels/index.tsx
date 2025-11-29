@@ -308,9 +308,9 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id } = useLocalSearchParams();
+  const { id, videoId } = useLocalSearchParams();
   const likeMutation = useLikeMutation();
-
+  const hasScrolledToVideo = useRef(false);
   const {
     // toggleLike,
     // addComment,
@@ -350,37 +350,110 @@ const ReelsFeed = () => {
   }, [reels, activeTab, isLoading]);
 
   // NEW: URL update function
+  // const updateURL = (index: number) => {
+  //   if (!reels[index]) return;
+
+  //   const reelId = reels[index].id || reels[index].uuid;
+
+  //   if (String(id) === String(reelId)) return;
+
+  //   router.setParams({ id: reelId });
+  //   // console.log("reelId updated",router.setParams({ id: reelId }));
+  //   updateReelURL(reelId);
+  // };
+
   const updateURL = (index: number) => {
     if (!reels[index]) return;
 
     const reelId = reels[index].id || reels[index].uuid;
 
-    if (String(id) === String(reelId)) return;
+    if (String(id) === String(reelId) && String(videoId) === String(reelId)) return;
 
-    router.setParams({ id: reelId });
-    // console.log("reelId updated",router.setParams({ id: reelId }));
+    router.setParams({ id: reelId, videoId: reelId });
     updateReelURL(reelId);
   };
 
+
+  // useEffect(() => {
+  //   if (!autoScroll || reels.length === 0) return;
+
+  //   const interval = setInterval(() => {
+  //     const nextIndex =
+  //       currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+  //     setCurrentIndex(nextIndex);
+
+  //     flatListRef.current?.scrollToIndex({
+  //       index: nextIndex,
+  //       animated: true,
+  //     });
+
+  //     updateURL(nextIndex);
+  //   }, 10000);
+
+  //   return () => clearInterval(interval);
+  // }, [autoScroll, reels.length]);
+
+  // useEffect(() => {
+  //   if (videoId && reels.length > 0 && flatListRef.current) {
+  //     const targetIndex = reels.findIndex(
+  //       (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
+  //     );
+
+  //     if (targetIndex !== -1) {
+  //       console.log('🎯 Found video at index:', targetIndex);
+
+  //       setTimeout(() => {
+  //         setCurrentIndex(targetIndex);
+  //         flatListRef.current?.scrollToIndex({
+  //           index: targetIndex,
+  //           animated: false,
+  //         });
+  //         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+  //       }, 100);
+  //     } else {
+  //       console.log('⚠️ Video not found in current feed');
+  //     }
+  //   }
+  // }, [videoId, reels.length]);
+
+// useEffect(() => {
+//   hasScrolledToVideo.current = false;
+// }, [videoId]);
+
+
   useEffect(() => {
-    if (!autoScroll || reels.length === 0) return;
+  if (!videoId) return;
+  if (hasScrolledToVideo.current) return;
+  if (reels.length === 0) return;
+  if (!flatListRef.current) return;
 
-    const interval = setInterval(() => {
-      const nextIndex =
-        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+  const targetIndex = reels.findIndex(
+    (reel) =>
+      String(reel.id) === String(videoId) ||
+      String(reel.uuid) === String(videoId)
+  );
 
-      setCurrentIndex(nextIndex);
+  if (targetIndex !== -1) {
+    console.log("🎯 Scrolling to:", targetIndex);
+
+    hasScrolledToVideo.current = true;
+
+    setTimeout(() => {
+      setCurrentIndex(targetIndex);
 
       flatListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
+        index: targetIndex,
+        animated: false,
       });
 
-      updateURL(nextIndex);
-    }, 10000);
+      updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+    }, 100);
+  } else {
+    console.log("⚠️ Video not found");
+  }
+}, [videoId, reels.length]);
 
-    return () => clearInterval(interval);
-  }, [autoScroll, reels.length]);
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
@@ -440,25 +513,25 @@ const ReelsFeed = () => {
     <View style={styles.container}>
       <StatusBar hidden />
       {/* Top Bar */}
-    <View style={styles.topBar}>
-      <View style={styles.tabsContainer}>
-        {['Explore', 'News', 'Followings'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActiveTab(tab as any)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.activeTabText,
-              ]}
+      <View style={styles.topBar}>
+        <View style={styles.tabsContainer}>
+          {['Explore', 'News', 'Followings'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab as any)}
             >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-    </View>
 
 
       <FlatList
@@ -520,6 +593,17 @@ const ReelsFeed = () => {
             </View>
           ) : null
         }
+
+        onScrollToIndexFailed={(info) => {
+          console.log('Scroll to index failed:', info);
+          // Wait for render then retry
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+            });
+          }, 100);
+        }}
       />
       <BookmarkPanel
       />
@@ -530,13 +614,13 @@ const ReelsFeed = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
   topBar: {
-  position: 'absolute',
-  top: 40,
-  left: 0,
-  right: 0,
-  zIndex: 999,
-  alignItems: 'center',
-},
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    alignItems: 'center',
+  },
   centerIcon: {
     position: "absolute",
     top: "45%",
