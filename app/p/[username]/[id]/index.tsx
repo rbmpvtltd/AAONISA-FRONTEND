@@ -1,4 +1,3 @@
-// All Your Imports
 import { GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
@@ -171,7 +170,7 @@ const UserReelItem = ({
                       }}
                     >
           <Image
-            source={{ uri: profilePicture }}
+            source={{ uri: profilePicture ? profilePicture :  "https://cdn-icons-png.flaticon.com/512/847/847969.png"}}
             style={{
               width: AVATAR_SIZE,
               height: AVATAR_SIZE,

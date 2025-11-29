@@ -294,7 +294,8 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
             renderItem={({ item, index }) =>
                 item.videoUrl ? (
                     <VideoItem
-                        videoUrl={item.videoUrl}
+                        // videoUrl={item.videoUrl}
+                         image={item.thumbnailUrl}
                         id={item.uuid}
                         username={username}
                         index={index}
@@ -339,6 +340,8 @@ export const ProfileScreen: React.FC = () => {
         enabled: !!username,
     });
 
+    console.log("pppppppppppp", profile);
+    
     // Check initial following status
     useEffect(() => {
         if (profile?.followers && currentUser?.id) {

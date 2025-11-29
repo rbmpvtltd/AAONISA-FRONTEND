@@ -76,20 +76,6 @@ const ReelItem = ({
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
 
-
-  // useEffect(() => {
-  //   if (!player) return;
-
-  //   if (currentIndex === index) {
-  //     if (player.currentTime < 0.5) player.currentTime = 0;
-  //     player.play();
-  //     player.volume = isMuted ? 0 : 1;
-  //   } else {
-  //     try { player.pause(); } catch { }
-  //     player.volume = 0;
-  //   }
-  // }, [currentIndex, index, isMuted]);
-
   useEffect(() => {
     if (!player) return;
 
@@ -190,7 +176,7 @@ useEffect(() => {
 
 
       {/* Top Bar */}
-      <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
+      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
         <View style={styles.tabsContainer}>
           {['Explore', 'News', 'Followings'].map((tab) => (
             <TouchableOpacity
@@ -208,7 +194,7 @@ useEffect(() => {
             </TouchableOpacity>
           ))}
         </View>
-      </View>
+      </View> */}
 
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
@@ -220,7 +206,10 @@ useEffect(() => {
             }}
           >
             <Image
-              source={{ uri: item.user.profilePic }}
+              source={{
+                uri: item.user.profilePic ? item.user.profilePic
+                  : "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+              }}
               style={{
                 width: AVATAR_SIZE,
                 height: AVATAR_SIZE,
@@ -228,13 +217,12 @@ useEffect(() => {
                 marginRight: 8,
               }}
             />
+
             <Text style={styles.username}>{item.user.username}</Text>
           </TouchableOpacity>
         </View>
-        {/* <Text style={styles.caption}>{item.caption}</Text> */}
 
         <View style={{ marginBottom: 8 }}>
-          {/* NORMAL caption (2 lines only) */}
           {!showFullCaption && (
             <>
               <Text style={styles.caption} numberOfLines={2}>
@@ -308,10 +296,6 @@ useEffect(() => {
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
-        {/* 
-        <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
-        </TouchableOpacity> */}
 
         <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
@@ -361,11 +345,6 @@ const ReelsFeed = () => {
   } = useReelsStore();
 
 
-  // const { data: reels = [], isLoading } = useReelsByCategory(activeTab);
-
-  // const { data: reels = [], isLoading, isError } =
-  //   useReelsByCategory(activeTab.toLowerCase());
-
   const {
     data,
     fetchNextPage,
@@ -377,71 +356,12 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-    useEffect(() => {
+  useEffect(() => {
     if (activeTab === 'Followings' && !isLoading && reels.length === 0) {
       console.log("No followings content, redirecting to Explore...");
       setActiveTab('Explore');
     }
   }, [reels, activeTab, isLoading]);
-
-  // useEffect(() => {
-  //   // jab activeTab Followings hai aur data empty aaya
-  //   if (activeTab === 'Followings' && reels.length === 0) {
-  //     console.log("No followings found, switching to Explore...");
-  //     setActiveTab('Explore');
-  //   }
-  // }, [reels, activeTab]);
-
-  // useEffect(() => {
-  //   fetchReelsByCategory(activeTab.toLowerCase() as any);
-  // }, [activeTab]);
-
-
-  // auto scroll 
-  // useEffect(() => {
-  //   let interval: any;
-
-  //   if (autoScroll && reels.length > 0) {
-  //     interval = setInterval(() => {
-  //       const nextIndex =
-  //         currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
-
-  //       setCurrentIndex(nextIndex);
-
-  //       flatListRef.current?.scrollToIndex({
-  //         index: nextIndex,
-  //         animated: true,
-  //       });
-
-  //       updateURL(nextIndex);
-  //     }, 10000);
-  //   }
-
-  //   return () => clearInterval(interval);
-  // }, [autoScroll, reels, currentIndex]);
-
-  // useEffect(() => {
-  //   if (!autoScroll || reels.length === 0) return;
-
-  //   const interval = setInterval(() => {
-  //     const prevIndex = currentIndex;
-
-  //     const nextIndex =
-  //       prevIndex + 1 < reels.length ? prevIndex + 1 : 0;
-
-  //     setCurrentIndex(nextIndex);
-
-  //     flatListRef.current?.scrollToIndex({
-  //       index: nextIndex,
-  //       animated: true,
-  //     });
-
-  //     updateURL(nextIndex);
-  //   }, 10000);
-
-  //   return () => clearInterval(interval);
-  // }, [autoScroll, reels.length]);
-
 
   // NEW: URL update function
   const updateURL = (index: number) => {
@@ -456,26 +376,6 @@ const ReelsFeed = () => {
     updateReelURL(reelId);
   };
 
-
-  // useEffect(() => {
-  //   if (id && reels.length > 0) {
-  //     const index = reels.findIndex((r: any) => r.id == id);
-  //     if (index !== -1) {
-  //       setCurrentIndex(index);
-  //       setTimeout(() => {
-  //         try {
-  //           // flatListRef.current?.scrollToIndex({ index, animated: false });
-  //           if (index >= 0 && index < reels.length) {
-  //             flatListRef.current?.scrollToIndex({ index, animated: false });
-  //           }
-
-  //         } catch (error) {
-  //           console.warn("Scroll error:", error);
-  //         }
-  //       }, 100);
-  //     }
-  //   }
-  // }, [id, reels]);
   useEffect(() => {
     if (!autoScroll || reels.length === 0) return;
 
@@ -496,30 +396,6 @@ const ReelsFeed = () => {
     return () => clearInterval(interval);
   }, [autoScroll, reels.length]);
 
-
-  //  UPDATED: Scroll handler with URL update
-  // const handleScroll = (event: any) => {
-  //   const offsetY = event.nativeEvent.contentOffset.y;
-  //   const index = Math.round(offsetY / SCREEN_HEIGHT);
-
-  //   if (index !== currentIndex) {
-  //     setCurrentIndex(index);
-  //     updateURL(index); // URL update karo
-  //   }
-  // };
-  // const handleScroll = (event: any) => {
-  //   const offsetY = event.nativeEvent.contentOffset.y;
-  //   const index = Math.round(offsetY / SCREEN_HEIGHT);
-
-  //   if (index === currentIndex) return; // 🔥 STOP infinite loop here
-
-  //   setCurrentIndex(index);
-
-  //   // URL update only when absolutely needed
-  //   if (reels[index]) {
-  //     updateURL(index);
-  //   }
-  // };
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
 
@@ -528,7 +404,6 @@ const ReelsFeed = () => {
       updateURL(index);
     }
   };
-
 
   // mute/unmute animation
   const handleToggleMute = () => {
@@ -562,9 +437,6 @@ const ReelsFeed = () => {
 
   if (isLoading)
     return (
-      // <View style={styles.loadingContainer}>
-      //   <Text style={styles.loadingText}>Loading...</Text>
-      // </View>
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
         <ActivityIndicator size="large" />
       </View>
@@ -581,6 +453,28 @@ const ReelsFeed = () => {
   return (
     <View style={styles.container}>
       <StatusBar hidden />
+      {/* Top Bar */}
+    <View style={styles.topBar}>
+      <View style={styles.tabsContainer}>
+        {['Explore', 'News', 'Followings'].map((tab) => (
+          <TouchableOpacity
+            key={tab}
+            onPress={() => setActiveTab(tab as any)}
+          >
+            <Text
+              style={[
+                styles.tabText,
+                activeTab === tab && styles.activeTabText,
+              ]}
+            >
+              {tab}
+            </Text>
+          </TouchableOpacity>
+        ))}
+      </View>
+    </View>
+
+
       <FlatList
         ref={flatListRef}
         // data={reels || []}
@@ -649,6 +543,14 @@ const ReelsFeed = () => {
 
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
+  topBar: {
+  position: 'absolute',
+  top: 40,
+  left: 0,
+  right: 0,
+  zIndex: 999,
+  alignItems: 'center',
+},
   centerIcon: {
     position: "absolute",
     top: "45%",
@@ -659,15 +561,15 @@ const styles = StyleSheet.create({
     borderRadius: 50,
     padding: 10,
   },
-  topBar: {
-    flexDirection: 'row',
-    justifyContent: 'center',
-    paddingHorizontal: 16,
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-  },
+  // topBar: {
+  //   flexDirection: 'row',
+  //   justifyContent: 'center',
+  //   paddingHorizontal: 16,
+  //   position: 'absolute',
+  //   top: 0,
+  //   left: 0,
+  //   right: 0,
+  // },
   bottomContent: { position: 'absolute', left: '4%', right: '20%' },
   userInfo: { flexDirection: 'row', alignItems: 'center', marginBottom: 12 },
   username: { color: '#fff', fontSize: 16, fontWeight: '600' },
