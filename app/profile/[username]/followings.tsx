@@ -93,7 +93,7 @@ const { data, isPending, isError } = useQuery({
     <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
       <View style={[styles.userRow, { borderBottomColor: theme.inputBorder }]}>
         <Image
-          source={{ uri: item.profilepicture || 'https://via.placeholder.com/150' }}
+          source={{ uri: item.profilepicture ? item.profilepicture :  "https://cdn-icons-png.flaticon.com/512/847/847969.png",  }}
           style={{
             width: avatarSize,
             height: avatarSize,

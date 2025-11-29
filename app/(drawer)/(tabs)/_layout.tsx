@@ -50,7 +50,6 @@ export default function TabsLayout() {
         })}
       >
 
-
         {/*  Home */}
         <Tabs.Screen
           name="index"
@@ -97,8 +96,6 @@ export default function TabsLayout() {
           }}
         />
 
-
-
         {/*  Search */}
         <Tabs.Screen
           name="search"
@@ -115,7 +112,6 @@ export default function TabsLayout() {
           }}
         />
 
-
         {/*  Create */}
         <Tabs.Screen
           name="createReels"
@@ -131,7 +127,6 @@ export default function TabsLayout() {
             ),
           }}
         />
-
 
         {/*  Reels */}
         <Tabs.Screen
