@@ -219,11 +219,11 @@ console.log("Followers count:", followers?.length ?? 0);
     <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
       <View style={[styles.userRow, { borderBottomColor: theme.inputBorder }]}>
         <Image
-          // source={{ uri: item.profilepicture || 'https://via.placeholder.com/150' }}
           source={
-            item.profilepicture
-              ? { uri: item.profilepicture }
-              : require("@/assets/darkThemeUser.jpg") // fallback image
+            {
+              uri : item.profilepicture 
+              ? item.profilepicture : "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+            }
           }
           style={{
             width: avatarSize,

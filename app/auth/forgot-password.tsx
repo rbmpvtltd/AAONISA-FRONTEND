@@ -35,7 +35,6 @@ const ForgotPassword = () => {
   const theme = useAppTheme();
   const [showNewPassword, setShowNewPassword] = React.useState(false);
 
-
   const {
     emailOrPhone,
     otp,
@@ -47,13 +46,11 @@ const ForgotPassword = () => {
     setNewPassword,
     setOtpSent,
     setToken,
-     resetAuth
+    resetAuth
   } = useAuthStore();
 
-   // declare refs (same file where TextInput is imported from 'react-native')
-    const otpRefs = React.useRef<(TextInput | null)[]>([]);
+  const otpRefs = React.useRef<(TextInput | null)[]>([]);
 
-  // Clipboard auto detect OTP
   useEffect(() => {
     if (Platform.OS === "web") return;
 
@@ -64,18 +61,19 @@ const ForgotPassword = () => {
         clearInterval(interval);
       }
     }, 2000);
-    return () => { clearInterval(interval);
+    return () => {
+      clearInterval(interval);
       resetAuth();
     };
   }, []);
 
-  
-const handleSendOtp = async () => {
-  const validation = forgotSchema.pick({ emailOrPhone: true }).safeParse({ emailOrPhone });
-  if (!validation.success) {
-    Alert.alert("Validation Error", validation.error.issues[0].message);
-    return;
-  }
+
+  const handleSendOtp = async () => {
+    const validation = forgotSchema.pick({ emailOrPhone: true }).safeParse({ emailOrPhone });
+    if (!validation.success) {
+      Alert.alert("Validation Error", validation.error.issues[0].message);
+      return;
+    }
 
     try {
       const data = await forgetPassword({ emailOrPhone });
@@ -91,20 +89,19 @@ const handleSendOtp = async () => {
   };
 
   const verifyOtpHandler = async () => {
-  const validation = forgotSchema.pick({ emailOrPhone: true, otp: true }).safeParse({
-    emailOrPhone,
-    otp: otp.join(""),
-  });
-  if (!validation.success) {
-    Alert.alert("Validation Error", validation.error.issues[0].message);
-    return;
-  }
+    const validation = forgotSchema.pick({ emailOrPhone: true, otp: true }).safeParse({
+      emailOrPhone,
+      otp: otp.join(""),
+    });
+    if (!validation.success) {
+      Alert.alert("Validation Error", validation.error.issues[0].message);
+      return;
+    }
 
     try {
       const data = await sendOtp({ emailOrPhone, code: otp.join("") });
       if (data.success) {
         setToken(data.token);
-        // save to localStorage / AsyncStorage
         if (Platform.OS === "web") localStorage.setItem("authToken", data.token);
         else await AsyncStorage.setItem("authToken", data.token);
 
@@ -121,11 +118,11 @@ const handleSendOtp = async () => {
   };
 
   const handleResetPassword = async () => {
-  const validation = forgotSchema.pick({ newPassword: true }).safeParse({ newPassword });
-  if (!validation.success) {
-    Alert.alert("Validation Error", validation.error.issues[0].message);
-    return;
-  }
+    const validation = forgotSchema.pick({ newPassword: true }).safeParse({ newPassword });
+    if (!validation.success) {
+      Alert.alert("Validation Error", validation.error.issues[0].message);
+      return;
+    }
 
     try {
       let storedToken = token;
@@ -177,72 +174,50 @@ const handleSendOtp = async () => {
         />
 
         {otpSent && (
-          // <View style={styles.otpContainer}>
-          //   {otp.map((digit, index) => (
-          //     <TextInput
-          //       key={index}
-          //       style={[styles.otpInput, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
-          //       maxLength={1}
-          //       keyboardType="numeric"
-          //       value={digit}
-          //       onChangeText={(text) => {
-          //         const newOtp = [...otp];
-          //         newOtp[index] = text;
-          //         setOtp(newOtp);
-          //       }}
-          //     />
-          //   ))}
-          // </View>
+          <View style={styles.otpContainer}>
+            {otp.map((digit, index) => (
+              <TextInput
+                key={index}
+                ref={(r: TextInput | null) => {
+                  otpRefs.current[index] = r;
+                }}
+                style={[
+                  styles.otpInput,
+                  {
+                    backgroundColor: theme.inputBg,
+                    borderColor: theme.inputBorder,
+                    color: theme.text,
+                  },
+                ]}
+                maxLength={1}
+                keyboardType="numeric"
+                value={digit}
+                onChangeText={(text) => {
+                  const newOtp = [...otp];
+                  newOtp[index] = text;
+                  setOtp(newOtp);
 
-           <View style={styles.otpContainer}>
-                      {otp.map((digit, index) => (
-                        <TextInput
-                          key={index}
-                          // typed callback ref — this removes the TS error
-                          ref={(r: TextInput | null) => {
-                            otpRefs.current[index] = r;
-                          }}
-                          style={[
-                            styles.otpInput,
-                            {
-                              backgroundColor: theme.inputBg,
-                              borderColor: theme.inputBorder,
-                              color: theme.text,
-                            },
-                          ]}
-                          maxLength={1}
-                          keyboardType="numeric"
-                          value={digit}
-                          onChangeText={(text) => {
-                            const newOtp = [...otp];
-                            newOtp[index] = text;
-                            setOtp(newOtp);
-          
-                            // Next box auto focus
-                            if (text.length === 1 && index < otp.length - 1) {
-                              otpRefs.current[index + 1]?.focus();
-                            }
-                          }}
-                          onKeyPress={({ nativeEvent }) => {
-                            if (nativeEvent.key === "Backspace") {
-                              const newOtp = [...otp];
-                              // if current box is empty, move to previous and clear it
-                              if (!digit && index > 0) {
-                                otpRefs.current[index - 1]?.focus();
-                                newOtp[index - 1] = "";
-                              } else {
-                                // clear current
-                                newOtp[index] = "";
-                              }
-                              setOtp(newOtp);
-                            }
-                          }}
-                          // helpful props
-                          textContentType="oneTimeCode"
-                          selectTextOnFocus
-                        />
-                      ))}
-                    </View>
+                  if (text.length === 1 && index < otp.length - 1) {
+                    otpRefs.current[index + 1]?.focus();
+                  }
+                }}
+                onKeyPress={({ nativeEvent }) => {
+                  if (nativeEvent.key === "Backspace") {
+                    const newOtp = [...otp];
+                    if (!digit && index > 0) {
+                      otpRefs.current[index - 1]?.focus();
+                      newOtp[index - 1] = "";
+                    } else {
+                      newOtp[index] = "";
+                    }
+                    setOtp(newOtp);
+                  }
+                }}
+                textContentType="oneTimeCode"
+                selectTextOnFocus
+              />
+            ))}
+          </View>
         )}
 
         <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>
@@ -253,48 +228,39 @@ const handleSendOtp = async () => {
           <Text style={[styles.verifyText, { color: theme.buttonText }]}>Verify OTP</Text>
         </TouchableOpacity>
 
-        {/* <TextInput
-          placeholder="Enter New Password"
-          placeholderTextColor={theme.placeholder}
-          secureTextEntry
-          style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
-          value={newPassword}
-          onChangeText={setNewPassword}
-        /> */}
-
         <View style={{ position: "relative" }}>
-  <TextInput
-    placeholder="Enter New Password"
-    placeholderTextColor={theme.placeholder}
-    secureTextEntry={!showNewPassword}
-    style={[
-      styles.input,
-      {
-        backgroundColor: theme.inputBg,
-        borderColor: theme.inputBorder,
-        color: theme.text,
-        paddingRight: 45, // space for eye icon
-      },
-    ]}
-    value={newPassword}
-    onChangeText={setNewPassword}
-  />
+          <TextInput
+            placeholder="Enter New Password"
+            placeholderTextColor={theme.placeholder}
+            secureTextEntry={!showNewPassword}
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.inputBg,
+                borderColor: theme.inputBorder,
+                color: theme.text,
+                paddingRight: 45,
+              },
+            ]}
+            value={newPassword}
+            onChangeText={setNewPassword}
+          />
 
-  <TouchableOpacity
-    onPress={() => setShowNewPassword(!showNewPassword)}
-    style={{
-      position: "absolute",
-      right: 12,
-      top: 18,
-    }}
-  >
-    <Ionicons
-      name={showNewPassword ? "eye-off" : "eye"}
-      size={22}
-      color={theme.placeholder}
-    />
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity
+            onPress={() => setShowNewPassword(!showNewPassword)}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: 18,
+            }}
+          >
+            <Ionicons
+              name={showNewPassword ? "eye-off" : "eye"}
+              size={22}
+              color={theme.placeholder}
+            />
+          </TouchableOpacity>
+        </View>
 
 
         <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleResetPassword}>
