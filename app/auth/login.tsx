@@ -115,7 +115,7 @@ const Login = () => {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
         <Text style={[styles.subtitle, { color: theme.subtitle }]}>
-          Log in to see Videos from your friends.
+          Express without limits
         </Text>
 
         <TextInput
@@ -197,7 +197,7 @@ const Login = () => {
 
 
         <Link href="/auth/register" style={[styles.link, { color: theme.link }]}>
-          Don’t have an account ? Sign up
+          new user ? Sign up
         </Link>
       </View>
     </KeyboardAvoidingView>
