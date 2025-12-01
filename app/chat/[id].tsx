@@ -3,10 +3,9 @@ import { useQuery } from "@tanstack/react-query";
 import { useCallback, useEffect, useRef, useState } from "react";
 import { FlatList, KeyboardAvoidingView, Modal, Platform, Pressable, StyleSheet, Text, TextInput, TouchableOpacity, View, useWindowDimensions } from "react-native";
 
-import { chatSessionId, getSessionMessages } from "@/src/api/chat-api";
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { getSocket, useSocket } from "@/src/socket/socket";
+import { useSocketManager } from "@/src/socket/socket";
 import { useChatStore } from "@/src/store/useChatStore";
 import { Message } from "@/src/types/chatType";
 
@@ -88,104 +87,34 @@ export default function ChatDetailScreen() {
 
   const { data: currentUser } = useQuery({ queryKey: ["currentUser"], queryFn: GetCurrentUser });
   const CURRENT_USER_ID = currentUser?.id;
+ const socket = useSocketManager(CURRENT_USER_ID, chatUserId);
 
-  const socket = getSocket();
-  useSocket(CURRENT_USER_ID); // singleton connect
-
-  const { messages, addMessage, selectedMessage, setSelectedMessage, deleteMessageForMe, deleteMessageForEveryone } = useChatStore();
+  const { messages, addMessage, selectedMessage, setSelectedMessage, deleteMessageForMe, deleteMessageForEveryone, getSessionId } = useChatStore();
 
   const flatRef = useRef<FlatList<any>>(null);
   const currentUserIdRef = useRef<string | undefined>(CURRENT_USER_ID);
   const currentRoomIdRef = useRef<string | null>(null);
-  const sessionIdRef = useRef<number | null>(null);
+  // const sessionIdRef = useRef<number | null>(null);
   const joinedRef = useRef(false);
-  
+  const sessionId = useChatStore((s) => s.sessionId);
+
+
   useEffect(() => { currentUserIdRef.current = CURRENT_USER_ID; }, [CURRENT_USER_ID]);
-
-  /* -------------------------
-     Create session + join room (idempotent)
-  ------------------------- */
-  useEffect(() => {
-    if (!CURRENT_USER_ID || !chatUserId) return;
-
-    const roomId = getRoomId(CURRENT_USER_ID, chatUserId);
-    currentRoomIdRef.current = roomId;
-    let didCancel = false;
-
-    async function createSession() {
-      try {
-        const sessionData = await chatSessionId(CURRENT_USER_ID, chatUserId);
-        if (didCancel) return;
-        sessionIdRef.current = sessionData.session_id;
-      } catch (err) {
-        console.error("❌ Error creating session:", err);
-      }
-    }
-
-    createSession();
-
-    const handleConnect = () => {
-      if (joinedRef.current) return;
-      joinedRef.current = true;
-      socket.emit("joinRoom", { roomId });
-      console.log("🟢 Joined Room:", roomId);
-      socket.emit("getPreviousMessages", { user1Id: CURRENT_USER_ID, user2Id: chatUserId });
-    };
-
-    if (socket.connected) handleConnect();
-    else socket.on("connect", handleConnect);
-
-    return () => {
-      didCancel = true;
-      if (roomId) socket.emit("leaveRoom", { roomId });
-      socket.off("connect", handleConnect);
-      joinedRef.current = false;
-    };
-  }, [CURRENT_USER_ID, chatUserId, socket]);
-
+  // useEffect(()=>{ sessionIdRef.current = sessionId; }, [sessionId]);
   /* -------------------------
      Socket listeners (named + cleanup)
   ------------------------- */
   useEffect(() => {
     if (!chatUserId) return;
+    if (!socket) return;
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
-
-    const handleMessage = (raw: any) => {
-      const myId = currentUserIdRef.current;
-      if (!myId) return;
-      const msg = normalizeIncomingMessage(raw);
-      addMessage(roomKey, { ...msg, fromMe: String(msg.senderId) === String(myId) });
-      setTimeout(() => flatRef.current?.scrollToEnd({ animated: true }), 50);
-    };
-
-    const handlePreviousMessages = async (payload: { sessionId?: number; messages?: any[] }) => {
-      try {
-        const myId = currentUserIdRef.current;
-        if (!myId) return;
-
-        const arr = payload.messages ?? (payload.sessionId ? await getSessionMessages(String(payload.sessionId)) : []);
-        arr.forEach((raw:any) => {
-          const msg = normalizeIncomingMessage(raw);
-          addMessage(roomKey, { ...msg, fromMe: String(msg.senderId) === String(myId) });
-        });
-
-        setTimeout(() => flatRef.current?.scrollToEnd({ animated: false }), 80);
-      } catch (err) {
-        console.error("❌ Error loading previousMessages:", err);
-      }
-    };
-
     const handleDeletedForMe = (data: { messageId: string }) => { deleteMessageForMe(roomKey, String(data.messageId)); };
     const handleDeletedForEveryone = (data: { messageId: string; deletedForEveryone?: boolean }) => { if (data.deletedForEveryone) deleteMessageForEveryone(roomKey, String(data.messageId)); };
-
-    socket.on("Message", handleMessage);
-    socket.on("previousMessages", handlePreviousMessages);
+    
     socket.on("messageDeletedForMe", handleDeletedForMe);
     socket.on("messageDeleted", handleDeletedForEveryone);
 
     return () => {
-      socket.off("Message", handleMessage);
-      socket.off("previousMessages", handlePreviousMessages);
       socket.off("messageDeletedForMe", handleDeletedForMe);
       socket.off("messageDeleted", handleDeletedForEveryone);
     };
@@ -194,13 +123,24 @@ export default function ChatDetailScreen() {
   /* -------------------------
      Send / Delete Handlers
   ------------------------- */
-  const sendMessageToSocket = useCallback((text: string) => {
-    if (!CURRENT_USER_ID || !sessionIdRef.current) return;
-    socket.emit("sendMessage", { sessionId: sessionIdRef.current, senderId: CURRENT_USER_ID, receiverId: chatUserId, text });
-  }, [CURRENT_USER_ID, chatUserId, socket]);
+  const sendMessageToSocket = useCallback(
+  (text: string) => {
+    if(!CURRENT_USER_ID || !sessionId || !socket) return;
+    socket.emit("sendMessage", {
+      sessionId,
+      senderId: CURRENT_USER_ID,
+      receiverId: chatUserId,
+      text,
+    });
+  },
+  [CURRENT_USER_ID, chatUserId, socket, sessionId]
+);
+
 
   const handleDeleteForMe = useCallback(() => {
     if (!selectedMessage || !CURRENT_USER_ID) return;
+    if(!socket) return
+
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
     socket.emit("deleteMessageForMe", { messageId: selectedMessage.id, userId: CURRENT_USER_ID, roomId: roomKey });
     deleteMessageForMe(roomKey, selectedMessage.id);
@@ -209,6 +149,8 @@ export default function ChatDetailScreen() {
 
   const handleDeleteForEveryone = useCallback(() => {
     if (!selectedMessage || !CURRENT_USER_ID) return;
+    if(!socket) return
+
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
     socket.emit("deleteMessageForEveryone", { messageId: selectedMessage.id, userId: CURRENT_USER_ID, roomId: roomKey });
     deleteMessageForEveryone(roomKey, selectedMessage.id);
@@ -224,18 +166,27 @@ export default function ChatDetailScreen() {
   const modalWidth = width < 360 ? "85%" : width < 400 ? "80%" : "70%";
 
   const chatMessages = messages[getRoomId(String(CURRENT_USER_ID), chatUserId)] ?? [];
-
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}>
       <View style={[styles.container, { padding }]}>
         <FlatList
-          ref={flatRef}
-          data={chatMessages.sort((a, b) => a.createdAt - b.createdAt)}
-          keyExtractor={(item) => item.id}
-          renderItem={({ item }) => <MessageBubble m={item} fontSize={fontSize} bubblePadding={bubblePadding} onLongPress={setSelectedMessage} />}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          showsVerticalScrollIndicator={false}
-        />
+  ref={flatRef}
+  data={chatMessages
+    .slice()
+    .sort((a, b) => new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime())} 
+  keyExtractor={(item) => item.id.toString()} 
+  renderItem={({ item }) => (
+    <MessageBubble
+      m={item}
+      fontSize={fontSize}
+      bubblePadding={bubblePadding}
+      onLongPress={(msg) => setSelectedMessage(msg)}
+    />
+  )}
+  contentContainerStyle={{ paddingBottom: 20 }}
+  showsVerticalScrollIndicator={false}
+/>
+
         <Composer onSend={sendMessageToSocket} inputFontSize={fontSize} padding={padding} />
       </View>
 

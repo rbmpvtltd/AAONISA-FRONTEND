@@ -90,7 +90,9 @@ type ChatState = {
   chats: ChatSummary[];
   messages: Record<string, Message[]>;
   selectedMessage: Message | null;
-
+  sessionId:number|null;
+  setSessionId: (id:number|null) => void;
+  getSessionId: () => number|null
   setSelectedMessage: (msg: Message | null) => void;
   setChats: (chats: ChatSummary[]) => void;
   addMessage: (chatId: string, msg: Message) => void;
@@ -99,10 +101,16 @@ type ChatState = {
   clearMessages: (chatId: string) => void;
 };
 
-export const useChatStore = create<ChatState>((set) => ({
+export const useChatStore = create<ChatState>((set,get) => ({
   chats: [],
   messages: {},
   selectedMessage: null,
+  sessionId: null,
+  setSessionId(id) {
+    // console.log(id)
+    set({ sessionId: id });
+  },
+  getSessionId: () => get().sessionId,
 
   setSelectedMessage: (msg) => set({ selectedMessage: msg }),
   setChats: (chats) => set({ chats }),
@@ -117,7 +125,12 @@ export const useChatStore = create<ChatState>((set) => ({
 
   clearMessages: (chatId) =>
     set((state) => ({ messages: { ...state.messages, [chatId]: [] } })),
-
+  clearRoomMessages: (chatId:any) =>
+    set((state) => {
+      const updated = { ...state.messages };
+      delete updated[chatId];
+      return { messages: updated };
+    }),
   deleteMessageForMe: (chatId, msgId) =>
     set((state) => ({
       messages: { ...state.messages, [chatId]: state.messages[chatId]?.filter((m) => m.id !== msgId) ?? [] },
