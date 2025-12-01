@@ -46,9 +46,9 @@ const Login = () => {
     resetAuth
   } = useAuthStore();
   const {
-     setUsername, setBio, setName, setProfilePicture, setViews, setLikes,setFollowersCount,setPostCount, setFollowingsCount,setUrl, resetProfile,setVideos
+    setUsername, setBio, setName, setProfilePicture, setViews, setLikes, setFollowersCount, setPostCount, setFollowingsCount, setUrl, resetProfile, setVideos
   } = useProfileStore();
-  const {setFollowers, setFollowings, resetFollow} = useFollowStore();
+  const { setFollowers, setFollowings, resetFollow } = useFollowStore();
   useEffect(() => {
     return () => {
       resetAuth?.();
@@ -91,7 +91,7 @@ const Login = () => {
         setFollowers(userData.followers);
         setFollowings(userData.followings);
 
-        const notifications: Notification[]  = await getUserNotifications();
+        const notifications: Notification[] = await getUserNotifications();
         const addNotification = useNotificationStore.getState().addNotification;
         notifications.forEach((notification: Notification) => {
           addNotification(notification);
@@ -115,7 +115,7 @@ const Login = () => {
       <View style={[styles.container, { backgroundColor: theme.background }]}>
         <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
         <Text style={[styles.subtitle, { color: theme.subtitle }]}>
-          Log in to see Videos from your friends.
+          Express without limits
         </Text>
 
         <TextInput
@@ -133,56 +133,40 @@ const Login = () => {
           onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
         />
 
-        {/* <TextInput
-          placeholder="Password"
-          placeholderTextColor={theme.placeholder}
-          style={[
-            styles.input,
-            {
-              backgroundColor: theme.inputBg,
-              borderColor: theme.inputBorder,
-              color: theme.text,
-            },
-          ]}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        /> */}
-
         <View style={{ position: "relative" }}>
-  <TextInput
-    placeholder="Password"
-    placeholderTextColor={theme.placeholder}
-    style={[
-      styles.input,
-      {
-        backgroundColor: theme.inputBg,
-        borderColor: theme.inputBorder,
-        color: theme.text,
-        paddingRight: 45, // space for eye icon
-      },
-    ]}
-    secureTextEntry={!showPassword} // <-- eye toggle
-    value={password}
-    onChangeText={setPassword}
-  />
+          <TextInput
+            placeholder="Password"
+            placeholderTextColor={theme.placeholder}
+            style={[
+              styles.input,
+              {
+                backgroundColor: theme.inputBg,
+                borderColor: theme.inputBorder,
+                color: theme.text,
+                paddingRight: 45,
+              },
+            ]}
+            secureTextEntry={!showPassword}
+            value={password}
+            onChangeText={setPassword}
+          />
 
-  {/* Eye Icon Button */}
-  <TouchableOpacity
-    onPress={() => setShowPassword(!showPassword)}
-    style={{
-      position: "absolute",
-      right: 12,
-      top: 15,
-    }}
-  >
-   <Ionicons 
-  name={showPassword ? "eye-off" : "eye"} 
-  size={22} 
-  color={theme.placeholder} 
-/>
-  </TouchableOpacity>
-</View>
+          {/* Eye Icon Button */}
+          <TouchableOpacity
+            onPress={() => setShowPassword(!showPassword)}
+            style={{
+              position: "absolute",
+              right: 12,
+              top: 15,
+            }}
+          >
+            <Ionicons
+              name={showPassword ? "eye-off" : "eye"}
+              size={22}
+              color={theme.placeholder}
+            />
+          </TouchableOpacity>
+        </View>
 
 
         <TouchableOpacity
@@ -213,7 +197,7 @@ const Login = () => {
 
 
         <Link href="/auth/register" style={[styles.link, { color: theme.link }]}>
-          Don’t have an account ? Sign up
+          new user ? Sign up
         </Link>
       </View>
     </KeyboardAvoidingView>

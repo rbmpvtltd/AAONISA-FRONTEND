@@ -121,7 +121,7 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
 import { router } from "expo-router";
-import React, { useCallback, useEffect, useState } from "react";
+import { useCallback, useEffect, useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import { FeedItem } from "./feedItem";
 
@@ -137,7 +137,6 @@ export const FeedList = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const videoAssets = [
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2017.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
@@ -242,6 +241,13 @@ export const FeedList = () => {
       onViewableItemsChanged={onViewableItemsChanged}
       viewabilityConfig={viewabilityConfig}
       showsVerticalScrollIndicator={false}
+
+      // item center
+      removeClippedSubviews={true}
+      maxToRenderPerBatch={3}
+      windowSize={5}
+      initialNumToRender={2}
+
       ListFooterComponent={
         loading ? (
           <View style={{ paddingVertical: 20 }}>

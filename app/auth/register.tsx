@@ -14,6 +14,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
+import { SafeAreaView } from "react-native-safe-area-context";
 import { z } from "zod";
 import { registerUser, verifyOtpRegisterUser } from "../../src/api/auth-api";
 
@@ -52,7 +53,7 @@ const Register = () => {
 
   // declare refs (same file where TextInput is imported from 'react-native')
   const otpRefs = React.useRef<(TextInput | null)[]>([]);
-  
+
   useEffect(() => {
     if (Platform.OS === "web") return;
 
@@ -116,179 +117,141 @@ const Register = () => {
   };
 
   return (
-    <KeyboardAvoidingView
-      style={{ flex: 1 }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
-    >
-      <View style={[styles.container, { backgroundColor: theme.background }]}>
-        <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
-        <Text style={[styles.subtitle, { color: theme.subtitle }]}>
-          Sign up to see Videos from your friends.
-        </Text>
-
-        <TextInput
-          placeholder="Phone Number or Email Address"
-          placeholderTextColor={theme.placeholder}
-          style={[
-            styles.input,
-            { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
-          ]}
-          value={emailOrPhone}
-          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
-        />
-
-        {otpSent ? (
-          // <View style={styles.otpContainer}>
-          //   {otp.map((digit, index) => (
-          //     <TextInput
-          //       key={index}
-          //       style={[
-          //         styles.otpInput,
-          //         { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
-          //       ]}
-          //       maxLength={1}
-          //       keyboardType="numeric"
-          //       value={digit}
-          //       onChangeText={(text) => {
-          //         const newOtp = [...otp];
-          //         newOtp[index] = text;
-          //         setOtp(newOtp);
-          //       }}
-          //     />
-          //   ))}
-          // </View>
-
-
-          // inside your render
-          <View style={styles.otpContainer}>
-            {otp.map((digit, index) => (
-              <TextInput
-                key={index}
-                // typed callback ref — this removes the TS error
-                ref={(r: TextInput | null) => {
-                  otpRefs.current[index] = r;
-                }}
-                style={[
-                  styles.otpInput,
-                  {
-                    backgroundColor: theme.inputBg,
-                    borderColor: theme.inputBorder,
-                    color: theme.text,
-                  },
-                ]}
-                maxLength={1}
-                keyboardType="numeric"
-                value={digit}
-                onChangeText={(text) => {
-                  const newOtp = [...otp];
-                  newOtp[index] = text;
-                  setOtp(newOtp);
-
-                  // Next box auto focus
-                  if (text.length === 1 && index < otp.length - 1) {
-                    otpRefs.current[index + 1]?.focus();
-                  }
-                }}
-                onKeyPress={({ nativeEvent }) => {
-                  if (nativeEvent.key === "Backspace") {
-                    const newOtp = [...otp];
-                    // if current box is empty, move to previous and clear it
-                    if (!digit && index > 0) {
-                      otpRefs.current[index - 1]?.focus();
-                      newOtp[index - 1] = "";
-                    } else {
-                      // clear current
-                      newOtp[index] = "";
-                    }
-                    setOtp(newOtp);
-                  }
-                }}
-                // helpful props
-                textContentType="oneTimeCode"
-                selectTextOnFocus
-              />
-            ))}
-          </View>
-        ) : null}
-
-        <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>
-          <Text style={[styles.verifyText, { color: theme.buttonText }]}>
-            {otpSent ? "Resend OTP" : "Send OTP"}
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+      <KeyboardAvoidingView
+        style={{ flex: 1 }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 100 : 0}
+      >
+        <View style={[styles.container, { backgroundColor: theme.background }]}>
+          <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
+          <Text style={[styles.subtitle, { color: theme.subtitle }]}>
+          Express without limits
           </Text>
-        </TouchableOpacity>
 
-        <TextInput
-          placeholder="User Name"
-          placeholderTextColor={theme.placeholder}
-          style={[
-            styles.input,
-            { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
-          ]}
-          value={username}
-          onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
-        />
+          <TextInput
+            placeholder="Phone Number or Email Address"
+            placeholderTextColor={theme.placeholder}
+            style={[
+              styles.input,
+              { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
+            ]}
+            value={emailOrPhone}
+            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
+          />
 
-        {/* <TextInput
-          placeholder="Create Password"
-          placeholderTextColor={theme.placeholder}
-          style={[
-            styles.input,
-            { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
-          ]}
-          secureTextEntry
-          value={password}
-          onChangeText={setPassword}
-        /> */}
+          {otpSent ? (
+            <View style={styles.otpContainer}>
+              {otp.map((digit, index) => (
+                <TextInput
+                  key={index}
+                  ref={(r: TextInput | null) => {
+                    otpRefs.current[index] = r;
+                  }}
+                  style={[
+                    styles.otpInput,
+                    {
+                      backgroundColor: theme.inputBg,
+                      borderColor: theme.inputBorder,
+                      color: theme.text,
+                    },
+                  ]}
+                  maxLength={1}
+                  keyboardType="numeric"
+                  value={digit}
+                  onChangeText={(text) => {
+                    const newOtp = [...otp];
+                    newOtp[index] = text;
+                    setOtp(newOtp);
 
-        <View style={{ position: "relative" }}>
-  <TextInput
-    placeholder="Create Password"
-    placeholderTextColor={theme.placeholder}
-    style={[
-      styles.input,
-      {
-        backgroundColor: theme.inputBg,
-        borderColor: theme.inputBorder,
-        color: theme.text,
-        paddingRight: 45, // space for eye icon
-      },
-    ]}
-    secureTextEntry={!showPassword}
-    value={password}
-    onChangeText={setPassword}
-  />
+                    if (text.length === 1 && index < otp.length - 1) {
+                      otpRefs.current[index + 1]?.focus();
+                    }
+                  }}
+                  onKeyPress={({ nativeEvent }) => {
+                    if (nativeEvent.key === "Backspace") {
+                      const newOtp = [...otp];
+                      if (!digit && index > 0) {
+                        otpRefs.current[index - 1]?.focus();
+                        newOtp[index - 1] = "";
+                      } else {
+                        newOtp[index] = "";
+                      }
+                      setOtp(newOtp);
+                    }
+                  }}
+                  textContentType="oneTimeCode"
+                  selectTextOnFocus
+                />
+              ))}
+            </View>
+          ) : null}
 
-  <TouchableOpacity
-    onPress={() => setShowPassword(!showPassword)}
-    style={{
-      position: "absolute",
-      right: 12,
-      top: 18,
-    }}
-  >
-    <Ionicons
-      name={showPassword ? "eye-off" : "eye"}
-      size={22}
-      color={theme.placeholder}
-    />
-  </TouchableOpacity>
-</View>
+          <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>
+            <Text style={[styles.verifyText, { color: theme.buttonText }]}>
+              {otpSent ? "Resend OTP" : "Send OTP"}
+            </Text>
+          </TouchableOpacity>
+
+          <TextInput
+            placeholder="User Name"
+            placeholderTextColor={theme.placeholder}
+            style={[
+              styles.input,
+              { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
+            ]}
+            value={username}
+            onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
+          />
+          <View style={{ position: "relative" }}>
+            <TextInput
+              placeholder="Create Password"
+              placeholderTextColor={theme.placeholder}
+              style={[
+                styles.input,
+                {
+                  backgroundColor: theme.inputBg,
+                  borderColor: theme.inputBorder,
+                  color: theme.text,
+                  paddingRight: 45,
+                },
+              ]}
+              secureTextEntry={!showPassword}
+              value={password}
+              onChangeText={setPassword}
+            />
+
+            <TouchableOpacity
+              onPress={() => setShowPassword(!showPassword)}
+              style={{
+                position: "absolute",
+                right: 12,
+                top: 18,
+              }}
+            >
+              <Ionicons
+                name={showPassword ? "eye-off" : "eye"}
+                size={22}
+                color={theme.placeholder}
+              />
+            </TouchableOpacity>
+          </View>
 
 
-        <Text style={[styles.policy, { color: theme.subtitle }]}>
-          By Sign up, you agree to our Terms, Privacy Policy and Cookies Policy
-        </Text>
+          <Text style={[styles.policy, { color: theme.subtitle }]}>
+            By Sign up, you agree to our Terms, Privacy Policy and Cookies Policy
+          </Text>
 
-        <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleSignUp}>
-          <Text style={[styles.signUpText, { color: theme.buttonText }]}>Sign Up</Text>
-        </TouchableOpacity>
+          <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleSignUp}>
+            <Text style={[styles.signUpText, { color: theme.buttonText }]}>Sign Up</Text>
+          </TouchableOpacity>
 
-        <Link href="/auth/login" style={[styles.link, { color: theme.link }]}>
-          Have an account ? Login
-        </Link>
-      </View>
-    </KeyboardAvoidingView>
+          <Link href="/auth/login" style={[styles.link, { color: theme.link }]}>
+            Have an account ? Login
+          </Link>
+        </View>
+      </KeyboardAvoidingView>
+    </SafeAreaView>
   );
 };
 
