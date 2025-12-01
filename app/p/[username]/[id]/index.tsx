@@ -1,6 +1,7 @@
 import { GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
@@ -163,24 +164,24 @@ const UserReelItem = ({
       {/* Bottom Info */}
       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
         <View style={styles.userInfo}>
-           <TouchableOpacity
-                      style={{ flexDirection: 'row', alignItems: 'center' }}
-                      onPress={() => {
-                        router.push(`/profile`);
-                      }}
-                    >
-          <Image
-            source={{ uri: profilePicture ? profilePicture :  "https://cdn-icons-png.flaticon.com/512/847/847969.png"}}
-            style={{
-              width: AVATAR_SIZE,
-              height: AVATAR_SIZE,
-              borderRadius: AVATAR_SIZE / 2,
-              borderWidth: 2,
-              borderColor: '#fff',
+          <TouchableOpacity
+            style={{ flexDirection: 'row', alignItems: 'center' }}
+            onPress={() => {
+              router.push(`/profile`);
             }}
-          />
+          >
+            <Image
+              source={{ uri: profilePicture ? profilePicture : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
+              style={{
+                width: AVATAR_SIZE,
+                height: AVATAR_SIZE,
+                borderRadius: AVATAR_SIZE / 2,
+                borderWidth: 2,
+                borderColor: '#fff',
+              }}
+            />
 
-          <Text style={styles.username}>{reelUsername}</Text>
+            <Text style={styles.username}>{reelUsername}</Text>
           </TouchableOpacity>
         </View>
         {/* <Text style={styles.caption}>{item.caption}</Text> */}
@@ -223,6 +224,11 @@ const UserReelItem = ({
             {item.audio || "Original Sound"}
           </Text>
         </View>
+
+        <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+          {getTimeAgo(item.created_at)}
+        </Text>
+
       </View>
 
       {/* Right Actions - Improved Layout */}
