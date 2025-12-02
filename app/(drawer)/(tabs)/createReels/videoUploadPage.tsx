@@ -319,7 +319,8 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                              disabled={isUploadingStory}
                             onPress={() => contentType === "story" ? storyUploading() : setIsUploading(true)}
                         >
-                            <Ionicons name="cloud-upload-outline" size={24} color="white" />
+                            <Ionicons name="arrow-forward" size={24} color="white" />
+                            {/* <Ionicons name="cloud-upload-outline" size={24} color="white" /> */}
                         </TouchableOpacity>
                         {/* Video */}
                         <Video

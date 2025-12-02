@@ -1,6 +1,7 @@
 import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
@@ -226,6 +227,10 @@ const ReelItem = ({
             Original Sound - {item.user.username}
           </Text>
         </View>
+
+          <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+                  {getTimeAgo(item.created_at)}
+                </Text>
       </View>
 
       {/* Right Actions */}

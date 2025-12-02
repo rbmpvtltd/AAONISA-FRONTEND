@@ -80,7 +80,7 @@ const Register = () => {
         Alert.alert("Error", data.message);
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to send OTP");
+      Alert.alert("Error", "invalid OTP");
     }
   };
 
@@ -105,14 +105,14 @@ const Register = () => {
         otp: otp.join(""),
       });
       if (data.success) {
-        Alert.alert("Success", "Account created successfully!");
+        // Alert.alert("Success", "Account created successfully!");
         await resetAuth();
         router.push("/auth/login");
       } else {
         Alert.alert("Error", data.message);
       }
     } catch (error) {
-      Alert.alert("Error", "Something went wrong");
+      Alert.alert("Error", "Signup is unscessful please check your details");
     }
   };
 
