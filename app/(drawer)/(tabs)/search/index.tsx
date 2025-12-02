@@ -154,7 +154,7 @@ export default function ExploreScreen() {
 
             {/*  NO RESULTS FOUND */}
             {!searchLoading && searchResults.length === 0 ? (
-              <View style={{   flex: 1, alignItems: "center",  justifyContent: "center"}}>
+              <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="search-outline" size={50} color={theme.subtitle} />
                 <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
                   No results found
@@ -237,13 +237,13 @@ const ThumbnailCard = ({ item, router }: any) => {
   return (
     <TouchableOpacity
       activeOpacity={0.9}
-      onPress={() =>
+      onPress={() => {
+        console.log("Navigating to video:", item.id);
         router.push({
           pathname: "/(drawer)/(tabs)/reels",
-          params: { id: String(item.id)
-           },
-        })
-      }
+          params: { videoId: item.id, tab: 'Explore' }
+        });
+      }}
       style={{ marginBottom: spacing }}
     >
       <Image
