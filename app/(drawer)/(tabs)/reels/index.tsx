@@ -160,28 +160,6 @@ const ReelItem = ({
         )}
       </Pressable>
 
-
-      {/* Top Bar */}
-      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
-        <View style={styles.tabsContainer}>
-          {['Explore', 'News', 'Followings'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab as any)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View> */}
-
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
@@ -308,7 +286,7 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id, videoId } = useLocalSearchParams();
+  const { id, videoId, tab } = useLocalSearchParams();
   const likeMutation = useLikeMutation();
   const hasScrolledToVideo = useRef(false);
   const {
@@ -330,6 +308,14 @@ const ReelsFeed = () => {
     autoScroll,
   } = useReelsStore();
 
+  useEffect(() => {
+    if (tab && typeof tab === 'string') {
+      const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
+      if (['Explore', 'News', 'Followings'].includes(tabName)) {
+        setActiveTab(tabName as any);
+      }
+    }
+  }, [tab]);
 
   const {
     data,
@@ -342,37 +328,18 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-  useEffect(() => {
-    if (activeTab === 'Followings' && !isLoading && reels.length === 0) {
-      console.log("No followings content, redirecting to Explore...");
-      setActiveTab('Explore');
-    }
-  }, [reels, activeTab, isLoading]);
 
-  // NEW: URL update function
-  // const updateURL = (index: number) => {
-  //   if (!reels[index]) return;
-
-  //   const reelId = reels[index].id || reels[index].uuid;
-
-  //   if (String(id) === String(reelId)) return;
-
-  //   router.setParams({ id: reelId });
-  //   // console.log("reelId updated",router.setParams({ id: reelId }));
-  //   updateReelURL(reelId);
-  // };
-
+  // URL update function
   const updateURL = (index: number) => {
     if (!reels[index]) return;
 
     const reelId = reels[index].id || reels[index].uuid;
 
-    if (String(id) === String(reelId) && String(videoId) === String(reelId)) return;
+    if (String(id) === String(reelId)) return;
 
-    router.setParams({ id: reelId, videoId: reelId });
+    router.setParams({ id: reelId, videoId: reelId, tab: activeTab });
     updateReelURL(reelId);
   };
-
 
   // useEffect(() => {
   //   if (!autoScroll || reels.length === 0) return;
@@ -394,65 +361,29 @@ const ReelsFeed = () => {
   //   return () => clearInterval(interval);
   // }, [autoScroll, reels.length]);
 
-  // useEffect(() => {
-  //   if (videoId && reels.length > 0 && flatListRef.current) {
-  //     const targetIndex = reels.findIndex(
-  //       (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
-  //     );
-
-  //     if (targetIndex !== -1) {
-  //       console.log('🎯 Found video at index:', targetIndex);
-
-  //       setTimeout(() => {
-  //         setCurrentIndex(targetIndex);
-  //         flatListRef.current?.scrollToIndex({
-  //           index: targetIndex,
-  //           animated: false,
-  //         });
-  //         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
-  //       }, 100);
-  //     } else {
-  //       console.log('⚠️ Video not found in current feed');
-  //     }
-  //   }
-  // }, [videoId, reels.length]);
-
-// useEffect(() => {
-//   hasScrolledToVideo.current = false;
-// }, [videoId]);
-
-
   useEffect(() => {
-  if (!videoId) return;
-  if (hasScrolledToVideo.current) return;
-  if (reels.length === 0) return;
-  if (!flatListRef.current) return;
+    if (videoId && reels.length > 0 && flatListRef.current) {
+      const targetIndex = reels.findIndex(
+        (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
+      );
 
-  const targetIndex = reels.findIndex(
-    (reel) =>
-      String(reel.id) === String(videoId) ||
-      String(reel.uuid) === String(videoId)
-  );
+      if (targetIndex !== -1) {
+        console.log('🎯 Found video at index:', targetIndex);
 
-  if (targetIndex !== -1) {
-    console.log("🎯 Scrolling to:", targetIndex);
+        setTimeout(() => {
+          setCurrentIndex(targetIndex);
+          flatListRef.current?.scrollToIndex({
+            index: targetIndex,
+            animated: false,
+          });
 
-    hasScrolledToVideo.current = true;
-
-    setTimeout(() => {
-      setCurrentIndex(targetIndex);
-
-      flatListRef.current?.scrollToIndex({
-        index: targetIndex,
-        animated: false,
-      });
-
-      updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
-    }, 100);
-  } else {
-    console.log("⚠️ Video not found");
-  }
-}, [videoId, reels.length]);
+          updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+        }, 100);
+      } else {
+        console.log('⚠️ Video not found in current feed');
+      }
+    }
+  }, [videoId, reels.length]);
 
 
   const handleScroll = (event: any) => {
@@ -460,7 +391,7 @@ const ReelsFeed = () => {
 
     if (index !== currentIndex && reels[index]) {
       setCurrentIndex(index);
-      updateURL(index);
+      // updateReelURL(index);
     }
   };
 
@@ -491,8 +422,6 @@ const ReelsFeed = () => {
   });
 
   const currentUserId = currentUser?.userProfile?.id
-
-  // console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
 
   if (isLoading)
     return (
@@ -579,6 +508,7 @@ const ReelsFeed = () => {
           const offsetY = event.nativeEvent.contentOffset.y;
           const index = Math.round(offsetY / SCREEN_HEIGHT);
           if (index !== currentIndex && reels[index]) {
+            setCurrentIndex(index);
             updateURL(index);
           }
         }}
