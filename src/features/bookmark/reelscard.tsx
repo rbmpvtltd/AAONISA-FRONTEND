@@ -76,10 +76,13 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 type ReelType = {
+  id : string;
   caption: string;
   created_at: string;
   videoUrl: string;
   user?: any;
+  likes : boolean;
+  comments : string;
 };
 
 
@@ -94,6 +97,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
   //  Load reel using ID
   // const reel = useMemo(() => getReelById(reelId!), [reelId]);
   const reel = useMemo(() => getReelById(reelId!), [reelId]) as ReelType | null;
+console.log("hhhhhh", reel?.comments);
 
 
   //  Reel Not Found UI
@@ -215,16 +219,16 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
               {reel?.caption}
               {/* HELLO EVERYONE */}
             </Text>
-            {/* {reel.caption?.length > 100 && (
+            {reel.caption?.length > 100 && (
               <TouchableOpacity onPress={() => setShowFullCaption(true)}>
                 <Text style={styles.more}>More</Text>
               </TouchableOpacity>
-            )} */}
+            )}
           </>
         ) : (
           <View style={{ maxHeight: 200 }}>
             <ScrollView nestedScrollEnabled>
-              {/* <Text style={styles.caption}>{reel.caption}</Text> */}
+              <Text style={styles.caption}>{reel.caption}</Text>
             </ScrollView>
 
             <TouchableOpacity onPress={() => setShowFullCaption(false)}>
@@ -236,7 +240,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         {/* MUSIC ROW */}
         <View style={styles.musicRow}>
           <Text style={styles.musicIcon}>♪</Text>
-          <Text style={styles.musicText}>Original Sound - GBSHCHBCHHJHJHJH</Text>
+          {/* <Text style={styles.musicText}>Original Sound - GBSHCHBCHHJHJHJH</Text> */}
           {/* <Text style={styles.musicText}>Original Sound - {reel.user.username}</Text> */}
         </View>
 
@@ -255,14 +259,14 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
           size={35}
           color={"white"}
         />
-        {/* <Text style={styles.actionText}>{likesCount}</Text> */}
+        {/* <Text style={styles.actionText}>{reel.likes}</Text> */}
         <Text style={styles.actionText}>16</Text>
         {/* </TouchableOpacity> */}
 
         {/* COMMENTS */}
         <TouchableOpacity
           style={styles.actionButton}
-        // onPress={() => router.push(`/comment/${reel.id}`)}
+        onPress={() => router.push(`/comment/${reel.id}`)}
         >
           <Ionicons name="chatbubble-outline" size={35} color="#fff" />
           <Text style={styles.actionText}>16</Text>
@@ -289,7 +293,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         onClose={() => setShowOptions(false)}
         onSave={() => { }}
         onReport={() => console.log("Reported")}
-        // reelId={reel.id}
+        reelId={reel.id}
         reelUrl={reel.videoUrl}
       />
     </View>

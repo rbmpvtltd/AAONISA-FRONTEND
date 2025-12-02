@@ -209,7 +209,7 @@ import { useIsFocused } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
 import { useEffect } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { GestureHandlerRootView } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
 
 const HomePage = () => {
   const theme = useAppTheme();
@@ -330,10 +330,24 @@ const HomePage = () => {
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.background }}>
-      <StoryList theme={theme} currentUserId = {currentUserId} currentUserProfilePic={currentUserProfilePic} />
-      <FeedList />
+      {/* <StoryList theme={theme} currentUserId = {currentUserId} currentUserProfilePic={currentUserProfilePic} />
+      <FeedList /> */}
+  <FlatList
+    data={[{ id: "header" }]} // Dummy data
+    renderItem={() => <FeedList />}
+    keyExtractor={(item) => item.id}
+    ListHeaderComponent={
+      <StoryList
+        theme={theme}
+        currentUserId={currentUserId}
+        currentUserProfilePic={currentUserProfilePic}
+      />
+    }
+    showsVerticalScrollIndicator={false}
+    style={{ backgroundColor: theme.background }}
+  />
+
     </GestureHandlerRootView>
   );
 };
-
 export default HomePage;
