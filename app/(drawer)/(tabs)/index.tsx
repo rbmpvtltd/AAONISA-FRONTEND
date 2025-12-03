@@ -31,23 +31,23 @@ const HomePage = () => {
     refetch: refetchStories,
   } = useQuery({
     queryKey: ["stories"],
-    queryFn: getAllStories,
-    // async () => {
-    // try {
-    // const data = await getAllStories();
-    //       return data || []; // Return empty array if undefined
-    //     } catch (error) {
-    //       console.error("Stories fetch error:", error);
-    //       return []; // Return empty array on error to prevent undefined
-    //     }
-    //   },
-    //   staleTime: 0,
-    //   refetchOnMount: true,
-    //   retry: 1, // Retry once on failure
+    queryFn: //getAllStories,
+      async () => {
+        try {
+          const data = await getAllStories();
+          return data || []; // Return empty array if undefined
+        } catch (error) {
+          console.error("Stories fetch error:", error);
+          return []; // Return empty array on error to prevent undefined
+        }
+      },
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 1, // Retry once on failure
   });
-console.log('====================================');
-console.log("stories",stories);
-console.log('====================================');
+  console.log('====================================');
+  console.log("stories", stories);
+  console.log('====================================');
   // Bookmarks
   const {
     data: bookmarks,
@@ -57,20 +57,20 @@ console.log('====================================');
     refetch: refetchBookmarks,
   } = useQuery({
     queryKey: ["bookmarks"],
-    queryFn: getAllBookmarks,
-    //  async () => {
-    //   try {
-    //     const data = await getAllBookmarks();
-    //     console.log("",data)
-    //     return data || []; // Return empty array if undefined
-    //   } catch (error) {
-    //     console.error("Bookmarks fetch error:", error);
-    //     return []; // Return empty array on error to prevent undefined
-    //   }
-    // },
-    // staleTime: 0,
-    // refetchOnMount: true,
-    // retry: 1, // Retry once on failure
+    queryFn:         // getAllBookmarks,
+      async () => {
+        try {
+          const data = await getAllBookmarks();
+          console.log("", data)
+          return data || []; // Return empty array if undefined
+        } catch (error) {
+          console.error("Bookmarks fetch error:", error);
+          return []; // Return empty array on error to prevent undefined
+        }
+      },
+    staleTime: 0,
+    refetchOnMount: true,
+    retry: 1, // Retry once on failure
   });
 
   console.log("stories data resivede", stories);
