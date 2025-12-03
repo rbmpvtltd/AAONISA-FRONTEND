@@ -1,5 +1,6 @@
 import { GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
+import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
@@ -61,7 +62,8 @@ const UserReelItem = ({
   const markViewedMutation = useMarkViewedMutation();
   const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
-
+const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const [showReportDrawer, setShowReportDrawer] = useState(false);
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
       ? item.likes.some((like: any) => like.user_id === currentUserId)
@@ -276,8 +278,21 @@ const UserReelItem = ({
         visible={showOptions}
         onClose={() => setShowOptions(false)}
         onSave={() => { openBookmarkPanel(item.uuid || item.id); setShowOptions(false); }}
-        onReport={() => console.log("Reported")}
+        // onReport={() => console.log("Reported")}
+        onReport={() => setShowReportDrawer(true)}
         onShare={() => console.log("Shared")}
+
+        reelId={item.id}
+        reelUrl={item.videoUrl} 
+      />
+
+       <ReportDrawer
+        visible={showReportDrawer}
+        onClose={() => setShowReportDrawer(false)}
+        onSelect={(reason: string) => {
+          console.log("User reported for:", reason);
+          setShowReportDrawer(false);
+        }}
       />
     </View>
   );

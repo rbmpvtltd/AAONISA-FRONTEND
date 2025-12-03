@@ -1,5 +1,6 @@
 import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
+import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
@@ -54,6 +55,8 @@ const ReelItem = ({
   const videoKey = currentIndex === index ? `video-${item.id}-active` : `video-${item.id}`;
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const [showFullCaption, setShowFullCaption] = useState(false);
+  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const [showReportDrawer, setShowReportDrawer] = useState(false);
   const isFocused = useIsFocused();
 
   const [liked, setLiked] = useState(
@@ -125,7 +128,6 @@ const ReelItem = ({
       setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
     }
   };
-
 
   console.log("item.likes", item.likesCount);
   console.log("comment count", item.commentsCount);
@@ -228,9 +230,9 @@ const ReelItem = ({
           </Text>
         </View>
 
-          <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
-                  {getTimeAgo(item.created_at)}
-                </Text>
+        <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+          {getTimeAgo(item.created_at)}
+        </Text>
       </View>
 
       {/* Right Actions */}
@@ -278,11 +280,20 @@ const ReelItem = ({
           openBookmarkPanel(item.id || item.uuid);
           setShowOptions(false);
         }}
-        onReport={() => console.log("Reported:", item.id || item.uuid)}
+        // onReport={() => console.log("Reported:", item.id || item.uuid)}
+        onReport={() => setShowReportDrawer(true)}
         reelId={item.id}
         reelUrl={item.videoUrl} // add this too for share/download
       />
 
+      <ReportDrawer
+        visible={showReportDrawer}
+        onClose={() => setShowReportDrawer(false)}
+        onSelect={(reason: string) => {
+          console.log("User reported for:", reason);
+          setShowReportDrawer(false);
+        }}
+      />
     </View>
   );
 };
