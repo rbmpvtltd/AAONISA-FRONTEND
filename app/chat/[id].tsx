@@ -108,8 +108,8 @@ export default function ChatDetailScreen() {
     if (!chatUserId) return;
     if (!socket) return;
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
-    const handleDeletedForMe = (data: { messageId: string }) => { deleteMessageForMe(roomKey, String(data.messageId)); };
-    const handleDeletedForEveryone = (data: { messageId: string; deletedForEveryone?: boolean }) => { if (data.deletedForEveryone) deleteMessageForEveryone(roomKey, String(data.messageId)); };
+    const handleDeletedForMe = (data: { messageId: string }) => { deleteMessageForMe(String(data.messageId)); };
+    const handleDeletedForEveryone = (data: { messageId: string; deletedForEveryone?: boolean }) => { if (data.deletedForEveryone) deleteMessageForEveryone(String(data.messageId)); };
     
     socket.on("messageDeletedForMe", handleDeletedForMe);
     socket.on("messageDeleted", handleDeletedForEveryone);
@@ -143,7 +143,7 @@ export default function ChatDetailScreen() {
 
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
     socket.emit("deleteMessageForMe", { messageId: selectedMessage.id, userId: CURRENT_USER_ID, roomId: roomKey });
-    deleteMessageForMe(roomKey, selectedMessage.id);
+    deleteMessageForMe(selectedMessage.id);
     setSelectedMessage(null);
   }, [selectedMessage, CURRENT_USER_ID, chatUserId, deleteMessageForMe, setSelectedMessage, socket]);
 
@@ -153,7 +153,7 @@ export default function ChatDetailScreen() {
 
     const roomKey = getRoomId(String(CURRENT_USER_ID), chatUserId);
     socket.emit("deleteMessageForEveryone", { messageId: selectedMessage.id, userId: CURRENT_USER_ID, roomId: roomKey });
-    deleteMessageForEveryone(roomKey, selectedMessage.id);
+    deleteMessageForEveryone(selectedMessage.id);
     setSelectedMessage(null);
   }, [selectedMessage, CURRENT_USER_ID, chatUserId, deleteMessageForEveryone, setSelectedMessage, socket]);
   
@@ -165,7 +165,9 @@ export default function ChatDetailScreen() {
   const padding = width < 360 ? 8 : width < 400 ? 10 : 14;
   const modalWidth = width < 360 ? "85%" : width < 400 ? "80%" : "70%";
 
-  const chatMessages = messages[getRoomId(String(CURRENT_USER_ID), chatUserId)] ?? [];
+  // const chatMessages = messages[getRoomId(String(CURRENT_USER_ID), chatUserId)] ?? [];
+  const chatMessages = useChatStore.getState().getMessages();
+  // console.log(chatMessages)
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}>
       <View style={[styles.container, { padding }]}>

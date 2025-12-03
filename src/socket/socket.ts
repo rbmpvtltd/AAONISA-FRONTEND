@@ -175,7 +175,8 @@ let globalSocket: Socket | null = null;
 let listenersRegistered = false;
 
 export function useSocketManager(userId?: string, otherUserId?: string) {
-  const { addMessage,setSessionId,clearMessages } = useChatStore();
+  const { addMessage,setSessionId,clearCurrentChat } = useChatStore();
+  const setCurrentChat = useChatStore((state) => state.setCurrentChat);
 
   const userIdRef = useRef(userId);
   const otherUserRef = useRef(otherUserId);
@@ -194,7 +195,7 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
 
     // Create a single global socket
     if (!globalSocket) {
-      globalSocket = io("http://192.168.1.63:3000/socket.io", {
+      globalSocket = io("http://192.168.1.64:3000/socket.io", {
         transports: ["websocket"],
         query: { userId },
         autoConnect: false,
@@ -219,6 +220,8 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
       globalSocket?.emit("joinRoom", { roomId });
       globalSocket?.emit("getPreviousMessages", { user1Id: userId, user2Id: otherUserId });
       console.log("🟢 Joined Room:", roomId);
+        setCurrentChat(roomId);
+
     };
 
     if (globalSocket.connected) {
@@ -234,12 +237,12 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
         const otherId = otherUserRef.current;
 
         const currentRoom = [myId, otherId].sort().join("-");
+        setCurrentChat(currentRoom);
         const incomingRoom = [msg.senderId, msg.receiverId].sort().join("-");
-
         // Prevent duplicate / wrong room messages
         if (incomingRoom !== currentRoom) return;
 
-        addMessage(currentRoom, {
+        addMessage( {
           id: String(msg.chat_id ?? msg.createdAt ?? Date.now()),
           text: msg.text ?? msg.message_text,
           fromMe: msg.sender.id === myId,
@@ -253,7 +256,8 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
         setSessionId(payload.sessionId);
         const room = [myId, otherId].sort().join("-");
         payload.messages?.forEach((raw:any) => {
-          addMessage(room, {
+          // console.log(raw);
+          addMessage( {
             id: String(raw.chat_id ?? raw.messageId ?? raw.createdAt),
             text: raw.message_text,
             fromMe: raw.sender.id === myId,
@@ -271,7 +275,7 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
       console.log("🚪 Leaving room:", roomIdRef.current);
       globalSocket?.emit("leaveRoom", { roomId: roomIdRef.current });
       setSessionId(null);
-      clearMessages(otherUserId);
+      clearCurrentChat();
     };
   }, [userId, otherUserId]);
 
