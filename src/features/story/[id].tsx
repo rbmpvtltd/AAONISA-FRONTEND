@@ -391,12 +391,16 @@ export default function StoryViewPage() {
   const userStory = userStories.find((u) =>
     u.stories.some((s) => s.id === id)
   );
-
+  console.log('====================================');
+  console.log(userStory);
+  console.log('====================================');
   const storyList = userStory?.stories || [];
 
   const [currentIndex, setCurrentIndex] = useState(0);
   const progress = useRef(new Animated.Value(0)).current;
   const [paused, setPaused] = useState(false);
+  const [isMuted, setIsMuted] = useState(false); // Add mute state
+
 
   //  Always call hook at top level
   const player = useVideoPlayer("");
@@ -516,7 +520,7 @@ export default function StoryViewPage() {
       </View>
     );
   }
-  
+
 
   return (
     <View style={styles.container}>
@@ -581,16 +585,16 @@ export default function StoryViewPage() {
       </View>
 
 
-        {/* Close button ko alag, upar layer me dikhaye */}
-  <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-    <View style={{ position: "absolute", top: 55, right: 10 }}>
-      <TouchableOpacity onPress={() => router.back()}>
-        <Ionicons name="close" size={26} color="#fff" />
-      </TouchableOpacity>
+      {/* Close button ko alag, upar layer me dikhaye */}
+      <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
+        <View style={{ position: "absolute", top: 55, right: 10 }}>
+          <TouchableOpacity onPress={() => router.back()}>
+            <Ionicons name="close" size={26} color="#fff" />
+          </TouchableOpacity>
+        </View>
+      </View>
     </View>
-  </View>
-    </View>
-  );  
+  );
 }
 
 const styles = StyleSheet.create({
