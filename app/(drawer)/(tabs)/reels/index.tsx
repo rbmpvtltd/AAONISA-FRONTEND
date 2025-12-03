@@ -1,6 +1,7 @@
 import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
@@ -174,28 +175,6 @@ useEffect(() => {
         )}
       </Pressable>
 
-
-      {/* Top Bar */}
-      {/* <View style={[styles.topBar, { paddingTop: topBarPaddingTop }]}>
-        <View style={styles.tabsContainer}>
-          {['Explore', 'News', 'Followings'].map((tab) => (
-            <TouchableOpacity
-              key={tab}
-              onPress={() => setActiveTab(tab as any)}
-            >
-              <Text
-                style={[
-                  styles.tabText,
-                  activeTab === tab && styles.activeTabText,
-                ]}
-              >
-                {tab}
-              </Text>
-            </TouchableOpacity>
-          ))}
-        </View>
-      </View> */}
-
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
         <View style={styles.userInfo}>
@@ -262,6 +241,10 @@ useEffect(() => {
             Original Sound - {item.user.username}
           </Text>
         </View>
+
+          <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+                  {getTimeAgo(item.created_at)}
+                </Text>
       </View>
 
       {/* Right Actions */}
@@ -322,9 +305,9 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id } = useLocalSearchParams();
+  const { id, videoId, tab } = useLocalSearchParams();
   const likeMutation = useLikeMutation();
-
+  const hasScrolledToVideo = useRef(false);
   const {
     // toggleLike,
     // addComment,
@@ -344,6 +327,14 @@ const ReelsFeed = () => {
     autoScroll,
   } = useReelsStore();
 
+  useEffect(() => {
+    if (tab && typeof tab === 'string') {
+      const tabName = tab.charAt(0).toUpperCase() + tab.slice(1);
+      if (['Explore', 'News', 'Followings'].includes(tabName)) {
+        setActiveTab(tabName as any);
+      }
+    }
+  }, [tab]);
 
   const {
     data,
@@ -356,14 +347,8 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-  useEffect(() => {
-    if (activeTab === 'Followings' && !isLoading && reels.length === 0) {
-      console.log("No followings content, redirecting to Explore...");
-      setActiveTab('Explore');
-    }
-  }, [reels, activeTab, isLoading]);
 
-  // NEW: URL update function
+  // URL update function
   const updateURL = (index: number) => {
     if (!reels[index]) return;
 
@@ -371,37 +356,61 @@ const ReelsFeed = () => {
 
     if (String(id) === String(reelId)) return;
 
-    router.setParams({ id: reelId });
-    // console.log("reelId updated",router.setParams({ id: reelId }));
+    router.setParams({ id: reelId, videoId: reelId, tab: activeTab });
     updateReelURL(reelId);
   };
 
+  // useEffect(() => {
+  //   if (!autoScroll || reels.length === 0) return;
+
+  //   const interval = setInterval(() => {
+  //     const nextIndex =
+  //       currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+  //     setCurrentIndex(nextIndex);
+
+  //     flatListRef.current?.scrollToIndex({
+  //       index: nextIndex,
+  //       animated: true,
+  //     });
+
+  //     updateURL(nextIndex);
+  //   }, 10000);
+
+  //   return () => clearInterval(interval);
+  // }, [autoScroll, reels.length]);
+
   useEffect(() => {
-    if (!autoScroll || reels.length === 0) return;
+    if (videoId && reels.length > 0 && flatListRef.current) {
+      const targetIndex = reels.findIndex(
+        (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
+      );
 
-    const interval = setInterval(() => {
-      const nextIndex =
-        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+      if (targetIndex !== -1) {
+        console.log('🎯 Found video at index:', targetIndex);
 
-      setCurrentIndex(nextIndex);
+        setTimeout(() => {
+          setCurrentIndex(targetIndex);
+          flatListRef.current?.scrollToIndex({
+            index: targetIndex,
+            animated: false,
+          });
 
-      flatListRef.current?.scrollToIndex({
-        index: nextIndex,
-        animated: true,
-      });
+          updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+        }, 100);
+      } else {
+        console.log('⚠️ Video not found in current feed');
+      }
+    }
+  }, [videoId, reels.length]);
 
-      updateURL(nextIndex);
-    }, 10000);
-
-    return () => clearInterval(interval);
-  }, [autoScroll, reels.length]);
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);
 
     if (index !== currentIndex && reels[index]) {
       setCurrentIndex(index);
-      updateURL(index);
+      // updateReelURL(index);
     }
   };
 
@@ -433,8 +442,6 @@ const ReelsFeed = () => {
 
   const currentUserId = currentUser?.userProfile?.id
 
-  // console.log("reeeeeeeeeeeeeeeeeeeeeelss", reels);
-
   if (isLoading)
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -454,25 +461,25 @@ const ReelsFeed = () => {
     <View style={styles.container}>
       <StatusBar hidden />
       {/* Top Bar */}
-    <View style={styles.topBar}>
-      <View style={styles.tabsContainer}>
-        {['Explore', 'News', 'Followings'].map((tab) => (
-          <TouchableOpacity
-            key={tab}
-            onPress={() => setActiveTab(tab as any)}
-          >
-            <Text
-              style={[
-                styles.tabText,
-                activeTab === tab && styles.activeTabText,
-              ]}
+      <View style={styles.topBar}>
+        <View style={styles.tabsContainer}>
+          {['Explore', 'News', 'Followings'].map((tab) => (
+            <TouchableOpacity
+              key={tab}
+              onPress={() => setActiveTab(tab as any)}
             >
-              {tab}
-            </Text>
-          </TouchableOpacity>
-        ))}
+              <Text
+                style={[
+                  styles.tabText,
+                  activeTab === tab && styles.activeTabText,
+                ]}
+              >
+                {tab}
+              </Text>
+            </TouchableOpacity>
+          ))}
+        </View>
       </View>
-    </View>
 
 
       <FlatList
@@ -520,6 +527,7 @@ const ReelsFeed = () => {
           const offsetY = event.nativeEvent.contentOffset.y;
           const index = Math.round(offsetY / SCREEN_HEIGHT);
           if (index !== currentIndex && reels[index]) {
+            setCurrentIndex(index);
             updateURL(index);
           }
         }}
@@ -534,6 +542,17 @@ const ReelsFeed = () => {
             </View>
           ) : null
         }
+
+        onScrollToIndexFailed={(info) => {
+          console.log('Scroll to index failed:', info);
+          // Wait for render then retry
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+            });
+          }, 100);
+        }}
       />
       <BookmarkPanel
       />
@@ -544,13 +563,13 @@ const ReelsFeed = () => {
 const styles = StyleSheet.create({
   container: { flex: 1, backgroundColor: 'black' },
   topBar: {
-  position: 'absolute',
-  top: 40,
-  left: 0,
-  right: 0,
-  zIndex: 999,
-  alignItems: 'center',
-},
+    position: 'absolute',
+    top: 40,
+    left: 0,
+    right: 0,
+    zIndex: 999,
+    alignItems: 'center',
+  },
   centerIcon: {
     position: "absolute",
     top: "45%",

@@ -102,7 +102,7 @@ const Login = () => {
       }
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Error", "Something went wrong");
+      Alert.alert("Error", "Invalid credentials");
     }
   };
 

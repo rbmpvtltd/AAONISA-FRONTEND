@@ -107,7 +107,7 @@ const ForgotPassword = () => {
 
         Alert.alert(
           "OTP Verified",
-          `Token saved to ${Platform.OS === "web" ? "localStorage" : "AsyncStorage"}!`
+          // `Token saved to ${Platform.OS === "web" ? "localStorage" : "AsyncStorage"}!`
         );
       } else {
         Alert.alert("Error", data.message || "Invalid OTP");
@@ -132,7 +132,7 @@ const ForgotPassword = () => {
       }
 
       if (!storedToken) {
-        Alert.alert("Error", "No token found. Please verify OTP first.");
+        Alert.alert("Error", "Please verify OTP first.");
         return;
       }
 

@@ -1,5 +1,5 @@
 import { removeBookmark, renameBookmark } from '@/src/features/bookmark/api';
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CategoryReelGrid from '../../../../src/features/bookmark/categoryReelGrid';
 import SavedCategories from '../../../../src/features/bookmark/savedCategories';
@@ -21,6 +21,7 @@ const SavedScreen = () => {
     );
   };
 
+  
   return (
     <View style={{ flex: 1 }}>
       {selectedCategory ? (
