@@ -167,6 +167,10 @@ export default function ChatDetailScreen() {
 
   // const chatMessages = messages[getRoomId(String(CURRENT_USER_ID), chatUserId)] ?? [];
   const chatMessages = useChatStore.getState().getMessages();
+  // const chatMessages = useChatStore((state) =>
+  // state.currentChatId ? state.messages[state.currentChatId] ?? [] : []
+// );
+
   // console.log(chatMessages)
   return (
     <KeyboardAvoidingView style={{ flex: 1, backgroundColor: theme.background }} behavior={Platform.OS === "ios" ? "padding" : "height"} keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}>

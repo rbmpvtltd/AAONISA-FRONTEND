@@ -172,16 +172,17 @@ import { useEffect, useRef } from "react";
 import { io, Socket } from "socket.io-client";
 
 let globalSocket: Socket | null = null;
-let listenersRegistered = false;
 
 export function useSocketManager(userId?: string, otherUserId?: string) {
-  const { addMessage,setSessionId,clearCurrentChat } = useChatStore();
+  const { addMessage, setSessionId, clearCurrentChat } = useChatStore();
   const setCurrentChat = useChatStore((state) => state.setCurrentChat);
 
-  const userIdRef = useRef(userId);
-  const otherUserRef = useRef(otherUserId);
+  const userIdRef = useRef<string | undefined>(userId);
+  const otherUserRef = useRef<string | undefined>(otherUserId);
+  const currentRoomRef = useRef<string | null>(null);
   const roomIdRef = useRef<string | null>(null);
 
+  // ✅ Always keep refs in sync
   useEffect(() => {
     userIdRef.current = userId;
   }, [userId]);
@@ -193,35 +194,37 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
   useEffect(() => {
     if (!userId || !otherUserId) return;
 
-    // Create a single global socket
+    // ✅ Create global socket once
     if (!globalSocket) {
-      globalSocket = io("http://192.168.1.64:3000/socket.io", {
+      globalSocket = io("https://hithoy-backend.justsearch.net.in/socket.io", {
         transports: ["websocket"],
-        query: { userId },
         autoConnect: false,
       });
-      console.log("🔌 Socket instance created");
+      console.log("🔌 Socket created");
     }
 
-    // Always update query before connect
+    // ✅ Update query before connect
     globalSocket.io.opts.query = { userId };
 
-    // Connect if needed
     if (!globalSocket.connected) {
       globalSocket.connect();
-      console.log("🟢 Connecting...");
+      console.log("🟢 Connecting socket...");
     }
 
-    // Create room ID
+    // ✅ Create & set room BEFORE joining
     const roomId = [userId, otherUserId].sort().join("-");
+    currentRoomRef.current = roomId;
     roomIdRef.current = roomId;
 
     const joinRoom = () => {
       globalSocket?.emit("joinRoom", { roomId });
-      globalSocket?.emit("getPreviousMessages", { user1Id: userId, user2Id: otherUserId });
-      console.log("🟢 Joined Room:", roomId);
-        setCurrentChat(roomId);
+      globalSocket?.emit("getPreviousMessages", {
+        user1Id: userId,
+        user2Id: otherUserId,
+      });
 
+      setCurrentChat(roomId);
+      console.log("🟢 Joined Room:", roomId);
     };
 
     if (globalSocket.connected) {
@@ -230,50 +233,60 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
       globalSocket.once("connect", joinRoom);
     }
 
-    // Register global listeners ONCE
-    if (!listenersRegistered) {
-      globalSocket.on("Message", (msg: any) => {
-        const myId = userIdRef.current;
-        const otherId = otherUserRef.current;
+    // ✅ REMOVE OLD LISTENERS (VERY IMPORTANT)
+    globalSocket.off("Message");
+    globalSocket.off("previousMessages");
 
-        const currentRoom = [myId, otherId].sort().join("-");
-        setCurrentChat(currentRoom);
-        const incomingRoom = [msg.senderId, msg.receiverId].sort().join("-");
-        // Prevent duplicate / wrong room messages
-        if (incomingRoom !== currentRoom) return;
+    // ✅ LIVE MESSAGE LISTENER (ALWAYS FRESH)
+    globalSocket.on("Message", (msg: any) => {
+      const incomingRoom = [msg.senderId, msg.receiverId].sort().join("-");
+      const activeRoom = currentRoomRef.current;
 
-        addMessage( {
-          id: String(msg.chat_id ?? msg.createdAt ?? Date.now()),
-          text: msg.text ?? msg.message_text,
-          fromMe: msg.sender.id === myId,
-          createdAt: msg.created_at ?? Date.now(),
+      console.log("✅ Active Room:", activeRoom);
+      console.log("📩 Incoming Room:", incomingRoom);
+
+      if (!activeRoom || incomingRoom !== activeRoom) {
+        console.log("❌ Message ignored for room:", incomingRoom);
+        return;
+      }
+
+      const myId = userIdRef.current;
+
+      addMessage({
+        id: String(msg.chat_id ?? msg.message_id),
+        text: msg.text ?? msg.message_text,
+        fromMe: msg.senderId === myId,
+        createdAt: msg.createdAt ?? Date.now(),
+      });
+    });
+
+    // ✅ PREVIOUS MESSAGES LISTENER
+    globalSocket.on("previousMessages", (payload) => {
+      const myId = userIdRef.current;
+
+      setSessionId(payload.sessionId);
+
+      payload.messages?.forEach((raw: any) => {
+        addMessage({
+          id: String(raw.chat_id ?? raw.messageId ?? raw.createdAt),
+          text: raw.message_text,
+          fromMe: raw.sender.id === myId,
+          createdAt: raw.created_at,
         });
       });
+    });
 
-      globalSocket.on("previousMessages", (payload) => {
-        const myId = userIdRef.current;
-        const otherId = otherUserRef.current;
-        setSessionId(payload.sessionId);
-        const room = [myId, otherId].sort().join("-");
-        payload.messages?.forEach((raw:any) => {
-          // console.log(raw);
-          addMessage( {
-            id: String(raw.chat_id ?? raw.messageId ?? raw.createdAt),
-            text: raw.message_text,
-            fromMe: raw.sender.id === myId,
-            createdAt: raw.created_at,
-          });
-        });
-      });
-
-      listenersRegistered = true;
-      console.log("✅ Listeners registered once");
-    }
-
-    // Cleanup only room leave — NOT listeners
+    // ✅ CLEANUP ON ROOM SWITCH (STRICT MODE SAFE)
     return () => {
       console.log("🚪 Leaving room:", roomIdRef.current);
-      globalSocket?.emit("leaveRoom", { roomId: roomIdRef.current });
+
+      if (roomIdRef.current) {
+        globalSocket?.emit("leaveRoom", { roomId: roomIdRef.current });
+      }
+
+      currentRoomRef.current = null;
+      roomIdRef.current = null;
+
       setSessionId(null);
       clearCurrentChat();
     };
@@ -287,7 +300,7 @@ export const disconnectSocket = () => {
     globalSocket.removeAllListeners();
     globalSocket.disconnect();
   }
+
   globalSocket = null;
-  listenersRegistered = false;
-  console.log("🔴 Socket fully disconnected!");
+  console.log("🔴 Socket fully disconnected");
 };

@@ -142,19 +142,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
   return state.messages[state.currentChatId] ?? [];
 },
 
-  // Add message to the current chat
-  addMessage: (msg) =>
+  addMessage: (msg) =>{
     set((state) => {
       const chatId = state.currentChatId;
-      if (!chatId) return state; // No chat selected
+      if (!chatId) return state;
       const existing = state.messages[chatId] ?? [];
-      if (existing.some((m) => m.id === msg.id)) return state; // ignore duplicate
+      if (existing.some((m) => m.id === msg.id)) return state;
       return {
         messages: { ...state.messages, [chatId]: [...existing, msg] },
       };
-    }),
-
-  // Delete a message for me in the current chat
+    })},
   deleteMessageForMe: (msgId) =>
     set((state) => {
       const chatId = state.currentChatId;
@@ -168,7 +165,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
     }),
 
-  // Delete a message for everyone in the current chat
   deleteMessageForEveryone: (msgId) =>
     set((state) => {
       const chatId = state.currentChatId;
@@ -184,7 +180,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       };
     }),
 
-  // Clear all messages of current chat
   clearMessages: () =>
     set((state) => {
       const chatId = state.currentChatId;
@@ -192,7 +187,6 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return { messages: { ...state.messages, [chatId]: [] } };
     }),
 
-  // Delete all messages of a chat room completely
   clearRoomMessages: (chatId) =>
     set((state) => {
       const updated = { ...state.messages };
