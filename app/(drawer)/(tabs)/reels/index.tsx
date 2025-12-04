@@ -58,6 +58,7 @@ const ReelItem = ({
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const isFocused = useIsFocused();
+  const [duration, setDuration] = useState<number | null>(null);
 
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -74,6 +75,7 @@ const ReelItem = ({
     }
   );
 
+  console.log("===================================",player)
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
@@ -95,6 +97,18 @@ const ReelItem = ({
     }
   }, [isFocused, currentIndex, index, isMuted]);
 
+useEffect(() => {
+  if (!player) return;
+
+  const listener = player.addListener("statusChange", () => {
+    if (player.status === "readyToPlay" && player.duration != null) {
+      console.log("duration", player.duration);
+      setDuration(player.duration);
+    }
+  });
+
+  return () => listener.remove();
+}, [player]);
   // mute/unmute
 
   const formatNumber = (num: number): string => {
