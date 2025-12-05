@@ -148,8 +148,10 @@ useEffect(() => {
   console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;
+  
 console.log('====================================');
 console.log(item.duration);
+console.log(item);
 console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -394,6 +396,34 @@ const ReelsFeed = () => {
   //   return () => clearInterval(interval);
   // }, [autoScroll, reels.length]);
 
+
+// auto scroll logic 
+useEffect(() => {
+  if (!autoScroll || reels.length === 0) return;
+
+  // current video ki duration lo
+  const currentVideoDuration = reels[currentIndex]?.duration;
+
+  if (!currentVideoDuration) return; 
+
+  const timer = setTimeout(() => {
+    const nextIndex =
+      currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+    setCurrentIndex(nextIndex);
+
+    flatListRef.current?.scrollToIndex({
+      index: nextIndex,
+      animated: true,
+    });
+
+    updateURL(nextIndex);
+  }, currentVideoDuration * 1000); 
+
+  return () => clearTimeout(timer);
+}, [autoScroll, reels.length, currentIndex]);
+
+
   useEffect(() => {
     if (videoId && reels.length > 0 && flatListRef.current) {
       const targetIndex = reels.findIndex(
@@ -418,6 +448,66 @@ const ReelsFeed = () => {
     }
   }, [videoId, reels.length]);
 
+
+// Add this to your state
+// const [isManualNavigation, setIsManualNavigation] = useState(false);
+
+// // Modified auto-scroll effect
+// useEffect(() => {
+//   if (!autoScroll || reels.length === 0 || isManualNavigation) return;
+
+//   const currentVideoDuration = reels[currentIndex]?.duration;
+
+//   if (!currentVideoDuration) return; 
+
+//   const timer = setTimeout(() => {
+//     const nextIndex =
+//       currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+
+//     setCurrentIndex(nextIndex);
+
+//     flatListRef.current?.scrollToIndex({
+//       index: nextIndex,
+//       animated: true,
+//     });
+
+//     updateURL(nextIndex);
+//   }, currentVideoDuration * 1000); 
+
+//   return () => clearTimeout(timer);
+// }, [autoScroll, reels.length, currentIndex, isManualNavigation]);
+
+// // Modified videoId effect
+// useEffect(() => {
+//   if (videoId && reels.length > 0 && flatListRef.current) {
+//     const targetIndex = reels.findIndex(
+//       (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
+//     );
+
+//     if (targetIndex !== -1) {
+//       console.log('🎯 Found video at index:', targetIndex);
+
+//       setIsManualNavigation(true); // Prevent auto-scroll
+      
+//       setTimeout(() => {
+//         setCurrentIndex(targetIndex);
+//         flatListRef.current?.scrollToIndex({
+//           index: targetIndex,
+//           animated: false,
+//         });
+
+//         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+        
+//         // Re-enable auto-scroll after a delay
+//         setTimeout(() => {
+//           setIsManualNavigation(false);
+//         }, 500);
+//       }, 100);
+//     } else {
+//       console.log('⚠️ Video not found in current feed');
+//     }
+//   }
+// }, [videoId, reels.length]);
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);

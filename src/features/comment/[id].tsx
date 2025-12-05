@@ -23,7 +23,6 @@ import {
   getCommentsApi,
   likeCommentApi
 } from "@/src/api/comments-api";
-import { GetCurrentUser } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useCommentStore } from "@/src/store/useCommentStore";
 const { width: windowWidth } = Dimensions.get("window");
@@ -110,27 +109,27 @@ const CommentPage = () => {
 
   
 
-  useEffect(() => {
-    const fetchUser = async () => {
-      try {
-        const data = await GetCurrentUser();
-        if (data?.id) {
-          setCurrentUser({
-            id: data.id,
-            username: data.username?.trim() || "you",
-            userProfile:
-              data.userProfile.ProfilePicture ||
-              "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-            realName: data.name,
-          });
-        }
-      } catch (error) {
-        console.error("❌ Error fetching user:", error);
-      }
-    };
+  // useEffect(() => {
+  //   const fetchUser = async () => {
+  //     try {
+  //       const data = await GetCurrentUser();
+  //       if (data?.id) {
+  //         setCurrentUser({
+  //           id: data.id,
+  //           username: data.username?.trim() || "you",
+  //           userProfile:
+  //             data.userProfile.ProfilePicture ||
+  //             "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+  //           realName: data.name,
+  //         });
+  //       }
+  //     } catch (error) {
+  //       console.error("❌ Error fetching user:", error);
+  //     }
+  //   };
 
-    fetchUser();
-  }, []);
+  //   fetchUser();
+  // }, []);
 
   const handleAddComment = async () => {
 

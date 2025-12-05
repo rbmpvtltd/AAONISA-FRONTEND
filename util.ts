@@ -6,7 +6,7 @@ function createApiUrl(url: string) {
         return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}${url}`;
         
     }
-    return `${process.env.EXPO_PUBLIC_API_URL}${url}`;
+    return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}${url}`;
 }
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
