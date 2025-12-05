@@ -37,5 +37,23 @@ const markViewed = async (storyId: string) => {
   }
 };
 
-export { markViewed };
+const DeleteVideoById = async (id: string) => {
+    const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl(`/videos/delete/${id}`);
+   const data =  await axios.delete(apiUrl, config);
+   return data;
+};
+
+
+
+export { DeleteVideoById, markViewed };
 

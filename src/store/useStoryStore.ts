@@ -84,20 +84,29 @@ export interface Story {
   videoUrl: string;
   duration: number;
   viewed: boolean;
-}
+  created_at: string;
+  viewers?: {
+    username: string;
+    profilePic: string;
+    viewedAt: string;
+  }[];
 
+}
 export interface StoryUser {
   username: string;
   profilePic: string;
   stories: Story[];
   owner: string;
   self: boolean;
+  viewers: string;
+  createdAt: Date;
 }
 
 interface StoryState {
   userStories: StoryUser[];
   setUserStories: (data: StoryUser[]) => void;
   markStoryViewed: (storyId: string) => void;
+  // deleteStory: (storyId: string) => void;
   // getNextStory: (currentStoryId: string) => { userId: string; storyId: string } | null;
   // getPreviousStory: (currentStoryId: string) => { userId: string; storyId: string } | null;
 }
@@ -126,6 +135,23 @@ export const useStoryStore = create<StoryState>((set, get) => ({
 
       return { userStories: updatedStories };
     }),
+
+  //    deleteStory: async (storyId: string) => {
+  //   const ok = await DeleteVideoById(storyId);
+
+  //   if (!ok) return false;
+
+  //   set((state) => {
+  //     const updatedUsers = state.userStories.map((user) => ({
+  //       ...user,
+  //       stories: user.stories.filter((s) => s.id !== storyId),
+  //     }));
+
+  //     return { userStories: updatedUsers };
+  //   });
+
+  //   return true;
+  // },
 
   // Helper: Next story logic
   // getNextStory: (currentStoryId) => {
