@@ -75,12 +75,12 @@ StoryItem.displayName = "StoryItem";
 
 export const StoryList = memo(({
   theme,
-  currentUserId,
-  currentUserProfilePic
+  // currentUserId,
+  // currentUserProfilePic
 }: {
   theme: any;
-  currentUserId: string;
-  currentUserProfilePic: string;
+  // currentUserId: string;
+  // currentUserProfilePic: string;
 }) => {
   const { userStories } = useStoryStore();
 
@@ -126,12 +126,12 @@ export const StoryList = memo(({
 
   // Create current user object for StoryItem
   const currentUserData = useMemo(() => ({
-    profilePic: currentUserStories?.profilePic || currentUserProfilePic,
+    profilePic: currentUserStories?.profilePic,
     username: currentUserStories?.username || "Your Story",
     stories: currentUserStories?.stories || [],
-    owner: currentUserStories?.owner || currentUserId,
+    owner: currentUserStories?.owner, //currentUserId,
     self: true,
-  }), [currentUserStories, currentUserProfilePic, currentUserId]);
+  }), [currentUserStories]);
 
   return (
     <View style={styles.container}>
