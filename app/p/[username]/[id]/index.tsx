@@ -132,6 +132,9 @@ const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   console.log("user comment resived", item.comments);
   console.log("user audio", item.audio);
 
+  console.log("=============================");
+  console.log("item :", item)
+  console.log("=============================");
 
 
   return (
@@ -310,6 +313,9 @@ const UserReelsFeed = () => {
   const [isMuted, setIsMuted] = useState(false);
   const [currentIndex, setCurrentIndex] = useState(0);
 
+  // NEW: Track video durations
+  // const [videoDurations, setVideoDurations] = useState<Record<string, number>>({});
+
   // Fetch profile + videos
   const { data: profile } = useQuery({
     queryKey: ["userProfile", username],
@@ -331,7 +337,17 @@ const UserReelsFeed = () => {
     setShowIcon,
     fadeAnim,
     updateReelURL,
+    autoScroll,
   } = useReelsStore();
+
+
+ // NEW: Callback to receive duration from child
+  // const handleDurationReady = (videoId: string, duration: number) => {
+  //   setVideoDurations(prev => ({
+  //     ...prev,
+  //     [videoId]: duration
+  //   }));
+  // };
 
   // Find start index from URL param id
   useEffect(() => {
@@ -362,6 +378,39 @@ const UserReelsFeed = () => {
     router.setParams({ id: reel.id, username: username });
     updateReelURL(reel.id);
   };
+
+
+// // FIXED: Auto scroll logic with proper variable names
+//   useEffect(() => {
+//     if (!autoScroll || videos.length === 0) return;
+
+//     const currentVideo = videos[currentIndex];
+//     if (!currentVideo) return;
+
+//     const currentVideoDuration = videoDurations[currentVideo.uuid];
+
+//     if (!currentVideoDuration) {
+//       console.log('⏳ Waiting for video duration...');
+//       return;
+//     }
+
+//     console.log(` Auto-scroll in ${currentVideoDuration}s for video ${currentVideo.uuid}`);
+
+//     const timer = setTimeout(() => {
+//       const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
+
+//       setCurrentIndex(nextIndex);
+
+//       flatListRef.current?.scrollToIndex({
+//         index: nextIndex,
+//         animated: true,
+//       });
+
+//       updateURL(nextIndex);
+//     }, currentVideoDuration * 1000);
+
+//     return () => clearTimeout(timer);
+//   }, [autoScroll, videos.length, currentIndex, videoDurations]);
 
   // Scroll handling
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -425,6 +474,7 @@ const UserReelsFeed = () => {
             likeMutation={likeMutation}
             reelUsername={profile?.username}
             profilePicture={profile?.userProfile?.ProfilePicture}
+              // onDurationReady={handleDurationReady}
           />
         )}
         keyExtractor={(item) => item.uuid}
