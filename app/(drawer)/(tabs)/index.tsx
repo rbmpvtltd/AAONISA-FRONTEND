@@ -73,7 +73,7 @@ const HomePage = () => {
     retry: 1, // Retry once on failure
   });
 
-  console.log("stories data resivede", stories);
+  // console.log("stories data resivede", stories);
 
   useEffect(() => {
     if (stories && stories.length > 0) {

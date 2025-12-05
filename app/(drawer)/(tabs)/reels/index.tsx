@@ -62,6 +62,7 @@ const ReelItem = ({
       : false
   );
   console.log("REEL id:", item.id || item.uuid);
+  
 
   // create player
   const player = useVideoPlayer(
@@ -131,7 +132,9 @@ const ReelItem = ({
   console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;
-
+console.log('====================================');
+console.log(item.duration);
+console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <Pressable
