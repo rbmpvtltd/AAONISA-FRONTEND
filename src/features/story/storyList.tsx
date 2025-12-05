@@ -119,6 +119,9 @@ export const StoryList = memo(({
 
     const story = user.stories.find(s => !s.viewed) || user.stories[0];
     router.push(`/story/${story.id}`);
+    console.log('====================================');
+    console.log(`/story/${story.id}`);
+    console.log('====================================');
   }, [userStories]);
 
   // Create current user object for StoryItem

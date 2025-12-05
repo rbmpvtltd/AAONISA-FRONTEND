@@ -391,53 +391,63 @@ export default function StoryViewPage() {
   const userStory = userStories.find((u) =>
     u.stories.some((s) => s.id === id)
   );
-  console.log('====================================');
-  console.log(userStory);
-  console.log('====================================');
-  const storyList = userStory?.stories || [];
 
+  const storyList = userStory?.stories || [];
+//  console.log("ddddddddddddduuuuuu", storyList);
   const [currentIndex, setCurrentIndex] = useState(0);
   const progress = useRef(new Animated.Value(0)).current;
   const [paused, setPaused] = useState(false);
-  const [isMuted, setIsMuted] = useState(false); // Add mute state
+  const [isMuted, setIsMuted] = useState(false);
+  const [showMuteIcon, setShowMuteIcon] = useState(false);
+  const [globalUserIndex, setGlobalUserIndex] = useState(0);
+  const [storyIndex, setStoryIndex] = useState(0);
 
-
-  //  Always call hook at top level
   const player = useVideoPlayer("");
 
+  useEffect(() => {
+    if (player) {
+      player.volume = isMuted ? 0 : 1.0;
+    }
+  }, [isMuted, player]);
+
+
   const currentStory = storyList[currentIndex];
+//  console.log('====================================');
+//  console.log(currentStory.duration);
+//  console.log('====================================');
 
   //  Set initial index only once on mount
   useEffect(() => {
     if (userStory && id) {
       const idx = userStory.stories.findIndex((s) => s.id === id);
       if (idx !== -1) {
-        // console.log(" Initial story index:", idx);
+        console.log(" Initial story index:", idx);
         setCurrentIndex(idx);
       }
     }
     // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [id]);
 
-  //  Load new video on currentIndex change
   useEffect(() => {
-    if (!currentStory || !player) return;
-
-    // console.log(" Loading story:", currentStory.id);
+    if (!currentStory?.videoUrl || !player) return;
 
     const loadVideo = async () => {
-      if (player.replaceAsync) {
-        await player.replaceAsync(currentStory.videoUrl);
+      try {
+        if (player.replaceAsync) {
+          await player.replaceAsync(currentStory.videoUrl);
+        } else {
+          player.replace(currentStory.videoUrl);
+        }
+        player.volume = isMuted ? 0 : 1.0;
         if (!paused) player.play();
-      } else {
-        player.replace(currentStory.videoUrl);
-        if (!paused) player.play();
+      } catch (err) {
+        console.log("Video load error:", err);
       }
     };
 
     loadVideo();
-  }, [currentStory, paused]);
-
+  }, [currentStory?.videoUrl]);
+  
   //  Progress animation
   useEffect(() => {
     if (!currentStory) return;
@@ -450,7 +460,7 @@ export default function StoryViewPage() {
 
     const anim = Animated.timing(progress, {
       toValue: 1,
-      duration: currentStory.duration * 1000,
+      duration: (currentStory.duration) * 1000,
       useNativeDriver: false,
     });
 
@@ -482,25 +492,30 @@ export default function StoryViewPage() {
     }
   };
 
-  const handlePrevious = () => {
-    if (currentIndex > 0) {
-      setCurrentIndex((i) => i - 1);
-      return;
-    }
 
-    const currentUserIndex = userStories.findIndex((u) => u.username === userStory?.username);
+const handlePrevious = () => {
+  // SELF story → LEFT tap ignored
+  // if (userStory?.self) return;
 
-    // Move back to previous user
-    if (currentUserIndex > 0) {
-      const prevUser = userStories[currentUserIndex - 1];
-      const prevStory = prevUser.stories[prevUser.stories.length - 1];
+  if (currentIndex > 0) {
+    setCurrentIndex((i) => i - 1);
+    return;
+  }
 
-      router.replace(`/story/${prevStory.id}`);
-    } else {
-      // First user's first story → exit
-      router.back();
-    }
-  };
+  const currentUserIndex = userStories.findIndex(
+    (u) => u.username === userStory?.username
+  );
+
+  if (currentUserIndex > 0) {
+    const prevUser = userStories[currentUserIndex - 1];
+    const prevStory =
+      prevUser.stories[prevUser.stories.length - 1];
+
+    router.replace(`/story/${prevStory.id}`);
+  } else {
+    router.back();
+  }
+};
 
   const handleLongPressIn = () => {
     // console.log(" Pause story");
@@ -572,7 +587,7 @@ export default function StoryViewPage() {
       </View>
 
       {/* Tap left/right */}
-      <View style={styles.touchLayer}>
+      <View style={styles.touchLayer} >
         <TouchableOpacity
           style={{ flex: 1 }}
           onPress={(e) =>
@@ -584,6 +599,17 @@ export default function StoryViewPage() {
         />
       </View>
 
+      {/* Mute/Unmute Button */}
+      <TouchableOpacity
+        style={{ position: "absolute", top: 55, right: 50 }}
+        onPress={() => setIsMuted(!isMuted)}
+      >
+        <Ionicons
+          name={isMuted ? "volume-mute" : "volume-high"}
+          size={26}
+          color="#fff"
+        />
+      </TouchableOpacity>
 
       {/* Close button ko alag, upar layer me dikhaye */}
       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
