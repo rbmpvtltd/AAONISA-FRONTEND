@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from "react";
+import { useEffect, useState } from "react";
 import {
   Dimensions,
   Modal,
@@ -60,7 +60,7 @@ const TextOverlay: React.FC<TextOverlayProps> = ({ overlay, onUpdate, onRemove }
 
   // ---------- debounce function ----------
   function debounce(func: (...args: any[]) => void, delay: number) {
-    let timeout: number;
+    let timeout: NodeJS.Timeout;   //number;
     return (...args: any) => {
       clearTimeout(timeout);
       timeout = setTimeout(() => func(...args), delay);

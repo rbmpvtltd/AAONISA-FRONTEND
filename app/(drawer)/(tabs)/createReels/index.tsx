@@ -42,10 +42,10 @@ export default function CreateReel() {
   // const [permission, requestPermission] = useCameraPermissions();
   const [videoUri, setVideoUri] = useState<string | null>(null);
   const [contentType, setContentType] = useState<ContentType>('reels');
-  
+
   // const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   // const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
-  
+
 
   // useEffect(() => {
   //   // Request all necessary permissions when component mounts
@@ -55,16 +55,16 @@ export default function CreateReel() {
   //       const cameraPermission = await requestPermission();
   //       const cameraStatus = cameraPermission.status as PermissionStatus;
   //       setHasCameraPermission(cameraStatus === 'granted');
-        
+
   //       // Request media library permission
   //       const mediaPermission = await MediaLibrary.requestPermissionsAsync();
   //       const mediaStatus = mediaPermission.status as PermissionStatus;
-        
+
   //       // Request microphone permission for audio recording
   //       const microphonePermission = await Audio.requestPermissionsAsync();
   //       const microphoneStatus = microphonePermission.granted;
   //       setHasMicrophonePermission(microphoneStatus);
-        
+
   //       if (cameraStatus !== 'granted' || mediaStatus !== 'granted' || !microphoneStatus) {
   //         Alert.alert(
   //           'Permissions required', 
@@ -76,26 +76,26 @@ export default function CreateReel() {
   //       Alert.alert('Permission Error', 'Failed to request necessary permissions. Please check app settings.');
   //     }
   //   })();
-    
+
   //   return () => {
   //     // Clean up music sound when component unmounts
-      
+
   //   };
   // }, []);
 
-  
-  
+
+
   const discardVideo = () => {
     setVideoUri(null);
   };
 
-  
+
   const uploadVideo = async () => {
     if (!videoUri) return;
-    
+
     try {
       Alert.alert("Processing", "Compressing your video...");
-      
+
       // Compress the video before uploading
       const compressedUri = await VideoCompressor.compress(videoUri, {
         compressionMethod: 'auto',
@@ -103,22 +103,22 @@ export default function CreateReel() {
         maxSize: 720, // Maximum resolution
         progressDivider: 1,
       });
-      
+
       // Simulate upload process
       setTimeout(() => {
         Alert.alert("Uploaded!", `Your ${contentType} is ready.`);
-        
+
         // Reset all states
         setVideoUri(null);
       }, 2000);
-      
+
     } catch (error) {
       console.error('Compression error:', error);
       Alert.alert("Error", "Failed to compress video. Please try again.");
     }
   };
 
-  
+
   // Show loading while permission is being checked
   // if (hasCameraPermission === null) {
   //   return <View style={styles.container} />;
@@ -141,68 +141,68 @@ export default function CreateReel() {
       {/* Video Preview on the same screen */}
       {videoUri ? (
         <>
-        <VideoPreview
-          videoUri={videoUri}
-          contentType={contentType} 
-          musicOptions={musicOptions}
-          onDiscard={discardVideo}
-          onUpload={uploadVideo}
-        />
+          <VideoPreview
+            videoUri={videoUri}
+            contentType={contentType}
+            musicOptions={musicOptions}
+            onDiscard={discardVideo}
+            onUpload={uploadVideo}
+          />
         </>
-      ) 
-      : (
-        <>
-          {/* Content Type Selector */}
-          <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType}/>
-        </>
-      )}
+      )
+        : (
+          <>
+            {/* Content Type Selector */}
+            <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType} />
+          </>
+        )}
     </View>
   );
 }
 const styles = StyleSheet.create({
   volumeControlsRow: {
-  flexDirection: 'row',
-  justifyContent: 'space-between',
-  marginBottom: 15,
-  paddingHorizontal: 10,
-},
-volumeControl: {
-  flex: 1,
-  marginHorizontal: 5,
-},
-volumeLabel: {
-  color: 'white',
-  fontSize: 12,
-  marginBottom: 5,
-  textAlign: 'center',
-},
-sliderContainer: {
-  flexDirection: 'row',
-  alignItems: 'center',
-  justifyContent: 'space-between',
-},
-sliderTrack: {
-  flex: 1,
-  height: 3,
-  backgroundColor: 'rgba(255,255,255,0.3)',
-  borderRadius: 2,
-  marginHorizontal: 5,
-  position: 'relative',
-},
-sliderProgress: {
-  height: '100%',
-  backgroundColor: '#0095f6',
-  borderRadius: 2,
-},
-sliderThumb: {
-  position: 'absolute',
-  width: 15,
-  height: 15,
-  borderRadius: 8,
-  backgroundColor: '#0095f6',
-  top: -6,
-  marginLeft: -7.5,
-},
+    flexDirection: 'row',
+    justifyContent: 'space-between',
+    marginBottom: 15,
+    paddingHorizontal: 10,
+  },
+  volumeControl: {
+    flex: 1,
+    marginHorizontal: 5,
+  },
+  volumeLabel: {
+    color: 'white',
+    fontSize: 12,
+    marginBottom: 5,
+    textAlign: 'center',
+  },
+  sliderContainer: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    justifyContent: 'space-between',
+  },
+  sliderTrack: {
+    flex: 1,
+    height: 3,
+    backgroundColor: 'rgba(255,255,255,0.3)',
+    borderRadius: 2,
+    marginHorizontal: 5,
+    position: 'relative',
+  },
+  sliderProgress: {
+    height: '100%',
+    backgroundColor: '#0095f6',
+    borderRadius: 2,
+  },
+  sliderThumb: {
+    position: 'absolute',
+    width: 15,
+    height: 15,
+    borderRadius: 8,
+    backgroundColor: '#0095f6',
+    top: -6,
+    marginLeft: -7.5,
+  },
   container: {
     flex: 1,
     justifyContent: 'center',

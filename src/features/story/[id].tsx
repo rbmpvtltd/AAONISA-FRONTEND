@@ -651,6 +651,7 @@ import { useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   Dimensions,
@@ -812,12 +813,11 @@ export default function StoryViewPage() {
           text: "Delete",
           style: "destructive",
           onPress: () => {
-            deleteVideo.mutate(currentStory.id);
-            if (storyList.length === 1) {
-              router.back();
-            } else {
-              handleNext();
-            }
+            deleteVideo.mutate(currentStory.id, {
+              onSuccess: () => {
+                router.replace("/(drawer)/(tabs)");
+              },
+            });
           },
         },
       ]
@@ -841,7 +841,7 @@ export default function StoryViewPage() {
       </View>
     );
   }
-
+  const isDeleting = deleteVideo.isPending;
   return (
     <View style={styles.container}>
       <VideoView
@@ -879,6 +879,8 @@ export default function StoryViewPage() {
             onPress={() => {
               if (!isOwnStory) {
                 router.push(`/profile/${userStory.username}`);
+              } else {
+                router.push(`/(drawer)/(tabs)/profile`);
               }
             }}
           >
@@ -936,18 +938,26 @@ export default function StoryViewPage() {
 
           {/* Bottom action buttons */}
           <View style={styles.bottomActions}>
-            <TouchableOpacity style={styles.actionBtn} onPress={handleDelete}>
+            {/*   <TouchableOpacity style={styles.actionBtn} onPress={handleDelete}>
               <Ionicons name="trash-outline" size={24} color="#fff" />
+            </TouchableOpacity> */}
+
+            <TouchableOpacity style={styles.actionBtn} onPress={handleDelete} disabled={isDeleting}>
+              {isDeleting ? (
+                <ActivityIndicator size="small" color="#fff" />
+              ) : (
+                <Ionicons name="trash-outline" size={24} color="#fff" />
+              )}
             </TouchableOpacity>
 
-            <TouchableOpacity
+            {/* Share functionality  */}
+            {/* <TouchableOpacity
               style={styles.actionBtn}
               onPress={() => {
-                /* Share functionality */
               }}
             >
               <Ionicons name="paper-plane-outline" size={24} color="#fff" />
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
             {/* More options */}
             {/* <TouchableOpacity
