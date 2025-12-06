@@ -3,7 +3,7 @@ import { useUploadStore } from "@/src/store/reelUploadStore";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
-import React, { useEffect, useRef, useState } from "react";
+import  { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
