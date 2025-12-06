@@ -301,7 +301,7 @@ console.log('====================================');
         }}
         // onReport={() => console.log("Reported:", item.id || item.uuid)}
         onReport={() => setShowReportDrawer(true)}
-        reelId={item.id}
+        reelId={item.id || item.uuid}
         reelUrl={item.videoUrl} // add this too for share/download
       />
 
@@ -312,6 +312,7 @@ console.log('====================================');
           console.log("User reported for:", reason);
           setShowReportDrawer(false);
         }}
+        videoId={item.id || item.uuid}
       />
     </View>
   );
