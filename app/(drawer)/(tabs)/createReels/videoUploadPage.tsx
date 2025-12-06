@@ -2,7 +2,7 @@ import { useUploadStore } from "@/src/store/reelUploadStore";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { Audio, AVPlaybackStatus, ResizeMode, Video } from "expo-av";
-import React, { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
     Alert,
@@ -120,10 +120,10 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         };
     }
 
-    
+
 
     const storyUploading = async () => {
-          setIsUploadingStory(true);
+        setIsUploadingStory(true);
         const {
             videoUri,
             trimStart,
@@ -199,18 +199,18 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         } catch (err: any) {
             console.error("Upload failed:", err?.response?.data || err.message);
         }
-             finally {
-    setIsUploadingStory(false); // ✅ loader OFF
-}
+        finally {
+            setIsUploadingStory(false); // ✅ loader OFF
+        }
         Alert.alert("Story uploaded successfully!");
-   }
+    }
 
     const setMusicVolumeStore = useUploadStore((state) => state.setMusicVolume);
     const setVideoVolumeStore = useUploadStore((state) => state.setVideoVolume);
     const addOverlayToStore = useUploadStore((state) => state.addOverlay);
     const removeOverlayToStore = useUploadStore((state) => state.removeOverlay);
     const updateOverlay = useUploadStore((state) => state.updateOverlay);
-    
+
     const overlays = useUploadStore((state) => state.overlays);
     const addOverlay = (text = "#example") => {
         const newOverlay = {
@@ -316,7 +316,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                 alignItems: "center",
                                 justifyContent: "center",
                             }}
-                             disabled={isUploadingStory}
+                            disabled={isUploadingStory}
                             onPress={() => contentType === "story" ? storyUploading() : setIsUploading(true)}
                         >
                             <Ionicons name="arrow-forward" size={24} color="white" />
@@ -543,26 +543,26 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                         onDiscard={onDiscard}
                     />
                 )}
- {isUploadingStory && (
-        <View
-          style={{
-            position: "absolute",
-            top: 0,
-            left: 0,
-            right: 0,
-            bottom: 0,
-            backgroundColor: "rgba(0,0,0,0.6)",
-            alignItems: "center",
-            justifyContent: "center",
-            zIndex: 9999,
-          }}
-        >
-          <ActivityIndicator size="large" color="#fff" />
-          <Text style={{ color: "#fff", marginTop: 10, fontSize: 16 }}>
-            Uploading Story...
-          </Text>
-        </View>
-      )}
+                {isUploadingStory && (
+                    <View
+                        style={{
+                            position: "absolute",
+                            top: 0,
+                            left: 0,
+                            right: 0,
+                            bottom: 0,
+                            backgroundColor: "rgba(0,0,0,0.6)",
+                            alignItems: "center",
+                            justifyContent: "center",
+                            zIndex: 9999,
+                        }}
+                    >
+                        <ActivityIndicator size="large" color="#fff" />
+                        <Text style={{ color: "#fff", marginTop: 10, fontSize: 16 }}>
+                            Uploading Story...
+                        </Text>
+                    </View>
+                )}
 
             </View></GestureHandlerRootView>
     );

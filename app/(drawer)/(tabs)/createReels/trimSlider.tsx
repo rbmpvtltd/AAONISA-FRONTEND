@@ -1,5 +1,5 @@
 import { useUploadStore } from '@/src/store/reelUploadStore';
-import React, { useEffect, useRef, useState } from 'react';
+import  { useEffect, useRef, useState } from 'react';
 import { Dimensions, PanResponder, StyleSheet, Text, View } from 'react-native';
 const SLIDER_WIDTH = Dimensions.get('window').width - 40;
 const THUMB_SIZE = 24;

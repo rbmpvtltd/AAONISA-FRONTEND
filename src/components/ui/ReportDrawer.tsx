@@ -1,3 +1,4 @@
+import { report } from "@/src/api/report.api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useEffect, useRef, useState } from "react";
 import {
@@ -12,7 +13,6 @@ import {
 } from "react-native";
 import { TextInput } from "react-native-gesture-handler";
 import Ionicons from "react-native-vector-icons/Ionicons";
-
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
 const reportOptions = [
@@ -31,12 +31,13 @@ const reportOptions = [
     "Something Else",
 ];
 
-const ReportDrawer = ({ visible, onClose, onSelect }: any) => {
+const ReportDrawer = ({ visible, onClose, onSelect,videoId }: any) => {
     const theme = useAppTheme();
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
     const [customVisible, setCustomVisible] = useState(false);
     const [customText, setCustomText] = useState("");
+    const [loading, setLoading] = useState(false);
 
     useEffect(() => {
         if (visible) {
@@ -53,6 +54,25 @@ const ReportDrawer = ({ visible, onClose, onSelect }: any) => {
             }).start();
         }
     }, [visible]);
+    const submitReport = async (text: string) => {
+    try {
+        setLoading(true);
+
+        await report({
+            videoId: videoId,
+            description: text,
+        });
+
+        Alert.alert("Report Submitted", "Your report has been submitted successfully.");
+        onClose();
+    } catch (err: any) {
+        const msg =
+            err?.response?.data?.message || "Something went wrong while reporting";
+        Alert.alert("Error", msg);
+    } finally {
+        setLoading(false);
+    }
+};
 
     if (!visible) return null;
 
@@ -106,9 +126,9 @@ const ReportDrawer = ({ visible, onClose, onSelect }: any) => {
                                         {
                                             text: "OK",
                                             onPress: () => {
-                                                onSelect(item); // report callback
-                                                Alert.alert("Report Submitted", `Your report for "${item}" has been submitted successfully.`);
-                                            },
+    submitReport(item);
+},
+
                                         },
                                     ],
                                     { cancelable: true }
@@ -156,23 +176,20 @@ const ReportDrawer = ({ visible, onClose, onSelect }: any) => {
 
                     <TouchableOpacity
                         style={styles.sendBtn}
-                        onPress={() => {
+                        disabled={loading}
+                        onPress={async () => {
                             if (!customText.trim()) {
                                 Alert.alert("Error", "Please write something first.");
                                 return;
                             }
 
-                            onSelect(customText);
-                            setCustomVisible(false);
-                            setCustomText("");
+                            await submitReport(customText);
+setCustomVisible(false);
+setCustomText("");
 
-                            Alert.alert(
-                                "Report Submitted",
-                                "Your report has been submitted successfully."
-                            );
                         }}
                     >
-                        <Text style={styles.sendText}>Send</Text>
+                        <Text style={styles.sendText}>{loading ? "Sending..." : "Send"}</Text>
                     </TouchableOpacity>
                 </Animated.View>
 
