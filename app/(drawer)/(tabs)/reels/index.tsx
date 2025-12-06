@@ -66,7 +66,7 @@ const ReelItem = ({
       : false
   );
   console.log("REEL id:", item.id || item.uuid);
-  
+
 
   // create player
   const player = useVideoPlayer(
@@ -76,7 +76,7 @@ const ReelItem = ({
     }
   );
 
-  console.log("===================================",player)
+  console.log("===================================", player)
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
@@ -98,18 +98,18 @@ const ReelItem = ({
     }
   }, [isFocused, currentIndex, index, isMuted]);
 
-useEffect(() => {
-  if (!player) return;
+  useEffect(() => {
+    if (!player) return;
 
-  const listener = player.addListener("statusChange", () => {
-    if (player.status === "readyToPlay" && player.duration != null) {
-      console.log("duration", player.duration);
-      setDuration(player.duration);
-    }
-  });
+    const listener = player.addListener("statusChange", () => {
+      if (player.status === "readyToPlay" && player.duration != null) {
+        console.log("duration", player.duration);
+        setDuration(player.duration);
+      }
+    });
 
-  return () => listener.remove();
-}, [player]);
+    return () => listener.remove();
+  }, [player]);
   // mute/unmute
 
   const formatNumber = (num: number): string => {
@@ -148,11 +148,11 @@ useEffect(() => {
   console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;
-  
-console.log('====================================');
-console.log(item.duration);
-console.log(item);
-console.log('====================================');
+
+  console.log('====================================');
+  console.log(item.duration);
+  console.log(item);
+  console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <Pressable
@@ -282,7 +282,16 @@ console.log('====================================');
           </Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => addShare(item.id)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {
+          addShare(item.id);
+          router.push({
+            pathname: `/chat`,
+            params: {  
+              shareMode: "true",
+              reelId: item.id 
+            }
+          });
+        }}>
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
         </TouchableOpacity>
@@ -397,31 +406,31 @@ const ReelsFeed = () => {
   // }, [autoScroll, reels.length]);
 
 
-// auto scroll logic 
-useEffect(() => {
-  if (!autoScroll || reels.length === 0) return;
+  // auto scroll logic 
+  useEffect(() => {
+    if (!autoScroll || reels.length === 0) return;
 
-  // current video ki duration lo
-  const currentVideoDuration = reels[currentIndex]?.duration;
+    // current video ki duration lo
+    const currentVideoDuration = reels[currentIndex]?.duration;
 
-  if (!currentVideoDuration) return; 
+    if (!currentVideoDuration) return;
 
-  const timer = setTimeout(() => {
-    const nextIndex =
-      currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+    const timer = setTimeout(() => {
+      const nextIndex =
+        currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
 
-    setCurrentIndex(nextIndex);
+      setCurrentIndex(nextIndex);
 
-    flatListRef.current?.scrollToIndex({
-      index: nextIndex,
-      animated: true,
-    });
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
 
-    updateURL(nextIndex);
-  }, currentVideoDuration * 1000); 
+      updateURL(nextIndex);
+    }, currentVideoDuration * 1000);
 
-  return () => clearTimeout(timer);
-}, [autoScroll, reels.length, currentIndex]);
+    return () => clearTimeout(timer);
+  }, [autoScroll, reels.length, currentIndex]);
 
 
   useEffect(() => {
@@ -449,65 +458,65 @@ useEffect(() => {
   }, [videoId, reels.length]);
 
 
-// Add this to your state
-// const [isManualNavigation, setIsManualNavigation] = useState(false);
+  // Add this to your state
+  // const [isManualNavigation, setIsManualNavigation] = useState(false);
 
-// // Modified auto-scroll effect
-// useEffect(() => {
-//   if (!autoScroll || reels.length === 0 || isManualNavigation) return;
+  // // Modified auto-scroll effect
+  // useEffect(() => {
+  //   if (!autoScroll || reels.length === 0 || isManualNavigation) return;
 
-//   const currentVideoDuration = reels[currentIndex]?.duration;
+  //   const currentVideoDuration = reels[currentIndex]?.duration;
 
-//   if (!currentVideoDuration) return; 
+  //   if (!currentVideoDuration) return; 
 
-//   const timer = setTimeout(() => {
-//     const nextIndex =
-//       currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
+  //   const timer = setTimeout(() => {
+  //     const nextIndex =
+  //       currentIndex + 1 < reels.length ? currentIndex + 1 : 0;
 
-//     setCurrentIndex(nextIndex);
+  //     setCurrentIndex(nextIndex);
 
-//     flatListRef.current?.scrollToIndex({
-//       index: nextIndex,
-//       animated: true,
-//     });
+  //     flatListRef.current?.scrollToIndex({
+  //       index: nextIndex,
+  //       animated: true,
+  //     });
 
-//     updateURL(nextIndex);
-//   }, currentVideoDuration * 1000); 
+  //     updateURL(nextIndex);
+  //   }, currentVideoDuration * 1000); 
 
-//   return () => clearTimeout(timer);
-// }, [autoScroll, reels.length, currentIndex, isManualNavigation]);
+  //   return () => clearTimeout(timer);
+  // }, [autoScroll, reels.length, currentIndex, isManualNavigation]);
 
-// // Modified videoId effect
-// useEffect(() => {
-//   if (videoId && reels.length > 0 && flatListRef.current) {
-//     const targetIndex = reels.findIndex(
-//       (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
-//     );
+  // // Modified videoId effect
+  // useEffect(() => {
+  //   if (videoId && reels.length > 0 && flatListRef.current) {
+  //     const targetIndex = reels.findIndex(
+  //       (reel) => String(reel.id) === String(videoId) || String(reel.uuid) === String(videoId)
+  //     );
 
-//     if (targetIndex !== -1) {
-//       console.log('🎯 Found video at index:', targetIndex);
+  //     if (targetIndex !== -1) {
+  //       console.log('🎯 Found video at index:', targetIndex);
 
-//       setIsManualNavigation(true); // Prevent auto-scroll
-      
-//       setTimeout(() => {
-//         setCurrentIndex(targetIndex);
-//         flatListRef.current?.scrollToIndex({
-//           index: targetIndex,
-//           animated: false,
-//         });
+  //       setIsManualNavigation(true); // Prevent auto-scroll
 
-//         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
-        
-//         // Re-enable auto-scroll after a delay
-//         setTimeout(() => {
-//           setIsManualNavigation(false);
-//         }, 500);
-//       }, 100);
-//     } else {
-//       console.log('⚠️ Video not found in current feed');
-//     }
-//   }
-// }, [videoId, reels.length]);
+  //       setTimeout(() => {
+  //         setCurrentIndex(targetIndex);
+  //         flatListRef.current?.scrollToIndex({
+  //           index: targetIndex,
+  //           animated: false,
+  //         });
+
+  //         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
+
+  //         // Re-enable auto-scroll after a delay
+  //         setTimeout(() => {
+  //           setIsManualNavigation(false);
+  //         }, 500);
+  //       }, 100);
+  //     } else {
+  //       console.log('⚠️ Video not found in current feed');
+  //     }
+  //   }
+  // }, [videoId, reels.length]);
 
   const handleScroll = (event: any) => {
     const index = Math.round(event.nativeEvent.contentOffset.y / SCREEN_HEIGHT);

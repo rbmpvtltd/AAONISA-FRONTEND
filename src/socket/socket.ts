@@ -196,7 +196,7 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
 
     // ✅ Create global socket once
     if (!globalSocket) {
-      globalSocket = io("http://192.168.1.64:3000/socket.io", {
+      globalSocket = io("https://hithoy-backend.justsearch.net.in/socket.io", {
         transports: ["websocket"],
         autoConnect: false,
       });

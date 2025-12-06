@@ -174,7 +174,8 @@ import { getUserSessionsWithLatestMessage } from "@/src/api/chat-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
 import { useQuery } from "@tanstack/react-query";
-import { router } from "expo-router";
+import { router, useLocalSearchParams } from "expo-router";
+
 import {
   FlatList,
   Image,
@@ -248,6 +249,12 @@ function ChatRow({
 export default function ChatListScreen() {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
+  // const { reelId } = useLocalSearchParams();
+  const params = useLocalSearchParams();
+const shareMode = params.shareMode === "true";
+const reelId = params.reelId;
+
+
 
   // Backend already filters by logged-in user and returns "otherUser"
   const { data: sessions, isLoading, isError } = useQuery({
@@ -306,6 +313,7 @@ export default function ChatListScreen() {
                 params: {
                   id: item.id,
                   sessionId: item.sessionId,
+                    reelId: reelId, 
                 },
               })
             }

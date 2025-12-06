@@ -9,6 +9,8 @@ export const useDeleteVideo = () => {
 
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["stories"] });
+      queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       console.log("Video deleted successfully!");
     },
 
