@@ -19,7 +19,19 @@ import Ionicons from "react-native-vector-icons/Ionicons";
 
 const SCREEN_HEIGHT = Dimensions.get("window").height;
 
-const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl, reelId }: any) => {
+interface BottomDrawerProps {
+  visible: boolean;
+  onClose: () => void;
+  onSave: () => void;
+  onReport: () => void;
+  onDelete?: () => void; // NEW: Optional delete callback
+  reelUrl: string;
+  reelId: string;
+  isOwner?: boolean; // NEW: Flag to check if current user is owner
+}
+
+
+const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, reelId, isOwner = false }: any) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const theme = useAppTheme();
   const [showSharePanel, setShowSharePanel] = useState(false);
@@ -66,8 +78,7 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl, reelId }: a
 
   if (!visible) return null;
 
-// const shareUrl = `https://com.anonymous.AaoNiSa/(drawer)/(tabs)/reels/${reelId}`;
-
+  // const shareUrl = `https://justsearchapp/(drawer)/(tabs)/reels/${reelId}`;
 
   const handleCopyLink = async () => {
     await Clipboard.setStringAsync(reelUrl);
@@ -182,6 +193,11 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl, reelId }: a
   };
 
 
+  const handleDelete = () => {
+            onDelete?.();
+            onClose();
+  };
+
   return (
     <View style={[styles.overlay, { backgroundColor: theme.overlay }]}>
       <TouchableOpacity style={styles.overlayBackground} onPress={onClose} />
@@ -204,6 +220,16 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, reelUrl, reelId }: a
                 Save
               </Text>
             </TouchableOpacity>
+
+            {/* NEW: Show Delete button only for owner */}
+            {isOwner && onDelete && (
+              <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
+                <Ionicons name="trash-outline" size={22} color="#FF3B30" />
+                <Text style={[styles.optionText, { color: "#FF3B30" }]}>
+                  Delete
+                </Text>
+              </TouchableOpacity>
+            )}
 
             <TouchableOpacity style={styles.optionButton} onPress={onReport}>
               <Ionicons

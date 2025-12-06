@@ -1,10 +1,11 @@
-import { GetProfileUsername } from '@/src/api/profile-api';
+import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
+import { useDeleteVideo } from '@/src/hooks/videosMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
@@ -14,6 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  Alert,
   Animated,
   FlatList,
   Image,
@@ -44,7 +46,8 @@ const UserReelItem = ({
   currentUserId,
   addShare,
   reelUsername,
-  profilePicture
+  profilePicture,
+  owner,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
   const {
@@ -62,7 +65,7 @@ const UserReelItem = ({
   const markViewedMutation = useMarkViewedMutation();
   const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
-const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -113,7 +116,7 @@ const [showBottomDrawer, setShowBottomDrawer] = useState(false);
           if (!viewed && time >= 10) {
             setViewed(true);
             markViewedMutation.mutate(item.uuid);
-            console.log(`👀 User viewed reel: ${item.uuid} | Time watched: ${time}s`);
+            console.log(` User viewed reel: ${item.uuid} | Time watched: ${time}s`);
           }
         }
       } catch (e) {
@@ -136,6 +139,29 @@ const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   console.log("item :", item)
   console.log("=============================");
 
+
+  const deleteVideo = useDeleteVideo();
+  const handleDeleteReel = () => {
+    Alert.alert(
+      "Delete Reel",
+      "Are you sure you want to delete this reel?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Delete",
+          style: "destructive",
+          onPress: () => {
+            deleteVideo.mutate(item.uuid, {
+              onSuccess: () => {
+                router.replace("/(drawer)/(tabs)/profile");
+                Alert.alert("Success", "Reel deleted successfully!");
+              },
+            });
+          },
+        },
+      ]
+    );
+  };
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -262,7 +288,16 @@ const [showBottomDrawer, setShowBottomDrawer] = useState(false);
           <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => addShare(item.id)}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {
+          addShare(item.id);
+          router.push({
+            pathname: `/chat`,
+            params: {
+              shareMode: "true",
+              reelId: item.id
+            }
+          });
+        }}>
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{item.shares?.length || 0}</Text>
         </TouchableOpacity>
@@ -281,15 +316,15 @@ const [showBottomDrawer, setShowBottomDrawer] = useState(false);
         visible={showOptions}
         onClose={() => setShowOptions(false)}
         onSave={() => { openBookmarkPanel(item.uuid || item.id); setShowOptions(false); }}
-        // onReport={() => console.log("Reported")}
+        onDelete={owner ? handleDeleteReel : undefined}
         onReport={() => setShowReportDrawer(true)}
         onShare={() => console.log("Shared")}
-
         reelId={item.id}
-        reelUrl={item.videoUrl} 
+        reelUrl={item.videoUrl}
+        isOwner={owner}
       />
 
-       <ReportDrawer
+      <ReportDrawer
         visible={showReportDrawer}
         onClose={() => setShowReportDrawer(false)}
         onSelect={(reason: string) => {
@@ -324,6 +359,16 @@ const UserReelsFeed = () => {
   });
 
 
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+
+  const owner = profile?.userProfile.username === currentUser?.userProfile.username;
+  console.log('====================================');
+  console.log("owner", owner)
+  console.log('====================================');
   console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
@@ -341,7 +386,7 @@ const UserReelsFeed = () => {
   } = useReelsStore();
 
 
- // NEW: Callback to receive duration from child
+  // NEW: Callback to receive duration from child
   // const handleDurationReady = (videoId: string, duration: number) => {
   //   setVideoDurations(prev => ({
   //     ...prev,
@@ -380,37 +425,37 @@ const UserReelsFeed = () => {
   };
 
 
-// // FIXED: Auto scroll logic with proper variable names
-//   useEffect(() => {
-//     if (!autoScroll || videos.length === 0) return;
+  // // FIXED: Auto scroll logic with proper variable names
+  //   useEffect(() => {
+  //     if (!autoScroll || videos.length === 0) return;
 
-//     const currentVideo = videos[currentIndex];
-//     if (!currentVideo) return;
+  //     const currentVideo = videos[currentIndex];
+  //     if (!currentVideo) return;
 
-//     const currentVideoDuration = videoDurations[currentVideo.uuid];
+  //     const currentVideoDuration = videoDurations[currentVideo.uuid];
 
-//     if (!currentVideoDuration) {
-//       console.log('⏳ Waiting for video duration...');
-//       return;
-//     }
+  //     if (!currentVideoDuration) {
+  //       console.log('⏳ Waiting for video duration...');
+  //       return;
+  //     }
 
-//     console.log(` Auto-scroll in ${currentVideoDuration}s for video ${currentVideo.uuid}`);
+  //     console.log(` Auto-scroll in ${currentVideoDuration}s for video ${currentVideo.uuid}`);
 
-//     const timer = setTimeout(() => {
-//       const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
+  //     const timer = setTimeout(() => {
+  //       const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
 
-//       setCurrentIndex(nextIndex);
+  //       setCurrentIndex(nextIndex);
 
-//       flatListRef.current?.scrollToIndex({
-//         index: nextIndex,
-//         animated: true,
-//       });
+  //       flatListRef.current?.scrollToIndex({
+  //         index: nextIndex,
+  //         animated: true,
+  //       });
 
-//       updateURL(nextIndex);
-//     }, currentVideoDuration * 1000);
+  //       updateURL(nextIndex);
+  //     }, currentVideoDuration * 1000);
 
-//     return () => clearTimeout(timer);
-//   }, [autoScroll, videos.length, currentIndex, videoDurations]);
+  //     return () => clearTimeout(timer);
+  //   }, [autoScroll, videos.length, currentIndex, videoDurations]);
 
   // Scroll handling
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -474,7 +519,8 @@ const UserReelsFeed = () => {
             likeMutation={likeMutation}
             reelUsername={profile?.username}
             profilePicture={profile?.userProfile?.ProfilePicture}
-              // onDurationReady={handleDurationReady}
+            owner={owner}
+            currentUserId={currentUser?.userProfile?.id}
           />
         )}
         keyExtractor={(item) => item.uuid}
