@@ -4,6 +4,7 @@ import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
 import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
+import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
@@ -17,7 +18,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { getUserInfoAndFollowState, getUserNotifications, loginUser } from "../../src/api/auth-api";
+import { expoTokenAssign, getUserInfoAndFollowState, getUserNotifications, loginUser } from "../../src/api/auth-api";
 
 const loginSchema = z.object({
   emailOrPhone: z
@@ -71,6 +72,9 @@ const Login = () => {
         if (data.accessToken) {
           await saveToken(data.accessToken);
         }
+        const pushToken = AsyncStorage.getItem('pushToken');
+        console.log("Push token:", pushToken);
+        await expoTokenAssign(pushToken);
         Alert.alert("Success", "Logged in successfully!");
         await resetAuth();
         router.replace("/(drawer)/(tabs)");
