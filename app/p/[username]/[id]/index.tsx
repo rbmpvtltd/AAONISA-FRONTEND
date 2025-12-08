@@ -15,6 +15,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
 import React, { useEffect, useRef, useState } from 'react';
 import {
+  ActivityIndicator,
   Alert,
   Animated,
   FlatList,
@@ -67,6 +68,8 @@ const UserReelItem = ({
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
+  const [isLoading, setIsLoading] = useState(true);
+
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
       ? item.likes.some((like: any) => like.user_id === currentUserId)
@@ -76,6 +79,18 @@ const UserReelItem = ({
   const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
     instance.loop = true;
     instance.volume = isMuted ? 0 : 1;
+
+    // VIDEO LOADED EVENT
+    instance.addListener("statusChange", (event) => {
+      if (event.status === "loading") {
+        setIsLoading(true);
+      }
+
+      if (event.status === "readyToPlay") {
+        setIsLoading(false); // video is fully ready
+      }
+    });
+
   });
 
   // Handle play/pause based on scroll safely
@@ -130,14 +145,14 @@ const UserReelItem = ({
     return () => cancelAnimationFrame(frameId);
   }, [player, currentIndex, index, viewed]);
 
-  console.log("username in profile", reelUsername);
-  console.log("user item.ProfilePicture ", profilePicture);
-  console.log("user comment resived", item.comments);
-  console.log("user audio", item.audio);
+  // console.log("username in profile", reelUsername);
+  // console.log("user item.ProfilePicture ", profilePicture);
+  // console.log("user comment resived", item.comments);
+  // console.log("user audio", item.audio);
 
-  console.log("=============================");
-  console.log("item :", item)
-  console.log("=============================");
+  // console.log("=============================");
+  // console.log("item :", item)
+  // console.log("=============================");
 
 
   const deleteVideo = useDeleteVideo();
@@ -170,6 +185,18 @@ const UserReelItem = ({
         style={{ flex: 1 }}
         onPress={handleToggleMute}
       >
+        {/* <View style={{ flex: 1 }}> */}
+        {isLoading && (
+          <View style={{
+            position: "absolute",
+            top: "45%",
+            left: "45%",
+            zIndex: 9999
+          }}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
+
         <VideoView
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
           key={`video-${item.id}-${index}`}
@@ -366,9 +393,9 @@ const UserReelsFeed = () => {
 
 
   const owner = profile?.userProfile.username === currentUser?.userProfile.username;
-  console.log('====================================');
-  console.log("owner", owner)
-  console.log('====================================');
+  // console.log('====================================');
+  // console.log("owner", owner)
+  // console.log('====================================');
   console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
@@ -418,44 +445,39 @@ const UserReelsFeed = () => {
   const updateURL = (idx: number) => {
     const reel = videos[idx];
     if (!reel) return;
-    // router.replace(`/p/${username}/${reel.uuid}`);
+    router.replace(`/p/${username}/${reel.uuid}`);
 
     router.setParams({ id: reel.id, username: username });
     updateReelURL(reel.id);
   };
 
+  console.log("durection resived", videos[currentIndex]?.duration);
 
-  // // FIXED: Auto scroll logic with proper variable names
-  //   useEffect(() => {
-  //     if (!autoScroll || videos.length === 0) return;
+  useEffect(() => {
+    if (!autoScroll || videos.length === 0) return;
 
-  //     const currentVideo = videos[currentIndex];
-  //     if (!currentVideo) return;
+    // current video ki duration lo
+    const currentVideoDuration = videos[currentIndex]?.duration;
 
-  //     const currentVideoDuration = videoDurations[currentVideo.uuid];
+    if (!currentVideoDuration) return;
 
-  //     if (!currentVideoDuration) {
-  //       console.log('⏳ Waiting for video duration...');
-  //       return;
-  //     }
+    const timer = setTimeout(() => {
+      const nextIndex =
+        currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
 
-  //     console.log(` Auto-scroll in ${currentVideoDuration}s for video ${currentVideo.uuid}`);
+      setCurrentIndex(nextIndex);
 
-  //     const timer = setTimeout(() => {
-  //       const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
+      flatListRef.current?.scrollToIndex({
+        index: nextIndex,
+        animated: true,
+      });
 
-  //       setCurrentIndex(nextIndex);
+      updateURL(nextIndex);
+    }, currentVideoDuration * 1000);
 
-  //       flatListRef.current?.scrollToIndex({
-  //         index: nextIndex,
-  //         animated: true,
-  //       });
+    return () => clearTimeout(timer);
+  }, [autoScroll, videos.length, currentIndex]);
 
-  //       updateURL(nextIndex);
-  //     }, currentVideoDuration * 1000);
-
-  //     return () => clearTimeout(timer);
-  //   }, [autoScroll, videos.length, currentIndex, videoDurations]);
 
   // Scroll handling
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
