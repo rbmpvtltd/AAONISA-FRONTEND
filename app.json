@@ -16,7 +16,7 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.AaoNiSa"
+      "bundleIdentifier": "com.rbm.HitHoy"
     },
     "android": {
       "useNextNotificationsApi": true,
@@ -32,7 +32,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.AaoNiSa",
+      "package": "com.rbm.HitHoy",
       "usesCleartextTraffic": true
     },
     "web": {
