@@ -81,6 +81,8 @@ export default function MyProfileScreen() {
     queryFn: GetCurrentUser,
   });
 
+
+  
   // Step 2: Get full profile using username from currentUser
   const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["userProfile", currentUser?.username],

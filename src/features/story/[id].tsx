@@ -643,10 +643,14 @@
 //   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
 // });
 
+import { GetCurrentUser } from "@/src/api/profile-api";
+import { markViewed } from "@/src/api/story-api";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
+import { useSocketManager } from "@/src/socket/socket";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { timeAgo } from "@/src/utils/timeAgo";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useRef, useState } from "react";
@@ -662,17 +666,16 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const { width, height } = Dimensions.get("window");
 
 export default function StoryViewPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { userStories, markStoryViewed } = useStoryStore();
-
   const userStory = userStories.find((u) =>
     u.stories.some((s) => s.id === id)
-  );
+);
+
 
   const storyList = userStory?.stories || [];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -682,10 +685,16 @@ export default function StoryViewPage() {
   const [showViewers, setShowViewers] = useState(false);
 
   const player = useVideoPlayer("");
-
+  
   const currentStory = storyList[currentIndex];
   const isOwnStory = userStory?.self === true;
 
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+  
+  const socket = useSocketManager(currentUser?.id)
   useEffect(() => {
     if (player) {
       player.volume = isMuted ? 0 : 1.0;
@@ -704,7 +713,6 @@ export default function StoryViewPage() {
 
   useEffect(() => {
     if (!currentStory?.videoUrl || !player) return;
-
     const loadVideo = async () => {
       try {
         if (player.replaceAsync) {
@@ -722,10 +730,21 @@ export default function StoryViewPage() {
     loadVideo();
   }, [currentStory?.videoUrl]);
 
+  const storyId = currentStory?.id
+  useEffect(() => {
+    if (!socket || !storyId) return;
+    
+  socket.emit("getStoryViews", { storyId });
+
+  return () => {
+    socket.emit("leaveRoom", { roomId: `story:${storyId}` });
+  };
+}, [storyId]);
+
   // Progress animation
   useEffect(() => {
     if (!currentStory) return;
-
+    markViewed(currentStory.id);
     markStoryViewed(currentStory.id);
 
     progress.stopAnimation();
