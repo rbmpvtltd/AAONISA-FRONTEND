@@ -28,7 +28,7 @@
         "WRITE_EXTERNAL_STORAGE"
       ],
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/logo-with-name.png",
+        "foregroundImage": "./assets/images/icon-hithoye.png",
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
