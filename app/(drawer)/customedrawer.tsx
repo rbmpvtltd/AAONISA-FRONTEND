@@ -96,7 +96,7 @@ const theme = useAppTheme();
               <Ionicons name="star-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => props.navigation.navigate("(tabs)/profile")}
+            onPress={() => {router.push("/(drawer)/comming-soon")}}
           />
 
           <DrawerItem
@@ -105,7 +105,7 @@ const theme = useAppTheme();
               <MaterialIcons name="workspace-premium" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => props.navigation.navigate("(tabs)/profile")}
+            onPress={() => {router.push("/(drawer)/comming-soon")}}
           />
 
           <DrawerItem
@@ -123,7 +123,7 @@ const theme = useAppTheme();
               <Ionicons name="help-circle-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => props.navigation.navigate("(tabs)/profile")}
+            onPress={() => {router.push("/(drawer)/comming-soon")}}
           />
 
           {/*Dark Mode */}
