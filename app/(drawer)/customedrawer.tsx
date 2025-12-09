@@ -118,12 +118,21 @@ const theme = useAppTheme();
           />
 
           <DrawerItem
-            label="Help And Support"
+            label="Help & Support"
             icon={({ color, size }) => (
               <Ionicons name="help-circle-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/comming-soon")}}
+            onPress={() => {router.push("/help-&-support")}}
+          />
+
+<DrawerItem
+            label="Privecy Policy"
+            icon={({ color, size }) => (
+              <Ionicons name="help-circle-outline" color={theme.text} size={size} />
+            )}
+            labelStyle={{ color: theme.text }}
+            onPress={() => {router.push("/privecy-policy")}}
           />
 
           {/*Dark Mode */}
