@@ -1,0 +1,29 @@
+{
+  "project_info": {
+    "project_number": "971951177490",
+    "project_id": "hithoy-e69b9",
+    "storage_bucket": "hithoy-e69b9.firebasestorage.app"
+  },
+  "client": [
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:971951177490:android:40e65d576f77a11eb9fdcb",
+        "android_client_info": {
+          "package_name": "com.rbm.HitHoy"
+        }
+      },
+      "oauth_client": [],
+      "api_key": [
+        {
+          "current_key": "AIzaSyBkMEkVgIKWgxyPVkUa28gxODC1V4mDUys"
+        }
+      ],
+      "services": {
+        "appinvite_service": {
+          "other_platform_oauth_client": []
+        }
+      }
+    }
+  ],
+  "configuration_version": "1"
+}

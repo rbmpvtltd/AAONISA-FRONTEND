@@ -17,7 +17,7 @@
            "EXPO_PUBLIC_LOCAL_API_URL":"https://hithoy-backend.justsearch.net.in/api"
         },
       "android": {
-        "buildType": "app-bundle"
+        "buildType": "apk"
       }
     }
   }
