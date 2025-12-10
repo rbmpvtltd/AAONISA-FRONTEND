@@ -1,7 +1,7 @@
 // src/hooks/useLikeMutation.ts
 import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { likeDislike } from "../api/profile-api";
-    
+
 export const useLikeMutation = () => {
   const queryClient = useQueryClient();
 
@@ -17,7 +17,7 @@ export const useLikeMutation = () => {
           ...previousData,
           videos: previousData.videos.map((v: any) =>
             v.uuid === storyId
-              ? { ...v, isLiked: !v.isLiked } 
+              ? { ...v, isLiked: !v.isLiked }
               : v
           ),
         };

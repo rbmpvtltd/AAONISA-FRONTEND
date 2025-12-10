@@ -7,7 +7,11 @@ import { useBookmarkStore } from '../../../../src/store/useBookmarkStore';
 
 const SavedScreen = () => {
   const { categories, setCategories } = useBookmarkStore();
-  const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  // const [selectedCategory, setSelectedCategory] = useState<any>(null);
+  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+
+const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+
   const handleDelete = (id: string) => {
     removeBookmark({ id });
     setCategories(prev => prev.filter(c => c.id !== id));
@@ -24,29 +28,30 @@ const SavedScreen = () => {
   
   return (
     <View style={{ flex: 1 }}>
-      {selectedCategory ? (
-        <>
-          <View style={styles.header}>
-            <TouchableOpacity onPress={() => setSelectedCategory(null)}>
-              <Text style={styles.back}>⬅ Back</Text>
-            </TouchableOpacity>
-            <Text style={styles.title}>{selectedCategory.name}</Text>
-          </View>
+      {selectedCategoryId ? (
+  <>
+    <View style={styles.header}>
+      <TouchableOpacity onPress={() => setSelectedCategoryId(null)}>
+        <Text style={styles.back}>⬅ Back</Text>
+      </TouchableOpacity>
 
-          {/* ✅ Category Reel Grid Here */}
-          <CategoryReelGrid
-            reels={selectedCategory.reels}
-            onSelectReel={(id) => console.log("Open Reel:", id)}
-          />
-        </>
-      ) : (
-        <SavedCategories
-          categories={categories}
-          onSelect={(cat) => setSelectedCategory(cat)}
-          onDelete={handleDelete}
-          onRename={handleRename}
-        />
-      )}
+      <Text style={styles.title}>{selectedCategory?.name}</Text>
+    </View>
+
+    <CategoryReelGrid
+      reels={selectedCategory?.reels ?? []}
+      onSelectReel={(id) => console.log("Open Reel:", id)}
+    />
+  </>
+) : (
+  <SavedCategories
+    categories={categories}
+    onSelect={(cat) => setSelectedCategoryId(cat.id)}   // 🔥 FIX
+    onDelete={handleDelete}
+    onRename={handleRename}
+  />
+)}
+
     </View>
   );
 };

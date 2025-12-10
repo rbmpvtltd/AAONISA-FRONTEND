@@ -28,7 +28,7 @@
 //   const handleAddCategory = async () => {
 //     const name = newCategory.trim();
 //     if (!name) return Alert.alert("Error", "Category name can't be empty");
-    
+
 //     try {
 //       setLoading(true);
 //       const res = await addBookmark({ name });
@@ -211,7 +211,10 @@ const BookmarkPanel = () => {
     try {
       setLoading(true);
       const res = await addBookmark({ name });
+      console.log("iiiiiiiiiiiiiiidddddddddddddddddddd", res);
+
       addCategory(name);
+      // addCategory({ id: res.id, name: res.name });
       setNewCategory('');
     } catch (e) {
       Alert.alert('Error', 'Failed to create category');
@@ -220,22 +223,57 @@ const BookmarkPanel = () => {
     }
   };
 
-  const handleSelectCategory = async (categoryId : any) => {
-    if (!selectedReel) return;
+  // const handleSelectCategory = async (categoryId: any) => {
+  //   if (!selectedReel) return;
 
-    saveToCategory(categoryId);
+  //   saveToCategory(categoryId);
+
+  //   try {
+  //     await addReelToBookmark({
+  //       reelId: selectedReel.uuid,
+  //       categoryId,
+  //     });
+  //   } catch (e) {
+  //     Alert.alert('Error', 'Failed to save reel');
+  //   }
+
+  //   closePanel();
+  // };
+  // const handleSelectCategory = async (categoryId: any) => {
+  //   const selectedCategory = categories.find(c => c.id === categoryId);
+  //   if (!selectedCategory) return;
+  //   try {
+  //     await addReelToBookmark({
+  //       reelId: selectedReel?.uuid,
+  //       name: selectedCategory.name,  
+  //     });
+
+  //     saveToCategory(categoryId);
+  //   } catch (e) {
+  //     Alert.alert('Error', 'Failed to save reel');
+  //   }
+
+  //   closePanel();
+  // };
+  const handleSelectCategory = async (categoryId: string) => {
+    const selectedCategory = categories.find(c => c.id === categoryId);
+    if (!selectedCategory || !selectedReel) return;
 
     try {
       await addReelToBookmark({
         reelId: selectedReel.uuid,
-        categoryId,
+        name: selectedCategory.name,
       });
-    } catch (e) {
-      Alert.alert('Error', 'Failed to save reel');
+
+      saveToCategory(categoryId);
+
+    } catch {
+      Alert.alert("Error", "Failed to save reel");
     }
 
     closePanel();
   };
+
 
   return (
     <Modal
