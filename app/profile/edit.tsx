@@ -892,7 +892,7 @@ onSuccess: (data: any) => {
               placeholder="Enter username"
               placeholderTextColor={theme.placeholder}
               value={profileData.username}
-              onChangeText={(text) => setProfileData((prev) => ({ ...prev, username: text.toLocaleLowerCase() }))}
+              onChangeText={(text) => setProfileData((prev) => ({ ...prev, username: text.toLocaleLowerCase().trim() }))}
             />
           </View>
 

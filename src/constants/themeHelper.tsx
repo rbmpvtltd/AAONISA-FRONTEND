@@ -65,6 +65,7 @@ const darkTheme = {
   inputBg: "#1a1a1a",
   inputBorder: "#00CFFF",
   forgot: "#66aaff",
+  // buttonBg: "#00d0ff53",
   buttonBg: "#00CFFF",
   buttonText: "#fff",
   googleBg: "#DB4437",
