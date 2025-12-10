@@ -15,7 +15,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 
-import { SearchUserProfiel } from "@/src/api/profile-api";
+import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
 import { getCategoryReel } from "@/src/api/reels-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 
@@ -39,6 +39,12 @@ export default function ExploreScreen() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
+
+    const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+ 
   // Search users API
   const {
     data: searchResults = [],
@@ -48,7 +54,16 @@ export default function ExploreScreen() {
     queryFn: () => (debouncedQuery ? SearchUserProfiel(debouncedQuery) : []),
     enabled: !!debouncedQuery,
   });
-
+  
+  // Filter out current user from search results
+const filteredSearchResults = useMemo(() => {
+  if (!currentUser || !searchResults) return [];
+  
+  return searchResults.filter((user: any) => 
+    user.username !== currentUser.username
+  );
+}, [searchResults, currentUser]);
+  
   // Infinite explore feed API
   const {
     data,
@@ -145,6 +160,7 @@ export default function ExploreScreen() {
               <Ionicons name="close-circle" size={20} color={theme.text} />
             </TouchableOpacity>
           ) : null}
+          
           {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
         </View>
 
@@ -153,7 +169,7 @@ export default function ExploreScreen() {
           <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: 40 }}>
 
             {/*  NO RESULTS FOUND */}
-            {!searchLoading && searchResults.length === 0 ? (
+            {!searchLoading && filteredSearchResults.length === 0 ? (
               <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
                 <Ionicons name="search-outline" size={50} color={theme.subtitle} />
                 <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
@@ -163,7 +179,7 @@ export default function ExploreScreen() {
             ) : null}
 
             {/*  SEARCH RESULTS LIST */}
-            {searchResults.map((u: any) => (
+            {filteredSearchResults.map((u: any) => (
               <TouchableOpacity
                 key={u.id}
                 style={[styles.userItem, { backgroundColor: theme.buttonBg }]}
