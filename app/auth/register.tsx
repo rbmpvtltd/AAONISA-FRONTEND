@@ -138,7 +138,7 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={emailOrPhone}
-            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
+            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
           />
 
           {otpSent ? (
@@ -202,7 +202,7 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={username}
-            onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
+            onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
           />
           <View style={{ position: "relative" }}>
             <TextInput
@@ -219,7 +219,7 @@ const Register = () => {
               ]}
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
             />
 
             <TouchableOpacity
