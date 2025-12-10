@@ -14,14 +14,14 @@ import { queryClient } from "../_layout";
 
 
 export default function CustomDrawer(props: any) {
-const { theme: themeMode, toggleTheme } = useThemeStore();
-const theme = useAppTheme();
+  const { theme: themeMode, toggleTheme } = useThemeStore();
+  const theme = useAppTheme();
 
   const [onlineStatus, setOnlineStatus] = useState(true);
   const { autoScroll, setAutoScroll } = useReelsStore();
 
   const router = useRouter();
-    
+
   const handleLogout = async () => {
     try {
       const pushToken = await AsyncStorage.getItem("pushToken");
@@ -32,16 +32,16 @@ const theme = useAppTheme();
       await AsyncStorage.removeItem("accessToken");
       await AsyncStorage.removeItem("refreshToken");
 
-   useProfileStore.getState().resetProfile();
+      useProfileStore.getState().resetProfile();
 
-    queryClient.clear();
-    queryClient.invalidateQueries();
+      queryClient.clear();
+      queryClient.invalidateQueries();
 
       router.replace("/auth/login");
 
       setTimeout(() => {
-      Alert.alert("Logged out successfully!"); 
-      },1500);
+        Alert.alert("Logged out successfully!");
+      }, 1500);
 
     } catch (error) {
       console.error("Logout Error:", error);
@@ -50,22 +50,22 @@ const theme = useAppTheme();
   };
 
   const confirmLogout = () => {
-  Alert.alert(
-    "Log out",
-    "Are you sure you want to log out?",
-    [
-      {
-        text: "Cancel",
-        style: "cancel",
-      },
-      {
-        text: "OK",
-        onPress: handleLogout,
-      },
-    ],
-    { cancelable: true }
-  );
-};
+    Alert.alert(
+      "Log out",
+      "Are you sure you want to log out?",
+      [
+        {
+          text: "Cancel",
+          style: "cancel",
+        },
+        {
+          text: "OK",
+          onPress: handleLogout,
+        },
+      ],
+      { cancelable: true }
+    );
+  };
 
 
   return (
@@ -96,7 +96,7 @@ const theme = useAppTheme();
               <Ionicons name="star-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/comming-soon")}}
+            onPress={() => { router.push("/(drawer)/comming-soon") }}
           />
 
           <DrawerItem
@@ -105,7 +105,7 @@ const theme = useAppTheme();
               <MaterialIcons name="workspace-premium" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/comming-soon")}}
+            onPress={() => { router.push("/(drawer)/comming-soon") }}
           />
 
           <DrawerItem
@@ -114,7 +114,7 @@ const theme = useAppTheme();
               <Ionicons name="bookmark-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/(drawer)/(tabs)/profile/savedScreen")}}
+            onPress={() => { router.push("/(drawer)/(tabs)/profile/savedScreen") }}
           />
 
           <DrawerItem
@@ -123,16 +123,25 @@ const theme = useAppTheme();
               <Ionicons name="help-circle-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/help-&-support")}}
+            onPress={() => { router.push("/help-&-support") }}
           />
 
-<DrawerItem
-            label="Privecy Policy"
+          <DrawerItem
+            label="Privacy Policy"
             icon={({ color, size }) => (
-              <Ionicons name="help-circle-outline" color={theme.text} size={size} />
+              <Ionicons name="lock-closed-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => {router.push("/privecy-policy")}}
+            onPress={() => { router.push("/privecy-policy") }}
+          />
+
+          <DrawerItem
+            label="Terms & Conditions"
+            icon={({ color, size }) => (
+              <Ionicons name="document-text-outline" color={theme.text} size={size} />
+            )}
+            labelStyle={{ color: theme.text }}
+            onPress={() => { router.push("/terms-&-conditions") }}
           />
 
           {/*Dark Mode */}
