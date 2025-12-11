@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
+
 import {
   Alert,
   KeyboardAvoidingView,
@@ -35,6 +36,7 @@ const Register = () => {
   const router = useRouter();
   const theme = useAppTheme();
   const [showPassword, setShowPassword] = React.useState(false);
+  const [usernameAvailable, setUsernameAvailable] = React.useState(null);
 
   const {
     emailOrPhone,
@@ -69,6 +71,23 @@ const Register = () => {
       resetAuth();
     };
   }, []);
+
+
+  // const handleUsernameChange = async (text: string) => {
+  //   const value = text.trim().toLowerCase();
+  //   setUsername(value); // <-- Ye store me username set karega
+
+  //   if (!value || value.length < 3) {
+  //     setUsernameAvailable(null);
+  //     return;
+  //   }
+
+  //   const res = await checkUsername(value);
+  //   console.log('====================================');
+  //   console.log('res', res);
+  //   console.log('====================================');// <-- API call
+  //   setUsernameAvailable(res.available);
+  // };
 
   const handleSendOtp = async () => {
     try {
@@ -126,7 +145,7 @@ const Register = () => {
         <View style={[styles.container, { backgroundColor: theme.background }]}>
           <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
           <Text style={[styles.subtitle, { color: theme.subtitle }]}>
-          Express without limits
+            Express without limits
           </Text>
 
           <TextInput
@@ -202,6 +221,8 @@ const Register = () => {
             ]}
             value={username}
             onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
+          // onChangeText={handleUsernameChange}
+
           />
           <View style={{ position: "relative" }}>
             <TextInput
