@@ -155,7 +155,7 @@ const PrivacyPolicyScreen: React.FC = () => {
             </Text>
           </TouchableOpacity>
 
-          <TouchableOpacity
+          {/* <TouchableOpacity
             onPress={() =>
               Linking.openURL(
                 `mailto:support@yourapp.com?subject=Privacy Policy Acknowledgement`
@@ -177,7 +177,7 @@ const PrivacyPolicyScreen: React.FC = () => {
             >
               Acknowledge
             </Text>
-          </TouchableOpacity>
+          </TouchableOpacity> */}
         </View>
       </ScrollView>
     </SafeAreaView>
