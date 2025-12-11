@@ -1,6 +1,6 @@
 import { create } from 'zustand';
 
-const useViewStore = create((set, get) => ({
+export const useViewStore = create((set, get) => ({
   story_id: null,
   views: [],
 
@@ -11,11 +11,17 @@ const useViewStore = create((set, get) => ({
     });
   },
 
+  /** backend se pure views replace karne ke liye */
+  setViews: (viewsList:any) => {
+    set({ views: viewsList });
+  },
+
+  /** Real-time single view push */
   addSingleView: (viewer:any) => {
     const { views } = get() as any;
 
-    const alreadyViewed = views.find((v:any) => v.userId === viewer.userId);
-    if (alreadyViewed) return;
+    const exists = views.find((v:any) => v.view_id === viewer.view_id);
+    if (exists) return;
 
     set({
       views: [
@@ -29,6 +35,7 @@ const useViewStore = create((set, get) => ({
   },
 
   resetViews: () => set({ views: [] }),
+  
 }));
 
-export default useViewStore;
+// export default useViewStore;

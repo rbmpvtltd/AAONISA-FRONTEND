@@ -177,44 +177,44 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
   const { addMessage, setSessionId, clearCurrentChat } = useChatStore();
   const setCurrentChat = useChatStore((state) => state.setCurrentChat);
 
-  const userIdRef = useRef<string | undefined>(userId);
-  const otherUserRef = useRef<string | undefined>(otherUserId);
-  const currentRoomRef = useRef<string | null>(null);
-  const roomIdRef = useRef<string | null>(null);
+  const userIdRef = useRef(userId);
+  const otherUserIdRef = useRef(otherUserId);
 
-  // ✅ Always keep refs in sync
   useEffect(() => {
     userIdRef.current = userId;
-  }, [userId]);
+    otherUserIdRef.current = otherUserId;
+  }, [userId, otherUserId]);
 
   useEffect(() => {
-    otherUserRef.current = otherUserId;
-  }, [otherUserId]);
+    if (!userId) return;
 
-  useEffect(() => {
-    if (!userId || !otherUserId) return;
-
-    // ✅ Create global socket once
+    // 🟢 Create Global Socket Once
     if (!globalSocket) {
       globalSocket = io("http://192.168.1.64:3000/socket.io", {
         transports: ["websocket"],
         autoConnect: false,
       });
-      console.log("🔌 Socket created");
+      console.log("🔌 SOCKET CREATED");
     }
 
-    // ✅ Update query before connect
     globalSocket.io.opts.query = { userId };
 
     if (!globalSocket.connected) {
       globalSocket.connect();
-      console.log("🟢 Connecting socket...");
+      console.log("🟢 SOCKET CONNECTING...");
     }
 
-    // ✅ Create & set room BEFORE joining
+    // ⚠️ STORY MODE → NO CHAT LOGIC
+    if (!otherUserId) {
+      console.log("📘 STORY MODE ACTIVE");
+      return; // Socket connected, nothing else
+    }
+
+    // 🟣 CHAT MODE BELOW
+    console.log("💬 CHAT MODE ACTIVE");
+
     const roomId = [userId, otherUserId].sort().join("-");
-    currentRoomRef.current = roomId;
-    roomIdRef.current = roomId;
+    setCurrentChat(roomId);
 
     const joinRoom = () => {
       globalSocket?.emit("joinRoom", { roomId });
@@ -222,71 +222,43 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
         user1Id: userId,
         user2Id: otherUserId,
       });
-
-      setCurrentChat(roomId);
-      console.log("🟢 Joined Room:", roomId);
     };
 
-    if (globalSocket.connected) {
-      joinRoom();
-    } else {
-      globalSocket.once("connect", joinRoom);
-    }
+    if (globalSocket.connected) joinRoom();
+    else globalSocket.once("connect", joinRoom);
 
-    // ✅ REMOVE OLD LISTENERS (VERY IMPORTANT)
+    // CHAT listeners
     globalSocket.off("Message");
     globalSocket.off("previousMessages");
 
-    // ✅ LIVE MESSAGE LISTENER (ALWAYS FRESH)
-    globalSocket.on("Message", (msg: any) => {
-      const incomingRoom = [msg.senderId, msg.receiverId].sort().join("-");
-      const activeRoom = currentRoomRef.current;
-
-      console.log("✅ Active Room:", activeRoom);
-      console.log("📩 Incoming Room:", incomingRoom);
-
-      if (!activeRoom || incomingRoom !== activeRoom) {
-        console.log("❌ Message ignored for room:", incomingRoom);
-        return;
-      }
-
-      const myId = userIdRef.current;
+    globalSocket.on("Message", (msg) => {
+      const activeRoom = [msg.senderId, msg.receiverId].sort().join("-");
+      if (activeRoom !== roomId) return;
 
       addMessage({
         id: String(msg.chat_id ?? msg.message_id),
         text: msg.text ?? msg.message_text,
-        fromMe: msg.senderId === myId,
+        fromMe: msg.senderId === userIdRef.current,
         createdAt: msg.createdAt ?? Date.now(),
       });
     });
 
-    // ✅ PREVIOUS MESSAGES LISTENER
     globalSocket.on("previousMessages", (payload) => {
-      const myId = userIdRef.current;
-
       setSessionId(payload.sessionId);
 
-      payload.messages?.forEach((raw: any) => {
+      payload.messages?.forEach((raw: any) =>
         addMessage({
-          id: String(raw.chat_id ?? raw.messageId ?? raw.createdAt),
+          id: String(raw.chat_id ?? raw.messageId),
           text: raw.message_text,
-          fromMe: raw.sender.id === myId,
+          fromMe: raw.sender.id === userIdRef.current,
           createdAt: raw.created_at,
-        });
-      });
+        })
+      );
     });
 
-    // ✅ CLEANUP ON ROOM SWITCH (STRICT MODE SAFE)
     return () => {
-      console.log("🚪 Leaving room:", roomIdRef.current);
-
-      if (roomIdRef.current) {
-        globalSocket?.emit("leaveRoom", { roomId: roomIdRef.current });
-      }
-
-      currentRoomRef.current = null;
-      roomIdRef.current = null;
-
+      console.log("🚪 LEAVING CHAT ROOM:", roomId);
+      globalSocket?.emit("leaveRoom", { roomId });
       setSessionId(null);
       clearCurrentChat();
     };
@@ -295,12 +267,9 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
   return globalSocket;
 }
 
+// Disconnect socket manually (e.g., on logout)
 export const disconnectSocket = () => {
-  if (globalSocket) {
-    globalSocket.removeAllListeners();
-    globalSocket.disconnect();
-  }
-
+  if (globalSocket?.connected) globalSocket.disconnect();
   globalSocket = null;
-  console.log("🔴 Socket fully disconnected");
+  console.log("🔴 Socket disconnected");
 };

@@ -2,7 +2,6 @@ import { createApiUrl } from '@/util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
 import { Platform } from 'react-native';
-import { useStoryStore } from "../store/useStoryStore";
 
 const getToken = async () => {
   if (Platform.OS === "web") {
@@ -14,7 +13,6 @@ const getToken = async () => {
 
 const markViewed = async (storyId: string) => {
     const token = await getToken();
-
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -24,11 +22,7 @@ const markViewed = async (storyId: string) => {
   };
 
   const apiUrl = createApiUrl('/view/addview');
-  const markStoryViewed = useStoryStore.getState().markStoryViewed;
-
-  // local update fast UI
-  markStoryViewed(storyId);
-
+ 
   // backend update
   try {
     await axios.post(apiUrl, { storyId }, config);
