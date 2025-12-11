@@ -1,5 +1,5 @@
 import { useAppTheme } from '@/src/constants/themeHelper';
-import supportTopics from '@/src/dumyData/help-and-sport';
+import supportTopics from '@/src/dumyData/help-&-support-content';
 import { useState } from 'react';
 import { Alert, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
 
@@ -301,7 +301,7 @@ const HelpSupportScreen: React.FC = () => {
                   </View>
                   <Text style={styles.topicTitle}>{topic.title}</Text>
                 </View>
-                <Text style={styles.chevron}>{isExpanded ? '▼' : '▶'}</Text>
+                <Text style={styles.chevron}>{isExpanded ? '▲' : '▼'}</Text>
               </View>
 
               {isExpanded && (

@@ -134,7 +134,7 @@ const Login = () => {
             },
           ]}
           value={emailOrPhone}
-          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
+          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
         />
 
         <View style={{ position: "relative" }}>
@@ -152,7 +152,7 @@ const Login = () => {
             ]}
             secureTextEntry={!showPassword}
             value={password}
-            onChangeText={setPassword}
+            onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
           />
 
           {/* Eye Icon Button */}
