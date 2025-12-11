@@ -137,6 +137,8 @@ export const FeedList = () => {
   const [activeIndex, setActiveIndex] = useState(0);
 
   const videoAssets = [
+    "https://pub-38b6f70d9fb1487292de6386fc39e570.r2.dev/reels/1764835672939-compressed_1764835664777-502411403.mp4",
+    "https://pub-38b6f70d9fb1487292de6386fc39e570.r2.dev/reels/1765015634289-1765015603413-21959099.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
     "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
