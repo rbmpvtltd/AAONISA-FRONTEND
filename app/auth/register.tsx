@@ -36,6 +36,7 @@ const Register = () => {
   const router = useRouter();
   const theme = useAppTheme();
   const [showPassword, setShowPassword] = React.useState(false);
+  const [acceptTerms, setAcceptTerms] = React.useState(false);
   const [usernameAvailable, setUsernameAvailable] = React.useState(null);
 
   const {
