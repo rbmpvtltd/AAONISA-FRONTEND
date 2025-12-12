@@ -37,7 +37,6 @@ const getToken = async () => {
 
 const getCommentsApi = async (reelId: string) => {
   const token = await getToken();
-  console.log("bhen k lode", token)
   const config = {
     headers: {
       'Content-Type': 'application/json',
