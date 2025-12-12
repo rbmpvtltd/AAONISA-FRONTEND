@@ -1,6 +1,7 @@
 import React from "react";
 import { Linking, Text, TouchableOpacity, View } from "react-native";
 import { useAppTheme } from "../constants/themeHelper";
+import { DeleteAccountSection } from "./DeleteAccountSecttion";
 // import { useAppTheme } from "./themeHelper";
 
 export type Section = {
@@ -81,4 +82,12 @@ export const getPrivacyPolicySections = (theme: ReturnType<typeof useAppTheme>):
       </View>
     ),
   },
+  {
+    id: "Delete",
+    title: " 10. Delete Your Account",
+    body:(
+          <DeleteAccountSection theme={theme} />
+    )
+     
+  }
 ];
