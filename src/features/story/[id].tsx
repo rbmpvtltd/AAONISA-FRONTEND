@@ -643,10 +643,15 @@
 //   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
 // });
 
+import { GetCurrentUser } from "@/src/api/profile-api";
+import { markViewed } from "@/src/api/story-api";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
+import { useSocketManager } from "@/src/socket/socket";
 import { useStoryStore } from "@/src/store/useStoryStore";
+import { useViewStore } from "@/src/store/viewStore";
 import { timeAgo } from "@/src/utils/timeAgo";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useRef, useState } from "react";
@@ -662,17 +667,15 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-
 const { width, height } = Dimensions.get("window");
-
 export default function StoryViewPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { userStories, markStoryViewed } = useStoryStore();
-
   const userStory = userStories.find((u) =>
     u.stories.some((s) => s.id === id)
-  );
+);
+
 
   const storyList = userStory?.stories || [];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -682,9 +685,17 @@ export default function StoryViewPage() {
   const [showViewers, setShowViewers] = useState(false);
 
   const player = useVideoPlayer("");
-
+  
   const currentStory = storyList[currentIndex];
   const isOwnStory = userStory?.self === true;
+
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+  
+  const socket = useSocketManager(currentUser?.id)
+  
 
   useEffect(() => {
     if (player) {
@@ -704,7 +715,6 @@ export default function StoryViewPage() {
 
   useEffect(() => {
     if (!currentStory?.videoUrl || !player) return;
-
     const loadVideo = async () => {
       try {
         if (player.replaceAsync) {
@@ -722,9 +732,52 @@ export default function StoryViewPage() {
     loadVideo();
   }, [currentStory?.videoUrl]);
 
+  const storyId = currentStory?.id;
+const { setViews, resetViews, setNewStory,views,addSingleView } = useViewStore() as any;
+
+useEffect(() => {
+  if (!socket || !storyId) return;
+
+  console.log("📤 Emitting getStoryViews", storyId);
+  setNewStory(storyId);
+
+  socket.emit("getStoryViews", { storyId });
+
+  const handleStoryViews = (data: any) => {
+    console.log("📥 storyViews EVENT RECEIVED:", data);
+
+    const formatted = data.views.map((v: any) => ({
+      view_id: v.view_id,
+      username: v.username,
+      profilePic: v.profilepic,
+      viewedAt: v.createdat,
+    }));
+
+    setViews(formatted);
+  };
+
+  socket.off("storyViews");
+  socket.on("storyViews", handleStoryViews);
+  socket.on("story:newView", (viewer) => {
+    console.log("🔥 LIVE NEW VIEW RECEIVED:", viewer);
+    addSingleView(viewer);
+  });
+  return () => {
+    console.log("🚪 Cleanup: leaving room", storyId);
+
+    socket.off("storyViews", handleStoryViews);
+    socket.emit("leaveRoom", { roomId: `story:${storyId}` });
+    socket.off("story:newView");
+    resetViews();
+  };
+}, [socket, storyId]);
+
+
   // Progress animation
   useEffect(() => {
-    if (!currentStory) return;
+    if (!currentStory || !socket) return;
+    markViewed(storyId);
+    socket.emit("viewStory", { userId: currentUser?.id, storyId });
 
     markStoryViewed(currentStory.id);
 
@@ -833,7 +886,7 @@ export default function StoryViewPage() {
     }
     setShowViewers(!showViewers);
   };
-
+  
   if (!userStory || storyList.length === 0 || !currentStory) {
     return (
       <View style={styles.center}>
@@ -932,7 +985,7 @@ export default function StoryViewPage() {
           >
             <Ionicons name="eye" size={20} color="#fff" />
             <Text style={styles.viewersText}>
-              {currentStory.viewers?.length || 0}
+              {views?.length || 0}
             </Text>
           </TouchableOpacity>
 
@@ -983,25 +1036,27 @@ export default function StoryViewPage() {
           </View>
 
           <ScrollView style={styles.viewersList}>
-            {currentStory.viewers && currentStory.viewers.length > 0 ? (
-              currentStory.viewers.map((viewer: any, index: number) => (
-                <View key={index} style={styles.viewerItem}>
-                  <Image
-                    source={{ uri: viewer.profilePic }}
-                    style={styles.viewerImage}
-                  />
-                  <View style={styles.viewerInfo}>
-                    <Text style={styles.viewerName}>{viewer.username}</Text>
-                    <Text style={styles.viewerTime}>{viewer.viewedAt}</Text>
-                  </View>
-                </View>
-              ))
-            ) : (
-              <View style={styles.noViewers}>
-                <Ionicons name="eye-off-outline" size={48} color="#666" />
-                <Text style={styles.noViewersText}>No views yet</Text>
-              </View>
-            )}
+
+{views.length > 0 ? (
+  views.map((viewer:any, index:any) => (
+    <View key={index} style={styles.viewerItem}>
+      <Image
+        source={{ uri: viewer.profilePic || "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAACUCAMAAACp1UvlAAAAM1BMVEX///+zs7Pn5+ewsLDq6uqtra22trb6+vq5ubn09PTd3d3Nzc3KysrHx8fi4uLAwMDV1dWKavJRAAAFXklEQVR4nO2c3ZarIAyFR/5UUPD9n/aAbWe0otlgbM+F+2rWrJb1NYSQQPTn59atW7du3bp16/tq+75XSiQpFf9uvw0U1ftpCF0j9UvSdGGYfP89pFbZIGc1az3+Gaz6huGUC1K/E63otAxOfBhqajZWyqHFD03qY1R+lJqGekrL0X4CqrUGMdXKasZe7mm2w021MFp3rc1EV2aqhc2665ZA7w4XIEGm3UUxzRf61ZbMX0DVjjWOtZYe2f1fmHPGeprMMHuZPW+sJxnnwmxHDmM9wfjmsg1c1krSgQmsZ3GtP8mOJWD0tbH0WjBua81gzWkwfmvNYN1JH2svwToPxhDkd8DGM1juGmvNYK4eiy3K56SrI7/CrZU+aYxJf+Ffqsz8YZ+PNdkwWR/LWm9jNYmS1fq+A2fROC+e5XYquIV3BvuirnIxAf1saSbxYnpJiQkLxrIi68FmUQ4bqgfZAH27YiYnYBZjAZajmsksYjI9lWL1yM81fg8rgnloLks3SmAeZOd3qWYwwBPkUIalgFk0h1izxehBdFkQC8Ac7PrWryw9iAwlWAL4oY7EEgoIgUWxgvYu2dFYEYx2sZLEogdmcUK4xEQPJPElCZg/QFhCBXIkfDdq6XWkaad/cAGpkkGDvgemEcOKYPRQEj1OAbx+hLnoUh2NrcAWJCcQK3o+YHzM8wUQ6y3MZQFnxUIYcEhyvDOu5DtyNDCE0dZqAoyFRIqmQbCQagOMXiiXRDZv+wUupGRDalluLiDkt0iKw80FHNUhCXTTwVhC0OuxQSJYj1SNJXECKSY1zeWhahbctgWUs0YueotE6rO4D8H7I7IPxfFILrAghbnA8pjkQpZj2tJQQW4BVB/YmYccwLwQMn/MDUkuaBh4RUKrMYmLCzMYai4+rpj9AvUjkpGDXPBISMyHYv38K9nsBeT4QG7/Kz4u+iQAPQhl5mqaQzBVcvjPOI9RejjgGkoO/+n4hQacx88M2ePVdMBadrFEcyFlwpLMZciUKL3AofchOBK+wLpJrcmUcqW3cMC+DeUl60FlmGykmSXsBF94LIag8xwsL3wna0IYh2EYQyjtdpoF5IVQHp2H23b0wVx0AQnVHeyi83uoTmMWUqfV3tHKbGsm+F3kBAw5B1gDNaaLbj8658bo+J0pxoPOAQpuaVNPlxnnK1H1q3Q5OpqyDjbo0gPeiWJ0cCk73AT8SOddaBiznCQwa9KNs+rgPk1Z12AxBzyXw0qrbntPu90mJyhhBc8xgQimM7fHeaNNyFYJ3nhQW3e608ZF3nXDd5BEFaNHoBRa2MwTzTTwvcLhPUw0VgnVTHZsMvge5ijky67IWE+wo+y1oFFnP6eQYzHUA2w/+ABncr/aGwU9LsmQ7S2mooarnV4T/DguA7aTCJf1nGSTHQlcaR+AZb227N4926dwxlq7YIV9ChkPw+8cd8Fyg5ZhbTejypW41hasuGH07VxaGgYsId4idnnf0KbPCj+xP5B6O82v6ZhbxYpzS3EBtvL9mr609W4En9eTYIuMrK6PbzmTkmUWZ66/sqa65/e39+F8iFjob01WPyH2ahaRfFRRr1k88UTFw8Xqd+ucnjv4mT7kZ9inGuMKNd+BFO6L70q+z+pd4rEdcTTgS7y5BJOXp7HSRml4zRUNZs4/RxHBuM0lhOV5go7bXoLrySZmv2eiYgZjfQ64Z8NifjizZcLifwCYw2SXPMt9HuyiB2zbc2QXvmehPVFvX/toeV9Hpq5/70PFZH6AaiYrs9mHqJIKVsCn3yrSAlZTX3ljB4Gmvvr+lce7YJZ86r95J8xPu9a3cW7dunXr1q1bt5L+AZmUU8mHUCndAAAAAElFTkSuQmCC" }}
+        style={styles.viewerImage}
+      />
+      <View style={styles.viewerInfo}>
+        <Text style={styles.viewerName}>{viewer.username}</Text>
+        <Text style={styles.viewerTime}>{viewer.viewedAt}</Text>
+      </View>
+    </View>
+  ))
+) : (
+  <View style={styles.noViewers}>
+    <Ionicons name="eye-off-outline" size={48} color="#666" />
+    <Text style={styles.noViewersText}>No views yet</Text>
+  </View>
+)}
+
           </ScrollView>
         </View>
       )}

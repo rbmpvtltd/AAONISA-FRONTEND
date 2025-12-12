@@ -3,7 +3,7 @@ function createApiUrl(url: string) {
     if (__DEV__) {
       console.log(`${process.env.EXPO_PUBLIC_LOCAL_API_URL}${url}`);
       
-        return `https://hithoy-backend.justsearch.net.in/api${url}`;
+        return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}${url}`;
         
     }
     return `https://hithoy-backend.justsearch.net.in/api${url}`;
