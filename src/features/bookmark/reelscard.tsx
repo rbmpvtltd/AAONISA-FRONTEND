@@ -63,6 +63,7 @@ import { router, useLocalSearchParams } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
 import { useEffect, useMemo, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Animated,
   Image,
   Pressable,
@@ -76,13 +77,19 @@ import {
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 type ReelType = {
-  id : string;
+  id: string;
+  uuid: string;
   caption: string;
   created_at: string;
   videoUrl: string;
-  user?: any;
-  likes : boolean;
-  comments : string;
+  user?: {
+    username: string;
+    userProfile: string;
+  };
+  likes: {
+    count: number;
+  };
+  comments: any[];
 };
 
 
@@ -97,7 +104,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
   //  Load reel using ID
   // const reel = useMemo(() => getReelById(reelId!), [reelId]);
   const reel = useMemo(() => getReelById(reelId!), [reelId]) as ReelType | null;
-console.log("hhhhhh", reel?.comments);
+  console.log("hhhhhh", reel?.comments);
 
 
   //  Reel Not Found UI
@@ -113,21 +120,24 @@ console.log("hhhhhh", reel?.comments);
     );
   }
 
-  console.log("========================",reel)
+  console.log("========================", reel)
   // --------------------------
   // BELOW = FULL REEL CARD UI
   // --------------------------
-
+  const [isLoading, setIsLoading] = useState(true);
   const [isMuted, setIsMuted] = useState(true);
   const [showIcon, setShowIcon] = useState(false);
   const fadeAnim = useRef(new Animated.Value(0)).current;
 
-  // const [likesCount, setLikesCount] = useState(reel.likesCount ?? 0);
-  // const [liked, setLiked] = useState(
-  //   reel.likes?.some((l: any) => l.user_id === currentUserId)
-  // );
+  const [likesCount, setLikesCount] = useState(reel.likes?.count ?? 0);
+  const [liked, setLiked] = useState(
+    // reel.likes.some((l: any) => l.user_id === currentUserId)
+    Array.isArray(reel.likes) ? reel.likes.some((l: any) => l.user_id === currentUserId) : false
+
+  );
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showOptions, setShowOptions] = useState(false);
+  const [duration, setDuration] = useState<number | null>(null);
 
   // Video Player
   const player = useVideoPlayer(
@@ -139,8 +149,31 @@ console.log("hhhhhh", reel?.comments);
   );
 
   useEffect(() => {
+    if (!player) return;
+
+    const listener = player.addListener("statusChange", () => {
+      if (player.status === "loading") {
+        setIsLoading(true);   // loader ON
+      }
+
+      if (player.status === "readyToPlay") {
+        setIsLoading(false);  // loader OFF
+      }
+
+      if (player.status === "readyToPlay" && player.duration != null) {
+        // console.log("duration", player.duration);
+        setDuration(player.duration);
+      }
+    });
+
+    return () => listener.remove();
+  }, [player]);
+
+  useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
+
+
 
   // Toggle Mute with Fade Icon
   const toggleMute = () => {
@@ -176,6 +209,21 @@ console.log("hhhhhh", reel?.comments);
   //     setLikesCount((p: number) => (newLiked ? p - 1 : p + 1));
   //   }
   // };
+  const handleLike = async () => {
+    const newLiked = !liked;
+
+    // UI update
+    setLiked(newLiked);
+    setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
+
+    try {
+      await likeMutation.mutateAsync(reel.uuid || reel.id);
+    } catch (err) {
+      // revert on error
+      setLiked(!newLiked);
+      setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
+    }
+  };
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: "black" }}>
@@ -188,6 +236,16 @@ console.log("hhhhhh", reel?.comments);
           nativeControls={false}
 
         />
+        {isLoading && (
+          <View style={{
+            position: "absolute",
+            top: "45%",
+            left: "45%",
+            zIndex: 9999
+          }}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
 
         {showIcon && (
           <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
@@ -202,17 +260,14 @@ console.log("hhhhhh", reel?.comments);
 
       {/* USER INFO + CAPTION */}
       <View style={[styles.bottomContent]}>
-        {/* <TouchableOpacity
+        <TouchableOpacity
           style={{ flexDirection: "row", alignItems: "center" }}
-          onPress={() => router.push(`/profile/${reel.user.username}`)}
-        > */}
-        {/* <Image source={{ uri: reel.user.profilePic }} style={styles.avatar} /> */}
-        {/* <Text style={styles.username}>{reel.user.username}</Text> */}
+          onPress={() => router.push(`/profile/${reel.user?.username}`)}
+        >
 
-        <Image source={{ uri: "https://avatar.iran.liara.run/public" }} style={styles.avatar} />
-        <Text style={styles.username}>ADNAN CHOUHAN</Text>
-        {/* </TouchableOpacity> */}
-
+          <Image source={{ uri: reel.user?.userProfile ? reel.user?.userProfile : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }} style={styles.avatar} />
+          <Text style={styles.username}>{reel.user?.username}</Text>
+        </TouchableOpacity>
         {/* CAPTION */}
         {!showFullCaption ? (
           <>
@@ -255,32 +310,41 @@ console.log("hhhhhh", reel?.comments);
       <View style={styles.rightActions}>
         {/* LIKE */}
         {/* <TouchableOpacity style={styles.actionButton} onPress={handleLike}> */}
-        <Ionicons
-          name={"heart-outline"}
-          size={35}
-          color={"white"}
-        />
-        {/* <Text style={styles.actionText}>{reel.likes}</Text> */}
-        <Text style={styles.actionText}>16</Text>
+        {/* <Ionicons name="heart-outline" size={35} color="white" /> */}
+        {/* <Text style={styles.actionText}>{reel.likes?.count || 0}</Text> */}
+        <TouchableOpacity
+          style={styles.actionButton}
+          disabled={likeMutation.isPending}
+          onPress={handleLike}
+        >
+          <Ionicons
+            name={liked ? 'heart' : 'heart-outline'}
+            size={35}
+            color={liked ? '#FF0000' : '#fff'}
+          />
+          <Text style={styles.actionText}>
+            {likesCount}
+          </Text>
+        </TouchableOpacity>
+
         {/* </TouchableOpacity> */}
 
         {/* COMMENTS */}
         <TouchableOpacity
           style={styles.actionButton}
-        onPress={() => router.push(`/comment/${reel.id}`)}
+          onPress={() => router.push(`/comment/${reel.uuid || reel.id}`)}
         >
           <Ionicons name="chatbubble-outline" size={35} color="#fff" />
-          <Text style={styles.actionText}>16</Text>
-          {/* <Text style={styles.actionText}>{reel.commentsCount}</Text> */}
-
+          <Text style={styles.actionText}>{reel.comments?.length || 0}</Text>
         </TouchableOpacity>
+
 
         {/* SHARE */}
         <TouchableOpacity style={styles.actionButton}>
           <Ionicons name="share-social-outline" size={35} color="#fff" />
-          <Text style={styles.actionText}>16</Text>
-          {/* <Text style={styles.actionText}>{reel.shares}</Text> */}
+          <Text style={styles.actionText}>0</Text>
         </TouchableOpacity>
+
 
         {/* OPTIONS */}
         <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>
@@ -294,7 +358,7 @@ console.log("hhhhhh", reel?.comments);
         onClose={() => setShowOptions(false)}
         onSave={() => { }}
         onReport={() => console.log("Reported")}
-        reelId={reel.id}
+        reelId={reel.uuid || reel.id}
         reelUrl={reel.videoUrl}
       />
     </View>
@@ -306,7 +370,7 @@ const styles = StyleSheet.create({
     position: "absolute",
     left: 15,
     right: 70,
-    bottom: 140,
+    bottom: 80
   },
   avatar: {
     width: 40, height: 40, borderRadius: 20, marginRight: 10,
@@ -320,7 +384,7 @@ const styles = StyleSheet.create({
   rightActions: {
     position: "absolute",
     right: 20,
-    bottom: 130,
+    bottom: 80,
     alignItems: "center",
   },
   actionButton: { alignItems: "center", marginBottom: 25 },

@@ -4,6 +4,7 @@ import { Ionicons } from "@expo/vector-icons";
 import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
+
 import {
   Alert,
   KeyboardAvoidingView,
@@ -35,6 +36,8 @@ const Register = () => {
   const router = useRouter();
   const theme = useAppTheme();
   const [showPassword, setShowPassword] = React.useState(false);
+  const [acceptTerms, setAcceptTerms] = React.useState(false);
+  const [usernameAvailable, setUsernameAvailable] = React.useState(null);
 
   const {
     emailOrPhone,
@@ -69,6 +72,23 @@ const Register = () => {
       resetAuth();
     };
   }, []);
+
+
+  // const handleUsernameChange = async (text: string) => {
+  //   const value = text.trim().toLowerCase();
+  //   setUsername(value); // <-- Ye store me username set karega
+
+  //   if (!value || value.length < 3) {
+  //     setUsernameAvailable(null);
+  //     return;
+  //   }
+
+  //   const res = await checkUsername(value);
+  //   console.log('====================================');
+  //   console.log('res', res);
+  //   console.log('====================================');// <-- API call
+  //   setUsernameAvailable(res.available);
+  // };
 
   const handleSendOtp = async () => {
     try {
@@ -126,7 +146,7 @@ const Register = () => {
         <View style={[styles.container, { backgroundColor: theme.background }]}>
           <Text style={[styles.logo, { color: theme.text }]}>HitHoy</Text>
           <Text style={[styles.subtitle, { color: theme.subtitle }]}>
-          Express without limits
+            Express without limits
           </Text>
 
           <TextInput
@@ -137,7 +157,7 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={emailOrPhone}
-            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
+            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
           />
 
           {otpSent ? (
@@ -202,6 +222,8 @@ const Register = () => {
             ]}
             value={username}
             onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
+          // onChangeText={handleUsernameChange}
+
           />
           <View style={{ position: "relative" }}>
             <TextInput
@@ -218,7 +240,7 @@ const Register = () => {
               ]}
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={setPassword}
+              onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
             />
 
             <TouchableOpacity
@@ -238,11 +260,51 @@ const Register = () => {
           </View>
 
 
-          <Text style={[styles.policy, { color: theme.subtitle }]}>
+          {/* <Text style={[styles.policy, { color: theme.subtitle }]}>
             By Sign up, you agree to our Terms, Privacy Policy and Cookies Policy
-          </Text>
+          </Text> */}
 
-          <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleSignUp}>
+
+          {/*  Terms & Privacy Checkbox */}
+          <View style={styles.checkboxContainer}>
+            <TouchableOpacity
+              style={[styles.checkbox, {
+                backgroundColor: acceptTerms ? theme.buttonBg : "transparent",
+                borderColor: acceptTerms ? theme.buttonBg : theme.inputBorder,
+              }]}
+              onPress={() => setAcceptTerms(!acceptTerms)}
+            >
+              {acceptTerms && <Ionicons name="checkmark" size={18} color="#fff" />}
+            </TouchableOpacity>
+            <Text style={[styles.policy, { color: theme.subtitle }]}>
+              I agree to{" "}
+              <Text
+                style={{ color: theme.link }}
+                onPress={() => router.push("/terms-&-conditions")}
+              >
+                Terms
+              </Text>{" "}
+              &{" "}
+              <Text
+                style={{ color: theme.link }}
+                onPress={() => router.push("/privecy-policy")}
+              >
+                Privacy Policy
+              </Text>
+            </Text>
+          </View>
+
+          <TouchableOpacity
+            style={[
+              styles.signUpButton,
+              { backgroundColor: acceptTerms ? theme.buttonBg : "#00d0ff76" },
+            ]}
+            onPress={handleSignUp}
+            disabled={!acceptTerms}
+          >
+
+
+            {/* <TouchableOpacity style={[styles.signUpButton, { backgroundColor: theme.buttonBg }]} onPress={handleSignUp}> */}
             <Text style={[styles.signUpText, { color: theme.buttonText }]}>Sign Up</Text>
           </TouchableOpacity>
 
@@ -286,11 +348,18 @@ const styles = StyleSheet.create({
     marginBottom: 12,
   },
   verifyText: { fontWeight: "bold" },
-  policy: {
-    fontSize: 12,
-    textAlign: "center",
-    marginBottom: 15,
+  checkboxContainer: { flexDirection: "row", alignItems: "center", marginBottom: 15 },
+  checkbox: {
+    width: 22,
+    height: 22,
+    borderWidth: 1,
+    borderRadius: 4,
+    marginRight: 8,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "#333",
   },
+  policy: { fontSize: 12, flex: 1, flexWrap: "wrap" },
   signUpButton: {
     padding: 14,
     borderRadius: 25,
@@ -300,3 +369,4 @@ const styles = StyleSheet.create({
   link: { marginTop: 15, textAlign: "center" },
 });
 
+// register.tsx

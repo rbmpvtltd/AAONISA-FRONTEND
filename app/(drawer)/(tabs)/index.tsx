@@ -75,11 +75,18 @@ const HomePage = () => {
     }
   }, [stories, setUserStories]);
 
+  // useEffect(() => {
+  //   if (bookmarks && bookmarks.length > 0) {
+  //     setCategories((prev) => [...prev, ...bookmarks]);
+  //   }
+  // }, [bookmarks, setCategories]);
+
   useEffect(() => {
-    if (bookmarks && bookmarks.length > 0) {
-      setCategories((prev) => [...prev, ...bookmarks]);
+    if (bookmarks) {
+      setCategories(() => bookmarks);   // ✔ overwrite, no merge
     }
   }, [bookmarks, setCategories]);
+
 
   useEffect(() => {
     if (!isFocused) {
@@ -130,7 +137,7 @@ const HomePage = () => {
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* <StoryList theme={theme} currentUserId = {currentUserId} currentUserProfilePic={currentUserProfilePic} />
-      <FeedList /> */}
+        <FeedList /> */}
       <FlatList
         data={[{ id: "header" }]} // Dummy data
         renderItem={() => <FeedList />}

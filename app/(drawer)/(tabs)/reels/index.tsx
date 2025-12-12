@@ -39,6 +39,7 @@ const ReelItem = ({
   toggleLike,
   likeMutation,
   currentUserId,
+  currentUser,
   // addComment,
   addShare,
   activeTab,
@@ -59,15 +60,17 @@ const ReelItem = ({
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const isFocused = useIsFocused();
   const [duration, setDuration] = useState<number | null>(null);
+  const [isLoading, setIsLoading] = useState(true);
 
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
       ? item.likes.some((like: any) => like.user_id === currentUserId)
       : false
   );
+  
   console.log("REEL id:", item.id || item.uuid);
 
-
+  const isOwnReel = item.user.username === currentUser;
   // create player
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
@@ -76,7 +79,7 @@ const ReelItem = ({
     }
   );
 
-  console.log("===================================", player)
+  // console.log("===================================", player)
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
@@ -102,8 +105,16 @@ const ReelItem = ({
     if (!player) return;
 
     const listener = player.addListener("statusChange", () => {
+      if (player.status === "loading") {
+        setIsLoading(true);   // loader ON
+      }
+
+      if (player.status === "readyToPlay") {
+        setIsLoading(false);  // loader OFF
+      }
+
       if (player.status === "readyToPlay" && player.duration != null) {
-        console.log("duration", player.duration);
+        // console.log("duration", player.duration);
         setDuration(player.duration);
       }
     });
@@ -144,14 +155,25 @@ const ReelItem = ({
     }
   };
 
-  console.log("item.likes", item.likesCount);
-  console.log("comment count", item.commentsCount);
+  // console.log("item.likes", item.likesCount);
+  // console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;
 
+  const handleProfilePress = () => {
+    if (isOwnReel) {
+      console.log("✅ Own reel detected - Redirecting to /profile");
+      router.push('/profile');
+    } else {
+      console.log("➡️ Other user reel - Redirecting to /profile/" + item.user.username);
+      router.push(`/profile/${item.user.username}`);
+    }
+  };
+
+
   console.log('====================================');
   console.log(item.duration);
-  console.log(item);
+  // console.log(item);
   console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -161,6 +183,19 @@ const ReelItem = ({
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
       >
+        {/* <View style={{ flex: 1 }}> */}
+        {isLoading && (
+          <View style={{
+            position: "absolute",
+            top: "45%",
+            left: "45%",
+            zIndex: 9999
+          }}>
+            <ActivityIndicator size="large" color="#fff" />
+          </View>
+        )}
+
+
         <VideoView
           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
           player={player}
@@ -187,9 +222,11 @@ const ReelItem = ({
         <View style={styles.userInfo}>
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center' }}
-            onPress={() => {
-              router.push(`/profile/${item.user.username}`);
-            }}
+            onPress={
+              // () => {
+              //   router.push(`/profile/${item.user.username}`);
+              // }
+              handleProfilePress}
           >
             <Image
               source={{
@@ -286,9 +323,9 @@ const ReelItem = ({
           addShare(item.id);
           router.push({
             pathname: `/chat`,
-            params: {  
+            params: {
               shareMode: "true",
-              reelId: item.id 
+              reelId: item.id
             }
           });
         }}>
@@ -374,6 +411,7 @@ const ReelsFeed = () => {
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
 
+
   // URL update function
   const updateURL = (index: number) => {
     if (!reels[index]) return;
@@ -457,6 +495,15 @@ const ReelsFeed = () => {
       }
     }
   }, [videoId, reels.length]);
+
+
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+  const currentUserId = currentUser?.userProfile?.id;
+  const currentUserProfile = currentUser?.username;
 
 
   // Add this to your state
@@ -549,12 +596,6 @@ const ReelsFeed = () => {
   };
   // const currentUserId = useProfileStore(state => state.userId);
 
-  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: GetCurrentUser,
-  });
-
-  const currentUserId = currentUser?.userProfile?.id
 
   if (isLoading)
     return (
@@ -613,6 +654,7 @@ const ReelsFeed = () => {
               showIcon={showIcon}
               fadeAnim={fadeAnim}
               currentUserId={currentUserId}
+              currentUser={currentUserProfile}
               // toggleLike={toggleLike}
               // toggleLike={(id: string) => likeMutation.mutate(id)}
               likeMutation={likeMutation}

@@ -11,32 +11,54 @@ const getToken = async () => {
   }
 };
 
-const getCommentsApi = async (reelId: string) => {
-    const token = await getToken();
+// const getCommentsApi = async (reelId: string) => {
+//     const token = await getToken();
 
+//   const config = {
+//     headers: {
+//       'Content-Type': 'application/json',
+//       ...(token ? { Authorization: `Bearer ${token}` } : {}),
+//     },
+//     // withCredentials: true,
+//   };
+
+//   const apiUrl = createApiUrl(`/comments/getComments/${reelId}`);
+
+//   let comments;
+
+//   try {
+//      comments = await axios.get(apiUrl, config);
+//   } catch (e) {
+//     console.log("getting comments failed", e);
+//   }
+//   return comments;
+// };
+
+
+const getCommentsApi = async (reelId: string) => {
+  const token = await getToken();
+  console.log("bhen k lode", token)
   const config = {
     headers: {
       'Content-Type': 'application/json',
       ...(token ? { Authorization: `Bearer ${token}` } : {}),
     },
-    // withCredentials: true,
   };
 
   const apiUrl = createApiUrl(`/comments/getComments/${reelId}`);
 
-  let comments;
-
   try {
-     comments = await axios.get(apiUrl, config);
+    const response = await axios.get(apiUrl, config);
+    console.log("✅ Comments fetched:", response.data?.length || 0);
+    return response.data;
   } catch (e) {
-    console.log("getting comments failed", e);
+    console.error("❌ Getting comments failed:", e);
+    return []; // ✅ Return empty array
   }
-  return comments;
 };
-
-const addCommentApi = async (reelId: string, comment: string,mentions:string[],parentId:string) => {
+const addCommentApi = async (reelId: string, comment: string, mentions: string[], parentId: string) => {
   const token = await getToken();
-    console.log(reelId,comment,mentions,parentId)
+  console.log(reelId, comment, mentions, parentId)
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -48,7 +70,7 @@ const addCommentApi = async (reelId: string, comment: string,mentions:string[],p
   const apiUrl = createApiUrl(`/comments/addComment/`);
 
   try {
-    const data = await axios.post(apiUrl, { content: comment,mentions,postId:reelId,parentId }, config);
+    const data = await axios.post(apiUrl, { content: comment, mentions, postId: reelId, parentId }, config);
     return data
   } catch (e) {
     console.log("adding comment failed", e);
@@ -56,7 +78,7 @@ const addCommentApi = async (reelId: string, comment: string,mentions:string[],p
 };
 
 const deleteCommentApi = async (commentId: string) => {
-  const token = await getToken();   
+  const token = await getToken();
 
   const config = {
     headers: {

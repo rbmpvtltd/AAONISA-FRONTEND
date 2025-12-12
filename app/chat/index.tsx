@@ -177,6 +177,7 @@ import { useQuery } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 
 import {
+  ActivityIndicator,
   FlatList,
   Image,
   StyleSheet,
@@ -267,8 +268,17 @@ const reelId = params.reelId;
   const msgFontSize = width < 360 ? 12 : width < 400 ? 13 : 14;
   const padding = width < 360 ? 12 : width < 400 ? 16 : 20;
 
+  // if (isLoading)
+  //   return <Text style={{ color: theme.text, marginTop: 20, textAlign: "center" }}>Loading...</Text>;
+
   if (isLoading)
-    return <Text style={{ color: theme.text, marginTop: 20, textAlign: "center" }}>Loading...</Text>;
+  return (
+    <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      <ActivityIndicator size="large" color={theme.text} />
+      <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
+    </View>
+  );
+
 
   if (isError)
     return (

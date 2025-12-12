@@ -553,7 +553,7 @@
 // ==================================================
 
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { Ionicons, MaterialCommunityIcons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
@@ -726,9 +726,9 @@ export const UserInfo: React.FC<{
 
 export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
     <View style={[styles.tabs, { backgroundColor: theme.background }]}>
-        <TouchableOpacity style={styles.tab}>
+        {/* <TouchableOpacity style={styles.tab}>
             <MaterialCommunityIcons name="view-grid-outline" size={22} color={theme.text} />
-        </TouchableOpacity>
+        </TouchableOpacity> */}
         <TouchableOpacity style={styles.tab}>
             <Ionicons name="play-circle-outline" size={22} color={theme.text} />
         </TouchableOpacity>

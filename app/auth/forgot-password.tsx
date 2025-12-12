@@ -170,7 +170,7 @@ const ForgotPassword = () => {
           placeholderTextColor={theme.placeholder}
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
           value={emailOrPhone}
-          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase())}
+          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
         />
 
         {otpSent && (
@@ -243,7 +243,7 @@ const ForgotPassword = () => {
               },
             ]}
             value={newPassword}
-            onChangeText={setNewPassword}
+            onChangeText={(text) => setNewPassword(text.trim().replace(/\s+/g, ''))}
           />
 
           <TouchableOpacity

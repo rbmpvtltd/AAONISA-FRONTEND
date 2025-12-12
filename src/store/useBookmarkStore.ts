@@ -2,6 +2,7 @@ import { create } from 'zustand';
 
 interface Reel {
   uuid: string;
+  id: string
   thumbnail: string;
   videoUrl: string;
 }
@@ -20,6 +21,8 @@ interface BookmarkStore {
   openBookmarkPanel: (reel: Reel) => void;
   closePanel: () => void;
   addCategory: (name: string) => void;
+  // addCategory: (data: { id: string; name: string }) => void;
+
   saveToCategory: (categoryId: string) => void;
 
   setCategories: (fn: (prev: Category[]) => Category[]) => void;
@@ -58,6 +61,19 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
       };
     });
   },
+
+  // addCategory: ({ id, name }) => {
+  //   set((state) => {
+  //     const exists = state.categories.some(
+  //       (c) => c.name.trim().toLowerCase() === name.trim().toLowerCase()
+  //     );
+  //     if (exists) return state;
+
+  //     return {
+  //       categories: [...state.categories, { id, name, reels: [] }],
+  //     };
+  //   });
+  // },
 
   saveToCategory: (categoryId) => {
     const { selectedReel, categories } = get();

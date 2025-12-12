@@ -16,10 +16,11 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.anonymous.AaoNiSa"
+      "bundleIdentifier": "com.rbm.HitHoy"
     },
     "android": {
       "useNextNotificationsApi": true,
+        "googleServicesFile": "./google-services.json",
       "permissions": [
         "android.permission.CAMERA",
         "android.permission.RECORD_AUDIO",
@@ -32,7 +33,7 @@
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
-      "package": "com.anonymous.AaoNiSa",
+      "package": "com.rbm.HitHoy",
       "usesCleartextTraffic": true
     },
     "web": {

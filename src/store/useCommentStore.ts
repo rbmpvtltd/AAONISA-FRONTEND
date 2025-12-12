@@ -70,39 +70,83 @@ export const useCommentStore = create<CommentState>((set) => ({
       },
     })),
 
+  // toggleLike: (postId, commentId, username, parentId = null) =>
+  //   set((state) => {
+  //     const updateLikes = (comment: Comment): Comment => {
+  //       const alreadyLiked = comment.likedBy.includes(username);
+  //       return {
+  //         ...comment,
+  //         likedBy: alreadyLiked
+  //           ? comment.likedBy.filter((u) => u !== username)
+  //           : [...comment.likedBy, username],
+  //       };
+  //     };
+
+  //     return {
+  //       comments: {
+  //         ...state.comments,
+  //         [postId]: (state.comments[postId] || []).map((comment) => {
+  //           if (comment.uuid === commentId && !parentId) {
+  //             return updateLikes(comment);
+  //           }
+  //           if (comment.replies && parentId) {
+  //             return {
+  //               ...comment,
+  //               replies: comment.replies.map((reply) =>
+  //                 reply.uuid === commentId ? updateLikes(reply) : reply
+  //               ),
+  //             };
+  //           }
+  //           return comment;
+  //         }),
+  //       },
+  //     };
+  //   }),
+
   toggleLike: (postId, commentId, username, parentId = null) =>
-    set((state) => {
-      const updateLikes = (comment: Comment): Comment => {
-        const alreadyLiked = comment.likedBy.includes(username);
-        return {
-          ...comment,
-          likedBy: alreadyLiked
-            ? comment.likedBy.filter((u) => u !== username)
-            : [...comment.likedBy, username],
-        };
-      };
-
+  set((state) => {
+    console.log("🔥 Toggle Like:", { postId, commentId, username, parentId });
+    
+    const updateLikes = (comment: Comment): Comment => {
+      const alreadyLiked = comment.likedBy.includes(username);
+      console.log("  → Comment:", comment.uuid, "Already liked?", alreadyLiked);
+      
       return {
-        comments: {
-          ...state.comments,
-          [postId]: (state.comments[postId] || []).map((comment) => {
-            if (comment.uuid === commentId && !parentId) {
-              return updateLikes(comment);
-            }
-            if (comment.replies && parentId) {
-              return {
-                ...comment,
-                replies: comment.replies.map((reply) =>
-                  reply.uuid === commentId ? updateLikes(reply) : reply
-                ),
-              };
-            }
-            return comment;
-          }),
-        },
+        ...comment,
+        likedBy: alreadyLiked
+          ? comment.likedBy.filter((u) => u !== username)
+          : [...comment.likedBy, username],
       };
-    }),
+    };
 
+    return {
+      comments: {
+        ...state.comments,
+        [postId]: (state.comments[postId] || []).map((comment) => {
+          if (comment.uuid === commentId && !parentId) {
+            console.log("  → Liking main comment");
+            return updateLikes(comment);
+          }
+          
+          if (parentId && comment.uuid === parentId) {
+            console.log("  → Liking reply in parent:", parentId);
+            return {
+              ...comment,
+              replies: (comment.replies || []).map((reply) => {
+                if (reply.uuid === commentId) {
+                  console.log("    → Found reply:", commentId);
+                  return updateLikes(reply);
+                }
+                return reply;
+              }),
+            };
+          }
+          
+          return comment;
+        }),
+      },
+    };
+  }),
   clearComments: (postId) =>
     set((state) => {
       const newState = { ...state.comments };

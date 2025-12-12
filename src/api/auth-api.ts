@@ -44,6 +44,17 @@ async function registerUser(reqBody: any) {
     return data;
 }
 
+
+async function checkUsername(reqBody: any) {
+    // const token = getToken();
+    const config = {
+        headers: { 'Content-Type': 'application/json' },
+    };
+    const apiUrl = createApiUrl('/users/check-username');
+    const { data } = await axios.post(apiUrl, reqBody, config);
+    return data;
+}
+
 async function verifyOtpRegisterUser(reqBody: any) {
     // const token = getToken();
     const config = {
@@ -225,5 +236,5 @@ async function sendNotification() {
   const { data } = await axios.post(apiUrl, config);
   return data;
 }
-export { expoTokenAssign, expoTokenUnassign, forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, logoutUser, registerUser, resetPassword, sendNotification, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
+export { checkUsername, expoTokenAssign, expoTokenUnassign, forgetPassword, getUserInfoAndFollowState, getUserNotifications, loginUser, logoutUser, registerUser, resetPassword, sendNotification, sendOtp, updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone, verifyOtpRegisterUser };
 

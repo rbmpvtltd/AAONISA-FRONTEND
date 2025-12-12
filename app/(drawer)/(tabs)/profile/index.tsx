@@ -90,7 +90,7 @@ export default function MyProfileScreen() {
     enabled: !!currentUser?.username, // tabhi chale jab username mil jaaye
   });
 
-  console.log("user data in current user ", profile);
+  // console.log("user data in current user ", profile);
   
   if (currentUserLoading || profileLoading) {
     return (
