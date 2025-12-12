@@ -368,3 +368,4 @@ const styles = StyleSheet.create({
   link: { marginTop: 15, textAlign: "center" },
 });
 
+// register.tsx
