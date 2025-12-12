@@ -611,13 +611,13 @@
 //     retry: 2,
 //   });
 
-//   // ✅ Fallback to default if data not available
-//   const currentUser = currentUserData || {
-//     id: "",
-//     username: "you",
-//     realName: "",
-//     userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-//   };
+// // ✅ Fallback to default if data not available
+// const currentUser = currentUserData || {
+//   id: "",
+//   username: "you",
+//   realName: "",
+//   userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+// };
 
 //   console.log("👤 Current User:", currentUser);
 //   console.log("📍 Post ID:", postId);
@@ -1295,7 +1295,7 @@
 
 
 // ======= arbaaz chouhan
-import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+// 
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -1312,18 +1312,17 @@ import {
   View,
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import uuid from "react-native-uuid";
 import Icon from "react-native-vector-icons/Ionicons";
 
 import {
   addCommentApi,
   deleteCommentApi,
   getCommentsApi,
-  likeCommentApi
+  likeCommentApi,
 } from "@/src/api/comments-api";
-import { GetCurrentUser } from "@/src/api/profile-api";
+
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { useCommentStore } from "@/src/store/useCommentStore";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const { width: windowWidth } = Dimensions.get("window");
 
@@ -1337,428 +1336,221 @@ const extractMentions = (text: string): string[] => {
   return mentions;
 };
 
+const normalizeComment = (c: any) => ({
+  uuid: c.id,
+  parentId: c.parentId || null,
+  username: c.author?.username || "Unknown",
+  userProfile:
+    c.author?.userProfile?.url ||
+    c.author?.userProfile ||
+    "https://via.placeholder.com/150",
+  content: c.content,
+  time: new Date(c.createdAt).toLocaleTimeString(),
+  mentions: c.mentions || [],
+  likedBy: c.likedBy || [],
+  replies: (c.replies || []).map((r: any) => ({
+    uuid: r.id,
+    parentId: c.id,
+    username: r.author?.username || "Unknown",
+    userProfile:
+      r.author?.userProfile?.url ||
+      r.author?.userProfile ||
+      "https://via.placeholder.com/150",
+    content: r.content,
+    time: new Date(r.createdAt).toLocaleTimeString(),
+    mentions: r.mentions || [],
+    likedBy: r.likedBy || [],
+  })),
+});
+
 const CommentPage = () => {
   const { id } = useLocalSearchParams();
   const postId = id as string;
+
   const theme = useAppTheme();
   const queryClient = useQueryClient();
-
-  const {
-    comments,
-    setComments,
-    addComment,
-    addReply,
-    deleteComment,
-    toggleLike,
-  } = useCommentStore();
 
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
-// const { data: rawComments1 } = useQuery({
-//   queryKey: ["comments", postId],
-//   queryFn: async () => {
-//     console.log("🔍 Fetching comments:", postId);
-//     const res = await getCommentsApi(postId);
-//     console.log("📦 API RAW:", res);
-//     return res?.data || [];
-//   },
-//   enabled: !!postId,
-// });
-
-// console.log("COMMENTS FROM QUERY:", rawComments1);
-
-  const { data: currentUserData, isLoading: currentUserLoading, isError: currentUserError } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: async () => {
-      console.log("🔥 Fetching current user...");
-      const result = await GetCurrentUser();
-      console.log("✅ Current user result:", result);
-      return result;
-    },
-    staleTime: 5 * 60 * 1000, // 5 mins
-    retry: 2,
-  });
-
-  // ✅ Fallback to default if data not available
-  const currentUser = currentUserData || {
-    id: "",
+  // Dummy current user
+  const currentUser = {
+    id: "123",
     username: "you",
-    realName: "",
     userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
   };
 
-  console.log("👤 Current User:", currentUser);
-  console.log("📍 Post ID:", postId);
-
-  // Fetch Comments Query
-  const {
-    data: rawComments,
-    isLoading,
-    isError,
-    error,
-    refetch,
-  } = useQuery({
+  // -------------------------------
+  // 🔥 FETCH COMMENTS — useQuery
+  // -------------------------------
+  const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
-      console.log("🔍 Fetching comments for post:", postId);
-      try {
-      const response = await getCommentsApi(postId);
-      console.log("📦 Comments response:", response);
-      return response?.data || [];
-        
-      } catch (error) {
-        
-        console.log("ppppppppppppppppppppppppppp");
-      }
-    },
-    // ✅ FIX: Only check if postId exists, don't wait for currentUser.id
-    enabled: !!postId,
-    staleTime: 30000,
-    gcTime: 5 * 60 * 1000,
-    retry: 2,
-    select: (data) => {
-      console.log("🔄 Selecting/formatting comments...", data);
-
-    return data.map((c: any) => ({
-      id: c.id,
-      uuid: c.id,
-      username:
-        c.author?.id === currentUser?.id
-          ? "you"
-          : c.author?.username?.trim() || "Unknown",
-      userProfile:
-        c.author?.userProfile?.ProfilePicture ||
-        c.author?.userProfile?.url ||
-        "https://via.placeholder.com/150",
-      content: c.content,
-      time: new Date(c.createdAt).toLocaleTimeString(),
-      mentions: c.mentions || [],
-      replies: (c.replies || []).map((r: any) => ({
-        uuid: r.id,
-        username:
-          r.author?.id === currentUser?.id
-            ? "you"
-            : r.author?.username?.trim() || "Unknown",
-        userProfile:
-          r.author?.userProfile?.ProfilePicture ||
-          r.author?.userProfile?.url ||
-          "https://via.placeholder.com/150",
-        content: r.content,
-        time: new Date(r.createdAt).toLocaleTimeString(),
-        mentions: r.mentions || [],
-        likedBy: r.likedBy || [],
-      })),
-      likedBy: c.likedBy || [],
-    }));
+      const res = await getCommentsApi(postId);
+      return res.map(normalizeComment);
     },
   });
 
-  // // Sync rawComments with Zustand store
-  // useEffect(() => {
-  //   if (rawComments) {
-  //     setComments(postId, rawComments);
-  //   }
-  // }, [rawComments, postId, setComments]);
-
-  // Add Comment Mutation with Optimistic Update
+  // ----------------------------------
+  // 🔥 ADD COMMENT / REPLY MUTATION
+  // ----------------------------------
   const addCommentMutation = useMutation({
-    mutationFn: async ({
-      content,
-      mentions,
-      parentId,
-    }: {
-      content: string;
-      mentions: string[];
-      parentId: string | null;
-    }) => {
-      const res = await addCommentApi(postId, content, mentions, parentId || "");
-      return res?.data;
-    },
-    onMutate: async ({ content, mentions, parentId }) => {
-      await queryClient.cancelQueries({ queryKey: ["comments", postId] });
+    mutationFn: ({ content, mentions, parentId }: any) =>
+      addCommentApi(postId, content, mentions, parentId || ""),
 
-      const previousComments = queryClient.getQueryData([
-        "comments",
-        postId,
-        currentUser.id,
-      ]);
-
-      const tempId = uuid.v4().toString();
-      const tempComment = {
-        uuid: tempId,
-        username: currentUser?.username || "you",
-        userProfile: currentUser?.userProfile || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-        content: content.trim(),
-        mentions,
-        time: new Date().toLocaleTimeString(),
-        replies: [],
-        likedBy: [],
-      };
-
-      if (parentId) {
-        addReply(postId, parentId, tempComment);
-      } else {
-        addComment(postId, tempComment);
-      }
-
-      return { previousComments, tempId };
-    },
-    onSuccess: (savedComment, variables, context) => {
-      if (!savedComment) return;
-
-      const normalized = {
-        uuid: savedComment.id,
-        username: savedComment.author?.username || "Unknown",
-        userProfile:
-          savedComment.author?.userProfile?.ProfilePicture ||
-          savedComment.author?.userProfile?.url ||
-          currentUser?.userProfile ||
-          "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-        content: savedComment.content,
-        time: new Date(savedComment.createdAt).toLocaleTimeString(),
-        mentions: savedComment.mentions || [],
-        replies: [],
-        likedBy: [],
-      };
-
-      if (variables.parentId) {
-        const updatedComments = comments[postId]?.map((comment) => {
-          if (comment.uuid === variables.parentId) {
-            return {
-              ...comment,
-              replies: comment.replies?.map((reply) =>
-                reply.uuid === context?.tempId ? normalized : reply
-              ),
-            };
-          }
-          return comment;
-        });
-        setComments(postId, updatedComments || []);
-      } else {
-        const updatedComments = comments[postId]?.map((comment) =>
-          comment.uuid === context?.tempId ? normalized : comment
-        );
-        setComments(postId, updatedComments || []);
-      }
-
+    onSuccess: (saved: any) => {
+      const formatted = normalizeComment(saved.data);
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
-    onError: (error, variables, context) => {
-      if (context?.previousComments) {
-        queryClient.setQueryData(
-          ["comments", postId, currentUser?.id],
-          context.previousComments
-        );
-      }
 
-      if (variables.parentId) {
-        const rollbackComments = comments[postId]?.map((comment) => {
-          if (comment.uuid === variables.parentId) {
-            return {
-              ...comment,
-              replies: comment.replies?.filter(
-                (reply) => reply.uuid !== context?.tempId
-              ),
-            };
-          }
-          return comment;
-        });
-        setComments(postId, rollbackComments || []);
-      } else {
-        const rollbackComments = comments[postId]?.filter(
-          (comment) => comment.uuid !== context?.tempId
-        );
-        setComments(postId, rollbackComments || []);
-      }
+      queryClient.setQueryData(["comments", postId], (old: any[] = []) => {
+        if (!formatted.parentId) return [...old, formatted];
 
-      console.error("❌ Error adding comment:", error);
-      Alert.alert("Error", "Failed to add comment. Try again.");
+
+        return old.map((c) =>
+          c.uuid === formatted.parentId
+            ? { ...c, replies: [...c.replies, formatted] }
+            : c
+        );
+      });
+
     },
   });
 
-  // Delete Comment Mutation
-  const deleteCommentMutation = useMutation({
-    mutationFn: async (commentId: string) => {
-      return await deleteCommentApi(commentId);
-    },
-    onMutate: async (commentId) => {
-      await queryClient.cancelQueries({ queryKey: ["comments", postId] });
-      await queryClient.invalidateQueries({ queryKey: ["reels"] });
-      await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-
-      const previousComments = queryClient.getQueryData([
-        "comments",
-        postId,
-        currentUser.id,
-      ]);
-
-      // Optimistically remove from store
-      deleteComment(postId, commentId);
-
-      return { previousComments };
-    },
-    onError: (error, commentId, context) => {
-      if (context?.previousComments) {
-        queryClient.setQueryData(
-          ["comments", postId, currentUser.id],
-          context.previousComments
-        );
-      }
-      console.error("❌ Error deleting comment:", error);
-      Alert.alert("Error", "Failed to delete comment");
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
-  });
-
-  // 🔥 Like Comment Mutation
-  const likeCommentMutation = useMutation({
-    mutationFn: async ({
-      commentId,
-      parentId
-    }: {
-      commentId: string;
-      parentId?: string | null;
-    }) => {
-      return await likeCommentApi(commentId);
-    },
-    onMutate: async ({ commentId, parentId }) => {
-      await queryClient.cancelQueries({ queryKey: ["comments", postId] });
-
-      const previousComments = queryClient.getQueryData([
-        "comments",
-        postId,
-        currentUser.id,
-      ]);
-
-      // Optimistically toggle like with parentId
-      toggleLike(postId, commentId, currentUser?.realName || "", parentId || null);
-
-      return { previousComments };
-    },
-    onError: (error, { commentId, parentId }, context) => {
-      if (context?.previousComments) {
-        queryClient.setQueryData(
-          ["comments", postId, currentUser.id],
-          context.previousComments
-        );
-      }
-
-      // Rollback the like
-      toggleLike(postId, commentId, currentUser?.realName || "", parentId || null);
-
-      console.error("❌ Error liking comment:", error);
-    },
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
-  });
-
-  const handleAddComment = () => {
+  const handleAddComment = async () => {
     if (!commentText.trim()) return;
 
     const mentions = extractMentions(commentText);
 
-    addCommentMutation.mutate(
-      {
-        content: commentText.trim(),
-        mentions,
-        parentId: replyTo,
-      },
-      {
-        onSuccess: () => {
-          setCommentText("");
-          setReplyTo(null);
-          queryClient.invalidateQueries({ queryKey: ["reels"] });
-          queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-        },
-      }
-    );
+    addCommentMutation.mutate({
+      content: commentText,
+      mentions,
+      parentId: replyTo,
+    });
+
+    queryClient.cancelQueries({ queryKey: ["comments", postId] });
+    queryClient.invalidateQueries({ queryKey: ["reels"] });
+    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    setCommentText("");
+    setReplyTo(null);
   };
 
-  const handleDeleteComment = (commentId: string, parentId?: string) => {
+  // ----------------------------------
+  // 🔥 DELETE COMMENT MUTATION
+  // ----------------------------------
+  const deleteMutation = useMutation({
+    mutationFn: (commentId: string) => deleteCommentApi(commentId),
+
+    onSuccess: (_, commentId) => {
+      queryClient.setQueryData(["comments", postId], (old: any[]) =>
+        old
+          .filter((c) => c.uuid !== commentId)
+          .map((c) => ({
+            ...c,
+            replies: c.replies.filter((r: any) => r.uuid !== commentId),
+          }))
+      );
+    },
+  });
+
+  const handleDeleteComment = (commentId: string) => {
     Alert.alert("Delete Comment", "Are you sure?", [
       { text: "Cancel", style: "cancel" },
       {
         text: "Delete",
         style: "destructive",
-        onPress: () => deleteCommentMutation.mutate(commentId),
+        onPress: () => deleteMutation.mutate(commentId),
       },
     ]);
+    queryClient.cancelQueries({ queryKey: ["comments", postId] });
+    queryClient.invalidateQueries({ queryKey: ["reels"] });
+    queryClient.invalidateQueries({ queryKey: ["userProfile"] });
   };
 
-  const getProfileUri = (profile: any) => {
-    if (!profile) return "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-    if (typeof profile === "string") return profile || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-    return profile.url || profile.ProfilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
-  };
+  // ----------------------------------
+  // 🔥 LIKE TOGGLE — optimistic update
+  // ----------------------------------
+
+  interface LikeVars {
+    commentId: string;
+    parentId?: string | null;
+  }
+  interface CommentContext {
+    prev: any;
+  }
+
+  const toggleArr = (arr: string[], value: string) =>
+    arr.includes(value)
+      ? arr.filter((v) => v !== value)
+      : [...arr, value];
+
+  const likeMutation = useMutation<void, Error, LikeVars, CommentContext>({
+    mutationFn: async ({ commentId }) => {
+      return likeCommentApi(commentId);
+    },
+
+    onMutate: async ({ commentId, parentId }) => {
+      await queryClient.cancelQueries({ queryKey: ["comments", postId] });
+
+      const prev = queryClient.getQueryData(["comments", postId]);
+
+      queryClient.setQueryData(["comments", postId], (old: any[] = []) =>
+        old.map((comment) => {
+          // 🔥 Like on main comment
+          if (!parentId && comment.uuid === commentId) {
+            return {
+              ...comment,
+              likedBy: toggleArr(comment.likedBy, currentUser.username),
+            };
+          }
+
+          // 🔥 Like on reply
+          if (parentId && comment.uuid === parentId) {
+            return {
+              ...comment,
+              replies: comment.replies.map((r: any) =>
+                r.uuid === commentId
+                  ? {
+                    ...r,
+                    likedBy: toggleArr(r.likedBy, currentUser.username),
+                  }
+                  : r
+              ),
+            };
+          }
+
+          return comment;
+        })
+      );
+
+      return { prev };
+    },
+
+    onError: (_err, _vars, ctx) => {
+      if (ctx?.prev) {
+        queryClient.setQueryData(["comments", postId], ctx.prev);
+      }
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
+  });
+
 
   const handleToggleLike = (commentId: string, parentId?: string | null) => {
-    if (!currentUser?.realName) return;
-
-    console.log("Like clicked:", { commentId, parentId, username: currentUser.realName });
-    likeCommentMutation.mutate({
-      commentId,
-      parentId: parentId || null
-    });
+    likeMutation.mutate({ commentId, parentId });
   };
 
-  const photoComments = rawComments || comments[postId] || [];
-  const loading = addCommentMutation.isPending;
 
-  console.log('====================================');
-  console.log("COMMENTS =>", comments[postId]);
-  console.log("rawComments =>", rawComments);
-  console.log('====================================');
 
-  // Loading State - only show if actually loading
-  if (currentUserLoading) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={styles.centerContainer}>
-          <Text style={{ color: theme.text }}>Loading...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  const getProfileUri = (profile: any) =>
+    typeof profile === "string"
+      ? profile
+      : profile?.url || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
-  // Error State - check for user error
-  if (currentUserError || !currentUser) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={styles.centerContainer}>
-          <Text style={{ color: theme.text, marginBottom: 10 }}>
-            Failed to load user data
-          </Text>
-          <TouchableOpacity onPress={() => window.location.reload()}>
-            <Text style={{ color: theme.buttonBg, fontWeight: "600" }}>
-              Retry
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  // Comments Error State
-  if (isError) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={styles.centerContainer}>
-          <Text style={{ color: theme.text, marginBottom: 10 }}>
-            Failed to load comments
-          </Text>
-          <TouchableOpacity onPress={() => refetch()}>
-            <Text style={{ color: theme.buttonBg, fontWeight: "600" }}>
-              Retry
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </SafeAreaView>
-    );
-  }
+  // ------------------------------------------
+  // 🔥 UI
+  // ------------------------------------------
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -1768,247 +1560,156 @@ const CommentPage = () => {
         keyboardVerticalOffset={90}
       >
         <FlatList
-          data={photoComments}
-          keyExtractor={(item) => String(item.uuid || item.id)}
+          data={comments}
+          keyExtractor={(item) => item.uuid}
           contentContainerStyle={{ paddingBottom: 20 }}
-          renderItem={({ item }) => (
-            <View>
-              <View style={styles.commentContainer}>
-                <Image
-                  source={{ uri: getProfileUri(item.userProfile) }}
-                  style={styles.profilePic}
-                />
-
-                <View style={{ flex: 1 }}>
-                  <Text style={[styles.commentUsername, { color: theme.text }]}>
-                    {item.username}{" "}
-                    <Text
-                      style={[styles.commentText, { color: theme.subtitle }]}
-                    >
-                      {item.content}
-                    </Text>
-                  </Text>
-
-                  <View style={styles.commentMeta}>
-                    <Text
-                      style={[styles.commentTime, { color: theme.placeholder }]}
-                    >
-                      {item.time}
-                    </Text>
-
-                    <TouchableOpacity onPress={() => setReplyTo(item.uuid)}>
-                      <Text
-                        style={[styles.replyText, { color: theme.buttonBg }]}
-                      >
-                        Reply
-                      </Text>
-                    </TouchableOpacity>
-
-                    {item.username === (currentUser?.username || "you") && (
-                      <TouchableOpacity
-                        onPress={() => handleDeleteComment(item.uuid || item.id)}
-                      >
-                        <Text
-                          style={[styles.deleteText, { color: theme.buttonBg }]}
-                        >
-                          Delete
-                        </Text>
-                      </TouchableOpacity>
-                    )}
-                  </View>
-
-                  {/* Replies */}
-                  {item.replies?.length ? (
-                    <View style={{ marginTop: 8, paddingLeft: 40 }}>
-                      {item.replies.map((reply: any) => (
-                        <View
-                          key={reply.uuid}
-                          style={{ flexDirection: "row", marginBottom: 5 }}
-                        >
-                          <Image
-                            source={{ uri: getProfileUri(reply.userProfile) }}
-                            style={styles.replyProfilePic}
-                          />
-
-                          <View style={{ flex: 1 }}>
-                            <Text
-                              style={[
-                                styles.commentUsername,
-                                { color: theme.text },
-                              ]}
-                            >
-                              {reply.username}{" "}
-                              <Text
-                                style={[
-                                  styles.commentText,
-                                  { color: theme.subtitle },
-                                ]}
-                              >
-                                {reply.content}
-                              </Text>
-                            </Text>
-
-                            <View style={styles.commentMeta}>
-                              <TouchableOpacity
-                                onPress={() =>
-                                  handleToggleLike(reply.uuid, item.uuid)
-                                }
-                              >
-                                <Icon
-                                  name={
-                                    reply.likedBy?.includes(
-                                      currentUser?.realName || ""
-                                    )
-                                      ? "heart"
-                                      : "heart-outline"
-                                  }
-                                  size={16}
-                                  color={
-                                    reply.likedBy?.includes(
-                                      currentUser?.realName || ""
-                                    )
-                                      ? "red"
-                                      : theme.text
-                                  }
-                                />
-                              </TouchableOpacity>
-                              <Text
-                                style={{
-                                  fontSize: 12,
-                                  color: theme.subtitle,
-                                }}
-                              >
-                                {reply.likedBy.length}
-                              </Text>
-
-                              {reply.username === (currentUser?.username || "you") && (
-                                <TouchableOpacity
-                                  onPress={() =>
-                                    handleDeleteComment(reply.uuid || reply.id, item.uuid || item.id)
-                                  }
-                                >
-                                  <Text
-                                    style={[
-                                      styles.deleteText,
-                                      { color: theme.buttonBg },
-                                    ]}
-                                  >
-                                    Delete
-                                  </Text>
-                                </TouchableOpacity>
-                              )}
-                            </View>
-                          </View>
-                        </View>
-                      ))}
-                    </View>
-                  ) : null}
-                </View>
-
-                {/* Like Button */}
-                <TouchableOpacity
-                  onPress={() => handleToggleLike(item.uuid, null)}
-                >
-                  <Icon
-                    name={
-                      item.likedBy?.includes(currentUser?.realName || "")
-                        ? "heart"
-                        : "heart-outline"
-                    }
-                    size={windowWidth * 0.05}
-                    color={
-                      item.likedBy?.includes(currentUser?.realName || "")
-                        ? "red"
-                        : theme.text
-                    }
-                  />
-                </TouchableOpacity>
-
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: theme.subtitle,
-                  }}
-                >
-                  {item.likedBy.length}
-                </Text>
-              </View>
-            </View>
-          )}
           ListEmptyComponent={
-            <Text
-              style={[
-                styles.emptyText,
-                { color: theme.placeholder, fontSize: windowWidth * 0.04 },
-              ]}
-            >
-              No comments yet. Be the first to comment!
+            <Text style={{ textAlign: "center", marginTop: 30, color: theme.placeholder }}>
+              No comments yet.
             </Text>
           }
+          renderItem={({ item }) => (
+            <View style={styles.commentContainer}>
+              <Image
+                source={{ uri: getProfileUri(item.userProfile) }}
+                style={styles.profilePic}
+              />
+
+              <View style={{ flex: 1 }}>
+                <Text style={[styles.commentUsername, { color: theme.text }]}>
+                  {item.username}{" "}
+                  <Text style={[styles.commentText, { color: theme.subtitle }]}>
+                    {item.content}
+                  </Text>
+                </Text>
+
+                <View style={styles.commentMeta}>
+                  <Text style={[styles.commentTime, { color: theme.placeholder }]}>
+                    {item.time}
+                  </Text>
+
+                  <TouchableOpacity onPress={() => setReplyTo(item.uuid)}>
+                    <Text style={[styles.replyText, { color: theme.buttonBg }]}>
+                      Reply
+                    </Text>
+                  </TouchableOpacity>
+
+                  {item.username === currentUser.username && (
+                    <TouchableOpacity onPress={() => handleDeleteComment(item.uuid)}>
+                      <Text style={[styles.deleteText, { color: theme.buttonBg }]}>
+                        Delete
+                      </Text>
+                    </TouchableOpacity>
+                  )}
+                </View>
+
+                {/* Replies */}
+                {item.replies?.length > 0 && (
+                  <View style={{ marginTop: 8, paddingLeft: 40 }}>
+                    {item.replies.map((reply: any) => (
+                      <View key={reply.uuid} style={{ flexDirection: "row" }}>
+                        <Image
+                          source={{ uri: getProfileUri(reply.userProfile) }}
+                          style={styles.replyProfilePic}
+                        />
+                        <View style={{ flex: 1 }}>
+                          <Text style={[styles.commentUsername, { color: theme.text }]}>
+                            {reply.username}{" "}
+                            <Text style={[styles.commentText, { color: theme.subtitle }]}>
+                              {reply.content}
+                            </Text>
+                          </Text>
+
+                          <View style={styles.commentMeta}>
+                            <TouchableOpacity
+                              onPress={() => handleToggleLike(reply.uuid, item.uuid)}
+                            >
+                              <Icon
+                                name={
+                                  reply.likedBy.includes(currentUser.username)
+                                    ? "heart"
+                                    : "heart-outline"
+                                }
+                                size={16}
+                                color={
+                                  reply.likedBy.includes(currentUser.username)
+                                    ? "red"
+                                    : theme.text
+                                }
+                              />
+                            </TouchableOpacity>
+
+                            <Text
+                              style={{
+                                fontSize: 12,
+                                color: theme.subtitle,
+                                marginLeft: 4,
+                              }}
+                            >
+                              {reply.likedBy.length}
+                            </Text>
+
+                            {reply.username === currentUser.username && (
+                              <TouchableOpacity
+                                onPress={() => handleDeleteComment(reply.uuid)}
+                              >
+                                <Text style={[styles.deleteText, { color: theme.buttonBg }]}>
+                                  Delete
+                                </Text>
+                              </TouchableOpacity>
+                            )}
+                          </View>
+                        </View>
+                      </View>
+                    ))}
+                  </View>
+                )}
+              </View>
+
+              {/* Like Button */}
+              <TouchableOpacity onPress={() => handleToggleLike(item.uuid)}>
+                <Icon
+                  name={
+                    item.likedBy.includes(currentUser.username)
+                      ? "heart"
+                      : "heart-outline"
+                  }
+                  size={windowWidth * 0.05}
+                  color={
+                    item.likedBy.includes(currentUser.username)
+                      ? "red"
+                      : theme.text
+                  }
+                />
+              </TouchableOpacity>
+            </View>
+          )}
         />
 
         {/* Input */}
         <View
           style={[
             styles.inputRow,
-            {
-              borderTopColor: theme.inputBorder,
-              backgroundColor: theme.background,
-            },
+            { borderTopColor: theme.inputBorder, backgroundColor: theme.background },
           ]}
         >
-          <Image
-            source={{ uri: currentUser?.userProfile }}
-            style={styles.commentProfilePic}
-          />
+          <Image source={{ uri: currentUser.userProfile }} style={styles.commentProfilePic} />
 
-          <View style={{ flex: 1, position: "relative" }}>
+          <View style={{ flex: 1 }}>
             <TextInput
-              placeholder={
-                replyTo ? "Replying to comment..." : "Add a comment..."
-              }
+              placeholder={replyTo ? "Replying..." : "Add a comment..."}
               placeholderTextColor={theme.placeholder}
               style={[
                 styles.input,
-                { color: theme.text, backgroundColor: theme.inputBg, paddingRight: 30 },
+                { color: theme.text, backgroundColor: theme.inputBg },
               ]}
               value={commentText}
               onChangeText={setCommentText}
             />
-
-            {replyTo && (
-              <TouchableOpacity
-                onPress={() => setReplyTo(null)}
-                style={{
-                  position: "absolute",
-                  right: 8,
-                  top: "50%",
-                  transform: [{ translateY: -10 }],
-                }}
-              >
-                <Icon name="close-circle" size={18} color={theme.placeholder} />
-              </TouchableOpacity>
-            )}
           </View>
 
-          <TouchableOpacity
-            onPress={handleAddComment}
-            disabled={loading || commentText.trim() === ""}
-            style={{ marginLeft: 6 }}
-          >
-            <Text
-              style={[
-                styles.postButton,
-                {
-                  color:
-                    commentText.trim() === "" || loading
-                      ? theme.placeholder
-                      : theme.buttonBg,
-                },
-              ]}
-            >
-              {loading ? "..." : "Post"}
-            </Text>
+          <TouchableOpacity onPress={handleAddComment}>
+            <Text style={[styles.postButton, { color: theme.buttonBg }]}>Post</Text>
           </TouchableOpacity>
         </View>
       </KeyboardAvoidingView>
