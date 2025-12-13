@@ -1,7 +1,6 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useAuthStore } from "@/src/store/useAuthStore";
 import { useFollowStore } from "@/src/store/useFollowerFollowingStore";
-import { Notification, useNotificationStore } from '@/src/store/useNotificationStore';
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { Ionicons } from "@expo/vector-icons";
 import AsyncStorage from "@react-native-async-storage/async-storage";
@@ -18,7 +17,7 @@ import {
   View,
 } from "react-native";
 import { z } from "zod";
-import { expoTokenAssign, getUserInfoAndFollowState, getUserNotifications, loginUser } from "../../src/api/auth-api";
+import { expoTokenAssign, getUserInfoAndFollowState, loginUser } from "../../src/api/auth-api";
 
 const loginSchema = z.object({
   emailOrPhone: z
@@ -72,7 +71,7 @@ const Login = () => {
         if (data.accessToken) {
           await saveToken(data.accessToken);
         }
-        const pushToken = AsyncStorage.getItem('pushToken');
+        const pushToken =await AsyncStorage.getItem('pushToken');
         console.log("Push token:", pushToken);
         await expoTokenAssign(pushToken);
         Alert.alert("Success", "Logged in successfully!");
@@ -94,13 +93,7 @@ const Login = () => {
         // console.log("===============================",setVideos)
         setFollowers(userData.followers);
         setFollowings(userData.followings);
-
-        const notifications: Notification[] = await getUserNotifications();
-        const addNotification = useNotificationStore.getState().addNotification;
-        notifications.forEach((notification: Notification) => {
-          addNotification(notification);
-        });
-        console.log("Notifications:", notifications);
+  
       } else {
         Alert.alert("Error", data.message);
       }
