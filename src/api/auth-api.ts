@@ -194,7 +194,7 @@ async function getUserNotifications() {
   return data;
 }
 
-async function expoTokenAssign(reqBody: any) {
+async function expoTokenAssign(pushToken: any) {
   const token = await getToken();
   const config = {
     headers: { 
@@ -204,7 +204,7 @@ async function expoTokenAssign(reqBody: any) {
     },
   };
   const apiUrl = createApiUrl('/tokens/assign');
-  const { data } = await axios.post(apiUrl, reqBody, config);
+  const { data } = await axios.post(apiUrl, {token:pushToken}, config);
   return data;
 }
 
