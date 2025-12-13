@@ -624,6 +624,7 @@
 
 // export default UserReelsFeed;
 
+import VideoProgressBar from '@/app/(drawer)/(tabs)/reels/videoProgressBar';
 import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
@@ -694,6 +695,7 @@ const UserReelItem = ({
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
+   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -722,6 +724,12 @@ const UserReelItem = ({
   useEffect(() => {
     if (!player) return;
 
+     if (!isFocused) {
+      player.pause();
+      return;
+    }
+
+
     if (currentIndex === index) {
       if (player.currentTime < 0.5) player.currentTime = 0;
       player.play();
@@ -730,7 +738,7 @@ const UserReelItem = ({
       try { player.pause(); } catch { }
       player.volume = 0;
     }
-  }, [currentIndex, index, isMuted]);
+  }, [isFocused,currentIndex, index, isMuted]);
 
   const handleLike = async () => {
     const newLiked = !liked;
@@ -963,6 +971,12 @@ const UserReelItem = ({
           <Ionicons name="ellipsis-vertical" size={ACTION_ICON_SIZE * 0.8} color="#fff" />
         </TouchableOpacity>
       </View>
+
+        <VideoProgressBar
+      player={player} 
+      isActive={currentIndex === index && isFocused}
+    />
+
 
       {/* Bottom Drawer - Perfectly Styled */}
       <BookmarkPanel />

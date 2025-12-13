@@ -30,6 +30,29 @@ async function getAllUsers() {
 
 }
 
+async function sendReelToChats(reelId: string, sessionIds: string[]) {
+  const token = await getToken();
+
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  };
+
+  const apiUrl = createApiUrl('/chat/shareReelMultiple');
+
+  // Body mein senderId aur receiverId bhejo
+  const { data } = await axios.post(apiUrl, {
+    reelId,
+    sessionIds
+  }, config);
+
+  console.log("Session data:", data);
+
+  return data;
+}
+
 async function chatSessionId(senderId: string, receiverId: string) {
   const token = await getToken();
 
@@ -74,7 +97,7 @@ async function getUserSessionsWithLatestMessage() {
 }
 
 
-   async function getSessionMessages(sessionId : string) {
+async function getSessionMessages(sessionId: string) {
   const token = await getToken();
 
   const config = {
@@ -85,7 +108,7 @@ async function getUserSessionsWithLatestMessage() {
   };
 
   const apiUrl = createApiUrl(`/chat/messages/session/${sessionId}`);
-  const { data } = await axios.get(apiUrl,config);
+  const { data } = await axios.get(apiUrl, config);
   console.log("getSessionMessages", data);
   return data;
 }
@@ -93,7 +116,7 @@ async function getUserSessionsWithLatestMessage() {
 
 
 // Delete message for me
- const deleteMessageForMeAPI = async (messageId: string) => {
+const deleteMessageForMeAPI = async (messageId: string) => {
   const token = await getToken();
 
   const config = {
@@ -104,13 +127,13 @@ async function getUserSessionsWithLatestMessage() {
   };
 
   const apiUrl = createApiUrl(`/chat/message/${messageId}/for-me`);
-  const data  = await axios.get(apiUrl, config);
+  const data = await axios.get(apiUrl, config);
   return data;
 
 };
 
 // Delete message for everyone
- const deleteMessageForEveryoneAPI = async (messageId: string) => {
+const deleteMessageForEveryoneAPI = async (messageId: string) => {
   const token = await getToken();
 
   const config = {
@@ -121,10 +144,10 @@ async function getUserSessionsWithLatestMessage() {
   };
 
   const apiUrl = createApiUrl(`/chat/message/${messageId}/for-everyone`);
-  const  data  = await axios.get(apiUrl, config);
+  const data = await axios.get(apiUrl, config);
   return data;
 };
 
 
-export { chatSessionId, deleteMessageForEveryoneAPI, deleteMessageForMeAPI, getAllUsers, getSessionMessages, getUserSessionsWithLatestMessage };
+export { chatSessionId, deleteMessageForEveryoneAPI, deleteMessageForMeAPI, getAllUsers, getSessionMessages, getUserSessionsWithLatestMessage, sendReelToChats };
 

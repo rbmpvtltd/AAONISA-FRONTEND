@@ -27,6 +27,7 @@ import {
 } from "react-native";
 import { ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import VideoProgressBar from './videoProgressBar';
 
 const ReelItem = ({
   item,
@@ -39,7 +40,6 @@ const ReelItem = ({
   toggleLike,
   likeMutation,
   currentUserId,
-  currentUser,
   // addComment,
   addShare,
   activeTab,
@@ -67,10 +67,9 @@ const ReelItem = ({
       ? item.likes.some((like: any) => like.user_id === currentUserId)
       : false
   );
-  
   console.log("REEL id:", item.id || item.uuid);
 
-  const isOwnReel = item.user.username === currentUser;
+
   // create player
   const player = useVideoPlayer(
     typeof item.videoUrl === "string" ? { uri: item.videoUrl } : item.videoUrl,
@@ -160,17 +159,6 @@ const ReelItem = ({
 
   const reelId = item.uuid || item.id;
 
-  const handleProfilePress = () => {
-    if (isOwnReel) {
-      console.log("✅ Own reel detected - Redirecting to /profile");
-      router.push('/profile');
-    } else {
-      console.log("➡️ Other user reel - Redirecting to /profile/" + item.user.username);
-      router.push(`/profile/${item.user.username}`);
-    }
-  };
-
-
   console.log('====================================');
   console.log(item.duration);
   // console.log(item);
@@ -222,11 +210,9 @@ const ReelItem = ({
         <View style={styles.userInfo}>
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center' }}
-            onPress={
-              // () => {
-              //   router.push(`/profile/${item.user.username}`);
-              // }
-              handleProfilePress}
+            onPress={() => {
+              router.push(`/profile/${item.user.username}`);
+            }}
           >
             <Image
               source={{
@@ -338,6 +324,11 @@ const ReelItem = ({
         </TouchableOpacity>
       </View>
 
+      <VideoProgressBar 
+      player={player} 
+      isActive={currentIndex === index && isFocused}
+    />
+
       <BottomDrawer
         visible={showOptions}
         onClose={() => setShowOptions(false)}
@@ -410,7 +401,6 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-
 
   // URL update function
   const updateURL = (index: number) => {
@@ -495,15 +485,6 @@ const ReelsFeed = () => {
       }
     }
   }, [videoId, reels.length]);
-
-
-  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
-    queryKey: ["currentUser"],
-    queryFn: GetCurrentUser,
-  });
-
-  const currentUserId = currentUser?.userProfile?.id;
-  const currentUserProfile = currentUser?.username;
 
 
   // Add this to your state
@@ -596,6 +577,12 @@ const ReelsFeed = () => {
   };
   // const currentUserId = useProfileStore(state => state.userId);
 
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+  const currentUserId = currentUser?.userProfile?.id
 
   if (isLoading)
     return (
@@ -654,7 +641,6 @@ const ReelsFeed = () => {
               showIcon={showIcon}
               fadeAnim={fadeAnim}
               currentUserId={currentUserId}
-              currentUser={currentUserProfile}
               // toggleLike={toggleLike}
               // toggleLike={(id: string) => likeMutation.mutate(id)}
               likeMutation={likeMutation}
@@ -710,6 +696,7 @@ const ReelsFeed = () => {
           }, 100);
         }}
       />
+
       <BookmarkPanel
       />
     </View>
