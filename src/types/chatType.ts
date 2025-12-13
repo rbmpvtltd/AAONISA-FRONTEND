@@ -1,9 +1,15 @@
-export type Message = {
+export interface Message {
   id: string;
-  fromMe: boolean;
   text: string;
   createdAt: number;
-};
+  fromMe: boolean;
+  type?: 'text' | 'reel';  // Optional type field
+  reelData?: {              // Optional reelData field
+    reelId: string;
+    url: string;
+    thumbnail: string;
+  };
+}
 
 export type ChatSummary = {
   id: string;

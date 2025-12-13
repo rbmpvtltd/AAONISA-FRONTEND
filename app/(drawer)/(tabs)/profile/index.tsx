@@ -70,21 +70,20 @@ import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useQuery } from "@tanstack/react-query";
 import { ActivityIndicator, View } from "react-native";
+import { RefreshControl, ScrollView } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyProfileScreen() {
   const theme = useAppTheme();
 
   // Step 1: Get current logged-in user (for username)
-  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+  const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
-
-
   
   // Step 2: Get full profile using username from currentUser
-  const { data: profile, isLoading: profileLoading } = useQuery({
+  const { data: profile, isLoading: profileLoading,  refetch: refetchProfile,} = useQuery({
     queryKey: ["userProfile", currentUser?.username],
     queryFn: () => GetProfileUsername(currentUser?.username || ""),
     enabled: !!currentUser?.username, // tabhi chale jab username mil jaaye
@@ -100,8 +99,25 @@ export default function MyProfileScreen() {
     );
   }
 
+  const onRefresh = async () => {
+  await Promise.all([
+    refetchCurrentUser(),
+    refetchProfile(),
+  ]);
+};
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
+       <ScrollView
+      showsVerticalScrollIndicator={false}
+      refreshControl={
+        <RefreshControl
+          refreshing={currentUserLoading || profileLoading}
+          onRefresh={onRefresh}
+          tintColor={theme.text} // iOS
+        />
+      }
+    >
       <TopHeader
         userName={profile?.username}
         theme={theme}
@@ -116,8 +132,8 @@ export default function MyProfileScreen() {
         onFollowToggle={() => {}}
       />
       <Tabs theme={theme} />
-      {/* <PostGrid videos={profile?.videos ?? []} /> */}
             <PostGrid videos={profile?.videos || []} username={profile?.username} />
+            </ScrollView>
     </SafeAreaView>
   );
 }
