@@ -1,6 +1,7 @@
 {
   "cli": {
-    "version": ">= 16.18.0"
+    "version": ">= 16.18.0",
+    "appVersionSource": "remote"
   },
   "build": {
     "development": {
@@ -9,15 +10,14 @@
       "android": {
         "buildType": "apk",
         "autoIncrement": true
-
       }
     },
     "production": {
-        "node": "20.19.4",
-       "env" : {
-           "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON",
-           "EXPO_PUBLIC_LOCAL_API_URL":"https://hithoy-backend.justsearch.net.in/api"
-        },
+      "node": "20.19.4",
+      "env": {
+        "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON",
+        "EXPO_PUBLIC_LOCAL_API_URL": "https://hithoy-backend.justsearch.net.in/api"
+      },
       "android": {
         "buildType": "app-bundle",
         "autoIncrement": true
