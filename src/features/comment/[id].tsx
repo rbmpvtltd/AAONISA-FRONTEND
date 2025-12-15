@@ -1295,7 +1295,7 @@
 
 
 // ======= arbaaz chouhan
-// 
+
 import { useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -1321,6 +1321,7 @@ import {
   likeCommentApi,
 } from "@/src/api/comments-api";
 
+import { GetCurrentUser } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
@@ -1342,24 +1343,26 @@ const normalizeComment = (c: any) => ({
   username: c.author?.username || "Unknown",
   userProfile:
     c.author?.userProfile?.url ||
-    c.author?.userProfile ||
+    c.author?.userProfile?.ProfilePicture ||
     "https://via.placeholder.com/150",
   content: c.content,
   time: new Date(c.createdAt).toLocaleTimeString(),
   mentions: c.mentions || [],
-  likedBy: c.likedBy || [],
+  // likedBy: c.likedBy || [],
+  likedBy: (c.likedBy || []).map((u: any) => u.id),
   replies: (c.replies || []).map((r: any) => ({
     uuid: r.id,
     parentId: c.id,
     username: r.author?.username || "Unknown",
     userProfile:
       r.author?.userProfile?.url ||
-      r.author?.userProfile ||
+      r.author?.userProfile?.ProfilePicture ||
       "https://via.placeholder.com/150",
     content: r.content,
     time: new Date(r.createdAt).toLocaleTimeString(),
     mentions: r.mentions || [],
-    likedBy: r.likedBy || [],
+    // likedBy: r.likedBy || [],
+    likedBy: (r.likedBy || []).map((u: any) => u.id),
   })),
 });
 
@@ -1374,11 +1377,29 @@ const CommentPage = () => {
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
   // Dummy current user
-  const currentUser = {
-    id: "123",
-    username: "you",
-    userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-  };
+  // const currentUser = {
+  //   id: "123",
+  //   username: "you",
+  //   userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+  // };
+
+
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+
+  if (currentUserLoading || !currentUser) {
+    return (
+      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+        <View style={styles.centerContainer}>
+          <Text style={{ color: theme.text }}>Loading...</Text>
+        </View>
+      </SafeAreaView>
+    );
+  }
+  console.log("cccccccccccuuuuuuuuuuu", currentUser);
 
   // -------------------------------
   // 🔥 FETCH COMMENTS — useQuery
@@ -1391,6 +1412,9 @@ const CommentPage = () => {
     },
   });
 
+  console.log('====================================');
+  console.log("ccccccccrrrrrrrrrrrroooo", comments);
+  console.log('====================================');
   // ----------------------------------
   // 🔥 ADD COMMENT / REPLY MUTATION
   // ----------------------------------
@@ -1493,13 +1517,17 @@ const CommentPage = () => {
 
       const prev = queryClient.getQueryData(["comments", postId]);
 
+      // // ✅ Safe access
+      // const username = currentUser?.username;
+      // if (!username) return { prev };
+
       queryClient.setQueryData(["comments", postId], (old: any[] = []) =>
         old.map((comment) => {
           // 🔥 Like on main comment
           if (!parentId && comment.uuid === commentId) {
             return {
               ...comment,
-              likedBy: toggleArr(comment.likedBy, currentUser.username),
+              likedBy: toggleArr(comment.likedBy, currentUser?.id),
             };
           }
 
@@ -1511,7 +1539,7 @@ const CommentPage = () => {
                 r.uuid === commentId
                   ? {
                     ...r,
-                    likedBy: toggleArr(r.likedBy, currentUser.username),
+                    likedBy: toggleArr(r.likedBy, currentUser?.id),
                   }
                   : r
               ),
@@ -1531,9 +1559,9 @@ const CommentPage = () => {
       }
     },
 
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
+    // onSettled: () => {
+    //   queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    // },
   });
 
 
@@ -1626,17 +1654,18 @@ const CommentPage = () => {
                             >
                               <Icon
                                 name={
-                                  reply.likedBy.includes(currentUser.username)
+                                  reply.likedBy.includes(currentUser?.id)
                                     ? "heart"
                                     : "heart-outline"
                                 }
                                 size={16}
                                 color={
-                                  reply.likedBy.includes(currentUser.username)
+                                  reply.likedBy.includes(currentUser?.id)
                                     ? "red"
                                     : theme.text
                                 }
                               />
+
                             </TouchableOpacity>
 
                             <Text
@@ -1670,17 +1699,26 @@ const CommentPage = () => {
               <TouchableOpacity onPress={() => handleToggleLike(item.uuid)}>
                 <Icon
                   name={
-                    item.likedBy.includes(currentUser.username)
+                    item.likedBy.includes(currentUser?.id)
                       ? "heart"
                       : "heart-outline"
                   }
                   size={windowWidth * 0.05}
                   color={
-                    item.likedBy.includes(currentUser.username)
+                    item.likedBy.includes(currentUser?.id)
                       ? "red"
                       : theme.text
                   }
                 />
+                <Text
+                  style={{
+                    fontSize: 12,
+                    color: theme.subtitle,
+                    marginLeft: 4,
+                  }}
+                >
+                  {item.likedBy.length}
+                </Text>
               </TouchableOpacity>
             </View>
           )}
@@ -1693,7 +1731,7 @@ const CommentPage = () => {
             { borderTopColor: theme.inputBorder, backgroundColor: theme.background },
           ]}
         >
-          <Image source={{ uri: currentUser.userProfile }} style={styles.commentProfilePic} />
+          <Image source={{ uri: currentUser.userProfile?.ProfilePicture }} style={styles.commentProfilePic} />
 
           <View style={{ flex: 1 }}>
             <TextInput
