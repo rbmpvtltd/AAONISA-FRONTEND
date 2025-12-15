@@ -65,31 +65,101 @@
 //   );
 // }
 
-import { PostGrid, ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profile/[username]/index";
+// import { PostGrid, ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profile/[username]/index";
+// import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
+// import { useAppTheme } from "@/src/constants/themeHelper";
+// import { useQuery } from "@tanstack/react-query";
+// import { ActivityIndicator, View } from "react-native";
+// import { RefreshControl, ScrollView } from "react-native-gesture-handler";
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+// export default function MyProfileScreen() {
+//   const theme = useAppTheme();
+
+//   // Step 1: Get current logged-in user (for username)
+//   const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
+//     queryKey: ["currentUser"],
+//     queryFn: GetCurrentUser,
+//   });
+  
+//   // Step 2: Get full profile using username from currentUser
+//   const { data: profile, isLoading: profileLoading,  refetch: refetchProfile,} = useQuery({
+//     queryKey: ["userProfile", currentUser?.username],
+//     queryFn: () => GetProfileUsername(currentUser?.username || ""),
+//     enabled: !!currentUser?.username, // tabhi chale jab username mil jaaye
+//   });
+
+//   // console.log("user data in current user ", profile);
+  
+//   if (currentUserLoading || profileLoading) {
+//     return (
+//       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+//         <ActivityIndicator size="large" color={theme.text} />
+//       </View>
+//     );
+//   }
+
+//   const onRefresh = async () => {
+//   await Promise.all([
+//     refetchCurrentUser(),
+//     refetchProfile(),
+//   ]);
+// };
+
+//   return (
+//     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
+//        <ScrollView
+//       showsVerticalScrollIndicator={false}
+//       refreshControl={
+//         <RefreshControl
+//           refreshing={currentUserLoading || profileLoading}
+//           onRefresh={onRefresh}
+//           tintColor={theme.text} // iOS
+//         />
+//       }
+//     >
+//       <TopHeader
+//         userName={profile?.username}
+//         theme={theme}
+//         isOwnProfile={true}
+//       />
+//       <ProfileHeader theme={theme} profile={profile} />
+//       <UserInfo
+//         theme={theme}
+//         profile={profile}
+//         isOwnProfile={true}
+//           isFollowing={false} 
+//         onFollowToggle={() => {}}
+//       />
+//       <Tabs theme={theme} />
+//             <PostGrid videos={profile?.videos || []} username={profile?.username} />
+//             </ScrollView>
+//     </SafeAreaView>
+//   );
+// }
+
+
+import { ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profile/[username]/index";
 import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useQuery } from "@tanstack/react-query";
-import { ActivityIndicator, View } from "react-native";
-import { RefreshControl, ScrollView } from "react-native-gesture-handler";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { RefreshControl } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyProfileScreen() {
   const theme = useAppTheme();
 
-  // Step 1: Get current logged-in user (for username)
   const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
   
-  // Step 2: Get full profile using username from currentUser
   const { data: profile, isLoading: profileLoading,  refetch: refetchProfile,} = useQuery({
     queryKey: ["userProfile", currentUser?.username],
     queryFn: () => GetProfileUsername(currentUser?.username || ""),
-    enabled: !!currentUser?.username, // tabhi chale jab username mil jaaye
+    enabled: !!currentUser?.username,
   });
-
-  // console.log("user data in current user ", profile);
   
   if (currentUserLoading || profileLoading) {
     return (
@@ -100,24 +170,14 @@ export default function MyProfileScreen() {
   }
 
   const onRefresh = async () => {
-  await Promise.all([
-    refetchCurrentUser(),
-    refetchProfile(),
-  ]);
-};
+    await Promise.all([
+      refetchCurrentUser(),
+      refetchProfile(),
+    ]);
+  };
 
-  return (
-    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
-       <ScrollView
-      showsVerticalScrollIndicator={false}
-      refreshControl={
-        <RefreshControl
-          refreshing={currentUserLoading || profileLoading}
-          onRefresh={onRefresh}
-          tintColor={theme.text} // iOS
-        />
-      }
-    >
+  const ListHeaderComponent = () => (
+    <>
       <TopHeader
         userName={profile?.username}
         theme={theme}
@@ -128,12 +188,51 @@ export default function MyProfileScreen() {
         theme={theme}
         profile={profile}
         isOwnProfile={true}
-          isFollowing={false} 
+        isFollowing={false} 
         onFollowToggle={() => {}}
       />
       <Tabs theme={theme} />
-            <PostGrid videos={profile?.videos || []} username={profile?.username} />
-            </ScrollView>
+    </>
+  );
+
+  return (
+    <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
+      <FlatList
+        data={profile?.videos || []}
+        keyExtractor={(item) => item.uuid}
+        numColumns={3}
+        columnWrapperStyle={{ gap: 2, paddingHorizontal: 2, marginBottom: 2 }}
+        renderItem={({ item, index }) => {
+          const { VideoItem } = require("@/app/profile/[username]/index");
+          return (
+            <VideoItem
+              image={item.thumbnailUrl}
+              id={item.uuid}
+              username={profile?.username}
+              index={index}
+              onPressItem={(idx : any) => {
+                const { router } = require("expo-router");
+                router.push(`/p/${profile?.username}/${item.uuid}`);
+              }}
+            />
+          );
+        }}
+        ListHeaderComponent={ListHeaderComponent}
+        ListEmptyComponent={() => (
+          <View style={{ alignItems: "center", marginTop: 50 }}>
+            <Text style={{ color: theme.text }}>No videos uploaded yet.</Text>
+          </View>
+        )}
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20, backgroundColor: theme.background }}
+        refreshControl={
+          <RefreshControl
+            refreshing={currentUserLoading || profileLoading}
+            onRefresh={onRefresh}
+            tintColor={theme.text}
+          />
+        }
+      />
     </SafeAreaView>
   );
 }
