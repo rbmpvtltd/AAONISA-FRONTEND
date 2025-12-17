@@ -62,7 +62,7 @@ const ReelItem = ({
   const isFocused = useIsFocused();
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
-  const markViewedMutation = useMarkViewedMutation();
+  const markViewedMutation = useMarkViewedMutation(item.id);
   const [viewed, setViewed] = useState(false);
 
   const [liked, setLiked] = useState(
