@@ -90,6 +90,7 @@ async function addReelToBookmark(reqBody: any) {
 }
 
 async function removeReelFromBookmark(reqBody: any) {
+  console.log(reqBody)
   const token = await getToken();
   const config = {
     headers: {
@@ -100,7 +101,7 @@ async function removeReelFromBookmark(reqBody: any) {
   };
 
   const apiUrl = createApiUrl("/bookmarks/removeReelFromBookmark");
-  const { data } = await axios.post(apiUrl, reqBody, config);
+  const { data } = await axios.post(apiUrl, {reelId:reqBody}, config);
   return data;
 }
 export { addBookmark, addReelToBookmark, getBookmarks, removeBookmark, removeReelFromBookmark, renameBookmark };

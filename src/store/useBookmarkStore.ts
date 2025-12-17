@@ -27,6 +27,8 @@ interface BookmarkStore {
 
   setCategories: (fn: (prev: Category[]) => Category[]) => void;
   getReelById: (reelId: string) => Reel | null;
+
+  removeReelFromCategory: (reelId: string) => void;
 }
 
 export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
@@ -34,8 +36,9 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   panelVisible: false,
   selectedReel: null,
 
-  openBookmarkPanel: (reel) =>
-    set({ selectedReel: reel, panelVisible: true }),
+  openBookmarkPanel: (reel) =>{
+    set({ selectedReel: reel, panelVisible: true })
+  },
 
   closePanel: () => set({ panelVisible: false }),
 
@@ -120,4 +123,12 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     }
     return null;
   },
+  removeReelFromCategory: (reelId) => {
+  set((state) => ({
+    categories: state.categories.map((cat) => ({
+      ...cat,
+      reels: cat.reels.filter((r) => r.uuid !== reelId),
+    })),
+  }));
+},
 }));

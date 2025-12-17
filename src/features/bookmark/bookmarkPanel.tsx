@@ -258,10 +258,9 @@ const BookmarkPanel = () => {
   const handleSelectCategory = async (categoryId: string) => {
     const selectedCategory = categories.find(c => c.id === categoryId);
     if (!selectedCategory || !selectedReel) return;
-
     try {
       await addReelToBookmark({
-        reelId: selectedReel.uuid,
+        reelId: selectedReel,
         name: selectedCategory.name,
       });
 

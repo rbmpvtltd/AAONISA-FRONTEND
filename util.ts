@@ -3,7 +3,7 @@ function createApiUrl(url: string) {
     if (__DEV__) {
       console.log(`https://hithoy-backend.justsearch.net.in/api${url}`);
       
-        return `https://hithoy-backend.justsearch.net.in/api${url}`;
+        return `http://192.168.1.64:3000/api${url}`;
         
     }
     return `https://hithoy-backend.justsearch.net.in/api${url}`;
