@@ -3,6 +3,7 @@ import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
+import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
@@ -61,6 +62,8 @@ const ReelItem = ({
   const isFocused = useIsFocused();
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
+  const markViewedMutation = useMarkViewedMutation();
+  const [viewed, setViewed] = useState(false);
 
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -154,7 +157,35 @@ const ReelItem = ({
     }
   };
 
-  // console.log("item.likes", item.likesCount);
+
+  useEffect(() => {
+    let frameId: number;
+
+    const checkTime = () => {
+      try {
+        // Only mark when current reel is active and playing
+        if (currentIndex === index && player?.playing) {
+          const time = player.currentTime;
+          if (!viewed && time >= 10) {
+            setViewed(true);
+            markViewedMutation.mutate(item.uuid);
+            console.log(` User viewed reel: ${item.uuid} | Time watched: ${time}s`);
+          }
+        }
+      } catch (e) {
+        console.log("View check error:", e);
+      }
+
+      frameId = requestAnimationFrame(checkTime);
+    };
+
+    frameId = requestAnimationFrame(checkTime);
+    return () => cancelAnimationFrame(frameId);
+  }, [player, currentIndex, index, viewed]);
+
+
+  console.log("item.VIEWS", item);
+  
   // console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;

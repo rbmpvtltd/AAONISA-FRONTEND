@@ -778,15 +778,16 @@ const UserReelItem = ({
     return () => cancelAnimationFrame(frameId);
   }, [player, currentIndex, index, viewed]);
 
-  console.log("username in profile", reelUsername);
-  console.log("user item.ProfilePicture ", profilePicture);
-  console.log("user comment resived", item.comments);
-  console.log("user audio", item.audio);
+
+
+  // console.log("username in profile", reelUsername);
+  // console.log("user item.ProfilePicture ", profilePicture);
+  // console.log("user comment resived", item.comments);
+  // console.log("user audio", item.audio);
 
   console.log("=============================");
   console.log("item :", item)
   console.log("=============================");
-
 
   const deleteVideo = useDeleteVideo();
   const handleDeleteReel = () => {
