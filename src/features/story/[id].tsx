@@ -1099,9 +1099,9 @@ const styles = StyleSheet.create({
     overflow: "hidden",
   },
   progressFill: { backgroundColor: "#fff" },
-  userRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-  profileImg: { width: 35, height: 35, borderRadius: 20 },
-  username: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  userRow: { flexDirection: "row", alignItems: "center" },
+  profileImg: { width: 35, height: 35, borderRadius: 20, marginRight : 10 },
+  username: { color: "#fff", fontSize: 16, fontWeight: "600",marginRight : 6 },
   timeText: { color: "#ccc", fontSize: 12, marginLeft: "10%" },
   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
   viewersButton: {

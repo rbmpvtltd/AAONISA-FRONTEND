@@ -1,9 +1,10 @@
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { Stack } from "expo-router";
+import { Stack, useLocalSearchParams } from "expo-router";
 import { StatusBar } from "react-native";
 
 export default function ChatLayout() {
   const theme = useAppTheme(); 
+    const { username,avatar } = useLocalSearchParams();
 
   return (
     <>

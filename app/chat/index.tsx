@@ -336,7 +336,7 @@ export default function ChatListScreen() {
   const chatList: ChatSummary[] = sessions?.map((session: any) => ({
     id: session.otherUser.id,
     name: session.otherUser.username,
-    avatar: session.otherUser.profilePicture,
+    avatar: session.otherUser.profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
     lastMessage: session.latestMessage?.text || "Start chatting...",
     unread: 0,
     sessionId: session.sessionId,
@@ -375,6 +375,8 @@ export default function ChatListScreen() {
         <Text style={{ color: theme.subtitle, fontSize: 16 }}>No chats yet</Text>
       </View>
     );
+
+
   }
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -410,6 +412,8 @@ export default function ChatListScreen() {
                   params: {
                     id: item.id,
                     sessionId: item.sessionId,
+                     username: item.name,
+                      avatar: item.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png",   
                     reelId,
                   },
                 });

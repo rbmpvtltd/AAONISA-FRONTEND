@@ -106,7 +106,7 @@
 // // // //   };
 
 // // // //   fetchComments();
-// // // // }, [postId, currentUser.id]); // 🔥 re-run when user loads
+// // // // }, [postId, currentUser.id]); //  re-run when user loads
 
 // // //   // useEffect(() => {
 // // //   //   const fetchUser = async () => {
@@ -602,7 +602,7 @@
 //   const { data: currentUserData, isLoading: currentUserLoading, isError: currentUserError } = useQuery({
 //     queryKey: ["currentUser"],
 //     queryFn: async () => {
-//       console.log("🔥 Fetching current user...");
+//       console.log(" Fetching current user...");
 //       const result = await GetCurrentUser();
 //       console.log("✅ Current user result:", result);
 //       return result;
@@ -843,7 +843,7 @@
 //     },
 //   });
 
-//   // 🔥 Like Comment Mutation
+//   //  Like Comment Mutation
 //   const likeCommentMutation = useMutation({
 //     mutationFn: async ({
 //       commentId,
@@ -1294,9 +1294,8 @@
 // });
 
 
-// ======= arbaaz chouhan
-
-import { useLocalSearchParams } from "expo-router";
+// ======= arbaaz chouhan =======
+import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
   Alert,
@@ -1323,6 +1322,7 @@ import {
 
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { timeAgo } from "@/src/utils/timeAgo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 
 const { width: windowWidth } = Dimensions.get("window");
@@ -1343,26 +1343,24 @@ const normalizeComment = (c: any) => ({
   username: c.author?.username || "Unknown",
   userProfile:
     c.author?.userProfile?.url ||
-    c.author?.userProfile?.ProfilePicture ||
+    c.author?.userProfile ||
     "https://via.placeholder.com/150",
   content: c.content,
-  time: new Date(c.createdAt).toLocaleTimeString(),
+  time: c.createdAt,
   mentions: c.mentions || [],
-  // likedBy: c.likedBy || [],
-  likedBy: (c.likedBy || []).map((u: any) => u.id),
+  likedBy: c.likedBy || [],
   replies: (c.replies || []).map((r: any) => ({
     uuid: r.id,
     parentId: c.id,
     username: r.author?.username || "Unknown",
     userProfile:
       r.author?.userProfile?.url ||
-      r.author?.userProfile?.ProfilePicture ||
+      r.author?.userProfile ||
       "https://via.placeholder.com/150",
     content: r.content,
-    time: new Date(r.createdAt).toLocaleTimeString(),
+    time: r.createdAt,
     mentions: r.mentions || [],
-    // likedBy: r.likedBy || [],
-    likedBy: (r.likedBy || []).map((u: any) => u.id),
+    likedBy: r.likedBy || [],
   })),
 });
 
@@ -1376,33 +1374,20 @@ const CommentPage = () => {
   const [commentText, setCommentText] = useState("");
   const [replyTo, setReplyTo] = useState<string | null>(null);
 
-  // Dummy current user
-  // const currentUser = {
-  //   id: "123",
-  //   username: "you",
-  //   userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-  // };
-
-
   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
 
+  // const currentUser = {
+  //   id:`123`,
+  //   username: "you",
+  //   userProfile: "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+  // };
 
-  if (currentUserLoading || !currentUser) {
-    return (
-      <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
-        <View style={styles.centerContainer}>
-          <Text style={{ color: theme.text }}>Loading...</Text>
-        </View>
-      </SafeAreaView>
-    );
-  }
-  console.log("cccccccccccuuuuuuuuuuu", currentUser);
 
   // -------------------------------
-  // 🔥 FETCH COMMENTS — useQuery
+  //  FETCH COMMENTS — useQuery
   // -------------------------------
   const { data: comments = [], isLoading } = useQuery({
     queryKey: ["comments", postId],
@@ -1412,11 +1397,8 @@ const CommentPage = () => {
     },
   });
 
-  console.log('====================================');
-  console.log("ccccccccrrrrrrrrrrrroooo", comments);
-  console.log('====================================');
   // ----------------------------------
-  // 🔥 ADD COMMENT / REPLY MUTATION
+  //  ADD COMMENT / REPLY MUTATION
   // ----------------------------------
   const addCommentMutation = useMutation({
     mutationFn: ({ content, mentions, parentId }: any) =>
@@ -1459,7 +1441,7 @@ const CommentPage = () => {
   };
 
   // ----------------------------------
-  // 🔥 DELETE COMMENT MUTATION
+  //  DELETE COMMENT MUTATION
   // ----------------------------------
   const deleteMutation = useMutation({
     mutationFn: (commentId: string) => deleteCommentApi(commentId),
@@ -1491,7 +1473,7 @@ const CommentPage = () => {
   };
 
   // ----------------------------------
-  // 🔥 LIKE TOGGLE — optimistic update
+  //  LIKE TOGGLE — optimistic update
   // ----------------------------------
 
   interface LikeVars {
@@ -1517,21 +1499,17 @@ const CommentPage = () => {
 
       const prev = queryClient.getQueryData(["comments", postId]);
 
-      // // ✅ Safe access
-      // const username = currentUser?.username;
-      // if (!username) return { prev };
-
       queryClient.setQueryData(["comments", postId], (old: any[] = []) =>
         old.map((comment) => {
-          // 🔥 Like on main comment
+          //  Like on main comment
           if (!parentId && comment.uuid === commentId) {
             return {
               ...comment,
-              likedBy: toggleArr(comment.likedBy, currentUser?.id),
+              likedBy: toggleArr(comment.likedBy, currentUser.username),
             };
           }
 
-          // 🔥 Like on reply
+          //  Like on reply
           if (parentId && comment.uuid === parentId) {
             return {
               ...comment,
@@ -1539,7 +1517,7 @@ const CommentPage = () => {
                 r.uuid === commentId
                   ? {
                     ...r,
-                    likedBy: toggleArr(r.likedBy, currentUser?.id),
+                    likedBy: toggleArr(r.likedBy, currentUser.username),
                   }
                   : r
               ),
@@ -1559,9 +1537,9 @@ const CommentPage = () => {
       }
     },
 
-    // onSettled: () => {
-    //   queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    // },
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
+    },
   });
 
 
@@ -1577,8 +1555,10 @@ const CommentPage = () => {
       : profile?.url || "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
   // ------------------------------------------
-  // 🔥 UI
+  //  UI
   // ------------------------------------------
+
+  // console.log("Comments:", comments);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -1599,21 +1579,25 @@ const CommentPage = () => {
           renderItem={({ item }) => (
             <View style={styles.commentContainer}>
               <Image
-                source={{ uri: getProfileUri(item.userProfile) }}
+                source={{ uri: getProfileUri(item.userProfile?.ProfilePicture) }}
                 style={styles.profilePic}
               />
 
               <View style={{ flex: 1 }}>
-                <Text style={[styles.commentUsername, { color: theme.text }]}>
-                  {item.username}{" "}
-                  <Text style={[styles.commentText, { color: theme.subtitle }]}>
-                    {item.content}
+                <TouchableOpacity
+                  onPress={() => router.push(`/profile/${item.username}`)}
+                >
+                  <Text style={[styles.commentUsername, { color: theme.text }]}>
+                    {item.username}{" "}
                   </Text>
+                </TouchableOpacity>
+                <Text style={[styles.commentText, { color: theme.subtitle }]}>
+                  {item.content}
                 </Text>
 
                 <View style={styles.commentMeta}>
                   <Text style={[styles.commentTime, { color: theme.placeholder }]}>
-                    {item.time}
+                    {timeAgo(item.time)}
                   </Text>
 
                   <TouchableOpacity onPress={() => setReplyTo(item.uuid)}>
@@ -1637,15 +1621,21 @@ const CommentPage = () => {
                     {item.replies.map((reply: any) => (
                       <View key={reply.uuid} style={{ flexDirection: "row" }}>
                         <Image
-                          source={{ uri: getProfileUri(reply.userProfile) }}
+                          source={{ uri: getProfileUri(reply.userProfile?.ProfilePicture) }}
                           style={styles.replyProfilePic}
                         />
                         <View style={{ flex: 1 }}>
-                          <Text style={[styles.commentUsername, { color: theme.text }]}>
-                            {reply.username}{" "}
-                            <Text style={[styles.commentText, { color: theme.subtitle }]}>
-                              {reply.content}
+                          <TouchableOpacity
+                            onPress={() => router.push(`/profile/${reply.username}`)}
+                          >
+                            <Text style={[styles.commentUsername, { color: theme.text }]} onPress={
+                              () => router.push(`/profile/${reply.username}`)
+                            }>
+                              {reply.username}{" "}
                             </Text>
+                          </TouchableOpacity>
+                          <Text style={[styles.commentText, { color: theme.subtitle }]}>
+                            {reply.content}
                           </Text>
 
                           <View style={styles.commentMeta}>
@@ -1654,18 +1644,17 @@ const CommentPage = () => {
                             >
                               <Icon
                                 name={
-                                  reply.likedBy.includes(currentUser?.id)
+                                  reply.likedBy.includes(currentUser.username)
                                     ? "heart"
                                     : "heart-outline"
                                 }
                                 size={16}
                                 color={
-                                  reply.likedBy.includes(currentUser?.id)
+                                  reply.likedBy.includes(currentUser.username)
                                     ? "red"
                                     : theme.text
                                 }
                               />
-
                             </TouchableOpacity>
 
                             <Text
@@ -1699,26 +1688,17 @@ const CommentPage = () => {
               <TouchableOpacity onPress={() => handleToggleLike(item.uuid)}>
                 <Icon
                   name={
-                    item.likedBy.includes(currentUser?.id)
+                    item.likedBy.includes(currentUser.username)
                       ? "heart"
                       : "heart-outline"
                   }
                   size={windowWidth * 0.05}
                   color={
-                    item.likedBy.includes(currentUser?.id)
+                    item.likedBy.includes(currentUser.username)
                       ? "red"
                       : theme.text
                   }
                 />
-                <Text
-                  style={{
-                    fontSize: 12,
-                    color: theme.subtitle,
-                    marginLeft: 4,
-                  }}
-                >
-                  {item.likedBy.length}
-                </Text>
               </TouchableOpacity>
             </View>
           )}

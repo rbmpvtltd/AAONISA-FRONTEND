@@ -104,11 +104,14 @@
 
 // export default NotificationList;
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
 import { useQuery } from "@tanstack/react-query";
+import { router } from "expo-router";
 import {
   ActivityIndicator,
   FlatList,
   Image,
+  Pressable,
   SafeAreaView,
   StyleSheet,
   Text,
@@ -146,11 +149,57 @@ const NotificationItem = ({ item, theme, width }: any) => {
     }
   };
 
+  const handleRedirect = () => {
+  switch (item.type) {
+    case "LIKE":
+    case "COMMENT":
+      // Post / Reel detail page
+      router.push({
+        pathname: "/(drawer)/(tabs)/reels",
+        params: {
+          username: item.sender?.username,
+          id: item.id,
+        },
+      });
+      break;
+
+    case "FOLLOW":
+      router.push({
+        pathname: "/profile/[username]/followers",
+        params: {
+          username: item.sender?.username,
+        },
+      });
+      break;
+
+    case "MESSAGE":
+      router.push({
+        pathname: "/chat/[id]",
+        params: {
+          id: item.sender?.id,
+        },
+      });
+      break;
+
+    case "MENTION":
+      router.push({
+        pathname: "/(drawer)/(tabs)/profile",
+        params: {
+          id: item.referenceId,
+        },
+      });
+      break;
+
+    default:
+      router.push("/notifications");
+  }
+};
+
   const avatarSize = width * 0.13;
   const fontSize = width * 0.04;
 
   return (
-    <View
+    <Pressable onPress={handleRedirect}
       style={[
         styles.container,
         {
@@ -178,12 +227,15 @@ const NotificationItem = ({ item, theme, width }: any) => {
           </Text>{" "}
           {getActionText()}
         </Text>
-
-        <Text style={{ color: theme.subtitle, fontSize: fontSize * 0.8, marginTop: 4 }}>
-          {new Date(item.createdAt).toLocaleTimeString()}
+        <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+          {getTimeAgo(item.createdAt)}
         </Text>
+
+        {/* <Text style={{ color: theme.subtitle, fontSize: fontSize * 0.8, marginTop: 4 }}>
+          {new Date(item.createdAt).toLocaleTimeString()}
+        </Text> */}
       </View>
-    </View>
+    </Pressable>
   );
 };
 
