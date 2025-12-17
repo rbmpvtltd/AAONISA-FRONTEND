@@ -189,10 +189,9 @@
 import { getUserSessionsWithLatestMessage, sendReelToChats } from "@/src/api/chat-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
-
 import {
   ActivityIndicator,
   FlatList,
@@ -229,6 +228,7 @@ interface ChatRowProps {
   selected: boolean;
 }
 
+
 function ChatRow({
   chat,
   onPress,
@@ -238,7 +238,7 @@ function ChatRow({
   msgFontSize,
   shareMode,
   selected,
-}:ChatRowProps) {
+}: ChatRowProps) {
   return (
     <TouchableOpacity
       style={[styles.chatRow, { borderBottomColor: theme.inputBorder }]}
@@ -299,16 +299,22 @@ export default function ChatListScreen() {
   const { width } = useWindowDimensions();
   // const { reelId } = useLocalSearchParams();
   const params = useLocalSearchParams();
+    const queryClient = useQueryClient();
 
   const shareMode = params.shareMode === "true";
   const reelId = params.reelId;
   const [selectedChats, setSelectedChats] = useState<string[]>([]);
 
   // Backend already filters by logged-in user and returns "otherUser"
-  const { data: sessions, isLoading, isError } = useQuery({
-    queryKey: ["sessions"],
-    queryFn: () => getUserSessionsWithLatestMessage(),
-  });
+  const { data: sessions, isLoading, isError, refetch,
+    isRefetching, } = useQuery({
+      queryKey: ["sessions"],
+      queryFn: () => getUserSessionsWithLatestMessage(),
+    });
+
+
+  console.log("dataaaaaaaa", sessions);
+
 
   const avatarSize = width < 360 ? 44 : width < 400 ? 50 : 60;
   const nameFontSize = width < 360 ? 14 : width < 400 ? 15 : 16;
@@ -331,16 +337,71 @@ export default function ChatListScreen() {
         Failed to load chat list
       </Text>
     );
+  const getLastMessagePreview = (latest: any) => {
+    if (!latest) return "Start chatting...";
+
+    let msg = latest;
+
+    //  JSON STRING → OBJECT
+    if (typeof latest === "string") {
+      try {
+        msg = JSON.parse(latest);
+      } catch {
+        return latest; // normal text
+      }
+    }
+
+    //  REELS (NEW + OLD both)
+    if (msg.type === "reels" || msg.type === "reel") {
+      return "📹 Send Reel";
+    }
+
+    if (msg.type === "news") {
+      return "📹 Send News";
+    }
+
+    // Normal text
+    if (typeof msg.text === "string") {
+      return msg.text;
+    }
+
+    return "New message";
+  };
+
 
   // FORMAT DATA - Backend already gives us the "otherUser"
-  const chatList: ChatSummary[] = sessions?.map((session: any) => ({
-    id: session.otherUser.id,
-    name: session.otherUser.username,
-    avatar: session.otherUser.profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-    lastMessage: session.latestMessage?.text || "Start chatting...",
-    unread: 0,
-    sessionId: session.sessionId,
-  })) || [];
+  // const chatList: ChatSummary[] = sessions?.map((session: any) => ({
+  //   id: session.otherUser.id,
+  //   name: session.otherUser.username,
+  //   avatar: session.otherUser.profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+  //   lastMessage: session.latestMessage?.text || "Start chatting...",
+  //   unread: 0,
+  //   sessionId: session.sessionId,
+  // })) || [];
+
+  const sortedSessions = [...(sessions || [])].sort(
+    (a: any, b: any) => {
+      const timeA = new Date(a.latestMessage?.createdAt || a.createdAt).getTime();
+      const timeB = new Date(b.latestMessage?.createdAt || b.createdAt).getTime();
+      return timeB - timeA;
+    }
+  );
+
+  const chatList: ChatSummary[] =
+    sortedSessions.map((session: any) => {
+      const latest = session.latestMessage;
+
+      return {
+        id: session.otherUser.id,
+        name: session.otherUser.username,
+        avatar:
+          session.otherUser.profilePicture ||
+          "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+        lastMessage: getLastMessagePreview(latest?.text),
+        unread: 0,
+        sessionId: session.sessionId,
+      };
+    }) || [];
 
   const toggleSelect = (sessionId: string): void => {
     setSelectedChats((prev: string[]) =>
@@ -350,24 +411,60 @@ export default function ChatListScreen() {
     );
   };
 
-  const handleSend = async () => {
-    if (!reelId) return;
+  // const handleSend = async () => {
+  //   if (!reelId) return;
 
-    try {
-      // Replace with your API to send reel to selected sessions
-      await sendReelToChats(
-      reelId as string,
-       selectedChats,
-      );
-      alert("Reel sent successfully!");
-      router.back();
-    } catch (error) {
-      console.error(error);
-      alert("Failed to send reel");
-    }
-    // Alert.alert("Send Reel", `Send reel ${reelId} to ${selectedChats.length} chats?`)
-    // console.log("sessions to send reel to:", selectedChats);
-  };
+  //   try {
+  //     // Replace with your API to send reel to selected sessions
+  //     await sendReelToChats(
+  //       reelId as string,
+  //       selectedChats,
+  //     );
+  //     alert("Reel sent successfully!");
+  //     router.back();
+  //   } catch (error) {
+  //     console.error(error);
+  //     alert("Failed to send reel");
+  //   }
+   
+  // };
+
+  const handleSend = async () => {
+  if (!reelId) return;
+
+  // 🔥 OPTIMISTIC UPDATE
+  queryClient.setQueryData(["sessions"], (old: any[] | undefined) => {
+    if (!old) return old;
+
+    return old
+      .map((session) => {
+        if (selectedChats.includes(session.sessionId)) {
+          return {
+            ...session,
+            latestMessage: {
+              text: JSON.stringify({ type: "reels" }),
+              createdAt: new Date().toISOString(),
+            },
+          };
+        }
+        return session;
+      })
+      .sort((a, b) => {
+        const tA = new Date(a.latestMessage?.createdAt || a.createdAt).getTime();
+        const tB = new Date(b.latestMessage?.createdAt || b.createdAt).getTime();
+        return tB - tA;
+      });
+  });
+
+  try {
+    await sendReelToChats(reelId as string, selectedChats);
+    router.back();
+  } catch (e) {
+    console.error(e);
+    alert("Failed to send reel");
+  }
+};
+
 
   if (chatList.length === 0) {
     return (
@@ -392,16 +489,6 @@ export default function ChatListScreen() {
             msgFontSize={msgFontSize}
             shareMode={shareMode}
             selected={selectedChats.includes(item.sessionId)}
-            // onPress={() =>
-            //   router.push({
-            //     pathname: "/chat/[id]",
-            //     params: {
-            //       id: item.id,
-            //       sessionId: item.sessionId,
-            //       reelId: reelId,
-            //     },
-            //   })
-            // }
 
             onPress={() => {
               if (shareMode) {
@@ -412,8 +499,8 @@ export default function ChatListScreen() {
                   params: {
                     id: item.id,
                     sessionId: item.sessionId,
-                     username: item.name,
-                      avatar: item.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png",   
+                    username: item.name,
+                    avatar: item.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
                     reelId,
                   },
                 });
@@ -421,6 +508,19 @@ export default function ChatListScreen() {
             }}
           />
         )}
+        removeClippedSubviews
+        initialNumToRender={10}
+        maxToRenderPerBatch={10}
+        windowSize={5}
+        updateCellsBatchingPeriod={50}
+        getItemLayout={(_, index) => ({
+          length: 80,
+          offset: 80 * index,
+          index,
+        })}
+
+        refreshing={isRefetching}
+        onRefresh={refetch}
         ItemSeparatorComponent={() => (
           <View style={{ height: 1, backgroundColor: theme.inputBorder, opacity: 0.3 }} />
         )}
