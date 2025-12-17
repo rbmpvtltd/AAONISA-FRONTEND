@@ -333,14 +333,14 @@ export default function ChatListScreen() {
     );
 
   // FORMAT DATA - Backend already gives us the "otherUser"
-  const chatList: ChatSummary[] = sessions?.map((session: any) => {{
+  const chatList: ChatSummary[] = sessions?.map((session: any) => ({
     id: session.otherUser.id,
     name: session.otherUser.username,
     avatar: session.otherUser.profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
     lastMessage: session.latestMessage?.text || "Start chatting...",
     unread: 0,
     sessionId: session.sessionId,
-  }}) || [];
+  })) || [];
 
   const toggleSelect = (sessionId: string): void => {
     setSelectedChats((prev: string[]) =>
