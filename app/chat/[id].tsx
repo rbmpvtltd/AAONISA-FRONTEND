@@ -975,8 +975,8 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
   useWindowDimensions,
+  View,
 } from "react-native";
 
 import { GetCurrentUser } from "@/src/api/profile-api";
@@ -984,8 +984,10 @@ import { useAppTheme } from "@/src/constants/themeHelper";
 import { useSocketManager } from "@/src/socket/socket";
 import { useChatStore } from "@/src/store/useChatStore";
 import { Message } from "@/src/types/chatType";
+import { timeAgo } from "@/src/utils/timeAgo";
 import { MaterialIcons } from "@expo/vector-icons";
-import { router } from "expo-router";
+import { router, Stack } from "expo-router";
+
 
 /* -------------------------
    Helpers
@@ -1083,10 +1085,11 @@ function MessageBubble({
           alignSelf: align,
         }}
       >
-        {new Date(m.createdAt).toLocaleTimeString([], {
+          {timeAgo(new Date(m.createdAt).toISOString())}
+        {/* {new Date(m.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
-        })}
+        })} */}
       </Text>
     </Pressable>
   );
@@ -1169,9 +1172,9 @@ export default function ChatDetailScreen() {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
   const route = useRoute<
-    RouteProp<{ params: { id: string; chatName?: string } }, "params">
+    RouteProp<{ params: { id: string; chatName?: string, username?: string, avatar?: string } }, "params">
   >();
-  const { id: chatUserId } = route.params;
+  const { id: chatUserId, username, avatar } = route.params;
 
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
@@ -1360,6 +1363,31 @@ export default function ChatDetailScreen() {
   const chatMessages = getMessages();
 
   return (
+    <>
+      <Stack.Screen
+        options={{
+          headerTitle: () => (
+            <View style={{ flexDirection: 'row', alignItems: 'center', gap: 10 }}>
+              {avatar && (
+                <Image
+                  source={{ uri: avatar }}
+                  style={{
+                    width: 32,
+                    height: 32,
+                    borderRadius: 16,
+                    backgroundColor: '#ccc',
+                  }}
+                />
+              )}
+              <TouchableOpacity onPress={() => router.push(`/profile/${username}`)} >
+              <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
+                {username || 'Chat'}
+              </Text>
+              </TouchableOpacity>
+            </View>
+          ),
+        }}
+      />
     <KeyboardAvoidingView
       style={{ flex: 1, backgroundColor: theme.background }}
       behavior={Platform.OS === "ios" ? "padding" : "height"}
@@ -1437,6 +1465,7 @@ export default function ChatDetailScreen() {
         </View>
       </Modal>
     </KeyboardAvoidingView>
+            </>
   );
 }
 
