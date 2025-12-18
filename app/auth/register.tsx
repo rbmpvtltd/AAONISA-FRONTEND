@@ -221,7 +221,7 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={username}
-            onChangeText={(text) => setUsername(text.trim().toLocaleLowerCase())}
+            onChangeText={(text) => setUsername(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
           // onChangeText={handleUsernameChange}
 
           />

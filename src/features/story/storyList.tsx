@@ -1,8 +1,11 @@
+import { GetCurrentUser } from "@/src/api/profile-api";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { Ionicons } from "@expo/vector-icons";
+import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { memo, useCallback, useMemo } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 
 // Individual Story Item Component - Memoized
 const StoryItem = memo(({
@@ -18,6 +21,23 @@ const StoryItem = memo(({
 }) => {
   const seen = !user.stories.some((s: any) => !s.viewed);
   const hasStories = user.stories && user.stories.length > 0;
+   
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+    queryKey: ["currentUser"],
+    queryFn: GetCurrentUser,
+  });
+
+console.log("=====================================");
+console.log("Current User in StoryItem:", currentUser);
+console.log("=====================================");
+
+
+// const imageUri =
+//   user.profilePic?.length
+//     ? user.profilePic
+//     : currentUser?.userProfile?.ProfilePicture
+//     ? currentUser.userProfile.ProfilePicture
+//     : "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
   return (
     <TouchableOpacity
@@ -36,7 +56,7 @@ const StoryItem = memo(({
             },
           ]}>
             <Image
-              source={{ uri: user.profilePic }}
+              source={{ uri: currentUser?.userProfile?.ProfilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png"}}
               style={styles.storyImage}
             />
             {!hasStories && (
@@ -55,7 +75,7 @@ const StoryItem = memo(({
           ]}
         >
           <Image
-            source={{ uri: user.profilePic }}
+            source={{ uri: user.profilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
             style={styles.storyImage}
           />
         </View>
@@ -134,7 +154,13 @@ export const StoryList = memo(({
   }), [currentUserStories]);
 
   return (
-    <View style={styles.container}>
+      <ScrollView
+      horizontal
+      showsHorizontalScrollIndicator={false}
+      style={styles.container}
+      contentContainerStyle={styles.contentContainer}
+    >
+    {/* // <View style={styles.container}> */}
       {/* Your Story - Always appears first */}
       <StoryItem
         user={currentUserData}
@@ -152,7 +178,8 @@ export const StoryList = memo(({
           onPress={() => handlePress(user.owner)}
         />
       ))}
-    </View>
+      </ScrollView>
+    // {/* // </View> */}
   );
 });
 
@@ -163,6 +190,9 @@ const styles = StyleSheet.create({
     flexDirection: "row",
     paddingHorizontal: 10,
     paddingVertical: 10,
+  },
+   contentContainer: {
+    paddingHorizontal: 10,
   },
   storyContainer: {
     alignItems: "center",

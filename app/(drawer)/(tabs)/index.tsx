@@ -7,9 +7,9 @@ import { useFeedStore } from "@/src/store/useFeedStore";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { useIsFocused } from "@react-navigation/native";
 import { useQuery } from "@tanstack/react-query";
-import { useEffect } from "react";
+import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
-import { FlatList, GestureHandlerRootView } from "react-native-gesture-handler";
+import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 
 const HomePage = () => {
   const theme = useAppTheme();
@@ -17,6 +17,8 @@ const HomePage = () => {
   const { setUserStories } = useStoryStore();
   const { setPhotos, toggleMute } = useFeedStore();
   const { setCategories } = useBookmarkStore();
+  const [refreshing, setRefreshing] = useState(false);
+
 
   // const currentUserId = "your_username";
   // const currentUserProfilePic = "https://images.unsplash.com/photo-1535713875002-d1d0cf377fde?fm=jpg&q=60&w=3000&ixlib=rb-4.1.0&ixid=M3wxMjA3fDB8MHxzZWFyY2h8Mnx8dXNlciUyMHByb2ZpbGV8ZW58MHx8MHx8fDA%3D&auto=format&fit=crop&w=500";
@@ -134,6 +136,29 @@ const HomePage = () => {
     );
   }
 
+  if (storiesLoading || bookmarksLoading) {
+    return (
+      <GestureHandlerRootView
+        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.background }}
+      >
+        <ActivityIndicator size="large" color={theme.text} />
+        <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
+      </GestureHandlerRootView>
+    );
+  }
+  const handleRefresh = async () => {
+    setRefreshing(true);
+    try {
+      await Promise.all([refetchStories(), refetchBookmarks()]);
+      // Agar feed bhi refetch karni hai to uske store function bhi call kar sakte ho
+    } catch (err) {
+      console.error("Refresh error:", err);
+    } finally {
+      setRefreshing(false);
+    }
+  };
+
+
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.background }}>
       {/* <StoryList theme={theme} currentUserId = {currentUserId} currentUserProfilePic={currentUserProfilePic} />
@@ -151,6 +176,15 @@ const HomePage = () => {
         }
         showsVerticalScrollIndicator={false}
         style={{ backgroundColor: theme.background }}
+        refreshControl={
+          <RefreshControl
+            refreshing={refreshing}
+            onRefresh={handleRefresh}
+            tintColor={theme.text}
+            colors={[theme.text]}
+            progressBackgroundColor={theme.background}
+          />
+        }
       />
 
     </GestureHandlerRootView>
