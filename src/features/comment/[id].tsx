@@ -1296,19 +1296,21 @@
 
 // ======= arbaaz chouhan =======
 import { router, useLocalSearchParams } from "expo-router";
-import { useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
+  ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
   Image,
+  Keyboard,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import Icon from "react-native-vector-icons/Ionicons";
@@ -1361,12 +1363,16 @@ const normalizeComment = (c: any) => ({
     time: r.createdAt,
     mentions: r.mentions || [],
     likedBy: r.likedBy || [],
-  })),
+  })).sort(
+    (a: any, b: any) =>
+      new Date(a.time).getTime() - new Date(b.time).getTime()
+  ), // Sort replies oldest to newest,
 });
 
 const CommentPage = () => {
   const { id } = useLocalSearchParams();
   const postId = id as string;
+  const inputRef = useRef<TextInput>(null);
 
   const theme = useAppTheme();
   const queryClient = useQueryClient();
@@ -1389,13 +1395,35 @@ const CommentPage = () => {
   // -------------------------------
   //  FETCH COMMENTS — useQuery
   // -------------------------------
-  const { data: comments = [], isLoading } = useQuery({
+  const { data: comments = [], isLoading, refetch, isRefetching } = useQuery({
     queryKey: ["comments", postId],
     queryFn: async () => {
       const res = await getCommentsApi(postId);
-      return res.map(normalizeComment);
+      // return res.map(normalizeComment);
+      return res
+        .map(normalizeComment)
+        .sort(
+          (a: any, b: any) =>
+            new Date(b.time).getTime() - new Date(a.time).getTime()
+        );
     },
   });
+
+
+  useEffect(() => {
+  const showSub = Keyboard.addListener("keyboardDidShow", () => {});
+  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+    // keyboard hide hone par reply cancel karo
+    if (replyTo) {
+      setReplyTo(null);
+    }
+  });
+
+  return () => {
+    showSub.remove();
+    hideSub.remove();
+  };
+}, [replyTo]);
 
   // ----------------------------------
   //  ADD COMMENT / REPLY MUTATION
@@ -1409,7 +1437,7 @@ const CommentPage = () => {
       queryClient.invalidateQueries({ queryKey: ["comments", postId] });
 
       queryClient.setQueryData(["comments", postId], (old: any[] = []) => {
-        if (!formatted.parentId) return [...old, formatted];
+        if (!formatted.parentId) return [formatted, ...old];
 
 
         return old.map((c) =>
@@ -1567,15 +1595,26 @@ const CommentPage = () => {
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={90}
       >
+        {isLoading && comments.length === 0 && (
+          <View style={styles.centerContainer}>
+            <ActivityIndicator size="large" color={theme.text} />
+          </View>
+        )}
+
         <FlatList
           data={comments}
           keyExtractor={(item) => item.uuid}
           contentContainerStyle={{ paddingBottom: 20 }}
+          refreshing={isRefetching}
+          onRefresh={refetch}
           ListEmptyComponent={
-            <Text style={{ textAlign: "center", marginTop: 30, color: theme.placeholder }}>
-              No comments yet.
-            </Text>
+            !isLoading ? (
+              <Text style={{ textAlign: "center", marginTop: 30 }}>
+                No comments yet
+              </Text>
+            ) : null
           }
+
           renderItem={({ item }) => (
             <View style={styles.commentContainer}>
               <Image
@@ -1600,7 +1639,9 @@ const CommentPage = () => {
                     {timeAgo(item.time)}
                   </Text>
 
-                  <TouchableOpacity onPress={() => setReplyTo(item.uuid)}>
+                  <TouchableOpacity onPress={() => { setReplyTo(item.uuid);    setTimeout(() => {
+      inputRef.current?.focus();
+    }, 100); }}>
                     <Text style={[styles.replyText, { color: theme.buttonBg }]}>
                       Reply
                     </Text>
@@ -1714,7 +1755,9 @@ const CommentPage = () => {
           <Image source={{ uri: currentUser.userProfile?.ProfilePicture }} style={styles.commentProfilePic} />
 
           <View style={{ flex: 1 }}>
+
             <TextInput
+              ref={inputRef}
               placeholder={replyTo ? "Replying..." : "Add a comment..."}
               placeholderTextColor={theme.placeholder}
               style={[
@@ -1732,7 +1775,7 @@ const CommentPage = () => {
         </View>
       </KeyboardAvoidingView>
     </SafeAreaView>
-  );
+  )
 };
 
 export default CommentPage;

@@ -609,8 +609,10 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     const followersCount = profile.followers?.length || 0;
     const followingsCount = profile.followings?.length || 0;
     const postsCount = profile.videos?.length || 0;
-    const likes = profile.likes || 0;
-    const views = profile.views || 0;
+    // const likes = profile.likes || 0;
+    // const views = profile.views || 0;
+    const totalLikes = profile.videos?.reduce((sum: number, video: any) => sum + (video.likes?.length || 0), 0) || 0;
+    const totalViews = profile.videos?.reduce((sum: number, video: any) => sum + (video.views?.length || 0), 0) || 0;
 
     return (
         <View style={styles.header}>
@@ -648,11 +650,11 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
                 <View style={{ flexDirection: "row" }}>
                     <View style={styles.likesViews}>
                         <Text style={[styles.statLabel, { color: theme.subtitle }]}>Likes</Text>
-                        <Text style={[styles.statNumber, { color: theme.text }]}>{likes}</Text>
+                        <Text style={[styles.statNumber, { color: theme.text }]}>{totalLikes}</Text>
                     </View>
                     <View style={styles.likesViews}>
                         <Text style={[styles.statLabel, { color: theme.subtitle }]}>Views</Text>
-                        <Text style={[styles.statNumber, { color: theme.text }]}>{views}</Text>
+                        <Text style={[styles.statNumber, { color: theme.text }]}>{totalViews}</Text>
                     </View>
                 </View>
             </View>

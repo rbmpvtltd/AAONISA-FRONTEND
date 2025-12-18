@@ -1,7 +1,9 @@
 import { GetProfileUsername, UnfollowUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
+import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { useLocalSearchParams, useRouter } from 'expo-router';
+import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
   FlatList,
@@ -12,6 +14,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
+import { TextInput } from 'react-native-gesture-handler';
 
 interface Following {
   id: string;
@@ -28,22 +31,21 @@ const FollowingScreen = () => {
   const { width } = useWindowDimensions();
   const queryClient = useQueryClient();
 
+    const [searchQuery, setSearchQuery] = useState('');
+  const searchFontSize = width > 400 ? 16 : 14;
+
+
   const avatarSize = width > 400 ? 60 : 50;
   const padding = width > 400 ? 20 : 16;
 
-  // ✅ Fetch profile data (includes followings)
-  // const { data, isPending, isError } = useQuery({
-  //   queryKey: ['userProfile', username],
-  //   queryFn: () => GetProfileUsername(username),
-  //   enabled: !!username,
-  // });
+
 const { data, isPending, isError } = useQuery({
   queryKey: ['userProfile', username],
   queryFn: () => GetProfileUsername(username!),
-  enabled: !!username, // <== ye line important hai!
+  enabled: !!username, 
 });
  
-  // ✅ Unfollow user mutation
+  //  Unfollow user mutation
   const unfollowMutation = useMutation({
     mutationFn: (id: string) => UnfollowUser(id),
     onSuccess: async () => {
@@ -79,6 +81,17 @@ const { data, isPending, isError } = useQuery({
     );
   }
 
+ const filteredFollowings = useMemo(() => {
+    if (!searchQuery.trim()) return followings;
+
+    const query = searchQuery.toLowerCase();
+    return followings.filter(
+      (following) =>
+        following?.username?.toLowerCase()?.includes(query) ||
+        following?.name?.toLowerCase()?.includes(query)
+    );
+  }, [followings, searchQuery]);
+
   const handleUnfollow = (id: string) => {
     if (unfollowMutation.isPending) return;
     unfollowMutation.mutate(id);
@@ -106,7 +119,7 @@ const { data, isPending, isError } = useQuery({
           <Text style={[styles.username, { color: theme.subtitle }]}>@{item.username}</Text>
         </View>
        
-        {/* ✅ Unfollow Button */}
+        {/*  Unfollow Button */}
         <TouchableOpacity
           onPress={() => handleUnfollow(item.id)}
           disabled={unfollowMutation.isPending}
@@ -126,6 +139,22 @@ const { data, isPending, isError } = useQuery({
     </TouchableOpacity>
   );
 
+   if (isPending)
+      return (
+        <View style={[styles.center, { backgroundColor: theme.background }]}>
+          <ActivityIndicator size="large" color={theme.text} />
+          <Text style={{ color: theme.subtitle }}>Loading followings...</Text>
+        </View>
+      );
+  
+    if (isError)
+      return (
+        <View style={[styles.center, { backgroundColor: theme.background }]}>
+          <Text style={{ color: 'red' }}>Failed to load followings</Text>
+        </View>
+      );
+  
+
   return (
     <View
       style={[
@@ -133,13 +162,44 @@ const { data, isPending, isError } = useQuery({
         { backgroundColor: theme.background, paddingHorizontal: padding, paddingTop: 10 },
       ]}
     >
-      <Text style={[styles.header, { color: theme.text }]}>
+      {/* <Text style={[styles.header, { color: theme.text }]}>
         Following ({followings.length})
-      </Text>
+      </Text> */}
+
+       <View style={[styles.searchContainer, { paddingHorizontal: padding, marginBottom: 16 }]}>
+        <View style={[styles.searchBar, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder }]}>
+          <Ionicons name="search" size={20} color={theme.subtitle} style={styles.searchIcon} />
+          <TextInput
+            placeholder="Search followings..."
+            placeholderTextColor={theme.placeholder}
+            value={searchQuery}
+            onChangeText={(text)=>setSearchQuery(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
+            style={[
+              styles.searchInput,
+              { color: theme.text, fontSize: searchFontSize }
+            ]}
+          />
+          {searchQuery.length > 0 && (
+            <TouchableOpacity onPress={() => setSearchQuery('')} style={styles.clearButton}>
+              <Ionicons name="close-circle" size={20} color={theme.subtitle} />
+            </TouchableOpacity>
+          )}
+        </View>
+      </View>
+
       <FlatList
-        data={followings}
+        data={filteredFollowings}
         renderItem={renderFollowing}
         keyExtractor={(item) => item.id}
+          contentContainerStyle={{ paddingHorizontal: padding }}
+                ListEmptyComponent={
+                  <View style={styles.emptyContainer}>
+                    <Text style={[styles.emptyText, { color: theme.subtitle }]}>
+                      {searchQuery ? 'No followings found' : 'No followeings yet'}
+                    </Text>
+                  </View>
+                }
+                showsVerticalScrollIndicator={false}
       />
     </View>
   );
@@ -153,6 +213,28 @@ const styles = StyleSheet.create({
     marginBottom: 20,
     textAlign: 'center',
   },
+  headerContainer: {
+    marginBottom: 12,
+  },
+  searchContainer: {
+    marginTop: 8,
+  }, searchBar: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    borderRadius: 10,
+    borderWidth: 1,
+    paddingHorizontal: 12,
+    paddingVertical: 10,
+  },
+  searchIcon: {
+    marginRight: 8,
+  },
+  searchInput: {
+    flex: 1,
+    paddingVertical: 0,
+  }, clearButton: {
+    padding: 4,
+  },
   userRow: {
     flexDirection: 'row',
     alignItems: 'center',
@@ -165,6 +247,13 @@ const styles = StyleSheet.create({
   followButton: { paddingVertical: 6, paddingHorizontal: 20, borderRadius: 8 },
   followButtonText: { fontWeight: '600', fontSize: 14 },
   center: { flex: 1, justifyContent: 'center', alignItems: 'center' },
+    emptyContainer: {
+    paddingVertical: 40,
+    alignItems: 'center',
+  },
+  emptyText: {
+    fontSize: 16,
+  },
 });
 
 export default FollowingScreen;
