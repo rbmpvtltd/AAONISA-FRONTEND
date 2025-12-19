@@ -199,7 +199,7 @@ interface Reel {
 }
 
 interface Category {
-  id: string;
+  id: number;
   name: string;
   reels: Reel[];
 }
@@ -207,8 +207,8 @@ interface Category {
 interface Props {
   categories: Category[];
   onSelect: (category: Category) => void;
-  onDelete?: (id: string) => void;
-  onRename?: (id: string, newName: string) => void;
+  onDelete?: (id: number) => void;
+  onRename?: (id: number, newName: string) => void;
 }
 
 const SavedCategories: React.FC<Props> = ({
@@ -217,7 +217,7 @@ const SavedCategories: React.FC<Props> = ({
   onDelete,
   onRename,
 }) => {
-  const [editingId, setEditingId] = useState<string | null>(null);
+  const [editingId, setEditingId] = useState<number| null>(null);
   const [newName, setNewName] = useState('');
 
   const colors = useAppTheme();
@@ -243,7 +243,7 @@ const SavedCategories: React.FC<Props> = ({
     <View style={[styles.container, { backgroundColor: colors.background }]}>
       <FlatList
         data={categories}
-        keyExtractor={(item) => item.id}
+        keyExtractor={(item) => item.id as any}
         contentContainerStyle={styles.list}
         renderItem={({ item }) => (
           <TouchableOpacity

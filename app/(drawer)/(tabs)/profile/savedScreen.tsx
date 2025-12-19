@@ -3,55 +3,95 @@ import { useState } from 'react';
 import { StyleSheet, Text, TouchableOpacity, View } from 'react-native';
 import CategoryReelGrid from '../../../../src/features/bookmark/categoryReelGrid';
 import SavedCategories from '../../../../src/features/bookmark/savedCategories';
-import { useBookmarkStore } from '../../../../src/store/useBookmarkStore';
+// import { useBookmarkStore } from '../../../../src/store/useBookmarkStore';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
+import { useBookmarks } from '../../../../src/features/bookmark/bookmarkPanel';
+// import {
+//   renameBookmarkCategory,
+//   deleteBookmarkCategory,
+// } from "./api";
+
+export const BOOKMARKS_KEY = ["bookmarks"];
+
+export const useRenameCategory = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({ id, name }: { id: number; name: string }) =>
+      renameBookmark({id, name}),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
+    },
+  });
+};
+
+export const useDeleteCategory = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: (id: number) => removeBookmark({id}),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
+    },
+  });
+};
 
 const SavedScreen = () => {
-  const { categories, setCategories } = useBookmarkStore();
-  // const [selectedCategory, setSelectedCategory] = useState<any>(null);
-  const [selectedCategoryId, setSelectedCategoryId] = useState<string | null>(null);
+  const { data: categories = [], isLoading } = useBookmarks();
 
-const selectedCategory = categories.find(c => c.id === selectedCategoryId);
+  const renameCategory = useRenameCategory();
+  const deleteCategory = useDeleteCategory();
 
-  const handleDelete = (id: string) => {
-    removeBookmark({ id });
-    setCategories(prev => prev.filter(c => c.id !== id));
+  const [selectedCategoryId, setSelectedCategoryId] =
+    useState<number | null>(null);
 
-  };
+  const selectedCategory = categories.find(
+    (c:any) => c.id === selectedCategoryId
+  );
 
-  const handleRename = (id: string, newName: string) => {
-    renameBookmark({ id, name: newName });
-    setCategories(prev =>
-      prev.map(c => (c.id === id ? { ...c, name: newName } : c))
-    );
-  };
+  if (isLoading) return null; // loader laga sakte ho
 
-  
   return (
     <View style={{ flex: 1 }}>
-      {selectedCategoryId ? (
-  <>
-    <View style={styles.header}>
-      <TouchableOpacity onPress={() => setSelectedCategoryId(null)}>
-        <Text style={styles.back}>⬅ Back</Text>
-      </TouchableOpacity>
+      {selectedCategoryId && selectedCategory ? (
+        <>
+          <View style={styles.header}>
+            <TouchableOpacity onPress={() => setSelectedCategoryId(null)}>
+              <Text style={styles.back}>⬅ Back</Text>
+            </TouchableOpacity>
 
-      <Text style={styles.title}>{selectedCategory?.name}</Text>
-    </View>
+            <Text style={styles.title}>{selectedCategory.name}</Text>
+          </View>
 
-    <CategoryReelGrid
-      reels={selectedCategory?.reels ?? []}
-      onSelectReel={(id) => console.log("Open Reel:", id)}
-    />
-  </>
-) : (
-  <SavedCategories
-    categories={categories}
-    onSelect={(cat) => setSelectedCategoryId(cat.id)}   // 🔥 FIX
-    onDelete={handleDelete}
-    onRename={handleRename}
-  />
-)}
-
+          <CategoryReelGrid
+            reels={selectedCategory.reels}
+            categoryId={selectedCategory.id}
+            categoryName={selectedCategory.name}
+          />
+        </>
+      ) : (
+        <SavedCategories
+          categories={categories}
+          onSelect={(cat) => setSelectedCategoryId(cat.id)}
+          onRename={(id, newName) =>
+            renameCategory.mutate(
+              { id, name: newName },
+              {
+                onError: () =>
+                  alert("Failed to rename category"),
+              }
+            )
+          }
+          onDelete={(id) =>
+            deleteCategory.mutate(id, {
+              onError: () =>
+                alert("Failed to delete category"),
+            })
+          }
+        />
+      )}
     </View>
   );
 };
