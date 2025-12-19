@@ -1,648 +1,3 @@
-// // import { markViewed } from "@/app/story/api";
-// // import { markViewed } from "@/app/(story)/api";
-// // import { useStoryStore } from "@/src/store/useStoryStore";
-// // import { Ionicons } from "@expo/vector-icons";
-// // import { useLocalSearchParams, useRouter } from "expo-router";
-// // import { VideoView, useVideoPlayer } from "expo-video";
-// // import React, { useEffect, useRef, useState } from "react";
-// // import {
-// //   Animated,
-// //   Dimensions,
-// //   Image,
-// //   StyleSheet,
-// //   Text,
-// //   TouchableOpacity,
-// //   View,
-// // } from "react-native";
-
-// // const { width, height } = Dimensions.get("window");
-
-// // export default function StoryViewPage() {
-// //   const router = useRouter();
-// //   const { id } = useLocalSearchParams<{ id: string }>();
-// //   const { userStories, markStoryViewed } = useStoryStore();
-
-// //   // ✅ Find user by story Id (no owner needed)
-// //   const userStory = userStories.find((user) =>
-// //     user.stories.some((story) => story.id === id)
-// //   );
-
-// //   const storyList = userStory?.stories || [];
-
-// //   const [currentIndex, setCurrentIndex] = useState(0);
-
-// //   useEffect(() => {
-// //     if (userStory) {
-// //       const idx = userStory.stories.findIndex((s) => s.id === id);
-// //       if (idx !== -1) setCurrentIndex(idx);
-// //     }
-// //   }, [userStory, id]);
-
-// //   const currentStory = storyList[currentIndex];
-
-// //   const progress = useRef(new Animated.Value(0)).current;
-// //   const [paused, setPaused] = useState(false);
-
-// //   const player = useVideoPlayer(currentStory?.videoUrl ?? "", (player) =>
-// //     player.play()
-// //   );
-
-// //   useEffect(() => {
-// //     if (!currentStory) return;
-
-// //     // Backend mark read
-// //     markViewed(currentStory.id);
-
-// //     // Local state update
-// //     markStoryViewed(currentStory.id);
-
-// //     progress.setValue(0);
-// //     Animated.timing(progress, {
-// //       toValue: 1,
-// //       duration: currentStory.duration,
-// //       useNativeDriver: false,
-// //     }).start(({ finished }) => finished && handleNext());
-// //   }, [currentIndex]);
-
-// //   const handleNext = () => {
-// //     if (currentIndex < storyList.length - 1) {
-// //       setCurrentIndex((i) => i + 1);
-// //     } else router.back();
-// //   };
-
-// //   const handlePrevious = () => {
-// //     if (currentIndex > 0) setCurrentIndex((i) => i - 1);
-// //     else router.back();
-// //   };
-
-// //   const handleLongPressIn = () => {
-// //     setPaused(true);
-// //     player.pause();
-// //   };
-// //   const handleLongPressOut = () => {
-// //     setPaused(false);
-// //     player.play();
-// //   };
-
-// //   // UI safety
-// //   if (!userStory) {
-// //     return (
-// //       <View style={styles.center}>
-// //         <Text style={{ color: "#fff" }}>Story not found</Text>
-// //       </View>
-// //     );
-// //   }
-
-// //   if (!currentStory) return null;
-
-// //   return (
-// //     <View style={styles.container}>
-// //       <VideoView
-// //         player={player}
-// //         style={styles.video}
-// //         contentFit="cover"
-// //         allowsFullscreen={false}
-// //         allowsPictureInPicture={false}
-// //         nativeControls={false}
-// //       />
-
-// //       {/* Top info */}
-// //       <View style={styles.topBar}>
-// //         <View style={styles.progressRow}>
-// //           {storyList.map((_, i) => (
-// //             <View key={i} style={styles.progressBackground}>
-// //               <Animated.View
-// //                 style={[
-// //                   styles.progressFill,
-// //                   i === currentIndex
-// //                     ? { flex: progress }
-// //                     : i < currentIndex
-// //                     ? { flex: 1 }
-// //                     : { flex: 0 },
-// //                 ]}
-// //               />
-// //             </View>
-// //           ))}
-// //         </View>
-
-// //         <View style={styles.userRow}>
-// //           <Image
-// //             source={{ uri: userStory.profilePic }}
-// //             style={styles.profileImg}
-// //           />
-// //           <Text style={styles.username}>{userStory.username}</Text>
-// //         </View>
-
-// //         <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-// //           <Ionicons name="close" size={26} color="#fff" />
-// //         </TouchableOpacity>
-// //       </View>
-
-// //       {/* Tap Areas */}
-// //       <View style={styles.touchLayer}>
-// //         <TouchableOpacity
-// //           style={{ flex: 1 }}
-// //           onPress={(e) =>
-// //             e.nativeEvent.locationX < width / 2 ? handlePrevious() : handleNext()
-// //           }
-// //           onLongPress={handleLongPressIn}
-// //           onPressOut={handleLongPressOut}
-// //           delayLongPress={150}
-// //         />
-// //       </View>
-// //     </View>
-// //   );
-// // }
-
-// // const styles = StyleSheet.create({
-// //   container: { flex: 1, backgroundColor: "#000" },
-// //   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-// //   video: { position: "absolute", width, height },
-// //   topBar: { position: "absolute", top: 40, left: 10, right: 10 },
-// //   progressRow: { flexDirection: "row", gap: 5, marginBottom: 10 },
-// //   progressBackground: {
-// //     flex: 1,
-// //     height: 3,
-// //     backgroundColor: "rgba(255,255,255,0.3)",
-// //     borderRadius: 2,
-// //     overflow: "hidden",
-// //   },
-// //   progressFill: { backgroundColor: "#fff" },
-// //   userRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-// //   profileImg: { width: 35, height: 35, borderRadius: 20 },
-// //   username: { color: "#fff", fontSize: 16, fontWeight: "600" },
-// //   closeBtn: { position: "absolute", right: 0, top: 0 },
-// //   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
-// // });
-
-// // ============================================================================
-
-// // import { useStoryStore } from "@/src/store/useStoryStore";
-// // import { Ionicons } from "@expo/vector-icons";
-// // import { useLocalSearchParams, useRouter } from "expo-router";
-// // import { VideoView, useVideoPlayer } from "expo-video";
-// // import { useEffect, useRef, useState } from "react";
-// // import {
-// //   Animated,
-// //   Dimensions,
-// //   Image,
-// //   StyleSheet,
-// //   Text,
-// //   TouchableOpacity,
-// //   View,
-// // } from "react-native";
-
-// // const { width, height } = Dimensions.get("window");
-
-// // export default function StoryViewPage() {
-// //   const router = useRouter();
-// //   const { id } = useLocalSearchParams<{ id: string }>();
-// //   const { userStories, markStoryViewed } = useStoryStore();
-
-// //   // ✅ find user that contains this story
-// //   const userStory = userStories.find((u) =>
-// //     u.stories.some((s) => s.id === id)
-// //   );
-
-// //   const storyList = userStory?.stories || [];
-// //   const [currentIndex, setCurrentIndex] = useState(0);
-
-// //   useEffect(() => {
-// //     if (userStory && id) {
-// //       const idx = userStory.stories.findIndex((s) => s.id === id);
-// //       if (idx !== -1) setCurrentIndex(idx);
-// //     }
-// //   }, [userStory, id]);
-
-// //   const currentStory = storyList[currentIndex];
-
-// //   const progress = useRef(new Animated.Value(0)).current;
-// //   const [paused, setPaused] = useState(false);
-
-// //   // ✅ stable player
-// //   const player = useVideoPlayer(currentStory?.videoUrl ?? "");
-
-// //   useEffect(() => {
-// //     if (!currentStory) return;
-
-// //     player.replace(currentStory.videoUrl);
-// //     if (!paused) player.play();
-// //   }, [currentStory, paused]);
-
-// //   // ✅ correct animation logic
-// //   useEffect(() => {
-// //     if (!currentStory) return;
-
-// //     markStoryViewed(currentStory.id);
-
-// //     progress.stopAnimation();
-// //     progress.setValue(0);
-
-// //     const anim = Animated.timing(progress, {
-// //       toValue: 1,
-// //       duration: currentStory.duration * 1000, // ✅ seconds to ms
-// //       useNativeDriver: false,
-// //     });
-
-// //     anim.start(({ finished }) => {
-// //       if (finished) handleNext();
-// //     });
-
-// //     return () => anim.stop();
-// //   }, [currentIndex]);
-
-// //   const handleNext = () => {
-// //     if (currentIndex < storyList.length - 1) {
-// //       setCurrentIndex((i) => i + 1);
-// //     } else {
-// //       router.back();
-// //     }
-// //   };
-
-// //   const handlePrevious = () => {
-// //     if (currentIndex > 0) {
-// //       setCurrentIndex((i) => i - 1);
-// //     } else {
-// //       router.back();
-// //     }
-// //   };
-
-// //   const handleLongPressIn = () => {
-// //     setPaused(true);
-// //     player.pause();
-// //   };
-
-// //   const handleLongPressOut = () => {
-// //     setPaused(false);
-// //     player.play();
-// //   };
-
-// //   if (!userStory || !currentStory) {
-// //     return (
-// //       <View style={styles.center}>
-// //         <Text style={{ color: "#fff" }}>Loading...</Text>
-// //       </View>
-// //     );
-// //   }
-
-// //   return (
-// //     <View style={styles.container}>
-// //       <VideoView
-// //         player={player}
-// //         style={styles.video}
-// //         contentFit="cover"
-// //         allowsFullscreen={false}
-// //         allowsPictureInPicture={false}
-// //         nativeControls={false}
-// //       />
-
-// //       {/* Header */}
-// //       <View style={styles.topBar}>
-// //         {/* Progress bars */}
-// //         <View style={styles.progressRow}>
-// //           {storyList.map((_, i) => (
-// //             <View key={i} style={styles.progressBackground}>
-// //               <Animated.View
-// //                 style={[
-// //                   styles.progressFill,
-// //                   i === currentIndex
-// //                     ? { flex: progress }
-// //                     : i < currentIndex
-// //                     ? { flex: 1 }
-// //                     : { flex: 0 },
-// //                 ]}
-// //               />
-// //             </View>
-// //           ))}
-// //         </View>
-
-// //         {/* User */}
-// //         <View style={styles.userRow}>
-// //           <Image source={{ uri: userStory.profilePic }} style={styles.profileImg} />
-// //           <Text style={styles.username}>{userStory.username}</Text>
-// //         </View>
-
-// //         <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-// //           <Ionicons name="close" size={26} color="#fff" />
-// //         </TouchableOpacity>
-// //       </View>
-
-// //       {/* Touch navigation */}
-// //       <View style={styles.touchLayer}>
-// //         <TouchableOpacity
-// //           style={{ flex: 1 }}
-// //           onPress={(e) =>
-// //             e.nativeEvent.locationX < width / 2 ? handlePrevious() : handleNext()
-// //           }
-// //           onLongPress={handleLongPressIn}
-// //           onPressOut={handleLongPressOut}
-// //           delayLongPress={150}
-// //         />
-// //       </View>
-// //     </View>
-// //   );
-// // }
-
-// // const styles = StyleSheet.create({
-// //   container: { flex: 1, backgroundColor: "#000" },
-// //   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-// //   video: { position: "absolute", width, height },
-// //   topBar: { position: "absolute", top: 40, left: 10, right: 10 },
-// //   progressRow: { flexDirection: "row", gap: 5, marginBottom: 10 },
-// //   progressBackground: {
-// //     flex: 1,
-// //     height: 3,
-// //     backgroundColor: "rgba(255,255,255,0.3)",
-// //     borderRadius: 2,
-// //     overflow: "hidden",
-// //   },
-// //   progressFill: { backgroundColor: "#fff" },
-// //   userRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-// //   profileImg: { width: 35, height: 35, borderRadius: 20 },
-// //   username: { color: "#fff", fontSize: 16, fontWeight: "600" },
-// //   closeBtn: { position: "absolute", right: 0, top: 0 },
-// //   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
-// // });
-
-// // // ==========================================================================================================
-
-// import { useStoryStore } from "@/src/store/useStoryStore";
-// import { Ionicons } from "@expo/vector-icons";
-// import { useLocalSearchParams, useRouter } from "expo-router";
-// import { VideoView, useVideoPlayer } from "expo-video";
-// import { useEffect, useRef, useState } from "react";
-// import {
-//   Animated,
-//   Dimensions,
-//   Image,
-//   StyleSheet,
-//   Text,
-//   TouchableOpacity,
-//   View,
-// } from "react-native";
-
-// const { width, height } = Dimensions.get("window");
-
-// export default function StoryViewPage() {
-//   const router = useRouter();
-//   const { id } = useLocalSearchParams<{ id: string }>();
-//   const { userStories, markStoryViewed } = useStoryStore();
-
-//   const userStory = userStories.find((u) =>
-//     u.stories.some((s) => s.id === id)
-//   );
-
-//   const storyList = userStory?.stories || [];
-//   //  console.log("ddddddddddddduuuuuu", storyList);
-//   const [currentIndex, setCurrentIndex] = useState(0);
-//   const progress = useRef(new Animated.Value(0)).current;
-//   const [paused, setPaused] = useState(false);
-//   const [isMuted, setIsMuted] = useState(false);
-//   const [showMuteIcon, setShowMuteIcon] = useState(false);
-//   const [globalUserIndex, setGlobalUserIndex] = useState(0);
-//   const [storyIndex, setStoryIndex] = useState(0);
-
-//   const player = useVideoPlayer("");
-
-//   useEffect(() => {
-//     if (player) {
-//       player.volume = isMuted ? 0 : 1.0;
-//     }
-//   }, [isMuted, player]);
-
-
-//   const currentStory = storyList[currentIndex];
-//   //  console.log('====================================');
-//   //  console.log(currentStory.duration);
-//   //  console.log('====================================');
-
-//   //  Set initial index only once on mount
-//  useEffect(() => {
-//     if (userStory && id) {
-//       const idx = userStory.stories.findIndex((s) => s.id === id);
-//       if (idx !== -1) {
-//         console.log("🔄 Setting story index:", idx, "for id:", id);
-//         setCurrentIndex(idx);
-//       }
-//     }
-//   }, [id]); 
-
-//   useEffect(() => {
-//     if (!currentStory?.videoUrl || !player) return;
-
-//     const loadVideo = async () => {
-//       try {
-//         if (player.replaceAsync) {
-//           await player.replaceAsync(currentStory.videoUrl);
-//         } else {
-//           player.replace(currentStory.videoUrl);
-//         }
-//         player.volume = isMuted ? 0 : 1.0;
-//         if (!paused) player.play();
-//       } catch (err) {
-//         console.log("Video load error:", err);
-//       }
-//     };
-
-//     loadVideo();
-//   }, [currentStory?.videoUrl]);
-
-//   //  Progress animation
-//   useEffect(() => {
-//     if (!currentStory) return;
-
-//     markStoryViewed(currentStory.id);
-
-//     progress.stopAnimation();
-//     progress.setValue(0);
-
-
-//     const anim = Animated.timing(progress, {
-//       toValue: 1,
-//       duration: (currentStory.duration) * 1000,
-//       useNativeDriver: false,
-//     });
-
-//     anim.start(({ finished }) => {
-//       if (finished) handleNext();
-//     });
-
-//     return () => anim.stop();
-//   }, [currentIndex]);
-
-//   const handleNext = () => {
-//     if (currentIndex < storyList.length - 1) {
-//       setCurrentIndex((i) => i + 1);
-//       return;
-//     }
-
-//     const currentUserIndex = userStories.findIndex((u) => u.username === userStory?.username);
-
-//     // Move to next user
-//     if (currentUserIndex < userStories.length - 1) {
-//       const nextUser = userStories[currentUserIndex + 1];
-//       const nextStory =
-//         nextUser.stories.find((s) => !s.viewed) || nextUser.stories[0];
-
-//       router.replace(`/story/${nextStory.id}`);
-//     } else {
-//       // End of last user
-//       router.back();
-//     }
-//   };
-
-
-//   const handlePrevious = () => {
-//     // SELF story → LEFT tap ignored
-//     // if (userStory?.self) return;
-
-//     if (currentIndex > 0) {
-//       setCurrentIndex((i) => i - 1);
-//       return;
-//     }
-
-//     const currentUserIndex = userStories.findIndex(
-//       (u) => u.username === userStory?.username
-//     );
-
-//     if (currentUserIndex > 0) {
-//       const prevUser = userStories[currentUserIndex - 1];
-//       const prevStory =
-//         prevUser.stories[prevUser.stories.length - 1];
-
-//       router.replace(`/story/${prevStory.id}`);
-//     } else {
-//       router.back();
-//     }
-//   };
-
-//   const handleLongPressIn = () => {
-//     // console.log(" Pause story");
-//     setPaused(true);
-//     player.pause();
-//   };
-
-//   const handleLongPressOut = () => {
-//     setPaused(false);
-//     player.play();
-//   };
-
-//   if (!userStory || storyList.length === 0 || !currentStory) {
-//     return (
-//       <View style={styles.center}>
-//         <Text style={{ color: "#fff" }}>Loading...</Text>
-//       </View>
-//     );
-//   }
-
-
-//   return (
-//     <View style={styles.container}>
-//       <VideoView
-//         player={player}
-//         style={styles.video}
-//         contentFit="cover"
-//         allowsFullscreen={false}
-//         allowsPictureInPicture={false}
-//         nativeControls={false}
-//       />
-
-//       {/* Top bar with progress */}
-//       <View style={styles.topBar}>
-//         <View style={styles.progressRow}>
-//           {storyList.map((_, i) => (
-//             <View key={i} style={styles.progressBackground}>
-//               <Animated.View
-//                 style={[
-//                   styles.progressFill,
-//                   i === currentIndex
-//                     ? { flex: progress }
-//                     : i < currentIndex
-//                       ? { flex: 1 }
-//                       : { flex: 0 },
-//                 ]}
-//               />
-//             </View>
-//           ))}
-//         </View>
-
-//         {/* User info */}
-//         <View style={styles.userRow}>
-//           <TouchableOpacity
-//             style={{ flexDirection: "row", alignItems: "center" }}
-//             onPress={() => {
-//               router.push(`/profile/${userStory.username}`);
-//             }}
-//           >
-//             <Image source={{ uri: userStory.profilePic }} style={styles.profileImg} />
-//             <Text style={styles.username}>{userStory.username}</Text>
-//           </TouchableOpacity>
-//         </View>
-
-//         {/* Close */}
-//         {/* <TouchableOpacity style={styles.closeBtn} onPress={() => router.back()}>
-//           <Ionicons name="close" size={26} color="#fff" />
-//         </TouchableOpacity> */}
-//       </View>
-
-//       {/* Tap left/right */}
-//       <View style={styles.touchLayer} >
-//         <TouchableOpacity
-//           style={{ flex: 1 }}
-//           onPress={(e) =>
-//             e.nativeEvent.locationX < width / 2 ? handlePrevious() : handleNext()
-//           }
-//           onLongPress={handleLongPressIn}
-//           onPressOut={handleLongPressOut}
-//           delayLongPress={150}
-//         />
-//       </View>
-
-//       {/* Mute/Unmute Button */}
-//       <TouchableOpacity
-//         style={{ position: "absolute", top: 55, right: 50 }}
-//         onPress={() => setIsMuted(!isMuted)}
-//       >
-//         <Ionicons
-//           name={isMuted ? "volume-mute" : "volume-high"}
-//           size={26}
-//           color="#fff"
-//         />
-//       </TouchableOpacity>
-
-//       {/* Close button ko alag, upar layer me dikhaye */}
-//       <View style={StyleSheet.absoluteFill} pointerEvents="box-none">
-//         <View style={{ position: "absolute", top: 55, right: 10 }}>
-//           <TouchableOpacity onPress={() => router.back()}>
-//             <Ionicons name="close" size={26} color="#fff" />
-//           </TouchableOpacity>
-//         </View>
-//       </View>
-//     </View>
-//   );
-// }
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#000" },
-//   center: { flex: 1, justifyContent: "center", alignItems: "center" },
-//   video: { position: "absolute", width, height },
-//   topBar: { position: "absolute", top: 40, left: 10, right: 10 },
-//   progressRow: { flexDirection: "row", gap: 5, marginBottom: 10 },
-//   progressBackground: {
-//     flex: 1,
-//     height: 3,
-//     backgroundColor: "rgba(255,255,255,0.3)",
-//     borderRadius: 2,
-//     overflow: "hidden",
-//   },
-//   progressFill: { backgroundColor: "#fff" },
-//   userRow: { flexDirection: "row", alignItems: "center", gap: 10 },
-//   profileImg: { width: 35, height: 35, borderRadius: 20 },
-//   username: { color: "#fff", fontSize: 16, fontWeight: "600" },
-//   closeBtn: { position: "absolute", right: 0, top: 0 },
-//   touchLayer: { position: "absolute", width, height, flexDirection: "row" },
-// });
-
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { markViewed } from "@/src/api/story-api";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
@@ -654,7 +9,7 @@ import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -672,10 +27,19 @@ export default function StoryViewPage() {
   const router = useRouter();
   const { id } = useLocalSearchParams<{ id: string }>();
   const { userStories, markStoryViewed } = useStoryStore();
-  const userStory = userStories.find((u) =>
+
+
+  const sortedUserStories = useMemo(() => {
+    return [...userStories].sort((a, b) => {
+      const latestA = Math.max(...a.stories.map(s => new Date(s.created_at).getTime()));
+      const latestB = Math.max(...b.stories.map(s => new Date(s.created_at).getTime()));
+      return latestB - latestA; // Descending order (newest first)
+    });
+  }, [userStories]);
+
+  const userStory = sortedUserStories.find((u) =>
     u.stories.some((s) => s.id === id)
 );
-
 
   const storyList = userStory?.stories || [];
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -746,7 +110,9 @@ useEffect(() => {
   const handleStoryViews = (data: any) => {
     console.log("📥 storyViews EVENT RECEIVED:", data);
 
-    const formatted = data.views.map((v: any) => ({
+    const formatted = data.views
+    .filter((v: any) => v.user_id !== currentUser?.id)
+    .map((v: any) => ({
       view_id: v.view_id,
       username: v.username,
       profilePic: v.profilepic,
@@ -758,10 +124,16 @@ useEffect(() => {
 
   socket.off("storyViews");
   socket.on("storyViews", handleStoryViews);
+  // socket.on("story:newView", (viewer) => {
+  //   console.log("🔥 LIVE NEW VIEW RECEIVED:", viewer);
+  //   addSingleView(viewer);
+  // });
   socket.on("story:newView", (viewer) => {
-    console.log("🔥 LIVE NEW VIEW RECEIVED:", viewer);
+  if (viewer.user_id !== currentUser?.id) {
     addSingleView(viewer);
-  });
+  }
+});
+
   return () => {
     console.log("🚪 Cleanup: leaving room", storyId);
 
@@ -774,28 +146,58 @@ useEffect(() => {
 
 
   // Progress animation
-  useEffect(() => {
-    if (!currentStory || !socket) return;
+  // useEffect(() => {
+  //   if (!currentStory || !socket) return;
+  //   markViewed(storyId);
+  //   socket.emit("viewStory", { userId: currentUser?.id, storyId });
+
+  //   markStoryViewed(currentStory.id);
+
+  //   progress.stopAnimation();
+  //   progress.setValue(0);
+
+  //   const anim = Animated.timing(progress, {
+  //     toValue: 1,
+  //     duration: currentStory.duration * 1000,
+  //     useNativeDriver: false,
+  //   });
+
+  //   anim.start(({ finished }) => {
+  //     if (finished) handleNext();
+  //   });
+
+  //   return () => anim.stop();
+  // }, [currentIndex]);
+
+useEffect(() => {
+  if (!currentStory || !socket || !currentUser) return;
+
+  if (!isOwnStory) {
     markViewed(storyId);
-    socket.emit("viewStory", { userId: currentUser?.id, storyId });
-
-    markStoryViewed(currentStory.id);
-
-    progress.stopAnimation();
-    progress.setValue(0);
-
-    const anim = Animated.timing(progress, {
-      toValue: 1,
-      duration: currentStory.duration * 1000,
-      useNativeDriver: false,
+    socket.emit("viewStory", {
+      userId: currentUser.id,
+      storyId,
     });
+  }
 
-    anim.start(({ finished }) => {
-      if (finished) handleNext();
-    });
+  markStoryViewed(currentStory.id);
 
-    return () => anim.stop();
-  }, [currentIndex]);
+  progress.stopAnimation();
+  progress.setValue(0);
+
+  const anim = Animated.timing(progress, {
+    toValue: 1,
+    duration: currentStory.duration * 1000,
+    useNativeDriver: false,
+  });
+
+  anim.start(({ finished }) => {
+    if (finished) handleNext();
+  });
+
+  return () => anim.stop();
+}, [currentIndex]);
+
 
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
@@ -803,11 +205,13 @@ useEffect(() => {
       return;
     }
 
-    const currentUserIndex = userStories.findIndex((u) => u.username === userStory?.username);
+    const currentUserIndex = sortedUserStories.findIndex((u) => u.owner === userStory?.owner);
+
+    console.log("🔄 Current User Index:", currentUserIndex, "Total:", sortedUserStories.length);
 
     // Move to next user
-    if (currentUserIndex < userStories.length - 1) {
-      const nextUser = userStories[currentUserIndex + 1];
+    if (currentUserIndex < sortedUserStories.length - 1) {
+      const nextUser = sortedUserStories[currentUserIndex + 1];
       const nextStory =
         nextUser.stories.find((s) => !s.viewed) || nextUser.stories[0];
 
@@ -828,12 +232,14 @@ useEffect(() => {
       return;
     }
 
-    const currentUserIndex = userStories.findIndex(
-      (u) => u.username === userStory?.username
+    const currentUserIndex = sortedUserStories.findIndex(
+      (u) => u.owner === userStory?.owner
     );
 
+     console.log("🔄 Current User Index:", currentUserIndex);
+    
     if (currentUserIndex > 0) {
-      const prevUser = userStories[currentUserIndex - 1];
+      const prevUser = sortedUserStories[currentUserIndex - 1];
       const prevStory =
         prevUser.stories[prevUser.stories.length - 1];
 
@@ -938,7 +344,7 @@ useEffect(() => {
             }}
           >
             <Image
-              source={{ uri: userStory.profilePic }}
+              source={{ uri: userStory.profilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
               style={styles.profileImg}
             />
             <Text style={styles.username}>
@@ -1041,12 +447,12 @@ useEffect(() => {
   views.map((viewer:any, index:any) => (
     <View key={index} style={styles.viewerItem}>
       <Image
-        source={{ uri: viewer.profilePic || "data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAJcAAACUCAMAAACp1UvlAAAAM1BMVEX///+zs7Pn5+ewsLDq6uqtra22trb6+vq5ubn09PTd3d3Nzc3KysrHx8fi4uLAwMDV1dWKavJRAAAFXklEQVR4nO2c3ZarIAyFR/5UUPD9n/aAbWe0otlgbM+F+2rWrJb1NYSQQPTn59atW7du3bp16/tq+75XSiQpFf9uvw0U1ftpCF0j9UvSdGGYfP89pFbZIGc1az3+Gaz6huGUC1K/E63otAxOfBhqajZWyqHFD03qY1R+lJqGekrL0X4CqrUGMdXKasZe7mm2w021MFp3rc1EV2aqhc2665ZA7w4XIEGm3UUxzRf61ZbMX0DVjjWOtZYe2f1fmHPGeprMMHuZPW+sJxnnwmxHDmM9wfjmsg1c1krSgQmsZ3GtP8mOJWD0tbH0WjBua81gzWkwfmvNYN1JH2svwToPxhDkd8DGM1juGmvNYK4eiy3K56SrI7/CrZU+aYxJf+Ffqsz8YZ+PNdkwWR/LWm9jNYmS1fq+A2fROC+e5XYquIV3BvuirnIxAf1saSbxYnpJiQkLxrIi68FmUQ4bqgfZAH27YiYnYBZjAZajmsksYjI9lWL1yM81fg8rgnloLks3SmAeZOd3qWYwwBPkUIalgFk0h1izxehBdFkQC8Ac7PrWryw9iAwlWAL4oY7EEgoIgUWxgvYu2dFYEYx2sZLEogdmcUK4xEQPJPElCZg/QFhCBXIkfDdq6XWkaad/cAGpkkGDvgemEcOKYPRQEj1OAbx+hLnoUh2NrcAWJCcQK3o+YHzM8wUQ6y3MZQFnxUIYcEhyvDOu5DtyNDCE0dZqAoyFRIqmQbCQagOMXiiXRDZv+wUupGRDalluLiDkt0iKw80FHNUhCXTTwVhC0OuxQSJYj1SNJXECKSY1zeWhahbctgWUs0YueotE6rO4D8H7I7IPxfFILrAghbnA8pjkQpZj2tJQQW4BVB/YmYccwLwQMn/MDUkuaBh4RUKrMYmLCzMYai4+rpj9AvUjkpGDXPBISMyHYv38K9nsBeT4QG7/Kz4u+iQAPQhl5mqaQzBVcvjPOI9RejjgGkoO/+n4hQacx88M2ePVdMBadrFEcyFlwpLMZciUKL3AofchOBK+wLpJrcmUcqW3cMC+DeUl60FlmGykmSXsBF94LIag8xwsL3wna0IYh2EYQyjtdpoF5IVQHp2H23b0wVx0AQnVHeyi83uoTmMWUqfV3tHKbGsm+F3kBAw5B1gDNaaLbj8658bo+J0pxoPOAQpuaVNPlxnnK1H1q3Q5OpqyDjbo0gPeiWJ0cCk73AT8SOddaBiznCQwa9KNs+rgPk1Z12AxBzyXw0qrbntPu90mJyhhBc8xgQimM7fHeaNNyFYJ3nhQW3e608ZF3nXDd5BEFaNHoBRa2MwTzTTwvcLhPUw0VgnVTHZsMvge5ijky67IWE+wo+y1oFFnP6eQYzHUA2w/+ABncr/aGwU9LsmQ7S2mooarnV4T/DguA7aTCJf1nGSTHQlcaR+AZb227N4926dwxlq7YIV9ChkPw+8cd8Fyg5ZhbTejypW41hasuGH07VxaGgYsId4idnnf0KbPCj+xP5B6O82v6ZhbxYpzS3EBtvL9mr609W4En9eTYIuMrK6PbzmTkmUWZ66/sqa65/e39+F8iFjob01WPyH2ahaRfFRRr1k88UTFw8Xqd+ucnjv4mT7kZ9inGuMKNd+BFO6L70q+z+pd4rEdcTTgS7y5BJOXp7HSRml4zRUNZs4/RxHBuM0lhOV5go7bXoLrySZmv2eiYgZjfQ64Z8NifjizZcLifwCYw2SXPMt9HuyiB2zbc2QXvmehPVFvX/toeV9Hpq5/70PFZH6AaiYrs9mHqJIKVsCn3yrSAlZTX3ljB4Gmvvr+lce7YJZ86r95J8xPu9a3cW7dunXr1q1bt5L+AZmUU8mHUCndAAAAAElFTkSuQmCC" }}
+        source={{ uri: viewer.profilePic ||  "https://cdn-icons-png.flaticon.com/512/847/847969.png"  }}
         style={styles.viewerImage}
       />
       <View style={styles.viewerInfo}>
         <Text style={styles.viewerName}>{viewer.username}</Text>
-        <Text style={styles.viewerTime}>{viewer.viewedAt}</Text>
+        <Text style={styles.viewerTime}>{timeAgo(viewer.viewedAt)}</Text>
       </View>
     </View>
   ))
