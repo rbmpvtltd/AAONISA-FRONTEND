@@ -58,10 +58,10 @@
 
 import BottomDrawer from "@/src/components/ui/BottomDrawer";
 import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
-import { useBookmarkStore } from "@/src/store/useBookmarkStore";
+import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useMemo, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Animated,
@@ -75,6 +75,25 @@ import {
   useWindowDimensions
 } from "react-native";
 import Ionicons from "react-native-vector-icons/Ionicons";
+
+export const useReelFromBookmarks = (reelId?: string) => {
+  const qc = useQueryClient();
+
+  if (!reelId) return null;
+
+  const categories = qc.getQueryData<any[]>(["bookmarks"]);
+
+  if (!categories) return null;
+
+  for (const cat of categories) {
+    const reel = cat.reels?.find(
+      (r: any) => r.uuid === reelId || r.id === reelId
+    );
+    if (reel) return reel;
+  }
+
+  return null;
+};
 
 type ReelType = {
   id: string;
@@ -97,13 +116,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
 
   const { reelId } = useLocalSearchParams<{ reelId: string }>();
-  const getReelById = useBookmarkStore((s) => s.getReelById);
-
-  console.log("rrrrrrrrrrrrrrr", getReelById(reelId));
-
-  //  Load reel using ID
-  // const reel = useMemo(() => getReelById(reelId!), [reelId]);
-  const reel = useMemo(() => getReelById(reelId!), [reelId]) as ReelType | null;
+const reel = useReelFromBookmarks(reelId);
   console.log("hhhhhh", reel?.comments);
 
 

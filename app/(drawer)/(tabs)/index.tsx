@@ -60,11 +60,11 @@ const HomePage = () => {
       async () => {
         try {
           const data = await getAllBookmarks();
-          console.log("", data)
-          return data || []; // Return empty array if undefined
+          console.log("a rhe h bookmarks",data)
+          return data || [];
         } catch (error) {
           console.error("Bookmarks fetch error:", error);
-          return []; // Return empty array on error to prevent undefined
+          return [];
         }
       },
     staleTime: 0,
@@ -83,11 +83,11 @@ const HomePage = () => {
   //   }
   // }, [bookmarks, setCategories]);
 
-  useEffect(() => {
-    if (bookmarks) {
-      setCategories(() => bookmarks);   // ✔ overwrite, no merge
-    }
-  }, [bookmarks, setCategories]);
+  // useEffect(() => {
+  //   if (bookmarks) {
+  //     setCategories(() => bookmarks);
+  //   }
+  // }, [bookmarks, setCategories]);
 
 
   useEffect(() => {

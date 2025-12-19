@@ -187,101 +187,96 @@ import {
 import Modal from 'react-native-modal';
 import { useAppTheme } from '../../constants/themeHelper';
 import { useBookmarkStore } from '../../store/useBookmarkStore';
-import { addBookmark, addReelToBookmark } from './api';
+// import { addBookmark, addReelToBookmark } from './api';
 
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import {
+  addBookmark,
+  addReelToBookmark,
+  getAllBookmarks,
+} from "./api";
+
+export const BOOKMARKS_KEY = ["bookmarks"];
+
+export const useBookmarks = () =>
+  useQuery({
+    queryKey: BOOKMARKS_KEY,
+    queryFn: getAllBookmarks,
+    initialData: [],
+  });
+
+export const useAddCategory = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: addBookmark,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
+    },
+  });
+};
+
+export const useSaveReelToCategory = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: addReelToBookmark,
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
+    },
+  });
+};
 const BookmarkPanel = () => {
-  const {
-    panelVisible,
-    closePanel,
-    categories,
-    addCategory,
-    saveToCategory,
-    selectedReel,
-  } = useBookmarkStore();
+  const { panelVisible, closePanel, selectedReel } = useBookmarkStore();
+  const { data: categories = [] } = useBookmarks();
+  const addCategoryMutation = useAddCategory();
+  const saveReelMutation = useSaveReelToCategory();
 
-  const [newCategory, setNewCategory] = useState('');
-  const [loading, setLoading] = useState(false);
-
+  const [newCategory, setNewCategory] = useState("");
   const theme = useAppTheme();
 
-  const handleAddCategory = async () => {
+  // ➕ Add Category
+  const handleAddCategory = () => {
     const name = newCategory.trim();
-    if (!name) return Alert.alert('Error', "Category name can't be empty");
+    if (!name) return Alert.alert("Error", "Category name can't be empty");
 
-    try {
-      setLoading(true);
-      const res = await addBookmark({ name });
-      console.log("iiiiiiiiiiiiiiidddddddddddddddddddd", res);
-
-      addCategory(name);
-      // addCategory({ id: res.id, name: res.name });
-      setNewCategory('');
-    } catch (e) {
-      Alert.alert('Error', 'Failed to create category');
-    } finally {
-      setLoading(false);
-    }
+    addCategoryMutation.mutate(
+      { name },
+      {
+        onSuccess: () => setNewCategory(""),
+        onError: () =>
+          Alert.alert("Error", "Failed to create category"),
+      }
+    );
   };
 
-  // const handleSelectCategory = async (categoryId: any) => {
-  //   if (!selectedReel) return;
+  // 💾 Save Reel
+  const handleSelectCategory = (categoryId: string, name: string) => {
+    if (!selectedReel) return;
 
-  //   saveToCategory(categoryId);
-
-  //   try {
-  //     await addReelToBookmark({
-  //       reelId: selectedReel.uuid,
-  //       categoryId,
-  //     });
-  //   } catch (e) {
-  //     Alert.alert('Error', 'Failed to save reel');
-  //   }
-
-  //   closePanel();
-  // };
-  // const handleSelectCategory = async (categoryId: any) => {
-  //   const selectedCategory = categories.find(c => c.id === categoryId);
-  //   if (!selectedCategory) return;
-  //   try {
-  //     await addReelToBookmark({
-  //       reelId: selectedReel?.uuid,
-  //       name: selectedCategory.name,  
-  //     });
-
-  //     saveToCategory(categoryId);
-  //   } catch (e) {
-  //     Alert.alert('Error', 'Failed to save reel');
-  //   }
-
-  //   closePanel();
-  // };
-  const handleSelectCategory = async (categoryId: string) => {
-    const selectedCategory = categories.find(c => c.id === categoryId);
-    if (!selectedCategory || !selectedReel) return;
-    try {
-      await addReelToBookmark({
+    saveReelMutation.mutate(
+      {
         reelId: selectedReel,
-        name: selectedCategory.name,
-      });
-
-      saveToCategory(categoryId);
-
-    } catch {
-      Alert.alert("Error", "Failed to save reel");
-    }
-
-    closePanel();
+        name,
+      },
+      {
+        onSuccess: closePanel,
+        onError: () =>
+          Alert.alert("Error", "Failed to save reel"),
+      }
+    );
   };
-
 
   return (
     <Modal
       isVisible={panelVisible}
       onBackdropPress={closePanel}
-      style={{ justifyContent: 'flex-end', margin: 0 }}
+      style={{ justifyContent: "flex-end", margin: 0 }}
     >
       <View style={[styles.sheet, { backgroundColor: theme.background }]}>
-        <Text style={[styles.title, { color: theme.text }]}>Save to Category</Text>
+        <Text style={[styles.title, { color: theme.text }]}>
+          Save to Category
+        </Text>
 
         <FlatList
           data={categories}
@@ -294,13 +289,17 @@ const BookmarkPanel = () => {
                 styles.categoryCard,
                 { backgroundColor: theme.buttonBg },
               ]}
-              onPress={() => handleSelectCategory(item.id)}
+              onPress={() =>
+                handleSelectCategory(item.id, item.name)
+              }
               activeOpacity={0.8}
             >
               <Text
-                style={[styles.categoryText, { color: theme.buttonText }]}
+                style={[
+                  styles.categoryText,
+                  { color: theme.buttonText },
+                ]}
                 numberOfLines={2}
-                adjustsFontSizeToFit
               >
                 {item.name}
               </Text>
@@ -328,13 +327,22 @@ const BookmarkPanel = () => {
               },
             ]}
           />
+
           <TouchableOpacity
             onPress={handleAddCategory}
-            style={[styles.addButton, { backgroundColor: theme.buttonBg }]}
-            disabled={loading}
+            style={[
+              styles.addButton,
+              { backgroundColor: theme.buttonBg },
+            ]}
+            disabled={addCategoryMutation.isPending}
           >
-            <Text style={[styles.addButtonText, { color: theme.buttonText }]}>
-              {loading ? '...' : 'Add'}
+            <Text
+              style={[
+                styles.addButtonText,
+                { color: theme.buttonText },
+              ]}
+            >
+              {addCategoryMutation.isPending ? "..." : "Add"}
             </Text>
           </TouchableOpacity>
         </View>
@@ -342,6 +350,7 @@ const BookmarkPanel = () => {
     </Modal>
   );
 };
+
 
 export default BookmarkPanel;
 

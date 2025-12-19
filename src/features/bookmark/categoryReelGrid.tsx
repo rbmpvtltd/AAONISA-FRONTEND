@@ -1,118 +1,78 @@
-// import { ResizeMode, Video } from 'expo-av';
-// import { useRouter } from "expo-router";
-
-// import React, { useEffect } from 'react';
-// import { FlatList, StyleSheet, TouchableOpacity, View } from 'react-native';
-
-// interface Reel {
-//   uuid: string;
-//   videoUrl: string;
-//   thumbnail?: string;
-// }
-
-// interface Props {
-//   reels: Reel[];
-//   onSelectReel: (id: string) => void;
-// }
-
-// const CategoryReelGrid: React.FC<Props> = ({ reels, onSelectReel }) => {
-//   const router = useRouter();
-
-//   useEffect(() => {
-//     console.log("CategoryReelGrid mounted");
-//     console.log("Reels received:", reels);
-//   }, []);
-
-//   return (
-//     <View style={styles.container}>
-//       <FlatList
-//         data={reels}
-//         numColumns={3}
-//         keyExtractor={(item) => item.uuid}
-//         ListEmptyComponent={() => (
-//           <View style={{ padding: 30, alignItems: 'center' }}>
-//             <View style={{ width: 50, height: 50, backgroundColor: '#ccc', borderRadius: 8 }} />
-//           </View>
-//         )}
-//         renderItem={({ item }) => {
-//           return (
-//             <TouchableOpacity
-//               onPress={() => router.push(`/bookmark/reelscard?reelId=${item.uuid}`)
-// }
-//               style={styles.touchBox}
-//               activeOpacity={0.7}
-//             >
-//               <Video
-//                 source={{ uri: item.videoUrl }}
-//                 style={styles.thumb}
-//                 resizeMode={ResizeMode.COVER}
-//                 shouldPlay={false}   // No auto play
-//                 isMuted               // no sound
-//                 usePoster             // ensures first frame visible
-//                 posterSource={item.thumbnail ? { uri: item.thumbnail } : undefined}
-//                 onError={() => console.log(" video thumbnail load error")}
-//               />
-//             </TouchableOpacity>
-//           );
-//         }}
-//       />
-//     </View>
-//   );
-// };
-
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#fff" },
-//   touchBox: { margin: 5 },
-//   thumb: {
-//     width: 120,
-//     height: 200,
-//     borderRadius: 8,
-//     backgroundColor: "#000",
-//   },
-// });
-
-// export default CategoryReelGrid;
-
-
-import { useAppTheme } from '@/src/constants/themeHelper'; // 👈 theme import
+import { useAppTheme } from '@/src/constants/themeHelper';
 import { Ionicons } from '@expo/vector-icons';
-import { ResizeMode, Video } from 'expo-av';
+import { useMutation, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import React, { useEffect } from 'react';
-import { FlatList, StyleSheet, Text, TouchableOpacity, View } from 'react-native';
-import { useBookmarkStore } from '../../store/useBookmarkStore';
+import React from 'react';
+import {
+  Alert,
+  FlatList,
+  Image,
+  StyleSheet,
+  Text,
+  TouchableOpacity,
+  View,
+} from 'react-native';
 import { removeReelFromBookmark } from './api';
 
 interface Reel {
   uuid: string;
   videoUrl: string;
-  thumbnail?: string;
+  thumbnailUrl?: string;
 }
 
 interface Props {
   reels: Reel[];
-  onSelectReel: (id: string) => void;
+  categoryId: string;
+  categoryName: string;
 }
 
-const CategoryReelGrid: React.FC<Props> = ({ reels, onSelectReel }) => {
-  const router = useRouter();
-  const theme = useAppTheme(); // 👈 use theme here
-  const { removeReelFromCategory } = useBookmarkStore();
+export const BOOKMARKS_KEY = ["bookmarks"];
 
-const handleDelete = async (reelId: string) => {
-  try {
-    await removeReelFromBookmark(reelId); // 🔥 API call
-    removeReelFromCategory(reelId);       // 🔥 Zustand update
-  } catch (err) {
-    console.log('Failed to remove bookmark', err);
-  }
+export const useRemoveReelFromCategory = () => {
+  const qc = useQueryClient();
+
+  return useMutation({
+    mutationFn: ({
+      reelId,
+      categoryName,
+    }: {
+      reelId: string;
+      categoryName: string;
+    }) => removeReelFromBookmark({ reelId, categoryName }),
+
+    onSuccess: () => {
+      qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
+    },
+  });
 };
 
-  useEffect(() => {
-    console.log("CategoryReelGrid mounted");
-    console.log("Reels received:", reels);
-  }, []);
+
+const CategoryReelGrid: React.FC<Props> = ({
+  reels,
+  categoryName,
+}) => {
+  const router = useRouter();
+  const theme = useAppTheme();
+  const removeReelMutation = useRemoveReelFromCategory();
+
+  const handleDelete = (reelId: string) => {
+    Alert.alert(
+      "Remove Reel",
+      "Are you sure you want to remove this reel from bookmarks?",
+      [
+        { text: "Cancel", style: "cancel" },
+        {
+          text: "Remove",
+          style: "destructive",
+          onPress: () =>
+            removeReelMutation.mutate({ reelId, categoryName }, {
+              onError: () =>
+                Alert.alert("Error", "Failed to remove reel"),
+            }),
+        },
+      ]
+    );
+  };
 
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
@@ -122,44 +82,51 @@ const handleDelete = async (reelId: string) => {
         keyExtractor={(item) => item.uuid}
         ListEmptyComponent={() => (
           <View style={styles.emptyContainer}>
-    <Text style={[styles.emptyText, { color: theme.subtitle }]}>
-      No bookmarked reels yet
-    </Text>
-  </View>
+            <Text style={[styles.emptyText, { color: theme.subtitle }]}>
+              No bookmarked reels yet
+            </Text>
+          </View>
         )}
         renderItem={({ item }) => {
+          console.log("item", item)
           return (
-            <TouchableOpacity
-  onPress={() =>
-    router.push(`/bookmark/reelscard?reelId=${item.uuid}`)
-  }
-  style={styles.touchBox}
-  activeOpacity={0.7}
->
-  <View>
-    <Video
-      source={{ uri: item.videoUrl }}
-      style={[styles.thumb, { backgroundColor: theme.subtitle }]}
-      resizeMode={ResizeMode.COVER}
-      shouldPlay={false}
-      isMuted
-      usePoster
-      posterSource={item.thumbnail ? { uri: item.thumbnail } : undefined}
-    />
+          <TouchableOpacity
+            onPress={() =>
+              router.push(`/bookmark/reelscard?reelId=${item.uuid}`)
+            }
+            style={styles.touchBox}
+            activeOpacity={0.7}
+          >
+            <View>
+              <Image
+                source={
+                  item.thumbnailUrl
+                    ? { uri: item.thumbnailUrl }
+                    : require('@/assets/darkThemeUser.jpg')
+                }
+                style={[
+                  styles.thumb,
+                  { backgroundColor: theme.subtitle },
+                ]}
+                resizeMode="cover"
+              />
 
-    {/* 🗑 DELETE BUTTON */}
-    <TouchableOpacity
-      style={styles.deleteBtn}
-      onPress={() => handleDelete(item.uuid)}
-      activeOpacity={0.8}
-    >
-      <Ionicons name="trash-outline" size={18} color="#fff" />
-    </TouchableOpacity>
-  </View>
-</TouchableOpacity>
-
-          );
-        }}
+              <TouchableOpacity
+                style={styles.deleteBtn}
+                onPress={() => handleDelete(item.uuid)}
+                activeOpacity={0.8}
+              >
+                <Ionicons
+                  name="trash-outline"
+                  size={18}
+                  color="#fff"
+                />
+              </TouchableOpacity>
+            </View>
+          </TouchableOpacity>
+        )
+        }
+      }
       />
     </View>
   );
