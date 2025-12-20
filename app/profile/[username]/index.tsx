@@ -553,6 +553,7 @@
 // ==================================================
 
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { formatCount } from "@/src/utils/formatCount";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -627,7 +628,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
 
             <View style={styles.stats}>
                 <View style={styles.stat}>
-                    <Text style={[styles.statNumber, { color: theme.text }]}>{postsCount}</Text>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{formatCount(postsCount)}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Posts</Text>
                 </View>
 
@@ -635,7 +636,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
                     style={styles.stat}
                     onPress={() => router.push(`/profile/${profile.username}/followers`)}
                 >
-                    <Text style={[styles.statNumber, { color: theme.text }]}>{followersCount}</Text>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{formatCount(followersCount)}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Followers</Text>
                 </TouchableOpacity>
 
@@ -643,18 +644,18 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
                     style={styles.stat}
                     onPress={() => router.push(`/profile/${profile.username}/followings`)}
                 >
-                    <Text style={[styles.statNumber, { color: theme.text }]}>{followingsCount}</Text>
+                    <Text style={[styles.statNumber, { color: theme.text }]}>{formatCount(followingsCount)}</Text>
                     <Text style={[styles.statLabel, { color: theme.subtitle }]}>Following</Text>
                 </TouchableOpacity>
 
                 <View style={{ flexDirection: "row" }}>
                     <View style={styles.likesViews}>
                         <Text style={[styles.statLabel, { color: theme.subtitle }]}>Likes</Text>
-                        <Text style={[styles.statNumber, { color: theme.text }]}>{totalLikes}</Text>
+                        <Text style={[styles.statNumber, { color: theme.text }]}>{formatCount(totalLikes)}</Text>
                     </View>
                     <View style={styles.likesViews}>
                         <Text style={[styles.statLabel, { color: theme.subtitle }]}>Views</Text>
-                        <Text style={[styles.statNumber, { color: theme.text }]}>{totalViews}</Text>
+                        <Text style={[styles.statNumber, { color: theme.text }]}>{formatCount(totalViews)}</Text>
                     </View>
                 </View>
             </View>
