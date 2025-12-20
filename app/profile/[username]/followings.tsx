@@ -39,7 +39,7 @@ const FollowingScreen = () => {
   const padding = width > 400 ? 20 : 16;
 
 
-const { data, isPending, isError } = useQuery({
+const { data, isPending, isError,refetch, isRefetching} = useQuery({
   queryKey: ['userProfile', username],
   queryFn: () => GetProfileUsername(username!),
   enabled: !!username, 
@@ -191,6 +191,8 @@ const { data, isPending, isError } = useQuery({
         data={filteredFollowings}
         renderItem={renderFollowing}
         keyExtractor={(item) => item.id}
+            refreshing={isRefetching}
+        onRefresh={refetch}
           contentContainerStyle={{ paddingHorizontal: padding }}
                 ListEmptyComponent={
                   <View style={styles.emptyContainer}>

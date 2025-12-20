@@ -8,6 +8,7 @@ import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
+import { formatCount } from '@/src/utils/formatCount';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -322,7 +323,7 @@ const ReelItem = ({
             color={liked ? '#FF0000' : '#fff'}
           />
           <Text style={styles.actionText}>
-            {likesCount}
+            {formatCount(likesCount)}
           </Text>
         </TouchableOpacity>
 
@@ -332,8 +333,8 @@ const ReelItem = ({
         >
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>
-            {item.commentsCount}
-          </Text>
+            {formatCount(item.commentsCount)}
+          </Text> 
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => {
@@ -347,7 +348,7 @@ const ReelItem = ({
           });
         }}>
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatNumber(item.shares)}</Text>
+          <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => setShowOptions(true)}>

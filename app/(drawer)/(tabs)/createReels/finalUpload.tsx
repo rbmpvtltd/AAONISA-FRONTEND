@@ -15,12 +15,20 @@ import {
   useWindowDimensions
 } from "react-native";
 
+import { SearchUserProfiel } from "@/src/api/profile-api";
 import { useUploadStore } from "@/src/store/reelUploadStore";
+import { useQuery } from "@tanstack/react-query";
 import { uploadReel } from "./api";
 interface FinalUploadProps {
   onCancel: () => void;
   onDiscard: () => void;
 }
+
+interface MentionUser {
+  id: string;
+  username: string;
+}
+
 
 const FinalUpload: React.FC<FinalUploadProps> = ({
   onCancel,
@@ -42,6 +50,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [localHashtags, setLocalHashtags] = useState(hashtags);
   const [localMentions, setLocalMentions] = useState(mentions);
   const [isUploading, setIsUploading] = useState(false);
+  const [mentionQuery, setMentionQuery] = useState("");
 
 
 
@@ -147,8 +156,6 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     }
   };
 
-
-
   // responsive scale factors
   const fontScale = width / 400; // adjust text size
   const paddingScale = width / 375; // adjust padding/margin
@@ -160,6 +167,37 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       setLocalCaption(text);
     }
   };
+
+
+  const handleMentionChange = (text: string) => {
+    setLocalMentions(text);
+
+    const lastWord = text.split(" ").pop();
+    if (lastWord?.startsWith("@")) {
+      setMentionQuery(lastWord.replace("@", ""));
+    } else {
+      setMentionQuery("");
+    }
+  };
+
+  const handleSelectMention = (username: string) => {
+    const words = localMentions.split(" ");
+    words.pop(); // last @query hatao
+    words.push(`@${username}`);
+    setLocalMentions(words.join(" ") + " ");
+    setMentionQuery("");
+  };
+
+
+  const {
+    data: searchResults = [],
+    isLoading: searchLoading,
+  } = useQuery<MentionUser[]>({
+    queryKey: ["searchUsers", mentionQuery],
+    queryFn: () =>
+      mentionQuery ? SearchUserProfiel(mentionQuery) : [],
+    enabled: mentionQuery.length > 0,
+  });
 
 
   return (
@@ -246,7 +284,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
             onChangeText={handleCaptionChange}
           />
 
-          <View style = {{alignItems : "flex-end"}}>
+          <View style={{ alignItems: "flex-end" }}>
             <Text
               style={{
                 color: theme.placeholder,
@@ -298,8 +336,38 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
             placeholder="@user1 @user2"
             placeholderTextColor={theme.placeholder}
             value={localMentions}
-            onChangeText={setLocalMentions}
+            onChangeText={handleMentionChange}
           />
+
+          {mentionQuery.length > 0 && (
+            <View style={[styles.mentionBox, { backgroundColor: theme.background }]}>
+
+
+              {searchLoading && (
+                <ActivityIndicator size="small" color={theme.buttonBg} />
+              )}
+              <ScrollView
+                keyboardShouldPersistTaps="handled"
+                showsVerticalScrollIndicator={false}
+              >
+                {searchResults?.map(user => (
+                  <TouchableOpacity
+                    key={user.id}
+                    style={styles.mentionItem}
+                    onPress={() => handleSelectMention(user.username)}
+                  >
+                    <Text style={[styles.mentionText, { color: theme.text }]}>@{user.username}</Text>
+                  </TouchableOpacity>
+                ))}
+                {(!searchLoading && searchResults.length === 0) && (
+                  <Text style={{ color: theme.placeholder, textAlign: "center", padding: 10 }}>
+                    No users found
+                  </Text>
+                )}
+              </ScrollView>
+            </View>
+          )}
+
 
           {/* Upload button */}
           <TouchableOpacity
@@ -392,6 +460,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
+ 
+  mentionBox: {
+  position: "absolute",
+  top: 90,              
+  left: 16,
+  right: 16,
+  maxHeight: 255,       
+  borderRadius: 14,
+  padding: 8,
+  elevation: 8,
+  shadowColor: "#000",
+  shadowOpacity: 0.2,
+  shadowRadius: 8,
+  zIndex: 100,
+},
+mentionItem: {
+  flexDirection: "row",
+  alignItems: "center",
+  gap: 10,
+  paddingVertical: 10,
+  paddingHorizontal: 6,
+  borderBottomWidth: 0.5,
+  borderBottomColor: "#ccc",
+},
+  mentionText: {
+  fontSize: 14,
+  fontWeight: "500",
+},
 });
 
 export default FinalUpload;

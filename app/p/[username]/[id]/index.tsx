@@ -636,6 +636,7 @@ import { useDeleteVideo } from '@/src/hooks/videosMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
+import { formatCount } from '@/src/utils/formatCount';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -695,7 +696,7 @@ const UserReelItem = ({
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
-   const isFocused = useIsFocused();
+  const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [liked, setLiked] = useState(
     Array.isArray(item.likes)
@@ -724,7 +725,7 @@ const UserReelItem = ({
   useEffect(() => {
     if (!player) return;
 
-     if (!isFocused) {
+    if (!isFocused) {
       player.pause();
       return;
     }
@@ -738,7 +739,7 @@ const UserReelItem = ({
       try { player.pause(); } catch { }
       player.volume = 0;
     }
-  }, [isFocused,currentIndex, index, isMuted]);
+  }, [isFocused, currentIndex, index, isMuted]);
 
   const handleLike = async () => {
     const newLiked = !liked;
@@ -938,7 +939,7 @@ const UserReelItem = ({
             color={liked ? '#FF0000' : '#fff'}
           />
           <Text style={styles.actionText}>
-            {Array.isArray(item.likes) ? item.likes.length : 0}
+            {formatCount(Array.isArray(item.likes) ? item.likes.length : 0)}
           </Text>
         </TouchableOpacity>
 
@@ -948,7 +949,7 @@ const UserReelItem = ({
           onPress={() => router.push(`/comment/${item.uuid}`)}
         >
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
+          <Text style={styles.actionText}>{formatCount(item.comments?.length || 0)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => {
@@ -962,7 +963,7 @@ const UserReelItem = ({
           });
         }}>
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{item.shares?.length || 0}</Text>
+          <Text style={styles.actionText}>{formatCount(item.shares?.length || 0)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -973,10 +974,10 @@ const UserReelItem = ({
         </TouchableOpacity>
       </View>
 
-        <VideoProgressBar
-      player={player} 
-      isActive={currentIndex === index && isFocused}
-    />
+      <VideoProgressBar
+        player={player}
+        isActive={currentIndex === index && isFocused}
+      />
 
 
       {/* Bottom Drawer - Perfectly Styled */}

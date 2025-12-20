@@ -164,11 +164,12 @@ const FollowersScreen = () => {
   const padding = width > 400 ? 20 : 16;
 
   //  Fetch profile followers
-  const { data, isPending, isError } = useQuery({
-    queryKey: ['userProfile', username],
-    queryFn: () => GetProfileUsername(username),
-    enabled: !!username,
-  });
+  const { data, isPending, isError, refetch,
+    isRefetching } = useQuery({
+      queryKey: ['userProfile', username],
+      queryFn: () => GetProfileUsername(username),
+      enabled: !!username,
+    });
 
   //  Mutation for follow/unfollow
   const followMutation = useMutation({
@@ -315,7 +316,7 @@ const FollowersScreen = () => {
             placeholder="Search followers..."
             placeholderTextColor={theme.placeholder}
             value={searchQuery}
-            onChangeText={(text)=>setSearchQuery(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
+            onChangeText={(text) => setSearchQuery(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
             style={[
               styles.searchInput,
               { color: theme.text, fontSize: searchFontSize }
@@ -334,6 +335,8 @@ const FollowersScreen = () => {
         data={filteredFollowers}
         renderItem={renderFollower}
         keyExtractor={(item) => item.id}
+        refreshing={isRefetching}
+        onRefresh={refetch}
         contentContainerStyle={{ paddingHorizontal: padding }}
         ListEmptyComponent={
           <View style={styles.emptyContainer}>

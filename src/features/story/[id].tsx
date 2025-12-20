@@ -4,6 +4,7 @@ import { useDeleteVideo } from "@/src/hooks/videosMutation";
 import { useSocketManager } from "@/src/socket/socket";
 import { useStoryStore } from "@/src/store/useStoryStore";
 import { useViewStore } from "@/src/store/viewStore";
+import { formatCount } from "@/src/utils/formatCount";
 import { timeAgo } from "@/src/utils/timeAgo";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -379,7 +380,7 @@ useEffect(() => {
           >
             <Ionicons name="eye" size={20} color="#fff" />
             <Text style={styles.viewersText}>
-              {views?.length || 0}
+              {formatCount(views?.length || 0)}
             </Text>
           </TouchableOpacity>
 

@@ -69,7 +69,7 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
             if (!video) throw new Error('Video is null');
 
             onImagePick(video.uri);
-            Alert.alert('Success', 'Video saved at: ' + video.uri);
+            Alert.alert('Video recorded successfully.');
         } catch (err: any) {
             Alert.alert('Error', err.message || 'Recording failed');
         } finally {
