@@ -18,6 +18,7 @@ import {
 import { SearchUserProfiel } from "@/src/api/profile-api";
 import { useUploadStore } from "@/src/store/reelUploadStore";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from "expo-router";
 import { uploadReel } from "./api";
 interface FinalUploadProps {
   onCancel: () => void;
@@ -51,7 +52,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [localMentions, setLocalMentions] = useState(mentions);
   const [isUploading, setIsUploading] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
-
+ const router = useRouter();
 
 
   function colorNameToHex(color: string): string {
@@ -146,13 +147,17 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
       const response = await uploadReel(formData);
       console.log("Upload response:", response);
       alert("Upload successful!");
+      router.push("/(drawer)/(tabs)/createReels");
       useUploadStore.getState().resetAll();
       onDiscard()
+      router.push("/(drawer)/(tabs)/createReels");
     } catch (err: any) {
       console.error("Upload failed:", err?.response?.data || err.message);
       alert("Upload failed, check console");
+      router.push("/(drawer)/(tabs)/createReels");
     } finally {
       setIsUploading(false);
+      router.push("/(drawer)/(tabs)/createReels");
     }
   };
 

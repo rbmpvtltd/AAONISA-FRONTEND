@@ -2,6 +2,7 @@ import { useUploadStore } from "@/src/store/reelUploadStore";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { Audio, AVPlaybackStatus, ResizeMode, Video } from "expo-av";
+import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
@@ -92,7 +93,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [isFinalUploading, setIsUploading] = useState(false);
 
     const [isUploadingStory, setIsUploadingStory] = useState(false);
-
+    const router = useRouter()
 
     const prevMusicVolume = useRef(50);
     function filterNameToHex(filter: string): string {
@@ -194,15 +195,18 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             console.log("Upload response:", response);
             useUploadStore.getState().resetAll();
             alert("Upload successful!");
+            router.push("/(drawer)/(tabs)/createReels");
             resetPreview();
             onDiscard()
         } catch (err: any) {
             console.error("Upload failed:", err?.response?.data || err.message);
         }
         finally {
-            setIsUploadingStory(false); // ✅ loader OFF
+            setIsUploadingStory(false);
+            router.push("/(drawer)/(tabs)/createReels");
         }
         Alert.alert("Story uploaded successfully!");
+        router.push("/(drawer)/(tabs)/createReels");
     }
 
     const setMusicVolumeStore = useUploadStore((state) => state.setMusicVolume);

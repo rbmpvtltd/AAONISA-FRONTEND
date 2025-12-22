@@ -434,7 +434,7 @@ useEffect(() => {
 
 {views.length > 0 ? (
   views.map((viewer:any, index:any) => (
-    <View key={index} style={styles.viewerItem}>
+    <TouchableOpacity key={index} style={styles.viewerItem}  onPress={() => router.push(`/profile/${viewer.username.toLowerCase()}`)}>
       <Image
         source={{ uri: viewer.profilePic ||  "https://cdn-icons-png.flaticon.com/512/847/847969.png"  }}
         style={styles.viewerImage}
@@ -443,7 +443,7 @@ useEffect(() => {
         <Text style={styles.viewerName}>{viewer.username}</Text>
         <Text style={styles.viewerTime}>{timeAgo(viewer.viewedAt)}</Text>
       </View>
-    </View>
+    </TouchableOpacity>
   ))
 ) : (
   <View style={styles.noViewers}>
@@ -451,7 +451,6 @@ useEffect(() => {
     <Text style={styles.noViewersText}>No views yet</Text>
   </View>
 )}
-
           </ScrollView>
         </View>
       )}

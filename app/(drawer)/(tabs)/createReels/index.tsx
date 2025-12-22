@@ -1,4 +1,5 @@
-import { useState } from 'react';
+import { useLocalSearchParams } from 'expo-router';
+import { useEffect, useState } from 'react';
 import { Alert, Dimensions, StyleSheet, View } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
 import CameraScreen from './recordPage';
@@ -41,8 +42,11 @@ const musicOptions: MusicOption[] = [
 export default function CreateReel() {
   // const [permission, requestPermission] = useCameraPermissions();
   const [videoUri, setVideoUri] = useState<string | null>(null);
-  const [contentType, setContentType] = useState<ContentType>('reels');
-
+  // const [contentType, setContentType] = useState<ContentType>('reels');
+  const params = useLocalSearchParams();
+    const [contentType, setContentType] = useState<ContentType>(
+    params.contentType === 'story' ? 'story' : 'reels'
+  );
   // const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
   // const [hasMicrophonePermission, setHasMicrophonePermission] = useState<boolean | null>(null);
 
@@ -83,7 +87,11 @@ export default function CreateReel() {
   //   };
   // }, []);
 
-
+  useEffect(() => {
+    if (params.contentType === 'story') {
+      setContentType('story');
+    }
+  }, [params.contentType]);
 
   const discardVideo = () => {
     setVideoUri(null);
