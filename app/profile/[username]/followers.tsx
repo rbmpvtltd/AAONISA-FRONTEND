@@ -129,7 +129,7 @@ import { GetProfileUsername, followUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
 import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
-import { useLocalSearchParams, useRouter } from 'expo-router';
+import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
 import {
   ActivityIndicator,
@@ -141,7 +141,7 @@ import {
   View,
   useWindowDimensions,
 } from 'react-native';
-import { TextInput } from 'react-native-gesture-handler';
+import { Pressable, TextInput } from 'react-native-gesture-handler';
 
 interface Follower {
   id: string;
@@ -300,6 +300,23 @@ const FollowersScreen = () => {
     );
 
   return (
+<>
+     <Stack.Screen
+        options={{
+          title: "Followers",
+          headerShown: true,
+
+          headerLeft: () => (
+            <Pressable
+              onPress={() => router.back()}
+              style={{ paddingHorizontal: 12 }}
+            >
+              <Ionicons name="arrow-back" size={24} color={theme.text} />
+            </Pressable>
+          ),
+        }}
+      />
+
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       {/* Header */}
       {/* <View style={[styles.headerContainer, { paddingHorizontal: padding, paddingTop: 20 }]}>
@@ -348,6 +365,7 @@ const FollowersScreen = () => {
         showsVerticalScrollIndicator={false}
       />
     </View>
+    </>
   );
 };
 

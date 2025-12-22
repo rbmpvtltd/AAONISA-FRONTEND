@@ -128,7 +128,8 @@ export const StoryList = memo(({
       const story = currentUserStories.stories.find(s => !s.viewed) || currentUserStories.stories[0];
       router.push(`/story/${story.id}`);
     } else {
-      router.push("/(drawer)/(tabs)/createReels");
+      // router.push("/(drawer)/(tabs)/createReels");
+        router.push("/(drawer)/(tabs)/createReels?contentType=story");
     }
   }, [hasOwnStories, currentUserStories]);
 

@@ -3,10 +3,10 @@ function createApiUrl(url: string) {
     if (__DEV__) {
       console.log(`https://hithoy-backend.justsearch.net.in/api${url}`);
       
-        return `https://hithoy-backend.justsearch.net.in/api${url}`;
+        return `http://88.222.213.106:3000/api${url}`;
         
     }
-    return `https://hithoy-backend.justsearch.net.in/api${url}`;
+    return `http://88.222.213.106:3000/api${url}`;
 }
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
