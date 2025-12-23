@@ -6,7 +6,8 @@ export const useLikeMutation = () => {
   const queryClient = useQueryClient();
 
   return useMutation({
-    mutationFn: (storyId: string) => likeDislike(storyId),
+    // mutationFn: (storyId: string) => likeDislike(storyId),
+    mutationFn: (reelId: string) => likeDislike(reelId),
     onMutate: async (storyId) => {
       await queryClient.cancelQueries({ queryKey: ["userProfile"] });
 
@@ -38,7 +39,7 @@ export const useLikeMutation = () => {
     // ✅ On Success — re-fetch fresh profile data
     onSuccess: () => {
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      queryClient.refetchQueries({ queryKey: ["userProfile"] });
+      queryClient.refetchQueries({ queryKey: ["reels"] });
     },
   });
 };
