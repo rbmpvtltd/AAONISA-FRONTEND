@@ -66,13 +66,17 @@ const ReelItem = ({
   const markViewedMutation = useMarkViewedMutation(item.id);
   const [viewed, setViewed] = useState(false);
 
-  const [liked, setLiked] = useState(
-    Array.isArray(item.likes)
-      ? item.likes.some((like: any) => like.user_id === currentUserId)
-      : false
-  );
-  console.log("REEL id:", item.id || item.uuid);
+  // const [liked, setLiked] = useState(
+  //   Array.isArray(item.likes)
+  //     ? item.likes.some((like: any) => like.user_id === currentUserId)
+  //     : false
+  // );
 
+  const [liked, setLiked] = useState(item.isLiked ?? false);
+  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item.isLiked);
+
+
+  console.log("REEL id:", item.id || item.uuid);
 
   // create player
   const player = useVideoPlayer(
@@ -186,7 +190,7 @@ const ReelItem = ({
 
 
   console.log("item.VIEWS", item);
-  
+
   // console.log("comment count", item.commentsCount);
 
   const reelId = item.uuid || item.id;
@@ -356,10 +360,10 @@ const ReelItem = ({
         </TouchableOpacity>
       </View>
 
-      <VideoProgressBar 
-      player={player} 
-      isActive={currentIndex === index && isFocused}
-    />
+      <VideoProgressBar
+        player={player}
+        isActive={currentIndex === index && isFocused}
+      />
 
       <BottomDrawer
         visible={showOptions}
@@ -433,6 +437,8 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
+
+
 
   // URL update function
   const updateURL = (index: number) => {
