@@ -21,7 +21,7 @@ interface Following {
   username: string;
   name: string;
   profilepicture: string;
-  isFollowing?: boolean; // optional for future toggle
+  followedByMe?: boolean; // optional for future toggle
 }
 
 const FollowingScreen = () => {
@@ -70,7 +70,7 @@ const { data, isPending, isError,refetch, isRefetching} = useQuery({
     );
 
   // const followings: Following[] = data?.followings || [];
-  const followings: Following[] = Array.isArray(data?.followings) ? data.followings : [];
+  const followings: Following[] = Array.isArray(data?.followingsWithFlag) ? data.followingsWithFlag : [];
 
 
   if (!followings.length) {
