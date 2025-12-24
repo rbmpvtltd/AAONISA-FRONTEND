@@ -81,7 +81,7 @@
 //     queryKey: ["currentUser"],
 //     queryFn: GetCurrentUser,
 //   });
-  
+
 //   // Step 2: Get full profile using username from currentUser
 //   const { data: profile, isLoading: profileLoading,  refetch: refetchProfile,} = useQuery({
 //     queryKey: ["userProfile", currentUser?.username],
@@ -90,7 +90,7 @@
 //   });
 
 //   // console.log("user data in current user ", profile);
-  
+
 //   if (currentUserLoading || profileLoading) {
 //     return (
 //       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -139,28 +139,37 @@
 // }
 
 
-import { ProfileHeader, Tabs, TopHeader, UserInfo } from "@/app/profile/[username]/index";
+import { ProfileHeader, Tabs, TopHeader, UserInfo, VideoItem } from "@/app/profile/[username]/index";
 import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
+import { useState } from "react";
 import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
 export default function MyProfileScreen() {
   const theme = useAppTheme();
+  const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
+
 
   const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
-  
-  const { data: profile, isLoading: profileLoading,  refetch: refetchProfile,} = useQuery({
+
+  const { data: profile, isLoading: profileLoading, refetch: refetchProfile, } = useQuery({
     queryKey: ["userProfile", currentUser?.username],
     queryFn: () => GetProfileUsername(currentUser?.username || ""),
     enabled: !!currentUser?.username,
   });
-  
+
+  const isOwnProfile =
+    currentUser?.username === profile?.username ||
+    currentUser?.id === profile?.id;
+
+
   if (currentUserLoading || profileLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
@@ -176,55 +185,79 @@ export default function MyProfileScreen() {
     ]);
   };
 
-  const ListHeaderComponent = () => (
-    <>
-      <TopHeader
-        userName={profile?.username}
-        theme={theme}
-        isOwnProfile={true}
-      />
-      <ProfileHeader theme={theme} profile={profile} />
-      <UserInfo
-        theme={theme}
-        profile={profile}
-        isOwnProfile={true}
-        isFollowing={false} 
-        onFollowToggle={() => {}}
-      />
-      <Tabs theme={theme} />
-    </>
-  );
+  // const ListHeaderComponent = () => (
+  //   <>
+  //     <TopHeader
+  //       userName={profile?.username}
+  //       theme={theme}
+  //       isOwnProfile={true}
+  //     />
+  //     <ProfileHeader theme={theme} profile={profile} />
+  //     <UserInfo
+  //       theme={theme}
+  //       profile={profile}
+  //       isOwnProfile={true}
+  //       isFollowing={false}
+  //       onFollowToggle={() => { }}
+  //     />
+  //     <Tabs theme={theme}
+  //       //  isOwnProfile={isOwnProfile}
+  //       activeTab={activeTab}
+  //       onChange={setActiveTab} />
+
+  //     {activeTab === "reels" && (
+  //       <View style={{ marginTop: 40, alignItems: "center" }}>
+  //         <Text style={{ color: theme.text }}>
+  //           Mentioned / Tagged Reels yahan aayengi
+  //         </Text>
+  //       </View>
+  //     )}
+  //   </>
+  // );
 
   return (
+    // <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
+    //   <FlatList
+    //     data={profile?.videos || []}
+    //     keyExtractor={(item) => item.uuid}
+    //     numColumns={3}
+    //     columnWrapperStyle={{ gap: 2, paddingHorizontal: 2, marginBottom: 2 }}
+    //     renderItem={({ item, index }) => {
+    //       const { VideoItem } = require("@/app/profile/[username]/index");
+    //       return (
+    //         <VideoItem
+    //           image={item.thumbnailUrl}
+    //           id={item.uuid}
+    //           username={profile?.username}
+    //           index={index}
+    //           onPressItem={(idx: any) => {
+    //             const { router } = require("expo-router");
+    //             router.push(`/p/${profile?.username}/${item.uuid}`);
+    //           }}
+    //         />
+    //       );
+    //     }}
+    //     ListHeaderComponent={ListHeaderComponent}
+    //     ListEmptyComponent={() => (
+    //       <View style={{ alignItems: "center", marginTop: 50 }}>
+    //         <Text style={{ color: theme.text }}>No videos uploaded yet.</Text>
+    //       </View>
+    //     )}
+    //     showsVerticalScrollIndicator={false}
+    //     contentContainerStyle={{ paddingBottom: 20, backgroundColor: theme.background }}
+    //     refreshControl={
+    //       <RefreshControl
+    //         refreshing={currentUserLoading || profileLoading}
+    //         onRefresh={onRefresh}
+    //         tintColor={theme.text}
+    //       />
+    //     }
+    //   />
+    // </SafeAreaView>
+
+    // ad 23
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
       <FlatList
-        data={profile?.videos || []}
-        keyExtractor={(item) => item.uuid}
-        numColumns={3}
-        columnWrapperStyle={{ gap: 2, paddingHorizontal: 2, marginBottom: 2 }}
-        renderItem={({ item, index }) => {
-          const { VideoItem } = require("@/app/profile/[username]/index");
-          return (
-            <VideoItem
-              image={item.thumbnailUrl}
-              id={item.uuid}
-              username={profile?.username}
-              index={index}
-              onPressItem={(idx : any) => {
-                const { router } = require("expo-router");
-                router.push(`/p/${profile?.username}/${item.uuid}`);
-              }}
-            />
-          );
-        }}
-        ListHeaderComponent={ListHeaderComponent}
-        ListEmptyComponent={() => (
-          <View style={{ alignItems: "center", marginTop: 50 }}>
-            <Text style={{ color: theme.text }}>No videos uploaded yet.</Text>
-          </View>
-        )}
-        showsVerticalScrollIndicator={false}
-        contentContainerStyle={{ paddingBottom: 20, backgroundColor: theme.background }}
         refreshControl={
           <RefreshControl
             refreshing={currentUserLoading || profileLoading}
@@ -232,7 +265,67 @@ export default function MyProfileScreen() {
             tintColor={theme.text}
           />
         }
+        ListHeaderComponent={
+          <>
+            <TopHeader userName={profile?.username} theme={theme} isOwnProfile />
+            <ProfileHeader theme={theme} profile={profile} />
+            <UserInfo
+              theme={theme}
+              profile={profile}
+              isOwnProfile
+              isFollowing={false}
+              onFollowToggle={() => { }}
+            />
+            <Tabs
+              theme={theme}
+              activeTab={activeTab}
+              onChange={setActiveTab}
+            />
+          </>
+        }
+        data={activeTab === "posts" ? profile?.videos || [] : []}
+        key={activeTab}
+        numColumns={activeTab === "posts" ? 3 : 1}
+        columnWrapperStyle={
+          activeTab === "posts"
+            ? { gap: 2, paddingHorizontal: 2, marginBottom: 2 }
+            : undefined
+        }
+        keyExtractor={(item, index) =>
+          activeTab === "posts" ? item.uuid : index.toString()
+        }
+        //  columnWrapperStyle={{ gap: 2, paddingHorizontal: 2, marginBottom: 2 }}
+        renderItem={({ item, index }) =>
+          activeTab === "posts" ? (
+            <VideoItem
+              image={item.thumbnailUrl}
+              id={item.uuid}
+              username={profile?.username}
+              index={index}
+              onPressItem={() => {
+                const { router } = require("expo-router");
+                router.push(`/p/${profile?.username}/${item.uuid}`);
+              }}
+            />
+          ) : null
+        }
+        ListEmptyComponent={
+          activeTab === "reels" ? (
+            <View style={{ alignItems: "center", marginTop: 80 }}>
+              <Ionicons name="person-circle-outline" size={64} color="#777" />
+              <Text style={{ color: theme.text, fontSize: 16, fontWeight: "600", marginTop: 12 }}>
+                No tagged reels yet
+              </Text>
+              <Text style={{ color: theme.subtitle, fontSize: 13, marginTop: 6 }}>
+                Reels you’re tagged in will appear here.
+              </Text>
+            </View>
+          ) : null
+        }
+        showsVerticalScrollIndicator={false}
+        contentContainerStyle={{ paddingBottom: 20 }}
       />
     </SafeAreaView>
+
   );
 }

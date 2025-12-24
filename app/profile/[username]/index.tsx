@@ -337,7 +337,7 @@
 //     });
 
 //     console.log("pppppppppppp", profile);
-    
+
 //     // Check initial following status
 //     useEffect(() => {
 //         if (profile?.followers && currentUser?.id) {
@@ -727,19 +727,49 @@ export const UserInfo: React.FC<{
     );
 };
 
-export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
+// export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
+//     <View style={[styles.tabs, { backgroundColor: theme.background }]}>
+//         {/* <TouchableOpacity style={styles.tab}>
+//             <MaterialCommunityIcons name="view-grid-outline" size={22} color={theme.text} />
+//         </TouchableOpacity> */}
+//         <TouchableOpacity style={styles.tab}>
+//             <Ionicons name="play-circle-outline" size={22} color={theme.text} />
+//         </TouchableOpacity>
+
+//             <TouchableOpacity style={styles.tab}>
+//                 <Ionicons name="person-circle-outline" size={22} color={theme.text} />
+//             </TouchableOpacity>
+//     </View>
+// );
+
+export const Tabs: React.FC<{
+    theme: any;
+    // isOwnProfile: boolean;
+    activeTab: "posts" | "reels";
+    onChange: (tab: "posts" | "reels") => void;
+}> = ({ theme, activeTab, onChange }) => (
     <View style={[styles.tabs, { backgroundColor: theme.background }]}>
-        {/* <TouchableOpacity style={styles.tab}>
-            <MaterialCommunityIcons name="view-grid-outline" size={22} color={theme.text} />
-        </TouchableOpacity> */}
-        <TouchableOpacity style={styles.tab}>
-            <Ionicons name="play-circle-outline" size={22} color={theme.text} />
+
+        {/* POSTS TAB */}
+        <TouchableOpacity style={styles.tab} onPress={() => onChange("posts")}>
+            <Ionicons
+                name="play-circle-outline"
+                size={22}
+                color={activeTab === "posts" ? theme.text : "#777"}
+            />
         </TouchableOpacity>
-        <TouchableOpacity style={styles.tab}>
-            <Ionicons name="person-circle-outline" size={22} color={theme.text} />
+
+        {/* REELS / PROFILE TAB (only owner) */}
+        <TouchableOpacity style={styles.tab} onPress={() => onChange("reels")}>
+            <Ionicons
+                name="person-circle-outline"
+                size={22}
+                color={activeTab === "reels" ? theme.text : "#777"}
+            />
         </TouchableOpacity>
     </View>
 );
+
 
 type VideoItemProps = {
     videoUrl?: string;
@@ -767,7 +797,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({
         })
         : null;
 
-        const theme = useAppTheme();
+    const theme = useAppTheme();
 
     useEffect(() => {
         if (player) {
@@ -783,8 +813,8 @@ export const VideoItem: React.FC<VideoItemProps> = ({
             style={[styles.postContainer, { backgroundColor: theme.background }]}
         >
             {image ? (
-                <Image 
-                    source={{ uri: image }} 
+                <Image
+                    source={{ uri: image }}
                     style={styles.postMedia}
                     resizeMode="cover"
                 />
@@ -805,7 +835,7 @@ export const VideoItem: React.FC<VideoItemProps> = ({
 export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos, username }) => {
     const router = useRouter();
     const theme = useAppTheme();
-    
+
     const handlePressVideo = (index: number) => {
         const video = videos[index];
         if (!video) return;
@@ -815,7 +845,7 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
     if (!videos || videos.length === 0) {
         return (
             <View style={{ alignItems: "center", marginTop: 50, }}>
-                <Text style ={{ color: theme.text }}>No videos uploaded yet.</Text>
+                <Text style={{ color: theme.text }}>No videos uploaded yet.</Text>
             </View>
         );
     }
@@ -837,7 +867,7 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
                 />
             )}
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20 , backgroundColor : theme.background}}
+            contentContainerStyle={{ paddingBottom: 20, backgroundColor: theme.background }}
         />
     );
 };
@@ -847,6 +877,8 @@ export const ProfileScreen: React.FC = () => {
     const queryClient = useQueryClient();
     const { username } = useLocalSearchParams<{ username?: string }>();
     const [isFollowing, setIsFollowing] = useState(false);
+    const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
+
 
     const {
         data: currentUser,
@@ -864,7 +896,12 @@ export const ProfileScreen: React.FC = () => {
     } = useQuery({
         queryKey: ["userProfile", username],
         queryFn: () => GetProfileUsername(username || ""),
+        staleTime: 1000 * 60 * 30,   // 30 min (fresh)
+        gcTime: 1000 * 60 * 60 * 6, // 6 hours cache in memory
         enabled: !!username,
+
+        refetchOnMount: false,        // cached UI instantly    // ad
+        refetchOnWindowFocus: true,   // background refresh     // ad
     });
 
     useEffect(() => {
@@ -876,27 +913,96 @@ export const ProfileScreen: React.FC = () => {
         }
     }, [profile?.followers, currentUser?.id]);
 
+    // const followMutation = useMutation({
+    //     mutationFn: (id: string) => followUser(id),
+    //     onMutate: () => setIsFollowing(true),
+    //     onError: () => setIsFollowing(false),
+    //     onSuccess: async () => {
+    //         await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
+    //         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    //         await queryClient.invalidateQueries({ queryKey: ["userProfile", currentUser?.username] });
+    //     },
+    // });
+
+    // ad 23
     const followMutation = useMutation({
         mutationFn: (id: string) => followUser(id),
-        onMutate: () => setIsFollowing(true),
-        onError: () => setIsFollowing(false),
+
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ["userProfile", username] });
+
+            const previous = queryClient.getQueryData(["userProfile", username]);
+
+            queryClient.setQueryData(["userProfile", username], (old: any) => ({
+                ...old,
+                followers: [...(old?.followers || []), currentUser],
+            }));
+
+            setIsFollowing(true);
+
+            return { previous };
+        },
+
+        onError: (_err, _vars, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(["userProfile", username], context.previous);
+            }
+            setIsFollowing(false);
+        },
+
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
             await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-            await queryClient.invalidateQueries({ queryKey: ["userProfile", currentUser?.username] });
         },
     });
 
+
+    // const unfollowMutation = useMutation({
+    //     mutationFn: (id: string) => UnfollowUser(id),
+    //     onMutate: () => setIsFollowing(false),
+    //     onError: () => setIsFollowing(true),
+    //     onSuccess: async () => {
+    //         await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
+    //         await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+    //         await queryClient.invalidateQueries({ queryKey: ["userProfile", currentUser?.username] });
+    //     },
+    // });
+
+
+    // ad 23
     const unfollowMutation = useMutation({
         mutationFn: (id: string) => UnfollowUser(id),
-        onMutate: () => setIsFollowing(false),
-        onError: () => setIsFollowing(true),
+
+        onMutate: async () => {
+            await queryClient.cancelQueries({ queryKey: ["userProfile", username] });
+
+            const previous = queryClient.getQueryData(["userProfile", username]);
+
+            queryClient.setQueryData(["userProfile", username], (old: any) => ({
+                ...old,
+                followers: (old?.followers || []).filter(
+                    (f: any) => f.id !== currentUser?.id
+                ),
+            }));
+
+            setIsFollowing(false);
+
+            return { previous };
+        },
+
+        onError: (_err, _vars, context) => {
+            if (context?.previous) {
+                queryClient.setQueryData(["userProfile", username], context.previous);
+            }
+            setIsFollowing(true);
+        },
+
         onSuccess: async () => {
             await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
             await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-            await queryClient.invalidateQueries({ queryKey: ["userProfile", currentUser?.username] });
         },
     });
+
 
     const handleFollowToggle = () => {
         if (!profile?.id) return;
@@ -934,8 +1040,65 @@ export const ProfileScreen: React.FC = () => {
                 onFollowToggle={handleFollowToggle}
                 isFollowing={isFollowing}
             />
-            <Tabs theme={theme} />
-            <PostGrid videos={profile?.videos || []} username={profile?.username} />
+            <Tabs theme={theme}
+                //  isOwnProfile={isOwnProfile}
+                activeTab={activeTab}
+                onChange={setActiveTab} />
+                
+            {activeTab === "posts" ? (
+                <PostGrid
+                    key="posts"
+                    videos={profile?.videos || []}
+                    username={profile?.username}
+                />
+            ) : (
+                <View
+                    key="reels"
+                    style={{ flex: 1, marginTop: 40, alignItems: "center" }}
+                >
+                    {/* <Text style={{ color: theme.text, backgroundColor: "#00000" }}>
+                        Mentioned / Tagged Reels yahan aayengi
+                    </Text> */}
+                     <View
+            style={{
+              flex: 1,
+              alignItems: "center",
+              paddingHorizontal: 30,
+            }}
+          >
+            <Ionicons
+              name="person-circle-outline"
+              size={64}
+              color="#777"
+            />
+
+            <Text
+              style={{
+                color: theme.text,
+                fontSize: 16,
+                fontWeight: "600",
+                marginTop: 12,
+              }}
+            >
+              No tagged reels yet
+            </Text>
+
+            <Text
+              style={{
+                color: theme.subtitle,
+                fontSize: 13,
+                marginTop: 6,
+                textAlign: "center",
+              }}
+            >
+              Reels you’re tagged in will appear here.
+            </Text>
+          </View>
+
+                </View>
+            )}
+
+            {/* <PostGrid videos={profile?.videos || []} username={profile?.username} /> */}
         </SafeAreaView>
     );
 };

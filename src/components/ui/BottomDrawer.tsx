@@ -31,7 +31,7 @@ interface BottomDrawerProps {
 }
 
 
-const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, reelId, isOwner = false }: any) => {
+const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, reelId, isOwner = false }: BottomDrawerProps) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const theme = useAppTheme();
   const [showSharePanel, setShowSharePanel] = useState(false);

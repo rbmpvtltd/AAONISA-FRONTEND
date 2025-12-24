@@ -988,7 +988,7 @@ const UserReelItem = ({
         onSave={() => { openBookmarkPanel(item.uuid || item.id); setShowOptions(false); }}
         onDelete={owner ? handleDeleteReel : undefined}
         onReport={() => setShowReportDrawer(true)}
-        onShare={() => console.log("Shared")}
+        // onShare={() => console.log("Shared")}
         reelId={item.id}
         reelUrl={item.videoUrl}
         isOwner={owner}
@@ -1026,8 +1026,10 @@ const UserReelsFeed = () => {
     queryKey: ["userProfile", username],
     queryFn: () => GetProfileUsername(username as string || ""),
     enabled: !!username,
-  });
 
+    staleTime: 1000 * 60 * 30,   // 30 minutes (fresh)                // ad
+    gcTime: 1000 * 60 * 60 * 6,  // 6 hours (cache memory)            // ad
+  });
 
   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
     queryKey: ["currentUser"],
@@ -1035,11 +1037,21 @@ const UserReelsFeed = () => {
   });
 
 
-  const owner = profile?.userProfile.username === currentUser?.userProfile.username;
-  console.log('====================================');
-  console.log("owner", owner)
-  console.log('====================================');
-  console.log("profile.videos.audio", profile?.videos?.audio);
+  // const owner = profile?.userProfile.username === currentUser?.userProfile.username;
+
+  const owner = currentUser?.id === profile?.id || 
+              currentUser?.userProfile?.id === profile?.userProfile?.id;
+
+console.log('====================================');
+console.log("currentUser ID:", currentUser?.id);
+console.log("profile ID:", profile?.id);
+console.log("owner:", owner);
+console.log('====================================');
+
+  // console.log('====================================');
+  // console.log("owner", owner)
+  // console.log('====================================');
+  // console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
 
