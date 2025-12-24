@@ -204,14 +204,8 @@ export const FeedList = () => {
     [activeIndex]
   );
 
-  // ✅ Like Handler
-  const handleLike = useCallback((id: string) => {
-    // optimistic UI example (optional – best with mutation)
-    feedVideos.forEach(() => { });
-  }, []);
 
-
-    const handleComment = useCallback(
+  const handleComment = useCallback(
     (id: string) => router.push(`../../../comment/${id}`),
     []
   );
@@ -234,41 +228,89 @@ export const FeedList = () => {
   }
 
   return (
-    <FlatList
-      data={feedVideos}
-      keyExtractor={(item) => item.id}
-      renderItem={({ item, index }) => (
-        <FeedItem
-          item={item}
-          isActive={index === activeIndex}
-          isFocused={isFocused}
-          onLike={handleLike}
-             onComment={handleComment}
-          theme={theme}
-          isMuted={isMuted}
-          toggleMute={toggleMute}
-        />
+    <View style={{ flex: 1, backgroundColor: "#000" }}>
+      <FlatList
+        data={feedVideos}
+        keyExtractor={(item) => item.id}
+        renderItem={({ item, index }) => (
+          <FeedItem
+            item={item}
+            isActive={index === activeIndex}
+            isFocused={isFocused}
+            onComment={handleComment}
+            theme={theme}
+            isMuted={isMuted}
+            toggleMute={toggleMute}
+          />
+        )}
+        pagingEnabled
+        windowSize={5}
+        initialNumToRender={1}
+        maxToRenderPerBatch={2}
+        removeClippedSubviews
+        showsVerticalScrollIndicator={false}
+        viewabilityConfig={viewConfigRef.current}
+        onViewableItemsChanged={onViewableItemsChanged}
+        onEndReached={() => {
+          if (hasNextPage && !isFetchingNextPage) {
+            fetchNextPage();
+          }
+        }}
+        onEndReachedThreshold={0.5}
+      />
+
+      {isFetchingNextPage && (
+        <View
+          style={{
+            position: "absolute",
+            bottom: 60,
+            alignSelf: "center",
+            backgroundColor: "rgba(0,0,0,0.6)",
+            padding: 12,
+            borderRadius: 30,
+          }}
+        >
+          <ActivityIndicator color="#fff" />
+        </View>
       )}
-      pagingEnabled
-      windowSize={5}
-      initialNumToRender={1}
-      maxToRenderPerBatch={2}
-      removeClippedSubviews
-      showsVerticalScrollIndicator={false}
-      viewabilityConfig={viewConfigRef.current}
-      onViewableItemsChanged={onViewableItemsChanged}
-      onEndReached={() => {
-        if (hasNextPage && !isFetchingNextPage) {
-          fetchNextPage();
-        }
-      }}
-      onEndReachedThreshold={0.5}
-      ListFooterComponent={
-        isFetchingNextPage ? (
-          <ActivityIndicator color={theme.text} />
-        ) : null
-      }
-    />
+    </View>
+
   );
 };
 
+// <FlatList
+//   data={feedVideos}
+//   keyExtractor={(item) => item.id}
+//   renderItem={({ item, index }) => (
+
+//     <FeedItem
+//       item={item}
+//       isActive={index === activeIndex}
+//       isFocused={isFocused}
+//       // onLike={handleLike}
+//       onComment={handleComment}
+//       theme={theme}
+//       isMuted={isMuted}
+//       toggleMute={toggleMute}
+//     />
+//   )}
+//   pagingEnabled
+//   windowSize={5}
+//   initialNumToRender={1}
+//   maxToRenderPerBatch={2}
+//   removeClippedSubviews
+//   showsVerticalScrollIndicator={false}
+//   viewabilityConfig={viewConfigRef.current}
+//   onViewableItemsChanged={onViewableItemsChanged}
+//   onEndReached={() => {
+//     if (hasNextPage && !isFetchingNextPage) {
+//       fetchNextPage();
+//     }
+//   }}
+//   onEndReachedThreshold={0.5}
+//   ListFooterComponent={
+//     isFetchingNextPage ? (
+//       <ActivityIndicator color={theme.text} />
+//     ) : null
+//   }
+// />
