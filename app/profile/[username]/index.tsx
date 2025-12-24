@@ -608,8 +608,8 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     const user = profile.username;
 
     const profilePicture = profile.userProfile.ProfilePicture || null;
-    const followersCount = profile.followers?.length || 0;
-    const followingsCount = profile.followings?.length || 0;
+    const followersCount = profile.followersWithFlag?.length || 0;
+    const followingsCount = profile.followingsWithFlag?.length || 0;
     const postsCount = profile.videos?.length || 0;
     // const likes = profile.likes || 0;
     // const views = profile.views || 0;

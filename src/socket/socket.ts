@@ -190,7 +190,7 @@ export function useSocketManager(userId?: string, otherUserId?: string) {
 
     // 🟢 Create Global Socket Once
     if (!globalSocket) {
-      globalSocket = io("http://88.222.213.106:3000/socket.io", {
+      globalSocket = io(`${process.env.EXPO_PUBLIC_LOCAL_API_URL}/socket.io`, {
         transports: ["websocket"],
         autoConnect: false,
       });

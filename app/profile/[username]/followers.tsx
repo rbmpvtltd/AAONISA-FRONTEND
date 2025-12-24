@@ -148,6 +148,7 @@ interface Follower {
   username: string;
   name: string;
   profilepicture: string;
+  followedByMe?: boolean;
 }
 
 const FollowersScreen = () => {
@@ -197,7 +198,7 @@ const FollowersScreen = () => {
   // const followers: Follower[] = data?.followers || [];
   // console.log('Followers count:', followers.length);
 
-  const followers: Follower[] = Array.isArray(data?.followers) ? data.followers : [];
+  const followers: Follower[] = Array.isArray(data?.followersWithFlag) ? data.followersWithFlag : [];
   console.log("Followers count:", followers?.length ?? 0);
 
   const filteredFollowers = useMemo(() => {
