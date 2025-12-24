@@ -1,264 +1,274 @@
+// import { getAdminVideosFeed } from "@/src/api/admin-feed-api";
 // import { useAppTheme } from "@/src/constants/themeHelper";
 // import { useFeedStore } from "@/src/store/useFeedStore";
 // import { useIsFocused } from "@react-navigation/native";
+// import { useInfiniteQuery } from "@tanstack/react-query";
 // import { router } from "expo-router";
-// import React, { useCallback, useEffect, useState } from "react";
-// import { ActivityIndicator, FlatList, View } from "react-native";
-// import { FeedItem } from "./feedItem"; // fixed import
+// import { useCallback, useState } from "react";
+// import { ActivityIndicator, FlatList, Text, View } from "react-native";
+// import { FeedItem } from "./feedItem";
 
 // export const FeedList = () => {
-//     const theme = useAppTheme();
-//     const isFocused = useIsFocused();
-//     const { photos, addPhotos, setPhotos, setPage, setLoading, loading, isMuted, toggleMute } =
-//         useFeedStore();
+//   const theme = useAppTheme();
+//   const isFocused = useIsFocused();
+//   const { isMuted, toggleMute } = useFeedStore();
+//   const [activeIndex, setActiveIndex] = useState(0);
 
-//     const [activeIndex, setActiveIndex] = useState(0);
+//   const {
+//   data,
+//   fetchNextPage,
+//   hasNextPage,
+//   isFetchingNextPage,
+//   isLoading,
+//   isError,
+//   refetch,
+// } = useInfiniteQuery({
+//   queryKey: ["admin-videos-feed"],
+//   queryFn: async ({ pageParam = 1 }) => {
+//     const res = await getAdminVideosFeed(pageParam, 20);
+//     return res.data || [];
+//   },
+//   initialPageParam: 1,
 
-//     const videoAssets = [
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2017.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback13.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback18.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback3.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback5.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback7.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback9.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2017.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-//         "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback13.mp4",
-//     ];
+//   getNextPageParam: (lastPage) =>
+//     lastPage.hasNextPage ? lastPage.page + 1 : undefined,
 
-//     useEffect(() => {
-//         if (photos.length > 0) return;
+//   select: (data) =>
+//     data.pages.flatMap((page) =>
+//       page.data.map((video: any) => ({
+//         id: video.id,
+//         title: video.title,
+//         caption: video.caption,
+//         videoUrl: video.videoUrl,
+//         thumbnailUrl: video.thumbnailUrl,
+//         duration: video.duration,
+//         type: video.type,
+//         created_at: video.created_at,
+//         user: video.user,
+//         username: video.user?.username || "Unknown",
+//         profilePic: video.user?.profilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+//         likes: video.likesCount || 0,
+//         comments: video.commentsCount || 0,
+//         shares: 0,
+//         views: video.viewsCount || 0,
+//         liked: video.isLiked || false,
+//         saved: false,
+//         hashtags: video.hashtags || [],
+//         audio: video.audio,
+//       })),
+//     ),
+// });
 
-//         const dummyData = Array.from({ length: 17 }).map((_, i) => ({
-//             id: i + 1,
-//             title: "Feed Video " + (i + 1),
-//             imageUrl: videoAssets[i % videoAssets.length],
-//             profilePic: `https://randomuser.me/api/portraits/men/${(i + 10) % 100}.jpg`,
-//             username: "user_" + (i + 1),
-//             likes: Math.floor(Math.random() * 100),
-//             liked: false,
-//             saved: false,
-//             // comments: [],
-//             comments: Math.floor(Math.random() * 50), //  number
-//     shares: Math.floor(Math.random() * 20),    //  number
+//   // ✅ Like Handler
+//   const handleLike = useCallback((id: string) => {
+//     // optimistic UI example (optional – best with mutation)
+//     feedVideos.forEach(() => { });
+//   }, []);
 
-//         }));
+//   const handleSave = useCallback((id: string) => { }, []);
+//   const handleComment = useCallback(
+//     (id: string) => router.push(`../../../comment/${id}`),
+//     []
+//   );
+//   const handleShare = useCallback((id: string) => { }, []);
 
-//         addPhotos(dummyData);
-//         setPage(1);
-//     }, []);
+//   const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
+//     if (viewableItems.length > 0) {
+//       setActiveIndex(viewableItems[0].index);
+//     }
+//   }, []);
 
-//     const handleLike = useCallback(
-//         (id: number) =>
-//             setPhotos((prev) =>
-//                 prev.map((p) =>
-//                     p.id === id
-//                         ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 }
-//                         : p
-//                 )
-//             ),
-//         [setPhotos]
-//     );
+//   const viewabilityConfig = { itemVisiblePercentThreshold: 70 };
 
-//     const handleSave = useCallback(
-//         (id: number) => setPhotos((prev) => prev.map((p) => (p.id === id ? { ...p, saved: !p.saved } : p))),
-//         [setPhotos]
-//     );
-
-//     const handleComment = useCallback((id: number) => router.push(`../../../comment/${id}`), []);
-//     const handleShare = useCallback((id: number) => console.log("Share", id), []);
-
-//     // Insta-style scroll autoplay (not full page)
-//     const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-//         if (viewableItems.length > 0) setActiveIndex(viewableItems[0].index);
-//     }, []);
-
-//     const viewabilityConfig = { itemVisiblePercentThreshold: 70 };
-
+//   if (isLoading) {
 //     return (
-//         <FlatList
-//             data={photos}
-//             renderItem={({ item, index }) => (
-//                 <FeedItem
-//                     item={item}
-//                     isActive={index === activeIndex}
-//                     isFocused={isFocused}
-//                     onLike={handleLike}
-//                     onSave={handleSave}
-//                     onComment={handleComment}
-//                     onShare={handleShare}
-//                     theme={theme}
-//                     isMuted={isMuted}
-//                     toggleMute={toggleMute}
-//                 />
-//             )}
-//             keyExtractor={(item) => `${item.id}`}
-//             onViewableItemsChanged={onViewableItemsChanged}
-//             viewabilityConfig={viewabilityConfig}
-//             showsVerticalScrollIndicator={false}
-//             ListFooterComponent={
-//                 loading ? (
-//                     <View style={{ paddingVertical: 20 }}>
-//                         <ActivityIndicator size="large" color={theme.text} />
-//                     </View>
-//                 ) : null
-//             }
-//         />
+//       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" }}>
+//         <ActivityIndicator size="large" color={theme.text} />
+//         <Text style={{ color: theme.text, marginTop: 10 }}>Loading videos...</Text>
+//       </View>
 //     );
+//   }
+
+//   if (isError) {
+//     return (
+//       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" }}>
+//         <Text style={{ color: "red" }}>Failed to load videos</Text>
+//         <Text style={{ color: theme.text }} onPress={() => refetch()}>
+//           Tap to retry
+//         </Text>
+//       </View>
+//     );
+//   }
+
+//   if (feedVideos.length === 0) {
+//     return (
+//       <View style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" }}>
+//         <Text style={{ color: theme.text }}>No videos available</Text>
+//       </View>
+//     );
+//   }
+
+//   return (
+//     <FlatList
+//       data={data}
+//       keyExtractor={(item) => item.id}
+//       renderItem={({ item, index }) => (
+//         <FeedItem
+//           item={item}
+//           isActive={index === activeIndex}
+//           isFocused={isFocused}
+//           onLike={handleLike}
+//           onSave={handleSave}
+//           onComment={handleComment}
+//           onShare={handleShare}
+//           theme={theme}
+//           isMuted={isMuted}
+//           toggleMute={toggleMute}
+//         />
+//       )}
+//       onViewableItemsChanged={onViewableItemsChanged}
+//       viewabilityConfig={viewabilityConfig}
+
+//       onEndReached={() => {
+//         if (hasNextPage && !isFetchingNextPage) {
+//           fetchNextPage();
+//         }
+//       }}
+//       onEndReachedThreshold={0.6}
+
+//       ListFooterComponent={
+//         isFetchingNextPage ? (
+//           <ActivityIndicator color={theme.text} />
+//         ) : null
+//       }
+
+//       removeClippedSubviews
+//       maxToRenderPerBatch={3}
+//       windowSize={5}
+//       initialNumToRender={2}
+//       showsVerticalScrollIndicator={false}
+//     />
+
+//   );
 // };
 
-// ==================================================================
-
+import { getAdminVideosFeed } from "@/src/api/admin-feed-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
+import { useInfiniteQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { useCallback, useEffect, useState } from "react";
-import { ActivityIndicator, FlatList, View } from "react-native";
+import { useCallback, useRef, useState } from "react";
+import { ActivityIndicator, FlatList, Text, View } from "react-native";
 import { FeedItem } from "./feedItem";
 
 export const FeedList = () => {
   const theme = useAppTheme();
   const isFocused = useIsFocused();
-  const { setPhotos, addPhotos, setPage, setLoading, loading, isMuted, toggleMute } =
-    useFeedStore();
-
-  const [allVideos, setAllVideos] = useState<any[]>([]);
-  const [visibleVideos, setVisibleVideos] = useState<any[]>([]);
-  const [page, setCurrentPage] = useState(1);
+  const { isMuted, toggleMute } = useFeedStore();
   const [activeIndex, setActiveIndex] = useState(0);
 
-  const videoAssets = [
-    "https://pub-38b6f70d9fb1487292de6386fc39e570.r2.dev/reels/1764835672939-compressed_1764835664777-502411403.mp4",
-    "https://pub-38b6f70d9fb1487292de6386fc39e570.r2.dev/reels/1765015634289-1765015603413-21959099.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback%2016.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback10.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback11.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback12.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback13.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback18.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback3.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback5.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback7.mp4",
-    "https://pub-a258ba4c9bd54cb1b6b94b53d2d61324.r2.dev/dummy/videoplayback9.mp4",
-  ];
+  const viewConfigRef = useRef({
+    itemVisiblePercentThreshold: 80,
+  });
 
-  useEffect(() => {
-    // Prepare dummy full data (all videos)
-    const dummyData = Array.from({ length: 25 }).map((_, i) => ({
-      id: i + 1,
-      title: "Feed Video " + (i + 1),
-      imageUrl: videoAssets[i % videoAssets.length],
-      profilePic: `https://randomuser.me/api/portraits/men/${(i + 10) % 100}.jpg`,
-      username: "user_" + (i + 1),
-      likes: Math.floor(Math.random() * 100),
-      liked: false,
-      saved: false,
-      comments: Math.floor(Math.random() * 50),
-      shares: Math.floor(Math.random() * 20),
-    }));
+  const {
+    data,
+    fetchNextPage,
+    hasNextPage,
+    isFetchingNextPage,
+    isLoading,
+    isError,
+    refetch,
+  } = useInfiniteQuery({
+    queryKey: ["admin-videos-feed"],
+    queryFn: ({ pageParam = 1 }) =>
+      getAdminVideosFeed(pageParam, 10),
+    initialPageParam: 1,
+    getNextPageParam: (lastPage) =>
+      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+  });
 
-    setAllVideos(dummyData);
-    setVisibleVideos(dummyData.slice(0, 10)); // show first 10
-    setPage(1);
-  }, []);
+  const feedVideos =
+    data?.pages.flatMap(page => page.data) ?? [];
 
-  // Like / Save handlers
-  const handleLike = useCallback(
-    (id: number) =>
-      setVisibleVideos((prev) =>
-        prev.map((p) =>
-          p.id === id
-            ? { ...p, liked: !p.liked, likes: p.liked ? p.likes - 1 : p.likes + 1 }
-            : p
-        )
-      ),
-    []
-  );
+  const onViewableItemsChanged = useCallback(
+    ({ viewableItems }: any) => {
+      if (!viewableItems.length) return;
 
-  const handleSave = useCallback(
-    (id: number) =>
-      setVisibleVideos((prev) =>
-        prev.map((p) => (p.id === id ? { ...p, saved: !p.saved } : p))
-      ),
-    []
-  );
-
-  const handleComment = useCallback((id: number) => router.push(`../../../comment/${id}`), []);
-  const handleShare = useCallback((id: number) => console.log("Share", id), []);
-
-  // Active video detection
-  const onViewableItemsChanged = useCallback(({ viewableItems }: any) => {
-    if (viewableItems.length > 0) setActiveIndex(viewableItems[0].index);
-  }, []);
-
-  const viewabilityConfig = { itemVisiblePercentThreshold: 70 };
-
-  // Load more videos (pagination)
-  const loadMoreVideos = async () => {
-    if (loading) return;
-    setLoading(true);
-
-    setTimeout(() => {
-      const nextPage = page + 1;
-      const start = (nextPage - 1) * 10;
-      const end = start + 10;
-      const newItems = allVideos.slice(start, end);
-
-      if (newItems.length > 0) {
-        setVisibleVideos((prev) => [...prev, ...newItems]);
-        setCurrentPage(nextPage);
+      const index = viewableItems[0]?.index;
+      if (index !== activeIndex) {
+        setActiveIndex(index);
       }
+    },
+    [activeIndex]
+  );
 
-      setLoading(false);
-    }, 1500); // simulate loading delay
-  };
+  // ✅ Like Handler
+  const handleLike = useCallback((id: string) => {
+    // optimistic UI example (optional – best with mutation)
+    feedVideos.forEach(() => { });
+  }, []);
+
+
+    const handleComment = useCallback(
+    (id: string) => router.push(`../../../comment/${id}`),
+    []
+  );
+  if (isLoading) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", backgroundColor: "#000" }}>
+        <ActivityIndicator color={theme.text} />
+      </View>
+    );
+  }
+
+  if (isError) {
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <Text onPress={() => refetch()} style={{ color: "red" }}>
+          Retry
+        </Text>
+      </View>
+    );
+  }
 
   return (
     <FlatList
-      data={visibleVideos}
+      data={feedVideos}
+      keyExtractor={(item) => item.id}
       renderItem={({ item, index }) => (
         <FeedItem
           item={item}
           isActive={index === activeIndex}
           isFocused={isFocused}
           onLike={handleLike}
-          onSave={handleSave}
-          onComment={handleComment}
-          onShare={handleShare}
+             onComment={handleComment}
           theme={theme}
           isMuted={isMuted}
           toggleMute={toggleMute}
         />
       )}
-      keyExtractor={(item) => `${item.id}`}
-      onViewableItemsChanged={onViewableItemsChanged}
-      viewabilityConfig={viewabilityConfig}
-      showsVerticalScrollIndicator={false}
-
-      // item center
-      removeClippedSubviews={true}
-      maxToRenderPerBatch={3}
+      pagingEnabled
       windowSize={5}
-      initialNumToRender={2}
-
+      initialNumToRender={1}
+      maxToRenderPerBatch={2}
+      removeClippedSubviews
+      showsVerticalScrollIndicator={false}
+      viewabilityConfig={viewConfigRef.current}
+      onViewableItemsChanged={onViewableItemsChanged}
+      onEndReached={() => {
+        if (hasNextPage && !isFetchingNextPage) {
+          fetchNextPage();
+        }
+      }}
+      onEndReachedThreshold={0.5}
       ListFooterComponent={
-        loading ? (
-          <View style={{ paddingVertical: 20 }}>
-            <ActivityIndicator size="large" color={theme.text} />
-          </View>
+        isFetchingNextPage ? (
+          <ActivityIndicator color={theme.text} />
         ) : null
       }
-      onEndReached={loadMoreVideos}
-      onEndReachedThreshold={0.4}
     />
   );
 };
+

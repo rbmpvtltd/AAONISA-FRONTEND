@@ -696,13 +696,16 @@ const UserReelItem = ({
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
+  const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
-  const [liked, setLiked] = useState(
-    Array.isArray(item.likes)
-      ? item.likes.some((like: any) => like.user_id === currentUserId)
-      : false
-  );
+  // const [liked, setLiked] = useState(
+  //   Array.isArray(item.likes)
+  //     ? item.likes.some((like: any) => like.user_id === currentUserId)
+  //     : false
+  // );
+
+  const [liked, setLiked] = useState(item.isLiked);
 
   const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
     instance.loop = true;
@@ -743,16 +746,19 @@ const UserReelItem = ({
 
   const handleLike = async () => {
     const newLiked = !liked;
+
+    // UI update
     setLiked(newLiked);
+    setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
 
     try {
-      await likeMutation.mutateAsync(item.uuid);
-    } catch (error) {
-      console.log("Like failed:", error);
+      await likeMutation.mutateAsync(item.uuid || item.id);
+    } catch (err) {
+      // revert on error
       setLiked(!newLiked);
+      setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
     }
   };
-
 
   useEffect(() => {
     let frameId: number;
@@ -939,7 +945,7 @@ const UserReelItem = ({
             color={liked ? '#FF0000' : '#fff'}
           />
           <Text style={styles.actionText}>
-            {formatCount(Array.isArray(item.likes) ? item.likes.length : 0)}
+            {formatCount(likesCount)}
           </Text>
         </TouchableOpacity>
 

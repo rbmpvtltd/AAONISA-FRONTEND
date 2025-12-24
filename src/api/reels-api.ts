@@ -42,7 +42,7 @@ const getCategoryReel = async (type:string,page:number,limit:number) => {
 
   const apiUrl = createApiUrl(`/videos/feed?type=${type}&page=${page}&limit=${limit}`);
   const { data } = await axios.get(apiUrl, config);
-  console.log(data)
+  console.log(" data iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", data); 
   return data;
 };
 

@@ -778,7 +778,7 @@
 
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useEffect, useState } from "react";
-import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
 export const FeedItem = React.memo(
@@ -799,7 +799,7 @@ export const FeedItem = React.memo(
         const [showControls, setShowControls] = useState(true);
 
         // Player setup
-        const player = useVideoPlayer(item.imageUrl, (p) => {
+        const player = useVideoPlayer(item.videoUrl, (p) => {
             p.loop = true;
             p.volume = isMuted ? 0 : 1;
         });
@@ -887,8 +887,8 @@ export const FeedItem = React.memo(
                     styles.videoContainer,
                     isFullscreen && styles.fullscreenVideo
                 ]}>
-                    <TouchableOpacity 
-                        activeOpacity={1} 
+                    <TouchableOpacity
+                        activeOpacity={1}
                         onPress={handleVideoPress}
                         style={{ flex: 1 }}
                     >
@@ -913,10 +913,10 @@ export const FeedItem = React.memo(
 
                                 {/* Play/Pause */}
                                 <TouchableOpacity onPress={togglePlayPause} style={styles.centerPlayBtn}>
-                                    <Icon 
-                                        name={isPlaying ? "pause" : "play"} 
-                                        size={40} 
-                                        color="white" 
+                                    <Icon
+                                        name={isPlaying ? "pause" : "play"}
+                                        size={40}
+                                        color="white"
                                     />
                                 </TouchableOpacity>
 
@@ -928,16 +928,16 @@ export const FeedItem = React.memo(
                             </View>
 
                             {/* Fullscreen Toggle - Bottom Right */}
-                            <TouchableOpacity 
-                                onPress={toggleFullscreen} 
+                            <Pressable
+                                onPress={toggleFullscreen}
                                 style={styles.fullscreenBtn}
                             >
-                                <Icon 
-                                    name={isFullscreen ? "contract" : "expand"} 
-                                    size={24} 
-                                    color="white" 
+                                <Icon
+                                    name={isFullscreen ? "contract" : "expand"}
+                                    size={24}
+                                    color="white"
                                 />
-                            </TouchableOpacity>
+                            </Pressable>
                         </View>
                     )}
 
@@ -977,7 +977,7 @@ export const FeedItem = React.memo(
 );
 
 const styles = StyleSheet.create({
-    reel: { 
+    reel: {
         height: 700,
         position: "relative",
     },
@@ -991,22 +991,22 @@ const styles = StyleSheet.create({
         right: 0,
         zIndex: 10,
     },
-    profileImage: { 
-        width: 40, 
-        height: 40, 
-        borderRadius: 20, 
-        marginRight: 10 
+    profileImage: {
+        width: 40,
+        height: 40,
+        borderRadius: 20,
+        marginRight: 10
     },
-    userInfo: { 
-        flex: 1 
+    userInfo: {
+        flex: 1
     },
-    username: { 
-        fontSize: 16, 
-        fontWeight: "600" 
+    username: {
+        fontSize: 16,
+        fontWeight: "600"
     },
-    title: { 
-        padding: 10, 
-        fontSize: 16 
+    title: {
+        padding: 10,
+        fontSize: 16
     },
     videoContainer: {
         width: "100%",
@@ -1074,9 +1074,9 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
     actionBtn: {
-        flexDirection: "row", 
+        flexDirection: "row",
         alignItems: "center",
-        gap: 5, 
+        gap: 5,
     },
     countText: {
         fontSize: 14,
