@@ -22,10 +22,9 @@ export const MentionedScreen: React.FC<MentionedScreenProps> = ({
   const handlePressVideo = (index: number) => {
     const video = mentionedVideos[index];
     if (!video) return;
-    router.push(`/p/${username}/${video.uuid}`);
+    router.push(`/p/${username}/${video.uuid}/mention`);
   };
 
-  // Agar koi mentioned videos nahi hain
   if (!mentionedVideos || mentionedVideos.length === 0) {
     return (
       <View style={styles.emptyContainer}>
@@ -42,7 +41,6 @@ export const MentionedScreen: React.FC<MentionedScreenProps> = ({
     );
   }
 
-  // Agar mentioned videos hain to grid format mein dikhao
   return (
     <FlatList
       data={mentionedVideos}
