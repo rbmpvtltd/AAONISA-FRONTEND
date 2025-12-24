@@ -60,7 +60,7 @@ const HomePage = () => {
       async () => {
         try {
           const data = await getAllBookmarks();
-          console.log("a rhe h bookmarks",data)
+          console.log("a rhe h bookmarks", data)
           return data || [];
         } catch (error) {
           console.error("Bookmarks fetch error:", error);

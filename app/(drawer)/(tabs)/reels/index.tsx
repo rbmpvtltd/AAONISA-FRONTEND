@@ -72,8 +72,8 @@ const ReelItem = ({
   //     : false
   // );
 
-  const [liked, setLiked] = useState(item.isLiked ?? false);
-  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item.isLiked);
+  const [liked, setLiked] = useState(item.isLiked);
+  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item);
 
 
   console.log("REEL id:", item.id || item.uuid);
@@ -437,8 +437,6 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-
-
 
   // URL update function
   const updateURL = (index: number) => {

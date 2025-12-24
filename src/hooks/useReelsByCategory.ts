@@ -43,7 +43,7 @@ export const useReelsByCategory = (category: string) => {
           likes: item.likesCount || 0,
           comments: item.commentsCount || 0,
           shares: item.sharesCount || 0,
-          isLiked: false,
+          isLiked: item.isLiked || false,
         }));
 
       return {
