@@ -1411,19 +1411,19 @@ const CommentPage = () => {
 
 
   useEffect(() => {
-  const showSub = Keyboard.addListener("keyboardDidShow", () => {});
-  const hideSub = Keyboard.addListener("keyboardDidHide", () => {
-    // keyboard hide hone par reply cancel karo
-    if (replyTo) {
-      setReplyTo(null);
-    }
-  });
+    const showSub = Keyboard.addListener("keyboardDidShow", () => { });
+    const hideSub = Keyboard.addListener("keyboardDidHide", () => {
+      // keyboard hide hone par reply cancel karo
+      if (replyTo) {
+        setReplyTo(null);
+      }
+    });
 
-  return () => {
-    showSub.remove();
-    hideSub.remove();
-  };
-}, [replyTo]);
+    return () => {
+      showSub.remove();
+      hideSub.remove();
+    };
+  }, [replyTo]);
 
   // ----------------------------------
   //  ADD COMMENT / REPLY MUTATION
@@ -1464,6 +1464,8 @@ const CommentPage = () => {
     queryClient.cancelQueries({ queryKey: ["comments", postId] });
     queryClient.invalidateQueries({ queryKey: ["reels"] });
     queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-videos-feed"] });
+
     setCommentText("");
     setReplyTo(null);
   };
@@ -1498,6 +1500,7 @@ const CommentPage = () => {
     queryClient.cancelQueries({ queryKey: ["comments", postId] });
     queryClient.invalidateQueries({ queryKey: ["reels"] });
     queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+    queryClient.invalidateQueries({ queryKey: ["admin-videos-feed"] });
   };
 
   // ----------------------------------
@@ -1639,9 +1642,11 @@ const CommentPage = () => {
                     {timeAgo(item.time)}
                   </Text>
 
-                  <TouchableOpacity onPress={() => { setReplyTo(item.uuid);    setTimeout(() => {
-      inputRef.current?.focus();
-    }, 100); }}>
+                  <TouchableOpacity onPress={() => {
+                    setReplyTo(item.uuid); setTimeout(() => {
+                      inputRef.current?.focus();
+                    }, 100);
+                  }}>
                     <Text style={[styles.replyText, { color: theme.buttonBg }]}>
                       Reply
                     </Text>

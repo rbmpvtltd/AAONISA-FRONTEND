@@ -776,8 +776,11 @@
 
 // ================================================
 
+import { useLikeMutation } from "@/src/hooks/userLikeMutation";
+import { formatCount } from "@/src/utils/formatCount";
+import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
-import React, { useEffect, useState } from "react";
+import React, { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import Icon from "react-native-vector-icons/Ionicons";
 
@@ -797,6 +800,12 @@ export const FeedItem = React.memo(
         const [isPlaying, setIsPlaying] = useState(false);
         const [isFullscreen, setIsFullscreen] = useState(false);
         const [showControls, setShowControls] = useState(true);
+        const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+        const [liked, setLiked] = useState(item.isLiked);
+        const [showFullCaption, setShowFullCaption] = useState(false);
+
+
+        const likeMutation = useLikeMutation();
 
         // Player setup
         const player = useVideoPlayer(item.videoUrl, (p) => {
@@ -833,6 +842,39 @@ export const FeedItem = React.memo(
                 return () => clearTimeout(timer);
             }
         }, [showControls]);
+
+
+        const handleLike = async () => {
+            const newLiked = !liked;
+
+            // UI update
+            setLiked(newLiked);
+            setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
+
+            try {
+                await likeMutation.mutateAsync(item.uuid || item.id);
+            } catch (err) {
+                // revert on error
+                setLiked(!newLiked);
+                setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
+            }
+        };
+
+
+        const truncateText = (text: string, maxWords: number = 6) => {
+            const words = text.split(" ");
+            return {
+                shortText: words.slice(0, maxWords).join(" "),
+                isTruncated: words.length > maxWords,
+            };
+        };
+
+        const { shortText, isTruncated } = truncateText(item.caption);
+
+        const handleComment = useCallback(
+            (id: string) => router.push(`../../../comment/${id}`),
+            []
+        );
 
         // Toggle play/pause
         const togglePlayPause = () => {
@@ -874,13 +916,20 @@ export const FeedItem = React.memo(
         return (
             <View style={[styles.reel, { backgroundColor: theme.background }]}>
                 {/* Header - Always visible */}
-                <View style={[styles.header, { backgroundColor: theme.overlay }]}>
-                    <Image source={{ uri: item.profilePic }} style={styles.profileImage} />
+                <Pressable
+                    onPress={() => router.push(`/profile/${item.user?.username}`)}
+                    style={[styles.header, { backgroundColor: theme.overlay }]}
+                >
+                    <Image
+                        source={{ uri: item.user?.profilePic }}
+                        style={styles.profileImage}
+                    />
                     <View style={styles.userInfo}>
-                        <Text style={[styles.username, { color: "#fff" }]}>{item.username}</Text>
-                        <Text style={{ color: "#fff", fontSize: 10 }}>{item.title.slice(0, 30)}</Text>
+                        <Text style={[styles.username, { color: "#fff" }]}>
+                            {item.user?.username}
+                        </Text>
                     </View>
-                </View>
+                </Pressable>
 
                 {/* Video Container */}
                 <View style={[
@@ -949,18 +998,18 @@ export const FeedItem = React.memo(
 
                 {/* Bottom Actions - Always visible */}
                 <View style={styles.actionsRow}>
-                    <TouchableOpacity onPress={() => onLike(item.id)} style={styles.actionBtn}>
+                    <TouchableOpacity onPress={handleLike} style={styles.actionBtn}>
                         <Icon
-                            name={item.liked ? "heart" : "heart-outline"}
+                            name={liked ? "heart" : "heart-outline"}
                             size={29}
-                            color={item.liked ? "red" : theme.text}
+                            color={liked ? "red" : theme.text}
                         />
-                        <Text style={[styles.countText, { color: theme.text }]}>{item.likes}</Text>
+                        <Text style={[styles.countText, { color: theme.text }]}>{likesCount}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => onComment(item.id)} style={styles.actionBtn}>
                         <Icon name="chatbubble-outline" size={25} color={theme.text} />
-                        <Text style={[styles.countText, { color: theme.text }]}>{item.comments ?? 0}</Text>
+                        <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.commentsCount)}</Text>
                     </TouchableOpacity>
 
                     <TouchableOpacity onPress={() => onShare(item.id)} style={styles.actionBtn}>
@@ -970,7 +1019,22 @@ export const FeedItem = React.memo(
                 </View>
 
                 {/* Caption - Always visible */}
-                <Text style={[styles.title, { color: theme.text }]}>{item.title}</Text>
+                <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
+                    <Text style={{ color: theme.text }}>
+                        {showFullCaption ? item.caption : shortText}
+                        {!showFullCaption && isTruncated ? "..." : ""}
+                    </Text>
+
+                    {isTruncated && (
+                        <Pressable onPress={() => setShowFullCaption(prev => !prev)}>
+                            <Text style={{ color: "#aaa", marginTop: 4 }}>
+                                {showFullCaption ? "less" : "more"}
+                            </Text>
+                        </Pressable>
+                    )}
+                </View>
+
+
             </View>
         );
     }

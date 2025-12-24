@@ -818,6 +818,7 @@ const UserReelItem = ({
       ]
     );
   };
+console.log("item.comments?.length ", item.comments?.length );
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
