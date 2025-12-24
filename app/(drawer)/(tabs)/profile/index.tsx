@@ -140,12 +140,12 @@
 
 
 import { ProfileHeader, Tabs, TopHeader, UserInfo, VideoItem } from "@/app/profile/[username]/index";
+import { MentionedScreen } from "@/app/profile/[username]/mantionScreen";
 import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
-import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
 import { SafeAreaView } from "react-native-safe-area-context";
 
@@ -164,6 +164,10 @@ export default function MyProfileScreen() {
     queryFn: () => GetProfileUsername(currentUser?.username || ""),
     enabled: !!currentUser?.username,
   });
+
+  console.log("=============================================");
+console.log("profile  AAAAAAAA=======>",profile?.mentionedVideos);
+  console.log("=============================================");
 
   const isOwnProfile =
     currentUser?.username === profile?.username ||
@@ -311,15 +315,21 @@ export default function MyProfileScreen() {
         }
         ListEmptyComponent={
           activeTab === "reels" ? (
-            <View style={{ alignItems: "center", marginTop: 80 }}>
-              <Ionicons name="person-circle-outline" size={64} color="#777" />
-              <Text style={{ color: theme.text, fontSize: 16, fontWeight: "600", marginTop: 12 }}>
-                No tagged reels yet
-              </Text>
-              <Text style={{ color: theme.subtitle, fontSize: 13, marginTop: 6 }}>
-                Reels you’re tagged in will appear here.
-              </Text>
-            </View>
+            // <View style={{ alignItems: "center", marginTop: 80 }}>
+            //   <Ionicons name="person-circle-outline" size={64} color="#777" />
+            //   <Text style={{ color: theme.text, fontSize: 16, fontWeight: "600", marginTop: 12 }}>
+            //     No tagged reels yet
+            //   </Text>
+            //   <Text style={{ color: theme.subtitle, fontSize: 13, marginTop: 6 }}>
+            //     Reels you’re tagged in will appear here.
+            //   </Text>
+            // </View>
+
+            <MentionedScreen
+              key="mentioned"
+              mentionedVideos={profile?.mentionedVideos || []}
+              username={profile?.username}
+            />
           ) : null
         }
         showsVerticalScrollIndicator={false}
