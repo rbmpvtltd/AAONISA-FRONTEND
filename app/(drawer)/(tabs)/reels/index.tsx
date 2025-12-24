@@ -86,6 +86,7 @@ const ReelItem = ({
     }
   );
 
+
   // console.log("===================================", player)
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;

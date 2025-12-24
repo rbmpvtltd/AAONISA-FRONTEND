@@ -573,6 +573,7 @@ import {
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
+import { MentionedScreen } from "./mantionScreen";
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
@@ -842,6 +843,8 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
         router.push(`/p/${username}/${video.uuid}`);
     };
 
+    console.log("videos ==>",videos)
+
     if (!videos || videos.length === 0) {
         return (
             <View style={{ alignItems: "center", marginTop: 50, }}>
@@ -903,6 +906,9 @@ export const ProfileScreen: React.FC = () => {
         refetchOnMount: false,        // cached UI instantly    // ad
         refetchOnWindowFocus: true,   // background refresh     // ad
     });
+
+console.log("profile 111111111=======>",profile?.mentionedVideos);
+
 
     useEffect(() => {
         if (profile?.followers && currentUser?.id) {
@@ -1052,50 +1058,54 @@ export const ProfileScreen: React.FC = () => {
                     username={profile?.username}
                 />
             ) : (
-                <View
-                    key="reels"
-                    style={{ flex: 1, marginTop: 40, alignItems: "center" }}
-                >
-                    {/* <Text style={{ color: theme.text, backgroundColor: "#00000" }}>
-                        Mentioned / Tagged Reels yahan aayengi
-                    </Text> */}
-                     <View
-            style={{
-              flex: 1,
-              alignItems: "center",
-              paddingHorizontal: 30,
-            }}
-          >
-            <Ionicons
-              name="person-circle-outline"
-              size={64}
-              color="#777"
-            />
+        //         <View
+        //             key="reels"
+        //             style={{ flex: 1, marginTop: 40, alignItems: "center" }}
+        //         >
+        //              <View
+        //     style={{
+        //       flex: 1,
+        //       alignItems: "center",
+        //       paddingHorizontal: 30,
+        //     }}
+        //   >
+        //     <Ionicons
+        //       name="person-circle-outline"
+        //       size={64}
+        //       color="#777"
+        //     />
 
-            <Text
-              style={{
-                color: theme.text,
-                fontSize: 16,
-                fontWeight: "600",
-                marginTop: 12,
-              }}
-            >
-              No tagged reels yet
-            </Text>
+        //     <Text
+        //       style={{
+        //         color: theme.text,
+        //         fontSize: 16,
+        //         fontWeight: "600",
+        //         marginTop: 12,
+        //       }}
+        //     >
+        //       No tagged reels yet
+        //     </Text>
 
-            <Text
-              style={{
-                color: theme.subtitle,
-                fontSize: 13,
-                marginTop: 6,
-                textAlign: "center",
-              }}
-            >
-              Reels you’re tagged in will appear here.
-            </Text>
-          </View>
+        //     <Text
+        //       style={{
+        //         color: theme.subtitle,
+        //         fontSize: 13,
+        //         marginTop: 6,
+        //         textAlign: "center",
+        //       }}
+        //     >
+        //       Reels you’re tagged in will appear here.
+        //     </Text>
+        //   </View>
 
-                </View>
+        //         </View>
+
+
+        <MentionedScreen
+        key="mentioned"
+        mentionedVideos={profile?.mentionedVideos || []}
+        username={profile?.username}
+    />
             )}
 
             {/* <PostGrid videos={profile?.videos || []} username={profile?.username} /> */}
