@@ -676,6 +676,7 @@ const UserReelItem = ({
   addShare,
   reelUsername,
   profilePicture,
+  currentUserProfile,
   owner,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
@@ -818,7 +819,9 @@ const UserReelItem = ({
       ]
     );
   };
-console.log("item.comments?.length ", item.comments?.length );
+  console.log("item.comments?.length ", item.comments?.length);
+
+  const isOwnProfile = item.userProfile?.id === currentUserId;
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -868,8 +871,15 @@ console.log("item.comments?.length ", item.comments?.length );
         <View style={styles.userInfo}>
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center' }}
+            // onPress={() => {
+            //   router.push(`/profile`);
+            // }}
             onPress={() => {
-              router.push(`/profile`);
+              if (isOwnProfile) {
+                router.push('/profile');
+              } else {
+                router.push(`/profile/${reelUsername}`);
+              }
             }}
           >
             <Image
@@ -1046,14 +1056,14 @@ const UserReelsFeed = () => {
 
   // const owner = profile?.userProfile.username === currentUser?.userProfile.username;
 
-  const owner = currentUser?.id === profile?.id || 
-              currentUser?.userProfile?.id === profile?.userProfile?.id;
+  const owner = currentUser?.id === profile?.id ||
+    currentUser?.userProfile?.id === profile?.userProfile?.id;
 
-console.log('====================================');
-console.log("currentUser ID:", currentUser?.id);
-console.log("profile ID:", profile?.id);
-console.log("owner:", owner);
-console.log('====================================');
+  console.log('====================================');
+  console.log("currentUser ID:", currentUser?.id);
+  console.log("profile ID:", profile?.id);
+  console.log("owner:", owner);
+  console.log('====================================');
 
   // console.log('====================================');
   // console.log("owner", owner)
