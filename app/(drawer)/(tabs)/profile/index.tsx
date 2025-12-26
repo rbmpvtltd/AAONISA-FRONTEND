@@ -326,7 +326,7 @@ console.log("profile  AAAAAAAA=======>",profile?.mentionedVideos);
             // </View>
 
             <MentionedScreen
-              key="mentioned"
+              key="reels"
               mentionedVideos={profile?.mentionedVideos || []}
               username={profile?.username}
             />
