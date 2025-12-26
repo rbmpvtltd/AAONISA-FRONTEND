@@ -166,7 +166,7 @@ export default function MyProfileScreen() {
   });
 
   console.log("=============================================");
-console.log("profile  AAAAAAAA=======>",profile?.mentionedVideos);
+  console.log("profile  AAAAAAAA=======>", profile?.mentionedVideos);
   console.log("=============================================");
 
   const isOwnProfile =
