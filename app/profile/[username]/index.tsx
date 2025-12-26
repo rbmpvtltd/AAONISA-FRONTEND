@@ -843,7 +843,7 @@ export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos
         router.push(`/p/${username}/${video.uuid}`);
     };
 
-    console.log("videos ==>",videos)
+    console.log("videos ==>", videos)
 
     if (!videos || videos.length === 0) {
         return (
@@ -907,7 +907,7 @@ export const ProfileScreen: React.FC = () => {
         refetchOnWindowFocus: true,   // background refresh     // ad
     });
 
-console.log("profile 111111111=======>",profile?.mentionedVideos);
+    console.log("profile 111111111=======>", profile?.mentionedVideos);
 
 
     useEffect(() => {
@@ -1031,6 +1031,7 @@ console.log("profile 111111111=======>",profile?.mentionedVideos);
         currentUser?.username === profile?.username ||
         currentUser?.id === profile?.id;
 
+    console.log("who mention ", profile?.mentionedVideos || []);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <TopHeader
@@ -1050,7 +1051,7 @@ console.log("profile 111111111=======>",profile?.mentionedVideos);
                 //  isOwnProfile={isOwnProfile}
                 activeTab={activeTab}
                 onChange={setActiveTab} />
-                
+
             {activeTab === "posts" ? (
                 <PostGrid
                     key="posts"
@@ -1058,54 +1059,54 @@ console.log("profile 111111111=======>",profile?.mentionedVideos);
                     username={profile?.username}
                 />
             ) : (
-        //         <View
-        //             key="reels"
-        //             style={{ flex: 1, marginTop: 40, alignItems: "center" }}
-        //         >
-        //              <View
-        //     style={{
-        //       flex: 1,
-        //       alignItems: "center",
-        //       paddingHorizontal: 30,
-        //     }}
-        //   >
-        //     <Ionicons
-        //       name="person-circle-outline"
-        //       size={64}
-        //       color="#777"
-        //     />
+                //         <View
+                //             key="reels"
+                //             style={{ flex: 1, marginTop: 40, alignItems: "center" }}
+                //         >
+                //              <View
+                //     style={{
+                //       flex: 1,
+                //       alignItems: "center",
+                //       paddingHorizontal: 30,
+                //     }}
+                //   >
+                //     <Ionicons
+                //       name="person-circle-outline"
+                //       size={64}
+                //       color="#777"
+                //     />
 
-        //     <Text
-        //       style={{
-        //         color: theme.text,
-        //         fontSize: 16,
-        //         fontWeight: "600",
-        //         marginTop: 12,
-        //       }}
-        //     >
-        //       No tagged reels yet
-        //     </Text>
+                //     <Text
+                //       style={{
+                //         color: theme.text,
+                //         fontSize: 16,
+                //         fontWeight: "600",
+                //         marginTop: 12,
+                //       }}
+                //     >
+                //       No tagged reels yet
+                //     </Text>
 
-        //     <Text
-        //       style={{
-        //         color: theme.subtitle,
-        //         fontSize: 13,
-        //         marginTop: 6,
-        //         textAlign: "center",
-        //       }}
-        //     >
-        //       Reels you’re tagged in will appear here.
-        //     </Text>
-        //   </View>
+                //     <Text
+                //       style={{
+                //         color: theme.subtitle,
+                //         fontSize: 13,
+                //         marginTop: 6,
+                //         textAlign: "center",
+                //       }}
+                //     >
+                //       Reels you’re tagged in will appear here.
+                //     </Text>
+                //   </View>
 
-        //         </View>
+                //         </View>
 
 
-        <MentionedScreen
-        key="reels"
-        mentionedVideos={profile?.mentionedVideos || []}
-        username={profile?.username}
-    />
+                <MentionedScreen
+                    key="reels"
+                    mentionedVideos={profile?.mentionedVideos || []}
+                    username={profile?.username}
+                />
             )}
 
             {/* <PostGrid videos={profile?.videos || []} username={profile?.username} /> */}

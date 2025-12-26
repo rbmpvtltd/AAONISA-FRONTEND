@@ -72,10 +72,9 @@ const MentionedReelItem = ({
   const [liked, setLiked] = useState(item.isLiked);
 
   // Get video owner's profile info
-  const reelUsername = item.user?.username || item.username || 'Unknown';
 
   const profilePicture = item.user?.userProfile?.ProfilePicture || item.userProfile?.ProfilePicture;
-  
+
   // Check if current user is the owner
   const owner = item.user_id === currentUserId || item.userId === currentUserId;
 
@@ -223,9 +222,9 @@ const MentionedReelItem = ({
         <View style={styles.userInfo}>
           <TouchableOpacity
             style={{ flexDirection: 'row', alignItems: 'center' }}
-          // onPress={() => {
-          //   router.push(`/profile/${reelUsername}`);
-          // }}
+          onPress={() => {
+            router.push(`/profile/${item.user_id?.username}`);
+          }}
           >
             <Image
               source={{ uri: profilePicture ? profilePicture : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
@@ -238,7 +237,7 @@ const MentionedReelItem = ({
               }}
             />
 
-            <Text style={styles.username}>{reelUsername}</Text>
+            <Text style={styles.username}>{item.user_id?.username}</Text>
           </TouchableOpacity>
         </View>
 
