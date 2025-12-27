@@ -72,8 +72,8 @@ const ReelItem = ({
   //     : false
   // );
 
-  const [liked, setLiked] = useState(item.isLiked);
-  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item);
+  const [liked, setLiked] = useState(item.isLiked ?? false);
+  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item.isLiked);
 
 
   console.log("REEL id:", item.id || item.uuid);
@@ -86,6 +86,7 @@ const ReelItem = ({
     }
   );
 
+  // console.log("player", player);
 
   // console.log("===================================", player)
   useEffect(() => {
@@ -143,7 +144,7 @@ const ReelItem = ({
     player.pause();
   };
 
-  const handlePressOut = () => {
+    const handlePressOut = () => {
     player.play();
   };
 
@@ -207,7 +208,7 @@ const ReelItem = ({
         onPress={handleToggleMute}
         onPressIn={handlePressIn}
         onPressOut={handlePressOut}
-      >
+        >
         {/* <View style={{ flex: 1 }}> */}
         {isLoading && (
           <View style={{
@@ -438,6 +439,8 @@ const ReelsFeed = () => {
   } = useReelsByCategory(activeTab.toLowerCase());
 
   const reels = data?.pages.flatMap((p: any) => p.reels) || [];
+
+
 
   // URL update function
   const updateURL = (index: number) => {
