@@ -328,7 +328,6 @@ export const StoryList = memo(({
 }) => {
 
   const userStories = stories;
-
   // Get current user for profile picture
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
