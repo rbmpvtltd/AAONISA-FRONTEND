@@ -2,6 +2,7 @@ import { GetCurrentUser } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { createReelGesture } from '@/src/hooks/ReelGestures';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
@@ -19,15 +20,14 @@ import {
   Animated,
   FlatList,
   Image,
-  Pressable,
   StatusBar,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
-import { ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import VideoProgressBar from './videoProgressBar';
 
@@ -65,17 +65,9 @@ const ReelItem = ({
   const [isLoading, setIsLoading] = useState(true);
   const markViewedMutation = useMarkViewedMutation(item.id);
   const [viewed, setViewed] = useState(false);
-
-  // const [liked, setLiked] = useState(
-  //   Array.isArray(item.likes)
-  //     ? item.likes.some((like: any) => like.user_id === currentUserId)
-  //     : false
-  // );
+  const [paused, setPaused] = useState(false);
 
   const [liked, setLiked] = useState(item.isLiked ?? false);
-  console.log("rrrrrrrrreeeeeeeeeeelssssssss", item.isLiked);
-
-
   console.log("REEL id:", item.id || item.uuid);
 
   // create player
@@ -86,9 +78,7 @@ const ReelItem = ({
     }
   );
 
-  // console.log("player", player);
 
-  // console.log("===================================", player)
   useEffect(() => {
     player.volume = isMuted ? 0 : 1;
   }, [isMuted]);
@@ -104,6 +94,8 @@ const ReelItem = ({
     if (currentIndex === index) {
       player.play();
       player.volume = isMuted ? 0 : 1;
+      // player.play();
+      // player.volume = isMuted ? 0 : 1;
     } else {
       player.pause();
       player.volume = 0;
@@ -139,14 +131,6 @@ const ReelItem = ({
   };
 
   const videoPosition = useRef(0);
-
-  const handlePressIn = () => {
-    player.pause();
-  };
-
-    const handlePressOut = () => {
-    player.play();
-  };
 
   const handleLike = async () => {
     const newLiked = !liked;
@@ -190,26 +174,35 @@ const ReelItem = ({
     return () => cancelAnimationFrame(frameId);
   }, [player, currentIndex, index, viewed]);
 
-
-  console.log("item.VIEWS", item);
-
-  // console.log("comment count", item.commentsCount);
-
   const reelId = item.uuid || item.id;
 
-  console.log('====================================');
-  console.log(item.duration);
-  // console.log(item);
-  console.log('====================================');
+  const handleLongPressIn = () => {
+    setPaused(true);
+    player.pause();
+  };
+
+  const handleLongPressOut = () => {
+    setPaused(false);
+    player.play();
+  };
+
+
+  const composedGesture = createReelGesture({
+    onTap: handleToggleMute,
+    onLongPressIn: handleLongPressIn,
+    onLongPressOut: handleLongPressOut,
+  });
+
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
-      <Pressable
+      {/* <Pressable
         style={{ flex: 1 }}
         onPress={handleToggleMute}
-        onPressIn={handlePressIn}
-        onPressOut={handlePressOut}
-        >
-        {/* <View style={{ flex: 1 }}> */}
+        onLongPress={handleLongPressIn}
+        onPressOut={handleLongPressOut}
+        delayLongPress={150}
+      >
+
         {isLoading && (
           <View style={{
             position: "absolute",
@@ -231,7 +224,6 @@ const ReelItem = ({
           nativeControls={false}
         />
 
-        {/* Audio Icon Overlay */}
         {showIcon && (
           <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
             <Ionicons
@@ -241,7 +233,51 @@ const ReelItem = ({
             />
           </Animated.View>
         )}
-      </Pressable>
+
+      </Pressable> */}
+
+      <GestureDetector gesture={composedGesture}>
+        <Animated.View style={{ flex: 1 }}>
+
+          {isLoading && (
+            <View
+              style={{
+                position: "absolute",
+                top: "45%",
+                left: "45%",
+                zIndex: 9999,
+              }}
+            >
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
+          )}
+
+          <VideoView
+            style={{
+              position: 'absolute',
+              width: SCREEN_WIDTH,
+              height: SCREEN_HEIGHT,
+            }}
+            player={player}
+            contentFit="cover"
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
+            nativeControls={false}
+          />
+
+          {showIcon && (
+            <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
+              <Ionicons
+                name={isMuted ? "volume-mute" : "volume-high"}
+                size={ACTION_ICON_SIZE}
+                color="#fff"
+              />
+            </Animated.View>
+          )}
+
+        </Animated.View>
+      </GestureDetector>
+
 
       {/* Bottom Content */}
       <View style={[styles.bottomContent, { bottom: bottomContentBottom }]}>
@@ -340,7 +376,7 @@ const ReelItem = ({
           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>
             {formatCount(item.commentsCount)}
-          </Text> 
+          </Text>
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => {

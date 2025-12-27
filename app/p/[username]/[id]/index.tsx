@@ -629,6 +629,7 @@ import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+import { createReelGesture } from '@/src/hooks/ReelGestures';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
@@ -650,7 +651,6 @@ import {
   Image,
   NativeScrollEvent,
   NativeSyntheticEvent,
-  Pressable,
   StatusBar,
   StyleSheet,
   Text,
@@ -658,7 +658,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // Reel Item Component
 const UserReelItem = ({
@@ -700,6 +700,7 @@ const UserReelItem = ({
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
+  const [paused, setPaused] = useState(false);
   // const [liked, setLiked] = useState(
   //   Array.isArray(item.likes)
   //     ? item.likes.some((like: any) => like.user_id === currentUserId)
@@ -787,7 +788,15 @@ const UserReelItem = ({
   }, [player, currentIndex, index, viewed]);
 
 
+  const handleLongPressIn = () => {
+    setPaused(true);
+    player.pause();
+  };
 
+  const handleLongPressOut = () => {
+    setPaused(false);
+    player.play();
+  };
   // console.log("username in profile", reelUsername);
   // console.log("user item.ProfilePicture ", profilePicture);
   // console.log("user comment resived", item.comments);
@@ -819,6 +828,14 @@ const UserReelItem = ({
       ]
     );
   };
+
+  const reelGesture = createReelGesture({
+    onTap: handleToggleMute,
+    onLongPressIn: handleLongPressIn,
+    onLongPressOut: handleLongPressOut,
+  });
+
+
   console.log("item.comments?.length ", item.comments?.length);
 
   const isOwnProfile = item.userProfile?.id === currentUserId;
@@ -827,44 +844,53 @@ const UserReelItem = ({
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
 
       {/* Video Player */}
-      <Pressable
+      {/* <Pressable
         style={{ flex: 1 }}
         onPress={handleToggleMute}
-      >
-        {/* <View style={{ flex: 1 }}> */}
-        {isLoading && (
-          <View style={{
-            position: "absolute",
-            top: "45%",
-            left: "45%",
-            zIndex: 9999
-          }}>
-            <ActivityIndicator size="large" color="#fff" />
-          </View>
-        )}
+        onLongPress={handleLongPressIn}
+        onPressOut={handleLongPressOut}
+        delayLongPress={150}
+      > */}
+
+      <GestureDetector gesture={reelGesture}>
+        <Animated.View style={{ flex: 1 }}>
+
+          {/* <View style={{ flex: 1 }}> */}
+          {isLoading && (
+            <View style={{
+              position: "absolute",
+              top: "45%",
+              left: "45%",
+              zIndex: 9999
+            }}>
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
+          )}
 
 
-        <VideoView
-          style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-          key={`video-${item.id}-${index}`}
-          player={player}
-          allowsFullscreen={false}
-          allowsPictureInPicture={false}
-          contentFit="cover"
-          nativeControls={false}
-        />
+          <VideoView
+            style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+            key={`video-${item.id}-${index}`}
+            player={player}
+            allowsFullscreen={false}
+            allowsPictureInPicture={false}
+            contentFit="cover"
+            nativeControls={false}
+          />
 
-        {/* Volume Icon */}
-        {showIcon && (
-          <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
-            <Ionicons
-              name={isMuted ? "volume-mute" : "volume-high"}
-              size={ACTION_ICON_SIZE}
-              color="#fff"
-            />
-          </Animated.View>
-        )}
-      </Pressable>
+          {/* Volume Icon */}
+          {showIcon && (
+            <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
+              <Ionicons
+                name={isMuted ? "volume-mute" : "volume-high"}
+                size={ACTION_ICON_SIZE}
+                color="#fff"
+              />
+            </Animated.View>
+          )}
+          {/* </Pressable> */}
+        </Animated.View>
+      </GestureDetector>
 
       {/* Bottom Info */}
       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
