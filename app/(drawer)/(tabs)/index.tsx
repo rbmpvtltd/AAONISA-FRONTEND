@@ -193,10 +193,11 @@
 // export default HomePage;
 
 
-import { getAllBookmarks, getAllStories } from "@/src/api/tab-api";
+import { getAllBookmarks } from "@/src/api/tab-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { FeedList } from "@/src/features/feed/feedList";
 import { StoryList } from "@/src/features/story/storyList";
+import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
@@ -212,28 +213,13 @@ const HomePage = () => {
   const { setCategories } = useBookmarkStore();
   const [refreshing, setRefreshing] = useState(false);
 
-  // Stories - React Query will cache this data
+  // Stories
   const {
-    data: stories,
+    data: stories = [],
     isLoading: storiesLoading,
     isError: storiesError,
-    error: storiesErrorData,
     refetch: refetchStories,
-  } = useQuery({
-    queryKey: ["stories"],
-    queryFn: async () => {
-      try {
-        const data = await getAllStories();
-        return data || [];
-      } catch (error) {
-        console.error("Stories fetch error:", error);
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000, // 5 minutes - data stays fresh
-    refetchOnMount: true,
-    retry: 1,
-  });
+  } = useStoriesQuery();
 
   // Bookmarks
   const {
@@ -322,7 +308,8 @@ const HomePage = () => {
         data={[{ id: "header" }]}
         renderItem={() => <FeedList />}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={<StoryList theme={theme} />}
+        ListHeaderComponent={<StoryList theme={theme} stories={stories} />}
+
         showsVerticalScrollIndicator={false}
         style={{ backgroundColor: theme.background }}
         refreshControl={

@@ -239,7 +239,6 @@
 // });
 
 import { GetCurrentUser } from "@/src/api/profile-api";
-import { getAllStories } from "@/src/api/tab-api";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
@@ -322,23 +321,13 @@ StoryItem.displayName = "StoryItem";
 
 export const StoryList = memo(({
   theme,
+  stories
 }: {
   theme: any;
+  stories?: any[];
 }) => {
-  // Get stories from React Query cache
-  const { data: userStories = [] } = useQuery({
-    queryKey: ["stories"],
-    queryFn: async () => {
-      try {
-        const data = await getAllStories();
-        return data || [];
-      } catch (error) {
-        console.error("Stories fetch error:", error);
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000, // Same as HomePage
-  });
+
+  const userStories = stories;
 
   // Get current user for profile picture
   const { data: currentUser } = useQuery({

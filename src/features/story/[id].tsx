@@ -41,7 +41,7 @@
 //   const [showViewers, setShowViewers] = useState(false);
 
 //   const player = useVideoPlayer("");
-  
+
 //   const currentStory = storyList[currentIndex];
 //   const isOwnStory = userStory?.self === true;
 
@@ -49,9 +49,9 @@
 //     queryKey: ["currentUser"],
 //     queryFn: GetCurrentUser,
 //   });
-  
+
 //   const socket = useSocketManager(currentUser?.id)
-  
+
 
 //   useEffect(() => {
 //     if (player) {
@@ -281,7 +281,7 @@
 //     }
 //     setShowViewers(!showViewers);
 //   };
-  
+
 //   if (!userStory || storyList.length === 0 || !currentStory) {
 //     return (
 //       <View style={styles.center}>
@@ -411,7 +411,7 @@
 //             {/* <TouchableOpacity
 //               style={styles.actionBtn}
 //               onPress={() => {
-               
+
 //               }}
 //             >
 //               <Ionicons name="ellipsis-horizontal" size={24} color="#fff" />
@@ -568,7 +568,7 @@
 
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { markViewed } from "@/src/api/story-api";
-import { getAllStories } from "@/src/api/tab-api";
+import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
 import { useSocketManager } from "@/src/socket/socket";
 import { useViewStore } from "@/src/store/viewStore";
@@ -598,7 +598,7 @@ export default function StoryViewPage() {
   const router = useRouter();
   const queryClient = useQueryClient();
   const { id } = useLocalSearchParams<{ id: string }>();
-  
+
   // Local state for viewed stories
   const [viewedStories, setViewedStories] = useState<Set<string>>(new Set());
   const [currentIndex, setCurrentIndex] = useState(0);
@@ -607,21 +607,13 @@ export default function StoryViewPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
 
-  // Get stories from React Query cache or refetch
-  const { data: userStories = [] } = useQuery({
-    queryKey: ["stories"],
-    queryFn: async () => {
-      try {
-        const data = await getAllStories();
-        return data || [];
-      } catch (error) {
-        console.error("Stories fetch error:", error);
-        return [];
-      }
-    },
-    staleTime: 5 * 60 * 1000,
-    initialData: () => queryClient.getQueryData(["stories"]),
-  });
+ // Stories
+  const {
+    data: userStories = [],
+    isLoading: storiesLoading,
+    isError: storiesError,
+    refetch: refetchStories,
+  } = useStoriesQuery();
 
   const userStory = userStories.find((u: any) =>
     u.stories.some((s: any) => s.id === id)
@@ -877,8 +869,8 @@ export default function StoryViewPage() {
                   i === currentIndex
                     ? { flex: progress }
                     : i < currentIndex
-                    ? { flex: 1 }
-                    : { flex: 0 },
+                      ? { flex: 1 }
+                      : { flex: 0 },
                 ]}
               />
             </View>
