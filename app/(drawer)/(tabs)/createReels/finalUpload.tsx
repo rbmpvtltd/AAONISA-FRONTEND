@@ -17,7 +17,7 @@ import {
 
 import { SearchUserProfiel } from "@/src/api/profile-api";
 import { useUploadStore } from "@/src/store/reelUploadStore";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { uploadReel } from "./api";
 interface FinalUploadProps {
@@ -52,8 +52,9 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
   const [localMentions, setLocalMentions] = useState(mentions);
   const [isUploading, setIsUploading] = useState(false);
   const [mentionQuery, setMentionQuery] = useState("");
- const router = useRouter();
+  const router = useRouter();
 
+  const queryClient = useQueryClient();
 
   function colorNameToHex(color: string): string {
     const ctx = document.createElement('canvas').getContext('2d');
@@ -145,6 +146,7 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
 
     try {
       const response = await uploadReel(formData);
+      await queryClient.invalidateQueries({ queryKey: ["stories"] });
       console.log("Upload response:", response);
       alert("Upload successful!");
       router.push("/(drawer)/(tabs)/createReels");
@@ -465,34 +467,34 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: "600",
   },
- 
+
   mentionBox: {
-  position: "absolute",
-  top: 90,              
-  left: 16,
-  right: 16,
-  maxHeight: 255,       
-  borderRadius: 14,
-  padding: 8,
-  elevation: 8,
-  shadowColor: "#000",
-  shadowOpacity: 0.2,
-  shadowRadius: 8,
-  zIndex: 100,
-},
-mentionItem: {
-  flexDirection: "row",
-  alignItems: "center",
-  gap: 10,
-  paddingVertical: 10,
-  paddingHorizontal: 6,
-  borderBottomWidth: 0.5,
-  borderBottomColor: "#ccc",
-},
+    position: "absolute",
+    top: 90,
+    left: 16,
+    right: 16,
+    maxHeight: 255,
+    borderRadius: 14,
+    padding: 8,
+    elevation: 8,
+    shadowColor: "#000",
+    shadowOpacity: 0.2,
+    shadowRadius: 8,
+    zIndex: 100,
+  },
+  mentionItem: {
+    flexDirection: "row",
+    alignItems: "center",
+    gap: 10,
+    paddingVertical: 10,
+    paddingHorizontal: 6,
+    borderBottomWidth: 0.5,
+    borderBottomColor: "#ccc",
+  },
   mentionText: {
-  fontSize: 14,
-  fontWeight: "500",
-},
+    fontSize: 14,
+    fontWeight: "500",
+  },
 });
 
 export default FinalUpload;
