@@ -136,6 +136,24 @@ const Register = () => {
     }
   };
 
+  // FIX: Email/Phone input handler
+  const handleEmailPhoneChange = (text: string) => {
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    setEmailOrPhone(cleanText);
+  };
+
+  // FIX: Username input handler
+  const handleUsernameChange = (text: string) => {
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    setUsername(cleanText);
+  };
+
+  // FIX: Password input handler
+  const handlePasswordChange = (text: string) => {
+    const cleanText = text.replace(/\s+/g, '');
+    setPassword(cleanText);
+  };
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
       <KeyboardAvoidingView
@@ -157,7 +175,10 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={emailOrPhone}
-            onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+            // onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+            onChangeText={handleEmailPhoneChange} // CHANGED
+            autoCapitalize="none" // ADD
+            autoCorrect={false} // ADD
           />
 
           {otpSent ? (
@@ -221,8 +242,10 @@ const Register = () => {
               { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text },
             ]}
             value={username}
-            onChangeText={(text) => setUsername(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
-          // onChangeText={handleUsernameChange}
+            // onChangeText={(text) => setUsername(text.toLocaleLowerCase().replace(/\s+/g, '').trim())}
+            onChangeText={handleUsernameChange} // CHANGED
+            autoCapitalize="none" // ADD
+            autoCorrect={false} // ADD
 
           />
           <View style={{ position: "relative" }}>
@@ -240,7 +263,10 @@ const Register = () => {
               ]}
               secureTextEntry={!showPassword}
               value={password}
-              onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
+              // onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
+              onChangeText={handlePasswordChange} // CHANGED
+              autoCapitalize="none" // ADD
+              autoCorrect={false} // ADD
             />
 
             <TouchableOpacity

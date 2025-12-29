@@ -232,6 +232,7 @@ export const FeedList = () => {
       <FlatList
         data={feedVideos}
         keyExtractor={(item) => item.id}
+        // keyExtractor={(item, index) => item?.id ? String(item.id) : `feed-item-${index}`}
         renderItem={({ item, index }) => (
           <FeedItem
             item={item}

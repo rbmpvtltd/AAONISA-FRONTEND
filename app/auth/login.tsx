@@ -71,7 +71,7 @@ const Login = () => {
         if (data.accessToken) {
           await saveToken(data.accessToken);
         }
-        const pushToken =await AsyncStorage.getItem('pushToken');
+        const pushToken = await AsyncStorage.getItem('pushToken');
         console.log("Push token:", pushToken);
         await expoTokenAssign(pushToken);
         Alert.alert("Success", "Logged in successfully!");
@@ -93,7 +93,7 @@ const Login = () => {
         // console.log("===============================",setVideos)
         setFollowers(userData.followers);
         setFollowings(userData.followings);
-  
+
       } else {
         Alert.alert("Error", data.message);
       }
@@ -101,6 +101,19 @@ const Login = () => {
       console.error("Login error:", error);
       Alert.alert("Error", "Invalid credentials");
     }
+  };
+
+
+  // FIX: Email/Phone input handler
+  const handleEmailPhoneChange = (text: string) => {
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    setEmailOrPhone(cleanText);
+  };
+
+  // FIX: Password input handler
+  const handlePasswordChange = (text: string) => {
+    const cleanText = text.replace(/\s+/g, '');
+    setPassword(cleanText);
   };
 
   return (
@@ -127,7 +140,10 @@ const Login = () => {
             },
           ]}
           value={emailOrPhone}
-          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+          // onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+          onChangeText={handleEmailPhoneChange} // CHANGED
+          autoCapitalize="none" // ADD
+          autoCorrect={false} // ADD
         />
 
         <View style={{ position: "relative" }}>
@@ -145,7 +161,10 @@ const Login = () => {
             ]}
             secureTextEntry={!showPassword}
             value={password}
-            onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
+            // onChangeText={(text) => setPassword(text.trim().replace(/\s+/g, ''))}
+            onChangeText={handlePasswordChange} // CHANGED
+            autoCapitalize="none" // ADD
+            autoCorrect={false} // ADD
           />
 
           {/* Eye Icon Button */}
