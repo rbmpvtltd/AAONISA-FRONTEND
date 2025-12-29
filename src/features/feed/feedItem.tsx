@@ -777,7 +777,9 @@
 // ================================================
 
 import BottomDrawer from "@/src/components/ui/BottomDrawer";
+import ReportDrawer from "@/src/components/ui/ReportDrawer";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
+import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { formatCount } from "@/src/utils/formatCount";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
@@ -813,8 +815,14 @@ export const FeedItem = React.memo(
         const [bookmarked, setBookmarked] = useState(false);
         const [showShareDrawer, setShowShareDrawer] = useState(false);
         const isOwner = item.user?.id === item.ownerId;
-
+        const [showBottomDrawer, setShowBottomDrawer] = useState(false);
+        const [showReportDrawer, setShowReportDrawer] = useState(false);
+        const { openBookmarkPanel } = useBookmarkStore();
         const likeMutation = useLikeMutation();
+
+
+
+        console.log("Item Adnnnnnnnnnnnnnnnnnn", item)
 
         // Player setup
         const player = useVideoPlayer(item.videoUrl, (p) => {
@@ -825,16 +833,20 @@ export const FeedItem = React.memo(
         // Play/pause logic based on active state
         useEffect(() => {
             if (isActive && isFocused) {
+                setShowThumbnail(true);
                 player.play();
                 setIsPlaying(true);
+
                 const timer = setTimeout(() => {
                     setShowThumbnail(false);
-                }, 300);
+                }, 500);
                 return () => clearTimeout(timer);
             } else {
                 player.pause();
                 setIsPlaying(false);
+
                 setShowThumbnail(true);
+
                 if (isFullscreen) {
                     setIsFullscreen(false);
                 }
@@ -919,11 +931,14 @@ export const FeedItem = React.memo(
             if (isPlaying) {
                 player.pause();
                 setIsPlaying(false);
-                setShowThumbnail(true);
+                // setShowThumbnail(true);
             } else {
+                // setShowThumbnail(true);
                 player.play();
                 setIsPlaying(true);
-                setShowThumbnail(false);
+                setTimeout(() => {
+                    setShowThumbnail(false);
+                }, 300);
             }
             setShowControls(true);
         };
@@ -982,9 +997,9 @@ export const FeedItem = React.memo(
                         style={{ flex: 1 }}
                     >
 
-                        {showThumbnail && item.thumbnail && (
+                        {showThumbnail && item.thumbnailUrl && (
                             <Image
-                                source={{ uri: item.thumbnail }}
+                                source={{ uri: item.thumbnailUrl }}
                                 style={styles.thumbnail}
                                 resizeMode={isFullscreen ? "contain" : "cover"}
                             />
@@ -1073,7 +1088,7 @@ export const FeedItem = React.memo(
                     </View>
 
                     {/* RIGHT SIDE BOOKMARK */}
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareDrawer(true)}>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
                         <Icon
                             name="ellipsis-vertical"
                             size={22}
@@ -1180,7 +1195,7 @@ export const FeedItem = React.memo(
                     )}
                 </View>
 
-                <BottomDrawer
+                {/* <BottomDrawer
                     visible={showShareDrawer}
                     onClose={() => setShowShareDrawer(false)}
                     onSave={handleBookmark}
@@ -1195,11 +1210,75 @@ export const FeedItem = React.memo(
                     reelId={item.id || item.uuid}
                     reelUrl={item.videoUrl}
                     isOwner={isOwner}
+                /> */}
+
+                {/* <View style={styles.drawerContainer} pointerEvents={showBottomDrawer ? "auto" : "none"}>
+
+                    <BottomDrawer
+                        visible={showBottomDrawer}
+                        onClose={() => setShowBottomDrawer(false)}
+                        onSave={() => {
+                            openBookmarkPanel(item.id || item.uuid);
+                            setShowBottomDrawer(false);
+                        }}
+                        onReport={() => {
+                            setShowReportDrawer(true);
+                            setShowBottomDrawer(false);
+                        }}
+                        onDelete={isOwner ? () => {
+                            console.log("Delete video:", item.id || item.uuid);
+                            setShowBottomDrawer(false);
+                        } : undefined}
+                        reelId={item.id || item.uuid}
+                        reelUrl={item.videoUrl}
+                        isOwner={isOwner}
+                    />
+
+                    <ReportDrawer
+                        visible={showReportDrawer}
+                        onClose={() => setShowReportDrawer(false)}
+                        onSelect={(reason: string) => {
+                            console.log("User reported for:", reason);
+                            setShowReportDrawer(false);
+                        }}
+                        videoId={item.id || item.uuid}
+                    />
+                </View> */}
+
+                {/* Replace existing BottomDrawer code with this: */}
+
+                <BottomDrawer
+                    visible={showBottomDrawer}
+                    onClose={() => setShowBottomDrawer(false)}
+                    onSave={() => {
+                        openBookmarkPanel(item.id || item.uuid);
+                        setShowBottomDrawer(false);
+                    }}
+                    onReport={() => {
+                        setShowReportDrawer(true);
+                        setShowBottomDrawer(false);
+                    }}
+                    onDelete={isOwner ? () => {
+                        console.log("Delete video:", item.id || item.uuid);
+                        setShowBottomDrawer(false);
+                    } : undefined}
+                    reelId={item.id || item.uuid}
+                    reelUrl={item.videoUrl}
+                    isOwner={isOwner}
+                />
+
+                <ReportDrawer
+                    visible={showReportDrawer}
+                    onClose={() => setShowReportDrawer(false)}
+                    onSelect={(reason: string) => {
+                        console.log("User reported for:", reason);
+                        setShowReportDrawer(false);
+                    }}
+                    videoId={item.id || item.uuid}
                 />
 
             </View >
         );
-        {/* Bottom Drawer for Share Options */ }
     }
 );
 
@@ -1239,6 +1318,13 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "80%",
         position: "relative",
+    },
+    drawerContainer: {
+        position: "absolute",
+        bottom: 0,
+        left: 0,
+        right: 0,
+        zIndex: 9999,
     },
     fullscreenVideo: {
         position: "absolute",

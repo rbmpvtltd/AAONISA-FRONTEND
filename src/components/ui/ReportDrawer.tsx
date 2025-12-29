@@ -31,7 +31,7 @@ const reportOptions = [
     "Something Else",
 ];
 
-const ReportDrawer = ({ visible, onClose, onSelect,videoId }: any) => {
+const ReportDrawer = ({ visible, onClose, onSelect, videoId }: any) => {
     const theme = useAppTheme();
     const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
 
@@ -55,24 +55,24 @@ const ReportDrawer = ({ visible, onClose, onSelect,videoId }: any) => {
         }
     }, [visible]);
     const submitReport = async (text: string) => {
-    try {
-        setLoading(true);
+        try {
+            setLoading(true);
 
-        await report({
-            videoId: videoId,
-            description: text,
-        });
+            await report({
+                videoId: videoId,
+                description: text,
+            });
 
-        Alert.alert("Report Submitted", "Your report has been submitted successfully.");
-        onClose();
-    } catch (err: any) {
-        const msg =
-            err?.response?.data?.message || "Something went wrong while reporting";
-        Alert.alert("Error", msg);
-    } finally {
-        setLoading(false);
-    }
-};
+            Alert.alert("Report Submitted", "Your report has been submitted successfully.");
+            onClose();
+        } catch (err: any) {
+            const msg =
+                err?.response?.data?.message || "Something went wrong while reporting";
+            Alert.alert("Error", msg);
+        } finally {
+            setLoading(false);
+        }
+    };
 
     if (!visible) return null;
 
@@ -126,8 +126,8 @@ const ReportDrawer = ({ visible, onClose, onSelect,videoId }: any) => {
                                         {
                                             text: "OK",
                                             onPress: () => {
-    submitReport(item);
-},
+                                                submitReport(item);
+                                            },
 
                                         },
                                     ],
@@ -184,8 +184,8 @@ const ReportDrawer = ({ visible, onClose, onSelect,videoId }: any) => {
                             }
 
                             await submitReport(customText);
-setCustomVisible(false);
-setCustomText("");
+                            setCustomVisible(false);
+                            setCustomText("");
 
                         }}
                     >
@@ -273,7 +273,7 @@ const styles = StyleSheet.create({
         paddingTop: 20,
         borderTopLeftRadius: 30,
         borderTopRightRadius: 30,
-        marginBottom : 20,
+        marginBottom: 20,
 
         //  TOP SHADOW
         shadowColor: "#000",

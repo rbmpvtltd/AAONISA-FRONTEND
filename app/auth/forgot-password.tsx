@@ -153,6 +153,18 @@ const ForgotPassword = () => {
     }
   };
 
+  // FIX: Email/Phone input handler
+  const handleEmailPhoneChange = (text: string) => {
+    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    setEmailOrPhone(cleanText);
+  };
+
+  // FIX: New Password input handler
+  const handleNewPasswordChange = (text: string) => {
+    const cleanText = text.replace(/\s+/g, '');
+    setNewPassword(cleanText);
+  };
+
   return (
     <KeyboardAvoidingView
       style={{ flex: 1 }}
@@ -170,7 +182,10 @@ const ForgotPassword = () => {
           placeholderTextColor={theme.placeholder}
           style={[styles.input, { backgroundColor: theme.inputBg, borderColor: theme.inputBorder, color: theme.text }]}
           value={emailOrPhone}
-          onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+          // onChangeText={(text) => setEmailOrPhone(text.trim().toLocaleLowerCase().replace(/\s+/g, ''))}
+          onChangeText={handleEmailPhoneChange} // CHANGED
+          autoCapitalize="none" // ADD
+          autoCorrect={false} // ADD
         />
 
         {otpSent && (
@@ -243,7 +258,10 @@ const ForgotPassword = () => {
               },
             ]}
             value={newPassword}
-            onChangeText={(text) => setNewPassword(text.trim().replace(/\s+/g, ''))}
+            // onChangeText={(text) => setNewPassword(text.trim().replace(/\s+/g, ''))}
+            onChangeText={handleNewPasswordChange} // CHANGED
+            autoCapitalize="none" // ADD
+            autoCorrect={false} // ADD
           />
 
           <TouchableOpacity
