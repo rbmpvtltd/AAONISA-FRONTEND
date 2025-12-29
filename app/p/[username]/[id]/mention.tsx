@@ -356,6 +356,7 @@ const MentionedReelItem = ({
       <VideoProgressBar
         player={player}
         isActive={currentIndex === index && isFocused}
+        paused={paused}
       />
 
       {/* Bottom Drawer */}

@@ -384,9 +384,13 @@ export const StoryList = memo(({
   }), [currentUserStories, currentUser]);
 
   // Don't show if no stories at all
-  if (!userStories || userStories.length === 0) {
-    return null;
-  }
+  // if (!userStories || userStories.length > 0) {
+  //   return null;
+  // }
+
+  const hasAnyStories =
+    (userStories && userStories.length > 0) || true;
+
 
   return (
     <ScrollView

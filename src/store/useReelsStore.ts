@@ -68,7 +68,7 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   toggleMute: () => set({ isMuted: !get().isMuted }),
   setShowIcon: (val: boolean) => set({ showIcon: val }),
   setAutoScroll: (value: boolean) => set({ autoScroll: value }),
-   resetReels: () => set({ currentIndex: 0, reels: [] }),
+  resetReels: () => set({ currentIndex: 0, reels: [] }),
 
 
   //  NEW: URL Update Function

@@ -1020,6 +1020,7 @@ const UserReelItem = ({
       <VideoProgressBar
         player={player}
         isActive={currentIndex === index && isFocused}
+        paused={paused}
       />
 
 

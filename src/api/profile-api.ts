@@ -332,10 +332,10 @@ async function UnfollowUser(followingId: string) {
 const markViewed = async (storyId: string) => {
   const token = await getToken();
   console.log("===========================================");
-console.log("storyy kjkjkjkjkjkjkjkmkk",storyId);
+  console.log("storyy kjkjkjkjkjkjkjkmkk", storyId);
   console.log("===========================================");
 
-  
+
   const config = {
     headers: {
       'Content-Type': 'application/json',
