@@ -776,12 +776,14 @@
 
 // ================================================
 
+import BottomDrawer from "@/src/components/ui/BottomDrawer";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
 import { formatCount } from "@/src/utils/formatCount";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useState } from "react";
 import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/Ionicons";
 
 export const FeedItem = React.memo(
@@ -796,6 +798,7 @@ export const FeedItem = React.memo(
         theme,
         isMuted,
         toggleMute,
+        addShare
     }: any) => {
         const [isPlaying, setIsPlaying] = useState(false);
         const [isFullscreen, setIsFullscreen] = useState(false);
@@ -803,7 +806,13 @@ export const FeedItem = React.memo(
         const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
         const [liked, setLiked] = useState(item.isLiked);
         const [showFullCaption, setShowFullCaption] = useState(false);
-
+        const [showThumbnail, setShowThumbnail] = useState(true);
+        const [captionLayout, setCaptionLayout] = useState({ lineCount: 0 });
+        // Caption ke liye check karein ki 5+ lines hain ya nahi
+        const shouldShowMore = captionLayout.lineCount > 5;
+        const [bookmarked, setBookmarked] = useState(false);
+        const [showShareDrawer, setShowShareDrawer] = useState(false);
+        const isOwner = item.user?.id === item.ownerId;
 
         const likeMutation = useLikeMutation();
 
@@ -818,10 +827,14 @@ export const FeedItem = React.memo(
             if (isActive && isFocused) {
                 player.play();
                 setIsPlaying(true);
+                const timer = setTimeout(() => {
+                    setShowThumbnail(false);
+                }, 300);
+                return () => clearTimeout(timer);
             } else {
                 player.pause();
                 setIsPlaying(false);
-                // Jab video inactive ho (user next/previous video par gaya), fullscreen close kar do
+                setShowThumbnail(true);
                 if (isFullscreen) {
                     setIsFullscreen(false);
                 }
@@ -876,14 +889,41 @@ export const FeedItem = React.memo(
             []
         );
 
+        const handleShare = useCallback(() => {
+            // Call addShare to increment share count
+            if (addShare) {
+                addShare(item.id || item.uuid);
+            }
+
+            // Navigate to chat list in share mode
+            router.push({
+                pathname: `/chat`,
+                params: {
+                    shareMode: "true",
+                    reelId: item.id || item.uuid
+                }
+            });
+        }, [item.id, item.uuid, addShare]);
+
+
+        const handleBookmark = () => {
+            setBookmarked(prev => !prev);
+        };
+
+        const handleShareOptions = useCallback(() => {
+            setShowShareDrawer(true);
+        }, []);
+
         // Toggle play/pause
         const togglePlayPause = () => {
             if (isPlaying) {
                 player.pause();
                 setIsPlaying(false);
+                setShowThumbnail(true);
             } else {
                 player.play();
                 setIsPlaying(true);
+                setShowThumbnail(false);
             }
             setShowControls(true);
         };
@@ -941,8 +981,16 @@ export const FeedItem = React.memo(
                         onPress={handleVideoPress}
                         style={{ flex: 1 }}
                     >
+
+                        {showThumbnail && item.thumbnail && (
+                            <Image
+                                source={{ uri: item.thumbnail }}
+                                style={styles.thumbnail}
+                                resizeMode={isFullscreen ? "contain" : "cover"}
+                            />
+                        )}
                         <VideoView
-                            style={{ width: "100%", height: "100%" }}
+                            style={{ width: "100%", height: "100%", opacity: showThumbnail ? 0 : 1 }}
                             player={player}
                             contentFit={isFullscreen ? "contain" : "cover"}
                             nativeControls={false}
@@ -998,29 +1046,52 @@ export const FeedItem = React.memo(
 
                 {/* Bottom Actions - Always visible */}
                 <View style={styles.actionsRow}>
-                    <TouchableOpacity onPress={handleLike} style={styles.actionBtn}>
+                    <View style={styles.leftActions}>
+                        <TouchableOpacity onPress={handleLike} style={styles.actionBtn}>
+                            <Icon
+                                name={liked ? "heart" : "heart-outline"}
+                                size={22}
+                                color={liked ? "red" : theme.text}
+                            />
+                            <Text style={[styles.countText, { color: theme.text }]}>{likesCount}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity onPress={() => onComment(item.id)} style={styles.actionBtn}>
+                            <Icon name="chatbubble-outline" size={22} color={theme.text} />
+                            <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.commentsCount)}</Text>
+                        </TouchableOpacity>
+
+                        <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
+                            <Icon name="paper-plane-outline" size={22} color={theme.text} />
+                            <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.shares ?? 0)}</Text>
+                        </TouchableOpacity>
+
+                        {/* <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareDrawer(true)} >
+                            <Icon name="share-social-outline" size={22} color={theme.text} />
+                            <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.shares ?? 0)}</Text>
+                        </TouchableOpacity> */}
+                    </View>
+
+                    {/* RIGHT SIDE BOOKMARK */}
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareDrawer(true)}>
                         <Icon
-                            name={liked ? "heart" : "heart-outline"}
-                            size={29}
-                            color={liked ? "red" : theme.text}
+                            name="ellipsis-vertical"
+                            size={22}
+                            color={theme.text}
                         />
-                        <Text style={[styles.countText, { color: theme.text }]}>{likesCount}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => onComment(item.id)} style={styles.actionBtn}>
-                        <Icon name="chatbubble-outline" size={25} color={theme.text} />
-                        <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.commentsCount)}</Text>
-                    </TouchableOpacity>
-
-                    <TouchableOpacity onPress={() => onShare(item.id)} style={styles.actionBtn}>
-                        <Icon name="share-social-outline" size={25} color={theme.text} />
-                        <Text style={[styles.countText, { color: theme.text }]}>{item.shares ?? 0}</Text>
                     </TouchableOpacity>
                 </View>
 
                 {/* Caption - Always visible */}
-                <View style={{ paddingHorizontal: 10, paddingBottom: 10 }}>
-                    <Text style={{ color: theme.text }}>
+                {/* <View style={{ paddingHorizontal: 10, paddingBottom: 10, flex: 1 }}>
+                    <Text style={{ color: theme.text }}
+                    // numberOfLines={showFullCaption ? undefined : 5}
+                    // onTextLayout={(e) => {
+                    //     if (!showFullCaption && captionLayout.lineCount === 0) {
+                    //         setCaptionLayout({ lineCount: e.nativeEvent.lines.length });
+                    //     }
+                    // }}
+                    >
                         {showFullCaption ? item.caption : shortText}
                         {!showFullCaption && isTruncated ? "..." : ""}
                     </Text>
@@ -1032,11 +1103,103 @@ export const FeedItem = React.memo(
                             </Text>
                         </Pressable>
                     )}
+                </View> */}
+
+                {/* Caption - Always visible */}
+                <View style={{ paddingHorizontal: 10, paddingBottom: 10, flex: 1 }}>
+                    {showFullCaption ? (
+                        <View>
+                            <ScrollView
+                                style={{ maxHeight: 250 }}
+                                showsVerticalScrollIndicator={true}
+                                nestedScrollEnabled={true}
+                            >
+                                <Text style={{ color: theme.text, lineHeight: 20, paddingBottom: 4 }}>
+                                    {item.caption}
+                                </Text>
+                                <TouchableOpacity
+                                    onPress={() => setShowFullCaption(false)}
+                                    activeOpacity={0.7}
+                                    style={{ marginTop: 40 }}
+                                >
+                                    <Text style={{ color: '#4A9EFF', fontWeight: '600', fontSize: 14, }}>
+                                        Show less
+                                    </Text>
+                                </TouchableOpacity>
+                            </ScrollView>
+
+                        </View>
+                    ) : (
+                        <View style={{ position: 'relative' }}>
+                            <Text
+                                style={{ color: theme.text, lineHeight: 20, }}
+                                numberOfLines={5}
+                                onTextLayout={(e) => {
+                                    if (captionLayout.lineCount === 0) {
+                                        setCaptionLayout({ lineCount: e.nativeEvent.lines.length });
+                                    }
+                                }}
+                            >
+                                {item.caption}
+                            </Text>
+
+                            {/* "...more" overlay at end of 5th line */}
+                            {shouldShowMore && (
+                                <TouchableOpacity
+                                    onPress={() => setShowFullCaption(true)} style={{
+                                        position: 'absolute',
+                                        bottom: 0,
+                                        right: 0,
+                                        backgroundColor: theme.background,
+                                        paddingLeft: 40,
+                                    }}>
+                                    <Text style={{ color: theme.text }}>
+                                        ...{' '}
+                                        <Text style={{ color: '#4A9EFF', fontWeight: '600' }}>
+                                            more
+                                        </Text>
+                                    </Text>
+                                </TouchableOpacity>
+                            )}
+                        </View>
+                    )}
+
+                    {/* Clickable area for "more" */}
+                    {shouldShowMore && !showFullCaption && (
+                        <TouchableOpacity
+                            onPress={() => setShowFullCaption(true)}
+                            style={{
+                                position: 'absolute',
+                                bottom: 10,
+                                right: 10,
+                                left: 10,
+                                height: 20,
+                            }}
+                            activeOpacity={1}
+                        />
+                    )}
                 </View>
 
+                <BottomDrawer
+                    visible={showShareDrawer}
+                    onClose={() => setShowShareDrawer(false)}
+                    onSave={handleBookmark}
+                    onReport={() => {
+                        console.log("Reported:", item.id || item.uuid);
+                        setShowShareDrawer(false);
+                    }}
+                    onDelete={isOwner ? () => {
+                        console.log("Delete video:", item.id || item.uuid);
+                        setShowShareDrawer(false);
+                    } : undefined}
+                    reelId={item.id || item.uuid}
+                    reelUrl={item.videoUrl}
+                    isOwner={isOwner}
+                />
 
-            </View>
+            </View >
         );
+        {/* Bottom Drawer for Share Options */ }
     }
 );
 
@@ -1096,6 +1259,7 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
         backgroundColor: "rgba(0,0,0,0.3)",
+        zIndex: 2,
     },
     centerControls: {
         flexDirection: "row",
@@ -1116,6 +1280,16 @@ const styles = StyleSheet.create({
         justifyContent: "center",
         alignItems: "center",
     },
+    thumbnail: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
+        width: "100%",
+        height: "100%",
+        zIndex: 1,
+    },
     fullscreenBtn: {
         position: "absolute",
         bottom: 20,
@@ -1133,14 +1307,23 @@ const styles = StyleSheet.create({
     actionsRow: {
         flexDirection: "row",
         gap: 15,
-        paddingHorizontal: 20,
+        paddingHorizontal: 12,
         paddingVertical: 8,
         alignItems: "center",
+
+        justifyContent: "space-between",
+        //   paddingHorizontal: 12,
+    },
+
+    leftActions: {
+        flexDirection: "row",
+        alignItems: "center",
+        gap: 18,
     },
     actionBtn: {
         flexDirection: "row",
         alignItems: "center",
-        gap: 5,
+        gap: 6,
     },
     countText: {
         fontSize: 14,
