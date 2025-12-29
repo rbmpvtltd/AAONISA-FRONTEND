@@ -194,8 +194,8 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
 
 
   const handleDelete = () => {
-            onDelete?.();
-            onClose();
+    onDelete?.();
+    onClose();
   };
 
   return (
