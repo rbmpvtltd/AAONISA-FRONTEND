@@ -179,11 +179,19 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
 
         // Selected music
         if (selectedMusic?.uri) {
-            formData.append("selectedMusicId", selectedMusic.id ?? "");
-            formData.append("selectedMusicUri", selectedMusic.uri ?? "");
-            formData.append("selectedMusicStartMs", (selectedMusic.startMs ?? 0).toString());
-            formData.append("selectedMusicEndMs", (selectedMusic.endMs ?? 0).toString());
-            formData.append("selectedMusicVolume", (selectedMusic.volume ?? 50).toString());
+            const music = {
+                id:selectedMusic.id ?? "",
+                uri:selectedMusic.uri ?? "",
+                startMs:selectedMusic.startMs ?? 0,
+                endMs:selectedMusic.endMs ?? 0,
+                volume:selectedMusic.volume ?? 50
+            }
+            formData.append("music", JSON.stringify(music));
+            // formData.append("selectedMusicId", selectedMusic.id ?? "");
+            // formData.append("selectedMusicUri", selectedMusic.uri ?? "");
+            // formData.append("selectedMusicStartMs", (selectedMusic.startMs ?? 0).toString());
+            // formData.append("selectedMusicEndMs", (selectedMusic.endMs ?? 0).toString());
+            // formData.append("selectedMusicVolume", (selectedMusic.volume ?? 50).toString());
         }
 
         const backendOverlays = overlays.map(mapOverlayToBackend);
