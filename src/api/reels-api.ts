@@ -3,13 +3,13 @@ import axios from "axios";
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Platform } from 'react-native';
- async function getAllStreamIds() {
+async function getAllStreamIds() {
   try {
     const config = {
       headers: { 'Content-Type': 'application/json' },
     };
 
-    const apiUrl = createApiUrl('/videos/getAllStreamIds'); 
+    const apiUrl = createApiUrl('/videos/getAllStreamIds');
 
     const { data } = await axios.get(apiUrl, config);
 
@@ -29,8 +29,8 @@ const getToken = async () => {
   }
 };
 
-const getCategoryReel = async (type:string,page:number,limit:number) => {
-    const token = await getToken();
+const getCategoryReel = async (type: string, page: number, limit: number, random: boolean = false) => {
+  const token = await getToken();
 
   const config = {
     headers: {
@@ -40,9 +40,9 @@ const getCategoryReel = async (type:string,page:number,limit:number) => {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl(`/videos/feed?type=${type}&page=${page}&limit=${limit}`);
+  const apiUrl = createApiUrl(`/videos/feed?type=${type}&page=${page}&limit=${limit}&random=${random}`);
   const { data } = await axios.get(apiUrl, config);
-  console.log(" data iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", data); 
+  console.log(" data iiiiiiiiiiiiiiiiiiiiiiiiiiiiiiii", data);
   return data;
 };
 

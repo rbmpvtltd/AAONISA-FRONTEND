@@ -32,8 +32,9 @@ export const useReelsByCategory = (category: string) => {
     queryKey: ["reels", category],
 
     queryFn: async ({ pageParam = 1 }) => {
-      const res = await getCategoryReel(category, pageParam, 20);
-
+      console.log("🔥 FETCH reels page:", pageParam);
+      const useRandom = pageParam === 1;
+      const res = await getCategoryReel(category, pageParam, 20, useRandom);
       const reelsData = Array.isArray(res?.data) ? res.data : [];
 
       const parsed = reelsData
@@ -46,11 +47,12 @@ export const useReelsByCategory = (category: string) => {
           isLiked: item.isLiked || false,
         }));
 
+      console.log(`✅ Parsed ${parsed.length} reels (random: ${useRandom})`);
       return {
         reels: parsed,
         // nextPage: parsed.length === 20 ? pageParam + 1 : null,
         nextPage: parsed.length < 20 ? null : pageParam + 1,
-        
+
       };
     },
 
@@ -59,7 +61,7 @@ export const useReelsByCategory = (category: string) => {
     // caching off — just like Instagram
     initialPageParam: 1,
     staleTime: 0,
-    gcTime: 0,
+    gcTime: 10000,
     refetchOnWindowFocus: false,
   });
 };
