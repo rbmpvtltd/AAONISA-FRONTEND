@@ -701,30 +701,33 @@ const UserReelItem = ({
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [paused, setPaused] = useState(false);
-  // const [liked, setLiked] = useState(
-  //   Array.isArray(item.likes)
-  //     ? item.likes.some((like: any) => like.user_id === currentUserId)
-  //     : false
-  // );
-
+  const [showThumbnail, setShowThumbnail] = useState(true);
   const [liked, setLiked] = useState(item.isLiked);
 
-  const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
-    instance.loop = true;
-    instance.volume = isMuted ? 0 : 1;
+  const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
 
-    // VIDEO LOADED EVENT
-    instance.addListener("statusChange", (event) => {
-      if (event.status === "loading") {
-        setIsLoading(true);
-      }
+  const player = useVideoPlayer(
+    shouldLoadVideo ? { uri: item.videoUrl } : null,
+    (instance) => {
+      if (!instance) return;
 
-      if (event.status === "readyToPlay") {
-        setIsLoading(false); // video is fully ready
-      }
+      instance.loop = true;
+      instance.volume = isMuted ? 0 : 1;
+
+      // VIDEO LOADED EVENT
+      instance.addListener("statusChange", (event) => {
+        if (event.status === "loading") {
+          setIsLoading(true);
+          setShowThumbnail(true);
+        }
+
+        if (event.status === "readyToPlay") {
+          setTimeout(() => setShowThumbnail(false), 300);
+          setIsLoading(false);
+        }
+      });
+
     });
-
-  });
 
   // Handle play/pause based on scroll safely
   useEffect(() => {
@@ -734,7 +737,6 @@ const UserReelItem = ({
       player.pause();
       return;
     }
-
 
     if (currentIndex === index) {
       if (player.currentTime < 0.5) player.currentTime = 0;
@@ -763,6 +765,8 @@ const UserReelItem = ({
   };
 
   useEffect(() => {
+    if (!shouldLoadVideo) return;
+
     let frameId: number;
 
     const checkTime = () => {
@@ -785,7 +789,7 @@ const UserReelItem = ({
 
     frameId = requestAnimationFrame(checkTime);
     return () => cancelAnimationFrame(frameId);
-  }, [player, currentIndex, index, viewed]);
+  }, [player, currentIndex, shouldLoadVideo, index, viewed]);
 
 
   const handleLongPressIn = () => {
@@ -797,14 +801,7 @@ const UserReelItem = ({
     setPaused(false);
     player.play();
   };
-  // console.log("username in profile", reelUsername);
-  // console.log("user item.ProfilePicture ", profilePicture);
-  // console.log("user comment resived", item.comments);
-  // console.log("user audio", item.audio);
 
-  console.log("=============================");
-  console.log("item :", item)
-  console.log("=============================");
 
   const deleteVideo = useDeleteVideo();
   const handleDeleteReel = () => {
@@ -855,6 +852,20 @@ const UserReelItem = ({
       <GestureDetector gesture={reelGesture}>
         <Animated.View style={{ flex: 1 }}>
 
+          {showThumbnail && item.thumbnailUrl && (
+            <Image
+              source={{ uri: item.thumbnailUrl }}
+              style={{
+                position: 'absolute',
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT,
+                zIndex: 1,
+              }}
+              resizeMode="cover"
+              fadeDuration={0}
+            />
+          )}
+
           {/* <View style={{ flex: 1 }}> */}
           {isLoading && (
             <View style={{
@@ -867,17 +878,17 @@ const UserReelItem = ({
             </View>
           )}
 
-
-          <VideoView
-            style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-            key={`video-${item.id}-${index}`}
-            player={player}
-            allowsFullscreen={false}
-            allowsPictureInPicture={false}
-            contentFit="cover"
-            nativeControls={false}
-          />
-
+          {shouldLoadVideo && (
+            <VideoView
+              style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+              key={`video-${item.id}-${index}`}
+              player={player}
+              allowsFullscreen={false}
+              allowsPictureInPicture={false}
+              contentFit="cover"
+              nativeControls={false}
+            />
+          )}
           {/* Volume Icon */}
           {showIcon && (
             <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
@@ -1071,8 +1082,8 @@ const UserReelsFeed = () => {
     queryFn: () => GetProfileUsername(username as string || ""),
     enabled: !!username,
 
-    staleTime: 1000 * 60 * 30,   // 30 minutes (fresh)                // ad
-    gcTime: 1000 * 60 * 60 * 6,  // 6 hours (cache memory)            // ad
+    staleTime: 1000 * 60 * 30,
+    gcTime: 1000 * 60 * 60 * 6,
   });
 
   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
@@ -1092,10 +1103,6 @@ const UserReelsFeed = () => {
   console.log("owner:", owner);
   console.log('====================================');
 
-  // console.log('====================================');
-  // console.log("owner", owner)
-  // console.log('====================================');
-  // console.log("profile.videos.audio", profile?.videos?.audio);
 
   const videos = profile?.videos ?? [];
 
@@ -1174,38 +1181,6 @@ const UserReelsFeed = () => {
 
     return () => clearTimeout(timer);
   }, [autoScroll, videos.length, currentIndex]);
-
-  // // FIXED: Auto scroll logic with proper variable names
-  //   useEffect(() => {
-  //     if (!autoScroll || videos.length === 0) return;
-
-  //     const currentVideo = videos[currentIndex];
-  //     if (!currentVideo) return;
-
-  //     const currentVideoDuration = videoDurations[currentVideo.uuid];
-
-  //     if (!currentVideoDuration) {
-  //       console.log('⏳ Waiting for video duration...');
-  //       return;
-  //     }
-
-  //     console.log(` Auto-scroll in ${currentVideoDuration}s for video ${currentVideo.uuid}`);
-
-  //     const timer = setTimeout(() => {
-  //       const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
-
-  //       setCurrentIndex(nextIndex);
-
-  //       flatListRef.current?.scrollToIndex({
-  //         index: nextIndex,
-  //         animated: true,
-  //       });
-
-  //       updateURL(nextIndex);
-  //     }, currentVideoDuration * 1000);
-
-  //     return () => clearTimeout(timer);
-  //   }, [autoScroll, videos.length, currentIndex, videoDurations]);
 
   // Scroll handling
   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
