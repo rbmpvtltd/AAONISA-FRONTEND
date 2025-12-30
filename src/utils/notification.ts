@@ -50,3 +50,6 @@ export async function registerForPushNotificationsAsync() {
   console.log('Expo Push Token:', token);
   return token;
 }
+
+
+// Error requesting notification permission Error : make sure to complete the guid for push notification

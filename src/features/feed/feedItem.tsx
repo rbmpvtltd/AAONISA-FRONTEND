@@ -1088,13 +1088,13 @@ export const FeedItem = React.memo(
                     </View>
 
                     {/* RIGHT SIDE BOOKMARK */}
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
+                    {/* <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
                         <Icon
                             name="ellipsis-vertical"
                             size={22}
                             color={theme.text}
                         />
-                    </TouchableOpacity>
+                    </TouchableOpacity> */}
                 </View>
 
                 {/* Caption - Always visible */}
