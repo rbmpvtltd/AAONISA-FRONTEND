@@ -10,6 +10,7 @@ import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Switch, Text, TouchableOpacity, View } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { queryClient } from "../_layout";
 
 
@@ -40,12 +41,14 @@ export default function CustomDrawer(props: any) {
       router.replace("/auth/login");
 
       setTimeout(() => {
-        Alert.alert("Logged out successfully!");
+        // Alert.alert("Logged out successfully!");
+        Toast.show({ type: "success", text1: "Logged out successfully!" })
       }, 1500);
 
     } catch (error) {
       console.error("Logout Error:", error);
-      Alert.alert("Logout failed, please try again!");
+      // Alert.alert("Logout failed, please try again!");
+      Toast.show({ type: "error", text1: "Logout failed, please try again!" })
     }
   };
 

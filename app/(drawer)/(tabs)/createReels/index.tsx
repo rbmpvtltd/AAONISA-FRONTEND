@@ -1,7 +1,8 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Alert, Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet, View } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
+import Toast from 'react-native-toast-message';
 import CameraScreen from './recordPage';
 import { VideoPreview } from './videoUploadPage';
 type ContentType = 'story' | 'reels' | 'news';
@@ -44,7 +45,7 @@ export default function CreateReel() {
   const [videoUri, setVideoUri] = useState<string | null>(null);
   // const [contentType, setContentType] = useState<ContentType>('reels');
   const params = useLocalSearchParams();
-    const [contentType, setContentType] = useState<ContentType>(
+  const [contentType, setContentType] = useState<ContentType>(
     params.contentType === 'story' ? 'story' : 'reels'
   );
   // const [hasCameraPermission, setHasCameraPermission] = useState<boolean | null>(null);
@@ -102,7 +103,8 @@ export default function CreateReel() {
     if (!videoUri) return;
 
     try {
-      Alert.alert("Processing", "Compressing your video...");
+      // Alert.alert("Processing", "Compressing your video...");
+      Toast.show({ type: "info", text1: "Processing", text2: "Compressing your video..." })
 
       // Compress the video before uploading
       const compressedUri = await VideoCompressor.compress(videoUri, {
@@ -114,7 +116,8 @@ export default function CreateReel() {
 
       // Simulate upload process
       setTimeout(() => {
-        Alert.alert("Uploaded!", `Your ${contentType} is ready.`);
+        // Alert.alert("Uploaded!", `Your ${contentType} is ready.`);
+        Toast.show({ type: "success", text1: "Uploaded!", text2: `Your ${contentType} is ready.` })
 
         // Reset all states
         setVideoUri(null);
@@ -122,7 +125,8 @@ export default function CreateReel() {
 
     } catch (error) {
       console.error('Compression error:', error);
-      Alert.alert("Error", "Failed to compress video. Please try again.");
+      // Alert.alert("Error", "Failed to compress video. Please try again.");
+      Toast.show({ type: "error", text1: "Error", text2: "Failed to compress video. Please try again." })
     }
   };
 

@@ -83,8 +83,9 @@ import {
 } from "expo-router";
 import { jwtDecode } from "jwt-decode";
 import React, { useEffect } from "react";
-import { ActivityIndicator, Alert, StatusBar, StyleSheet, View } from "react-native";
+import { ActivityIndicator, StatusBar, StyleSheet, View } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toast from 'react-native-toast-message';
 
 
 /* -------------------------------------------------
@@ -120,57 +121,58 @@ export default function RootLayout() {
 
 
   const checkTokenExpiry = async (router: any) => {
-  try {
-    const accessToken = await AsyncStorage.getItem("accessToken");
+    try {
+      const accessToken = await AsyncStorage.getItem("accessToken");
 
-    if (!accessToken) {
-      console.log("❌ No token found");
-      router.replace("/auth/login");
-      return;
-    }
+      if (!accessToken) {
+        console.log("❌ No token found");
+        router.replace("/auth/login");
+        return;
+      }
 
-    const decoded: any = jwtDecode(accessToken);
-    const now = Date.now() / 1000;
+      const decoded: any = jwtDecode(accessToken);
+      const now = Date.now() / 1000;
 
-    console.log("⏳ Time Left:", decoded.exp - now);
+      console.log("⏳ Time Left:", decoded.exp - now);
 
-    if (decoded.exp < now) {
-      console.log("⛔ Token Expired -> Logging out");
+      if (decoded.exp < now) {
+        console.log("⛔ Token Expired -> Logging out");
+        await AsyncStorage.removeItem("accessToken");
+        router.replace("/auth/login");
+      }
+    } catch (err) {
       await AsyncStorage.removeItem("accessToken");
       router.replace("/auth/login");
     }
-  } catch (err) {
-    await AsyncStorage.removeItem("accessToken");
-    router.replace("/auth/login");
-  }
-};
+  };
 
-useEffect(() => {
-  // ✅ Sirf tab check karo jab user auth pages par nahi hai
-  const inAuthGroup = segments[0] === "auth";
-  
-  if (inAuthGroup) {
-    console.log("🚫 Skipping token check on auth pages");
-    return; // Auth pages par token check mat karo
-  }
+  useEffect(() => {
+    // ✅ Sirf tab check karo jab user auth pages par nahi hai
+    const inAuthGroup = segments[0] === "auth";
 
-  const interval = setInterval(() => {
-    checkTokenExpiry(router);
-  }, 20000); // 20 sec
+    if (inAuthGroup) {
+      console.log("🚫 Skipping token check on auth pages");
+      return; // Auth pages par token check mat karo
+    }
 
-  return () => clearInterval(interval);
-}, [segments]); // ✅ segments ko dependency mein add karo
+    const interval = setInterval(() => {
+      checkTokenExpiry(router);
+    }, 20000); // 20 sec
+
+    return () => clearInterval(interval);
+  }, [segments]); // ✅ segments ko dependency mein add karo
 
 
-useEffect(() => {
+  useEffect(() => {
     (async () => {
       const perms = await requestAllPermissions();
 
       if (!perms.hasCamera || !perms.hasMic || !perms.hasMedia) {
-        Alert.alert(
-          "Permissions Required",
-          "Please allow camera, microphone and gallery permissions in App Settings."
-        );
+        // Alert.alert(
+        //   "Permissions Required",
+        //   "Please allow camera, microphone and gallery permissions in App Settings."
+        // );
+        Toast.show({ type: "info", text1: 'Please allow camera, microphone and gallery permissions in App Settings.' })
       }
     })();
   }, []);
@@ -184,9 +186,9 @@ useEffect(() => {
     };
     const apiUrl = createApiUrl("/tokens/create");
     console.log("Calling URL:", apiUrl);
-    const { data } = await axios.post(apiUrl, { token:pushToken }, config);
+    const { data } = await axios.post(apiUrl, { token: pushToken }, config);
     console.log(data);
-  }     
+  }
   /* -------------------------------------------------
      3. Load token from SecureStore
      ------------------------------------------------- */
@@ -280,6 +282,7 @@ useEffect(() => {
       <QueryClientProvider client={queryClient}>
         <StatusBar barStyle="dark-content" backgroundColor="#fff" />
         <Stack screenOptions={{ headerShown: false }} />
+        <Toast />
       </QueryClientProvider>
     </GestureHandlerRootView>
   );

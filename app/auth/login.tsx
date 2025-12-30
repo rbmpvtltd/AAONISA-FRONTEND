@@ -7,15 +7,15 @@ import AsyncStorage from "@react-native-async-storage/async-storage";
 import { Link, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { expoTokenAssign, getUserInfoAndFollowState, loginUser } from "../../src/api/auth-api";
 
@@ -61,7 +61,8 @@ const Login = () => {
     const validation = loginSchema.safeParse({ emailOrPhone, password });
 
     if (!validation.success) {
-      Alert.alert("Validation Error", validation.error.issues[0].message);
+      // Alert.alert("Validation Error", validation.error.issues[0].message);
+      Toast.show({ type: 'error', text1: 'Validation Error', text2: validation.error.issues[0].message })
       return;
     }
 
@@ -74,7 +75,8 @@ const Login = () => {
         const pushToken = await AsyncStorage.getItem('pushToken');
         console.log("Push token:", pushToken);
         await expoTokenAssign(pushToken);
-        Alert.alert("Success", "Logged in successfully!");
+        // Alert.alert("Success", "Logged in successfully!");
+        Toast.show({ type: "success", text1: "Success", text2: "Logged in successfully!" })
         await resetAuth();
         router.replace("/(drawer)/(tabs)");
         const userData = await getUserInfoAndFollowState();
@@ -95,11 +97,18 @@ const Login = () => {
         setFollowings(userData.followings);
 
       } else {
-        Alert.alert("Error", data.message);
+        // Alert.alert("Error", data.message);
+        Toast.show({
+          type: 'error',
+          text1: 'Error',
+          text2: data.message,
+        });
+
       }
     } catch (error) {
       console.error("Login error:", error);
-      Alert.alert("Error", "Invalid credentials");
+      // Alert.alert("Error", "Invalid credentials");
+      Toast.show({ type: "error", text1: "Error", text2: "Invalid credentials" });
     }
   };
 

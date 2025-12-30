@@ -6,16 +6,16 @@ import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { registerUser, verifyOtpRegisterUser } from "../../src/api/auth-api";
 
@@ -95,12 +95,15 @@ const Register = () => {
       const data = await registerUser({ emailOrPhone, username });
       if (data.success) {
         setOtpSent(true);
-        Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+        // Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+        Toast.show({ type: "success", text1: "OTP Sent", text2: "Check your email/phone for the OTP" })
       } else {
-        Alert.alert("Error", data.message);
+        // Alert.alert("Error", data.message);
+        Toast.show({ type: "error", text1: "Error", text2: data.message });
       }
     } catch (error) {
-      Alert.alert("Error", "invalid OTP");
+      // Alert.alert("Error", "invalid OTP");
+      Toast.show({ type: "error", text1: "Error", text2: "invalid OTP" })
     }
   };
 
@@ -113,7 +116,8 @@ const Register = () => {
     });
 
     if (!validation.success) {
-      Alert.alert("Validation Error", validation.error.issues[0].message);
+      // Alert.alert("Validation Error", validation.error.issues[0].message);
+      Toast.show({ type: "error", text1: "Validation Error", text2: validation.error.issues[0].message });
       return;
     }
 
@@ -126,13 +130,16 @@ const Register = () => {
       });
       if (data.success) {
         // Alert.alert("Success", "Account created successfully!");
+        Toast.show({ type: "success", text1: "Success", text2: "Account created successfully!" });
         await resetAuth();
         router.push("/auth/login");
       } else {
-        Alert.alert("Error", data.message);
+        // Alert.alert("Error", data.message);
+        Toast.show({ type: "error", text1: "Error", text2: data.message });
       }
     } catch (error) {
-      Alert.alert("Error", "Signup is unscessful please check your details");
+      // Alert.alert("Error", "Signup is unscessful please check your details");
+      Toast.show({ type: "error", text1: "Error", text2: "Signup is unscessful please check your details" });
     }
   };
 

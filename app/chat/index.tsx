@@ -202,6 +202,7 @@ import {
   useWindowDimensions,
   View,
 } from "react-native";
+import Toast from "react-native-toast-message";
 
 function Avatar({ avatar, size }: { avatar?: string; size: number }) {
   return (
@@ -299,7 +300,7 @@ export default function ChatListScreen() {
   const { width } = useWindowDimensions();
   // const { reelId } = useLocalSearchParams();
   const params = useLocalSearchParams();
-    const queryClient = useQueryClient();
+  const queryClient = useQueryClient();
 
   const shareMode = params.shareMode === "true";
   const reelId = params.reelId;
@@ -426,44 +427,45 @@ export default function ChatListScreen() {
   //     console.error(error);
   //     alert("Failed to send reel");
   //   }
-   
+
   // };
 
   const handleSend = async () => {
-  if (!reelId) return;
+    if (!reelId) return;
 
-  // 🔥 OPTIMISTIC UPDATE
-  queryClient.setQueryData(["sessions"], (old: any[] | undefined) => {
-    if (!old) return old;
+    // 🔥 OPTIMISTIC UPDATE
+    queryClient.setQueryData(["sessions"], (old: any[] | undefined) => {
+      if (!old) return old;
 
-    return old
-      .map((session) => {
-        if (selectedChats.includes(session.sessionId)) {
-          return {
-            ...session,
-            latestMessage: {
-              text: JSON.stringify({ type: "reels" }),
-              createdAt: new Date().toISOString(),
-            },
-          };
-        }
-        return session;
-      })
-      .sort((a, b) => {
-        const tA = new Date(a.latestMessage?.createdAt || a.createdAt).getTime();
-        const tB = new Date(b.latestMessage?.createdAt || b.createdAt).getTime();
-        return tB - tA;
-      });
-  });
+      return old
+        .map((session) => {
+          if (selectedChats.includes(session.sessionId)) {
+            return {
+              ...session,
+              latestMessage: {
+                text: JSON.stringify({ type: "reels" }),
+                createdAt: new Date().toISOString(),
+              },
+            };
+          }
+          return session;
+        })
+        .sort((a, b) => {
+          const tA = new Date(a.latestMessage?.createdAt || a.createdAt).getTime();
+          const tB = new Date(b.latestMessage?.createdAt || b.createdAt).getTime();
+          return tB - tA;
+        });
+    });
 
-  try {
-    await sendReelToChats(reelId as string, selectedChats);
-    router.back();
-  } catch (e) {
-    console.error(e);
-    alert("Failed to send reel");
-  }
-};
+    try {
+      await sendReelToChats(reelId as string, selectedChats);
+      router.back();
+    } catch (e) {
+      console.error(e);
+      // alert("Failed to send reel");
+      Toast.show({ type: "error", text1: "Failed to send reel" })
+    }
+  };
 
 
   if (chatList.length === 0) {

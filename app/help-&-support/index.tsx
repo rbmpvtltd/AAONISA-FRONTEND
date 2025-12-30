@@ -1,7 +1,8 @@
 import { useAppTheme } from '@/src/constants/themeHelper';
 import supportTopics from '@/src/dumyData/help-&-support-content';
 import { useState } from 'react';
-import { Alert, Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import { Linking, ScrollView, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 interface CopyrightForm {
   name: string;
@@ -29,16 +30,18 @@ const HelpSupportScreen: React.FC = () => {
 
   const handleSubmitCopyright = () => {
     if (!copyrightForm.name || !copyrightForm.proof || !copyrightForm.contentLink) {
-      Alert.alert('Error', 'Please fill in all fields');
+      // Alert.alert('Error', 'Please fill in all fields');
+      Toast.show({ type: "error", text1: 'Error', text2: 'Please fill in all fields' });
       return;
     }
-    
+
     const emailBody = `Name: ${copyrightForm.name}%0D%0AProof of Ownership: ${copyrightForm.proof}%0D%0AContent Link: ${copyrightForm.contentLink}`;
     Linking.openURL(`mailto:copyright@example.com?subject=Copyright Infringement Report&body=${emailBody}`);
-    
+
     setCopyrightForm({ name: '', proof: '', contentLink: '' });
     setShowCopyrightForm(false);
-    Alert.alert('Success', 'Your copyright report has been submitted');
+    // Alert.alert('Success', 'Your copyright report has been submitted');
+    Toast.show({ type: "success", text1: "Success", text2: "Your copyright report has been submitted" })
   };
 
   const styles = StyleSheet.create({

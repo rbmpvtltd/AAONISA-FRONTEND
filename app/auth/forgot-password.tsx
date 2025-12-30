@@ -5,15 +5,15 @@ import * as Clipboard from "expo-clipboard";
 import { Link, useRouter } from "expo-router";
 import React, { useEffect } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { forgetPassword, resetPassword, sendOtp } from "../../src/api/auth-api";
 import { useAppTheme } from "../../src/constants/themeHelper";
@@ -71,7 +71,8 @@ const ForgotPassword = () => {
   const handleSendOtp = async () => {
     const validation = forgotSchema.pick({ emailOrPhone: true }).safeParse({ emailOrPhone });
     if (!validation.success) {
-      Alert.alert("Validation Error", validation.error.issues[0].message);
+      // Alert.alert("Validation Error", validation.error.issues[0].message);
+      Toast.show({ type: "error", text1: "Validation Error", text2: validation.error.issues[0].message })
       return;
     }
 
@@ -79,12 +80,15 @@ const ForgotPassword = () => {
       const data = await forgetPassword({ emailOrPhone });
       if (data.success) {
         setOtpSent(true);
-        Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+        // Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+        Toast.show({ type: "success", text1: "OTP Sent", text2: "Check your email/phone for the OTP" })
       } else {
-        Alert.alert("Error", data.message || "Failed to send OTP");
+        // Alert.alert("Error", data.message || "Failed to send OTP");
+        Toast.show({ type: "error", text1: "Error", text2: data.message || "Failed to send OTP" })
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to send OTP");
+      // Alert.alert("Error", "Failed to send OTP");
+      Toast.show({ type: "error", text1: "Error", text2: "Failed to send OTP" })
     }
   };
 
@@ -94,7 +98,8 @@ const ForgotPassword = () => {
       otp: otp.join(""),
     });
     if (!validation.success) {
-      Alert.alert("Validation Error", validation.error.issues[0].message);
+      // Alert.alert("Validation Error", validation.error.issues[0].message);
+      Toast.show({ type: "error", text1: "Validation Error", text2: validation.error.issues[0].message })
       return;
     }
 
@@ -105,22 +110,23 @@ const ForgotPassword = () => {
         if (Platform.OS === "web") localStorage.setItem("authToken", data.token);
         else await AsyncStorage.setItem("authToken", data.token);
 
-        Alert.alert(
-          "OTP Verified",
-          // `Token saved to ${Platform.OS === "web" ? "localStorage" : "AsyncStorage"}!`
-        );
+        // Alert.alert("OTP Verified");
+        Toast.show({ type: "success", text1: "OTP Verified" })
       } else {
-        Alert.alert("Error", data.message || "Invalid OTP");
+        // Alert.alert("Error", data.message || "Invalid OTP");
+        Toast.show({ type: "error", text1: "Error", text2: data.message || "Invalid OTP" })
       }
     } catch (error) {
-      Alert.alert("Error", "Failed to verify OTP");
+      // Alert.alert("Error", "Failed to verify OTP");
+      Toast.show({ type: "error", text1: "Error", text2: "Failed to verify OTP" })
     }
   };
 
   const handleResetPassword = async () => {
     const validation = forgotSchema.pick({ newPassword: true }).safeParse({ newPassword });
     if (!validation.success) {
-      Alert.alert("Validation Error", validation.error.issues[0].message);
+      // Alert.alert("Validation Error", validation.error.issues[0].message);
+      Toast.show({ type: "error", text1: "Validation Error", text2: validation.error.issues[0].message })
       return;
     }
 
@@ -132,13 +138,15 @@ const ForgotPassword = () => {
       }
 
       if (!storedToken) {
-        Alert.alert("Error", "Please verify OTP first.");
+        // Alert.alert("Error", "Please verify OTP first.");
+        Toast.show({ type: "error", text1: "Error", text2: "Please verify OTP first." })
         return;
       }
 
       const data = await resetPassword({ emailOrPhone, token: storedToken, newPassword });
       if (data.success) {
-        Alert.alert("Success", "Password reset successfully!");
+        // Alert.alert("Success", "Password reset successfully!");
+        Toast.show({ type: "success", text1: "Success", text2: "Password reset successfully!" })
         await resetAuth()
         // remove token
         if (Platform.OS === "web") localStorage.removeItem("authToken");
@@ -146,10 +154,12 @@ const ForgotPassword = () => {
         setToken("");
         router.push("/auth/login");
       } else {
-        Alert.alert("Error", data.message || "Failed to reset password");
+        // Alert.alert("Error", data.message || "Failed to reset password");
+        Toast.show({ type: "error", text1: "Error", text2: data.message || "Failed to reset password" })
       }
     } catch (error) {
-      Alert.alert("Error", "Something went wrong");
+      // Alert.alert("Error", "Something went wrong");
+      Toast.show({ type: "error", text1: "Error", text2: "Something went wrong" })
     }
   };
 

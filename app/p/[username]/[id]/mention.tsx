@@ -33,6 +33,7 @@ import {
   View
 } from "react-native";
 import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
 const MentionedReelItem = ({
@@ -168,7 +169,8 @@ const MentionedReelItem = ({
             deleteVideo.mutate(item.uuid, {
               onSuccess: () => {
                 router.back();
-                Alert.alert("Success", "Reel deleted successfully!");
+                // Alert.alert("Success", "Reel deleted successfully!");
+                Toast.show({ type: "success", text1: "Success", text2: "Reel deleted successfully!" })
               },
             });
           },

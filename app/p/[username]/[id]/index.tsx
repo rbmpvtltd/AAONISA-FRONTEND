@@ -659,6 +659,7 @@ import {
   View
 } from "react-native";
 import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // Reel Item Component
 const UserReelItem = ({
@@ -820,7 +821,8 @@ const UserReelItem = ({
             deleteVideo.mutate(item.uuid, {
               onSuccess: () => {
                 router.replace("/(drawer)/(tabs)/profile");
-                Alert.alert("Success", "Reel deleted successfully!");
+                // Alert.alert("Success", "Reel deleted successfully!");
+                Toast.show({ type: "success", text1: "Success", text2: "Reel deleted successfully!" })
               },
             });
           },
