@@ -65,35 +65,43 @@ const MentionedReelItem = ({
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
+  const [showThumbnail, setShowThumbnail] = useState(true);
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [paused, setPaused] = useState(false);
-
   const [liked, setLiked] = useState(item.isLiked);
 
   // Get video owner's profile info
-
   const profilePicture = item.user?.userProfile?.ProfilePicture || item.userProfile?.ProfilePicture;
 
   // Check if current user is the owner
   const owner = item.user_id === currentUserId || item.userId === currentUserId;
 
-  const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
-    instance.loop = true;
-    instance.volume = isMuted ? 0 : 1;
+  const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
 
-    // VIDEO LOADED EVENT
-    instance.addListener("statusChange", (event) => {
-      if (event.status === "loading") {
-        setIsLoading(true);
-      }
+  const player = useVideoPlayer(
+    shouldLoadVideo ? { uri: item.videoUrl } : null,
+    (instance) => {
+      if (!instance) return;
 
-      if (event.status === "readyToPlay") {
-        setIsLoading(false);
-      }
+      instance.loop = true;
+      instance.volume = isMuted ? 0 : 1;
+
+      // VIDEO LOADED EVENT
+      instance.addListener("statusChange", (event) => {
+        if (event.status === "loading") {
+          setIsLoading(true);
+          setShowThumbnail(true);
+        }
+
+        if (event.status === "readyToPlay") {
+          setTimeout(() => setShowThumbnail(false), 300);
+          setIsLoading(false);
+        }
+      });
+
     });
-  });
 
   // Handle play/pause based on scroll safely
   useEffect(() => {
@@ -205,6 +213,21 @@ const MentionedReelItem = ({
 
       <GestureDetector gesture={reelGesture}>
         <Animated.View style={{ flex: 1 }}>
+
+          {showThumbnail && item.thumbnailUrl && (
+            <Image
+              source={{ uri: item.thumbnailUrl }}
+              style={{
+                position: 'absolute',
+                width: SCREEN_WIDTH,
+                height: SCREEN_HEIGHT,
+                zIndex: 1,
+              }}
+              resizeMode="cover"
+              fadeDuration={0}
+            />
+          )}
+
           {isLoading && (
             <View style={{
               position: "absolute",
