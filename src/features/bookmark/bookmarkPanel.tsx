@@ -176,13 +176,12 @@
 
 import { useState } from 'react';
 import {
-  Alert,
   FlatList,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from 'react-native';
 import Modal from 'react-native-modal';
 import { useAppTheme } from '../../constants/themeHelper';
@@ -190,6 +189,7 @@ import { useBookmarkStore } from '../../store/useBookmarkStore';
 // import { addBookmark, addReelToBookmark } from './api';
 
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
+import Toast from 'react-native-toast-message';
 import {
   addBookmark,
   addReelToBookmark,
@@ -238,14 +238,17 @@ const BookmarkPanel = () => {
   // ➕ Add Category
   const handleAddCategory = () => {
     const name = newCategory.trim();
-    if (!name) return Alert.alert("Error", "Category name can't be empty");
+    if (!name) return
+    // Alert.alert("Error", "Category name can't be empty");
+    Toast.show({ type: "error", text1: "Error", text2: "Category name can't be empty" })
 
     addCategoryMutation.mutate(
       { name },
       {
         onSuccess: () => setNewCategory(""),
         onError: () =>
-          Alert.alert("Error", "Failed to create category"),
+          // Alert.alert("Error", "Failed to create category"),
+          Toast.show({ type: "error", text1: "Error", text2: "Failed to create category" })
       }
     );
   };
@@ -262,7 +265,8 @@ const BookmarkPanel = () => {
       {
         onSuccess: closePanel,
         onError: () =>
-          Alert.alert("Error", "Failed to save reel"),
+          // Alert.alert("Error", "Failed to save reel"),
+          Toast.show({ type: "error", text1: "Error", text2: "Failed to save reel" })
       }
     );
   };

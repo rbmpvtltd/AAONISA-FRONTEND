@@ -1,10 +1,11 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView } from "expo-camera"; // assuming expo-camera
 import { useRef, useState } from "react";
-import { Alert, PanResponder, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { PanResponder, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // agar aap koi aur package use kar rahe ho toh yahan change kar lena
 import * as ImagePicker from "expo-image-picker";
-const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
+import Toast from "react-native-toast-message";
+const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
     //   const cameraRef = useRef(null);
     const zoomSliderRef = useRef<View>(null)
 
@@ -14,8 +15,8 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
     const [zoom, setZoom] = useState(0);
     const cameraRef = useRef<CameraView>(null);
     const recordingStartTimeRef = useRef<number | null>(null);
-    const autoStopTimeoutRef = useRef<NodeJS.Timeout|number | null>(null);
-    const timerIntervalRef = useRef<NodeJS.Timeout|number | null>(null);
+    const autoStopTimeoutRef = useRef<NodeJS.Timeout | number | null>(null);
+    const timerIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
     const getContentTypeIcon = (type: string) => {
         switch (type) {
             case "story":
@@ -35,7 +36,8 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
 
     const startRecording = async () => {
         if (!cameraRef.current) {
-            Alert.alert('Error', 'Camera not ready.');
+            // Alert.alert('Error', 'Camera not ready.');
+            Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' })
             return;
         }
 
@@ -50,7 +52,7 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
                     setRecordTime(elapsedSec);
                 }
             }, 1000);
-           
+
             const durationMiliSecs = contentType === 'story' ? 30000 : 120000;
 
             autoStopTimeoutRef.current = setTimeout(() => {
@@ -62,16 +64,19 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
 
             const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
             if (elapsed < 2000) {
-                Alert.alert('Too short', 'Please record at least 2 seconds.');
+                // Alert.alert('Too short', 'Please record at least 2 seconds.');
+                Toast.show({ type: "info", text1: 'Too short', text2: 'Please record at least 2 seconds.' })
                 return;
             }
 
             if (!video) throw new Error('Video is null');
 
             onImagePick(video.uri);
-            Alert.alert('Video recorded successfully.');
+            // Alert.alert('Video recorded successfully.');
+            Toast.show({ type: "success", text1: 'Video recorded successfully.' })
         } catch (err: any) {
-            Alert.alert('Error', err.message || 'Recording failed');
+            // Alert.alert('Error', err.message || 'Recording failed');
+            Toast.show({ type: "error", text1: 'Error', text2: err.message || 'Recording failed' })
         } finally {
             setIsRecording(false);
             recordingStartTimeRef.current = null;
@@ -110,7 +115,8 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
             // Permission check
             const { status } = await ImagePicker.requestMediaLibraryPermissionsAsync();
             if (status !== "granted") {
-                alert("Permission to access gallery is required!");
+                // alert("Permission to access gallery is required!");
+                Toast.show({ type: "info", text1: 'Permission to access gallery is required!' })
                 return;
             }
 
@@ -135,22 +141,22 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
 
     const zoomPanResponder = useRef(
         PanResponder.create({
-          onStartShouldSetPanResponder: () => true,
-          onMoveShouldSetPanResponder: () => true,
-          onPanResponderMove: (evt, gestureState) => {
-            if (zoomSliderRef.current) {
-              zoomSliderRef.current.measure((x, y, width, height, pageX, pageY) => {
-                const touchY = evt.nativeEvent.pageY;
-                const relativeY = touchY - pageY;
-                const sliderHeight = height;
-                
-                const newZoom = Math.max(0, Math.min(1, 1 - (relativeY / sliderHeight)));
-                setZoom(newZoom);
-              });
-            }
-          },
+            onStartShouldSetPanResponder: () => true,
+            onMoveShouldSetPanResponder: () => true,
+            onPanResponderMove: (evt, gestureState) => {
+                if (zoomSliderRef.current) {
+                    zoomSliderRef.current.measure((x, y, width, height, pageX, pageY) => {
+                        const touchY = evt.nativeEvent.pageY;
+                        const relativeY = touchY - pageY;
+                        const sliderHeight = height;
+
+                        const newZoom = Math.max(0, Math.min(1, 1 - (relativeY / sliderHeight)));
+                        setZoom(newZoom);
+                    });
+                }
+            },
         })
-      ).current;
+    ).current;
 
     return (
         <View style={{ flex: 1, backgroundColor: "black" }}>
@@ -163,7 +169,7 @@ const CameraScreen = ({ onImagePick,setContentType,contentType }: any) => {
                             styles.contentTypeButton,
                             contentType === type && styles.contentTypeButtonActive,
                         ]}
-                        onPress={() => {setContentType(type);}}
+                        onPress={() => { setContentType(type); }}
                     >
                         <Ionicons
                             name={getContentTypeIcon(type)}

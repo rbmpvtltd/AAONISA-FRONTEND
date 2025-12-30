@@ -4,15 +4,15 @@ import * as Clipboard from "expo-clipboard";
 import { useRouter } from "expo-router";
 import { useEffect } from "react";
 import {
-  Alert,
   KeyboardAvoidingView,
   Platform,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
+import Toast from "react-native-toast-message";
 import { z } from "zod";
 import { updateEmailSendOtp, updatePhoneSendOtp, updateUserEmail, updateUserPhone } from "../../src/api/auth-api";
 
@@ -48,74 +48,90 @@ const ChangeEmailAndPhone = () => {
     setVerifyingPhone,
   } = useAuthStore();
 
-useEffect(() => {
-  if (Platform.OS === "web") return;
+  useEffect(() => {
+    if (Platform.OS === "web") return;
 
-  const interval = setInterval(async () => {
-    const text = await Clipboard.getStringAsync();
-    if (/^\d{6}$/.test(text)) {  
-      setOtp(text.split(""));
-      clearInterval(interval);
-    }
-  }, 2000);
+    const interval = setInterval(async () => {
+      const text = await Clipboard.getStringAsync();
+      if (/^\d{6}$/.test(text)) {
+        setOtp(text.split(""));
+        clearInterval(interval);
+      }
+    }, 2000);
 
-  return () => clearInterval(interval);
-}, []);
+    return () => clearInterval(interval);
+  }, []);
 
-   const getOtpString = () => otp.join("");
+  const getOtpString = () => otp.join("");
 
-const handleSendEmailOtp = async () => {
-    if (!email) return Alert.alert("Enter email first");
+  const handleSendEmailOtp = async () => {
+    if (!email) return
+    // Alert.alert("Enter email first");
+    Toast.show({ type: "error", text1: "Enter email first" });
     try {
       const res = await updateEmailSendOtp({ email });
       console.log(res)
       if (res.success) setEmailOtpSent(true);
-      Alert.alert(res.message || "OTP sent to email");
+      // Alert.alert(res.message || "OTP sent to email");
+      Toast.show({ type: "success", text1: res.message || "OTP sent to email" });
     } catch (err: any) {
-      Alert.alert(err.response?.data?.message || "Error sending OTP");
+      // Alert.alert(err.response?.data?.message || "Error sending OTP");
+      Toast.show({ type: "error", text1: err.response?.data?.message || "Error sending OTP" });
     }
   };
 
-    const handleVerifyEmailOtp = async () => {
+  const handleVerifyEmailOtp = async () => {
     const otpValue = getOtpString();
-    if (otpValue.length !== 6) return Alert.alert("Enter 6 digit OTP");
+    if (otpValue.length !== 6) return
+    // Alert.alert("Enter 6 digit OTP");
+    Toast.show({ type: "success", text1: "Enter 6 digit OTP" })
     setVerifyingEmail(true);
     try {
       const res = await updateUserEmail({ email, otp: otpValue });
       if (res.success) {
-        Alert.alert(res.message || "Email updated successfully");
+        // Alert.alert(res.message || "Email updated successfully");
+        Toast.show({ type: "success", text1: res.message || "Email updated successfully" });
         setEmailOtpSent(false);
         setOtp(["", "", "", "", "", ""]);
       }
     } catch (err: any) {
-      Alert.alert(err.response?.data?.message || "OTP verification failed");
+      // Alert.alert(err.response?.data?.message || "OTP verification failed");
+      Toast.show({ type: "error", text1: err.response?.data?.message || "OTP verification failed" })
     }
     setVerifyingEmail(false);
   };
-const handleSendPhoneOtp = async () => {
-    if (!phone) return Alert.alert("Enter phone first");
+  const handleSendPhoneOtp = async () => {
+    if (!phone) return
+    // Alert.alert("Enter phone first");
+    Toast.show({ type: "error", text1: "Enter phone first" });
     try {
       const res = await updatePhoneSendOtp({ phone: phone });
       if (res.success) setPhoneOtpSent(true);
-      Alert.alert(res.message || "OTP sent to phone");
+      // Alert.alert(res.message || "OTP sent to phone");
+      Toast.show({ type: "success", text1: res.message || "OTP sent to phone" })
     } catch (err: any) {
-      Alert.alert(err.response?.data?.message || "Error sending OTP");
+      // Alert.alert(err.response?.data?.message || "Error sending OTP");
+      Toast.show({ type: "error", text1: err.response?.data?.message || "Error sending OTP" });
     }
   };
 
   const handleVerifyPhoneOtp = async () => {
     const otpValue = getOtpString();
-    if (otpValue.length !== 6) return Alert.alert("Enter 6 digit OTP");
+    if (otpValue.length !== 6) return
+    //  Alert.alert("Enter 6 digit OTP");
+    Toast.show({ type: "error", text1: "Enter 6 digit OTP" });
     setVerifyingPhone(true);
     try {
       const res = await updateUserPhone({ phone: phone, otp: otpValue });
       if (res.success) {
-        Alert.alert(res.message || "Phone updated successfully");
+        // Alert.alert(res.message || "Phone updated successfully");
+        Toast.show({ type: "success", text1: res.message || "Phone updated successfully" })
         setPhoneOtpSent(false);
         setOtp(["", "", "", "", "", ""]);
       }
     } catch (err: any) {
-      Alert.alert(err.response?.data?.message || "OTP verification failed");
+      // Alert.alert(err.response?.data?.message || "OTP verification failed");
+      Toast.show({ type: "error", text1: err.response?.data?.message || "OTP verification failed" });
     }
     setVerifyingPhone(false);
   };

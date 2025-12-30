@@ -19,6 +19,7 @@ import { SearchUserProfiel } from "@/src/api/profile-api";
 import { useUploadStore } from "@/src/store/reelUploadStore";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
+import Toast from "react-native-toast-message";
 import { uploadReel } from "./api";
 interface FinalUploadProps {
   onCancel: () => void;
@@ -78,7 +79,8 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
 
   const handleUpload = async () => {
     if (!localTitle.trim() && !localCaption.trim()) {
-      alert("Please add a title or caption before posting.");
+      // alert("Please add a title or caption before posting.");
+      Toast.show({ type: "info", text1: "Please add a title or caption before posting." })
       return;
     }
 
@@ -95,7 +97,8 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     } = useUploadStore.getState();
 
     if (!videoUri) {
-      alert("No video selected!");
+      // alert("No video selected!");
+      Toast.show({ type: "info", text1: "No video selected!" })
       return;
     }
 
@@ -155,15 +158,19 @@ const FinalUpload: React.FC<FinalUploadProps> = ({
     try {
       const response = await uploadReel(formData);
       await queryClient.invalidateQueries({ queryKey: ["stories"] });
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos-feed"] });
+
       console.log("Upload response:", response);
-      alert("Upload successful!");
+      // alert("Upload successful!");
+      Toast.show({ type: "success", text1: "Upload successful!" })
       router.push("/(drawer)/(tabs)/createReels");
       useUploadStore.getState().resetAll();
       onDiscard()
       router.push("/(drawer)/(tabs)/createReels");
     } catch (err: any) {
       console.error("Upload failed:", err?.response?.data || err.message);
-      alert("Upload failed, check console");
+      // alert("Upload failed, check console");
+      Toast.show({ type: "error", text1: "Upload failed" });
       router.push("/(drawer)/(tabs)/createReels");
     } finally {
       setIsUploading(false);

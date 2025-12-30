@@ -5,6 +5,7 @@ import CategoryReelGrid from '../../../../src/features/bookmark/categoryReelGrid
 import SavedCategories from '../../../../src/features/bookmark/savedCategories';
 // import { useBookmarkStore } from '../../../../src/store/useBookmarkStore';
 import { useMutation, useQueryClient } from "@tanstack/react-query";
+import Toast from 'react-native-toast-message';
 import { useBookmarks } from '../../../../src/features/bookmark/bookmarkPanel';
 // import {
 //   renameBookmarkCategory,
@@ -18,7 +19,7 @@ export const useRenameCategory = () => {
 
   return useMutation({
     mutationFn: ({ id, name }: { id: number; name: string }) =>
-      renameBookmark({id, name}),
+      renameBookmark({ id, name }),
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
@@ -30,7 +31,7 @@ export const useDeleteCategory = () => {
   const qc = useQueryClient();
 
   return useMutation({
-    mutationFn: (id: number) => removeBookmark({id}),
+    mutationFn: (id: number) => removeBookmark({ id }),
 
     onSuccess: () => {
       qc.invalidateQueries({ queryKey: BOOKMARKS_KEY });
@@ -48,7 +49,7 @@ const SavedScreen = () => {
     useState<number | null>(null);
 
   const selectedCategory = categories.find(
-    (c:any) => c.id === selectedCategoryId
+    (c: any) => c.id === selectedCategoryId
   );
 
   if (isLoading) return null; // loader laga sakte ho
@@ -80,14 +81,17 @@ const SavedScreen = () => {
               { id, name: newName },
               {
                 onError: () =>
-                  alert("Failed to rename category"),
+                  // alert("Failed to rename category"),
+                  Toast.show({ type: "error", text1: "Failed to rename category" })
               }
             )
           }
           onDelete={(id) =>
             deleteCategory.mutate(id, {
               onError: () =>
-                alert("Failed to delete category"),
+                // alert("Failed to delete category"),
+                Toast.show({ type: "error", text1: "Failed to delete category" })
+
             })
           }
         />

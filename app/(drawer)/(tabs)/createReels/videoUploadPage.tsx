@@ -6,7 +6,6 @@ import { useRouter } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
     Dimensions,
     ScrollView,
     Text,
@@ -14,6 +13,7 @@ import {
     View
 } from "react-native";
 import { GestureHandlerRootView } from "react-native-gesture-handler";
+import Toast from "react-native-toast-message";
 import { uploadReel } from "./api";
 import FinalUpload from "./finalUpload";
 import MusicScreen from "./musicPanel";
@@ -137,7 +137,8 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             contentType,
         } = useUploadStore.getState();
         if (!videoUri) {
-            alert("No video selected!");
+            // alert("No video selected!");
+            Toast.show({ type: "info", text1: "No video selected!" })
             return;
         }
 
@@ -180,11 +181,11 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         // Selected music
         if (selectedMusic?.uri) {
             const music = {
-                id:selectedMusic.id ?? "",
-                uri:selectedMusic.uri ?? "",
-                startMs:selectedMusic.startMs ?? 0,
-                endMs:selectedMusic.endMs ?? 0,
-                volume:selectedMusic.volume ?? 50
+                id: selectedMusic.id ?? "",
+                uri: selectedMusic.uri ?? "",
+                startMs: selectedMusic.startMs ?? 0,
+                endMs: selectedMusic.endMs ?? 0,
+                volume: selectedMusic.volume ?? 50
             }
             formData.append("music", JSON.stringify(music));
             // formData.append("selectedMusicId", selectedMusic.id ?? "");
@@ -202,18 +203,22 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             const response = await uploadReel(formData);
             console.log("Upload response:", response);
             useUploadStore.getState().resetAll();
-            alert("Upload successful!");
+            // alert("Upload successful!");
+            Toast.show({ type: "success", text1: "Upload successful!" })
             router.push("/(drawer)/(tabs)/createReels");
             resetPreview();
             onDiscard()
         } catch (err: any) {
             console.error("Upload failed:", err?.response?.data || err.message);
+            Toast.show({ type: "error", text1: err?.response?.data || err.message })
         }
         finally {
             setIsUploadingStory(false);
             router.push("/(drawer)/(tabs)/createReels");
         }
-        Alert.alert("Story uploaded successfully!");
+        // Alert.alert("Story uploaded successfully!");
+        Toast.show({ type: "success", text1: "Story uploaded successfully!" })
+
         router.push("/(drawer)/(tabs)/createReels");
     }
 

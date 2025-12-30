@@ -191,6 +191,7 @@
 import { useAppTheme } from '@/src/constants/themeHelper';
 import React, { useState } from 'react';
 import { Alert, FlatList, StyleSheet, Text, TextInput, TouchableOpacity, View } from 'react-native';
+import Toast from 'react-native-toast-message';
 
 interface Reel {
   uuid: string;
@@ -217,7 +218,7 @@ const SavedCategories: React.FC<Props> = ({
   onDelete,
   onRename,
 }) => {
-  const [editingId, setEditingId] = useState<number| null>(null);
+  const [editingId, setEditingId] = useState<number | null>(null);
   const [newName, setNewName] = useState('');
 
   const colors = useAppTheme();
@@ -229,7 +230,8 @@ const SavedCategories: React.FC<Props> = ({
 
   const handleSaveRename = () => {
     if (newName.trim().length === 0) {
-      Alert.alert('Invalid name', 'Please enter a valid category name.');
+      // Alert.alert('Invalid name', 'Please enter a valid category name.');
+      Toast.show({ type: "info", text1: "Invalid name", text2: "Please enter a valid category name." })
       return;
     }
     if (onRename && editingId) {

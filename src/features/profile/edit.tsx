@@ -5,7 +5,6 @@ import { Ionicons } from "@expo/vector-icons";
 import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
-    Alert,
     Dimensions,
     Image,
     KeyboardAvoidingView,
@@ -15,8 +14,9 @@ import {
     Text,
     TextInput,
     TouchableOpacity,
-    View,
+    View
 } from "react-native";
+import Toast from "react-native-toast-message";
 const { width, height } = Dimensions.get("window");
 
 interface ProfileData {
@@ -32,7 +32,7 @@ const UserEditProfile = () => {
         username: storeUsername,
         name: storeName,
         bio: storeBio,
-            ProfilePicture: storeProfilePicture,
+        ProfilePicture: storeProfilePicture,
         url: storeUrl,
     } = useProfileStore();
     const theme = useAppTheme();
@@ -89,12 +89,15 @@ const UserEditProfile = () => {
                     url: profileData.url,
                 });
 
-                Alert.alert("Success", "Profile updated successfully!");
+                // Alert.alert("Success", "Profile updated successfully!");
+                Toast.show({ type: "success", text1: "Success", text2: "Profile updated successfully!" })
             } else {
-                Alert.alert("Error", data.message || "Failed to update profile");
+                // Alert.alert("Error", data.message || "Failed to update profile");
+                Toast.show({ type: "error", text1: "Error", text2: data.message || "Failed to update profile" })
             }
         } catch {
-            Alert.alert("Error", "Something went wrong while updating profile");
+            // Alert.alert("Error", "Something went wrong while updating profile");
+            Toast.show({ type: "error", text1: "Error", text2: "Something went wrong while updating profile" })
         }
     };
 

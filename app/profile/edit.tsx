@@ -120,7 +120,7 @@
 //     //     ProfilePicture: data.data.ProfilePicture,
 //     //     url: data.data.url,
 //     //   });
-     
+
 //     // =============================================
 // onSuccess: (data: any) => {
 //   const user = data?.data;
@@ -466,7 +466,7 @@
 //         behavior={Platform.OS === "ios" ? "padding" : undefined}
 //       >
 //         <ScrollView style={styles.container}>
-          
+
 //           {/* Profile Picture */}
 //           <View style={styles.ProfilePictureContainer}>
 //             <TouchableOpacity onPress={() => setShowImageOptions(!showImageOptions)}>
@@ -674,7 +674,6 @@ import * as ImagePicker from "expo-image-picker";
 import { useState } from "react";
 import {
   ActivityIndicator,
-  Alert,
   Dimensions,
   Image,
   KeyboardAvoidingView,
@@ -684,9 +683,10 @@ import {
   Text,
   TextInput,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
+import Toast from "react-native-toast-message";
 
 const { width, height } = Dimensions.get("window");
 
@@ -785,23 +785,24 @@ function UserEditProfile() {
     //     ProfilePicture: data.data.ProfilePicture,
     //     url: data.data.url,
     //   });
-     
-    // =============================================
-onSuccess: (data: any) => {
-  const user = data?.data;
-  if (!user) {
-    Alert.alert("Error", "Invalid server response");
-    return;
-  }
 
-  useProfileStore.setState({
-    username: user.username || "",
-    name: user.name || "",
-    bio: user.bio || "",
-    ProfilePicture: user.ProfilePicture || null,
-    url: user.url || "",
-  });
-// =============================================
+    // =============================================
+    onSuccess: (data: any) => {
+      const user = data?.data;
+      if (!user) {
+        // Alert.alert("Error", "Invalid server response");
+        Toast.show({ type: "error", text1: "Invalid server response" })
+        return;
+      }
+
+      useProfileStore.setState({
+        username: user.username || "",
+        name: user.name || "",
+        bio: user.bio || "",
+        ProfilePicture: user.ProfilePicture || null,
+        url: user.url || "",
+      });
+      // =============================================
 
 
       setImageChanged(false);
@@ -810,10 +811,12 @@ onSuccess: (data: any) => {
       queryClient.invalidateQueries({ queryKey: ["currentUser"] });
       queryClient.invalidateQueries({ queryKey: ["userProfile", data.data.username], });
       queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      Alert.alert("Success", "Profile updated successfully!");
+      // Alert.alert("Success", "Profile updated successfully!");
+      Toast.show({ type: "success", text1: "Profile updated successfully!" })
     },
     onError: () => {
-      Alert.alert("Error", "Something went wrong while updating profile");
+      // Alert.alert("Error", "Something went wrong while updating profile");
+      Toast.show({ type: "error", text1: "Something went wrong while updating profile" })
     },
   });
 

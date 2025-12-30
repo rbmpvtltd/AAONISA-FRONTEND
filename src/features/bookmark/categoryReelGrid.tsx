@@ -12,6 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from 'react-native';
+import Toast from 'react-native-toast-message';
 import { removeReelFromBookmark } from './api';
 
 interface Reel {
@@ -67,7 +68,8 @@ const CategoryReelGrid: React.FC<Props> = ({
           onPress: () =>
             removeReelMutation.mutate({ reelId, categoryName }, {
               onError: () =>
-                Alert.alert("Error", "Failed to remove reel"),
+                // Alert.alert("Error", "Failed to remove reel"),
+                Toast.show({ type: "error", text1: "Error", text2: "Failed to remove reel" })
             }),
         },
       ]
@@ -90,43 +92,43 @@ const CategoryReelGrid: React.FC<Props> = ({
         renderItem={({ item }) => {
           console.log("item", item)
           return (
-          <TouchableOpacity
-            onPress={() =>
-              router.push(`/bookmark/reelscard?reelId=${item.uuid}`)
-            }
-            style={styles.touchBox}
-            activeOpacity={0.7}
-          >
-            <View>
-              <Image
-                source={
-                  item.thumbnailUrl
-                    ? { uri: item.thumbnailUrl }
-                    : require('@/assets/darkThemeUser.jpg')
-                }
-                style={[
-                  styles.thumb,
-                  { backgroundColor: theme.subtitle },
-                ]}
-                resizeMode="cover"
-              />
-
-              <TouchableOpacity
-                style={styles.deleteBtn}
-                onPress={() => handleDelete(item.uuid)}
-                activeOpacity={0.8}
-              >
-                <Ionicons
-                  name="trash-outline"
-                  size={18}
-                  color="#fff"
+            <TouchableOpacity
+              onPress={() =>
+                router.push(`/bookmark/reelscard?reelId=${item.uuid}`)
+              }
+              style={styles.touchBox}
+              activeOpacity={0.7}
+            >
+              <View>
+                <Image
+                  source={
+                    item.thumbnailUrl
+                      ? { uri: item.thumbnailUrl }
+                      : require('@/assets/darkThemeUser.jpg')
+                  }
+                  style={[
+                    styles.thumb,
+                    { backgroundColor: theme.subtitle },
+                  ]}
+                  resizeMode="cover"
                 />
-              </TouchableOpacity>
-            </View>
-          </TouchableOpacity>
-        )
+
+                <TouchableOpacity
+                  style={styles.deleteBtn}
+                  onPress={() => handleDelete(item.uuid)}
+                  activeOpacity={0.8}
+                >
+                  <Ionicons
+                    name="trash-outline"
+                    size={18}
+                    color="#fff"
+                  />
+                </TouchableOpacity>
+              </View>
+            </TouchableOpacity>
+          )
         }
-      }
+        }
       />
     </View>
   );
@@ -141,24 +143,24 @@ const styles = StyleSheet.create({
     borderRadius: 8,
   },
   deleteBtn: {
-  position: 'absolute',
-  bottom: 8,
-  right: 8,
-  backgroundColor: 'rgba(0,0,0,0.6)',
-  padding: 6,
-  borderRadius: 20,
-  zIndex: 10,
-},
-emptyContainer: {
-  flex: 1,
-  justifyContent: 'center',
-  alignItems: 'center',
-  paddingTop: 40,
-},
-emptyText: {
-  fontSize: 14,
-  opacity: 0.7,
-},
+    position: 'absolute',
+    bottom: 8,
+    right: 8,
+    backgroundColor: 'rgba(0,0,0,0.6)',
+    padding: 6,
+    borderRadius: 20,
+    zIndex: 10,
+  },
+  emptyContainer: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    paddingTop: 40,
+  },
+  emptyText: {
+    fontSize: 14,
+    opacity: 0.7,
+  },
 
 });
 
