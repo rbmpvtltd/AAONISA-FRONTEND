@@ -30,7 +30,7 @@
       ],
       "versionCode": 2,
       "adaptiveIcon": {
-        "foregroundImage": "./assets/images/icon-hithoye.png",
+        "foregroundImage": "./assets/images/icon-hithoye(1).png",
         "backgroundColor": "#FFFFFF"
       },
       "edgeToEdgeEnabled": true,
