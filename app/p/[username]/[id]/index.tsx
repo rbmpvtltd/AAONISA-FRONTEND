@@ -722,8 +722,8 @@ const UserReelItem = ({
         }
 
         if (event.status === "readyToPlay") {
-          setTimeout(() => setShowThumbnail(false), 300);
           setIsLoading(false);
+          setTimeout(() => setShowThumbnail(false), 300);
         }
       });
 
@@ -831,6 +831,15 @@ const UserReelItem = ({
     onLongPressIn: handleLongPressIn,
     onLongPressOut: handleLongPressOut,
   });
+
+
+  // const reelGesture = React.useMemo(() => {
+  //   return createReelGesture({
+  //     onTap: handleToggleMute,
+  //     onLongPressIn: handleLongPressIn,
+  //     onLongPressOut: handleLongPressOut,
+  //   });
+  // }, []);
 
 
   console.log("item.comments?.length ", item.comments?.length);
@@ -970,7 +979,7 @@ const UserReelItem = ({
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
-            {item.audio || "Original Sound"}
+            {item.audio?.name || "Original Sound"}
           </Text>
         </View>
 

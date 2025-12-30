@@ -40,11 +40,11 @@ export default function ExploreScreen() {
   }, [searchQuery]);
 
 
-    const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
- 
+
   // Search users API
   const {
     data: searchResults = [],
@@ -54,16 +54,16 @@ export default function ExploreScreen() {
     queryFn: () => (debouncedQuery ? SearchUserProfiel(debouncedQuery) : []),
     enabled: !!debouncedQuery,
   });
-  
+
   // Filter out current user from search results
-const filteredSearchResults = useMemo(() => {
-  if (!currentUser || !searchResults) return [];
-  
-  return searchResults.filter((user: any) => 
-    user.username !== currentUser.username
-  );
-}, [searchResults, currentUser]);
-  
+  const filteredSearchResults = useMemo(() => {
+    if (!currentUser || !searchResults) return [];
+
+    return searchResults.filter((user: any) =>
+      user.username !== currentUser.username
+    );
+  }, [searchResults, currentUser]);
+
   // Infinite explore feed API
   const {
     data,
@@ -160,7 +160,7 @@ const filteredSearchResults = useMemo(() => {
               <Ionicons name="close-circle" size={20} color={theme.text} />
             </TouchableOpacity>
           ) : null}
-          
+
           {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
         </View>
 
