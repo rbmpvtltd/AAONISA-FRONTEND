@@ -322,7 +322,7 @@ const MentionedReelItem = ({
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
-            {item.audio || "Original Sound"}
+            {item.audio?.name || "Original Sound"}
           </Text>
         </View>
 

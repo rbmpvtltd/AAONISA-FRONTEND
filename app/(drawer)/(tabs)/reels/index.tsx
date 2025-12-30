@@ -1212,7 +1212,7 @@ const ReelItem = ({
         <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
-            Original Sound - {item.user.username}
+            {item.audio?.name || "Original Sound"}
           </Text>
         </View>
 

@@ -1,11 +1,12 @@
 import { Ionicons } from "@expo/vector-icons";
-import { useInfiniteQuery, useQuery } from "@tanstack/react-query";
+import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
   Image,
+  RefreshControl,
   ScrollView,
   StyleSheet,
   Text,
@@ -16,8 +17,8 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
-import { getCategoryReel } from "@/src/api/reels-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
 
 const { width } = Dimensions.get("window");
 const numColumns = 3;
@@ -64,27 +65,18 @@ export default function ExploreScreen() {
     );
   }, [searchResults, currentUser]);
 
-  // Infinite explore feed API
   const {
     data,
-    isLoading: videoLoading,
-    isError,
     fetchNextPage,
     hasNextPage,
-    refetch,
     isFetchingNextPage,
-  } = useInfiniteQuery({
-    queryKey: ["exploreVideos"],
-    queryFn: ({ pageParam = 1 }) => getCategoryReel("explore", pageParam, 18),
-    getNextPageParam: (lastPage, allPages) =>
-      lastPage?.hasMore ? allPages.length + 1 : undefined,
-    initialPageParam: 1,
-  });
+    isLoading: videoLoading,
+    isError,
+    refetch,
+    isRefetching,
+  } = useReelsByCategory('explore');
 
-  const videos = useMemo(
-    () => data?.pages?.flatMap((p) => p.data) ?? [],
-    [data]
-  );
+  const videos = data?.pages.flatMap((p: any) => p.reels) || [];
 
   // Masonry column distribution
   const columns = useMemo(() => {
@@ -207,6 +199,14 @@ export default function ExploreScreen() {
             {/* EXPLORE GRID */}
             <ScrollView
               contentContainerStyle={{ padding: spacing }}
+              refreshControl={
+                <RefreshControl
+                  refreshing={isRefetching}
+                  onRefresh={refetch}
+                  tintColor={theme.text}      // iOS
+                  colors={[theme.text]}       // Android
+                />
+              }
               onScroll={({ nativeEvent }) => {
                 const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
                 if (
@@ -220,7 +220,7 @@ export default function ExploreScreen() {
               showsVerticalScrollIndicator={false}
             >
               <View style={styles.masonryRow}>
-                {columns.map((col, colIndex) => (
+                {/* {columns.map((col, colIndex) => (
                   <View key={colIndex} style={styles.column}>
                     {col.map((item) => (
                       <ThumbnailCard
@@ -230,12 +230,28 @@ export default function ExploreScreen() {
                       />
                     ))}
                   </View>
+                ))} */}
+                {columns.map((col, colIndex) => (
+                  <View key={`col-${colIndex}`} style={styles.column}>
+                    {col.map((item, itemIndex) => (
+                      <ThumbnailCard
+                        key={`${item.id}-${colIndex}-${itemIndex}`}
+                        item={item}
+                        router={router}
+                      />
+                    ))}
+                  </View>
                 ))}
+
               </View>
 
-              {isFetchingNextPage && (
-                <ActivityIndicator size="small" color={theme.text} style={{ padding: 12 }} />
+              {/* {isFetchingNextPage && (
+                <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+              )} */}
+              {isFetchingNextPage && !isRefetching && (
+                <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
               )}
+
             </ScrollView>
           </>
         )}
