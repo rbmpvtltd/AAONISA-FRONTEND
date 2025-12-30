@@ -910,14 +910,23 @@ export const ProfileScreen: React.FC = () => {
     console.log("profile 111111111=======>", profile?.mentionedVideos);
 
 
+    // useEffect(() => {
+    //     if (profile?.followers && currentUser?.id) {
+    //         const alreadyFollowing = profile.followers.some(
+    //             (follower: any) => follower.id === currentUser.id
+    //         );
+    //         setIsFollowing(alreadyFollowing);
+    //     }
+    // }, [profile?.followers, currentUser?.id]);
+
     useEffect(() => {
-        if (profile?.followers && currentUser?.id) {
-            const alreadyFollowing = profile.followers.some(
-                (follower: any) => follower.id === currentUser.id
+        if (profile?.followersWithFlag && currentUser?.id) {
+            const alreadyFollowing = profile.followersWithFlag.some(
+                (f: any) => f.id === currentUser.id
             );
             setIsFollowing(alreadyFollowing);
         }
-    }, [profile?.followers, currentUser?.id]);
+    }, [profile?.followersWithFlag, currentUser?.id]);
 
     // const followMutation = useMutation({
     //     mutationFn: (id: string) => followUser(id),
@@ -931,6 +940,7 @@ export const ProfileScreen: React.FC = () => {
     // });
 
     // ad 23
+
     const followMutation = useMutation({
         mutationFn: (id: string) => followUser(id),
 
@@ -941,7 +951,10 @@ export const ProfileScreen: React.FC = () => {
 
             queryClient.setQueryData(["userProfile", username], (old: any) => ({
                 ...old,
-                followers: [...(old?.followers || []), currentUser],
+                followersWithFlag: [
+                    ...(old?.followersWithFlag || []),
+                    { ...currentUser, isFollowing: true },
+                ],
             }));
 
             setIsFollowing(true);
@@ -986,7 +999,7 @@ export const ProfileScreen: React.FC = () => {
 
             queryClient.setQueryData(["userProfile", username], (old: any) => ({
                 ...old,
-                followers: (old?.followers || []).filter(
+                followersWithFlag: (old?.followersWithFlag || []).filter(
                     (f: any) => f.id !== currentUser?.id
                 ),
             }));
