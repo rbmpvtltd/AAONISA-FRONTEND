@@ -244,8 +244,8 @@ export default function ExploreScreen() {
                 ))}
 
               </View>
-
-              {/* {isFetchingNextPage && (
+              {/* 
+              {isFetchingNextPage && (
                 <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
               )} */}
               {isFetchingNextPage && !isRefetching && (
