@@ -957,6 +957,7 @@ const ReelItem = ({
   activeTab,
   setActiveTab,
 }: any) => {
+
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
   const [showOptions, setShowOptions] = useState(false);
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
@@ -964,6 +965,8 @@ const ReelItem = ({
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const { openBookmarkPanel } = useBookmarkStore();
+  const TOP_OFFSET = 100; // StatusBar (40) + Tabs (60)
+  const VIDEO_HEIGHT = SCREEN_HEIGHT - TOP_OFFSET;
 
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const [showFullCaption, setShowFullCaption] = useState(false);
@@ -1112,8 +1115,10 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                // height: SCREEN_HEIGHT,
                 zIndex: 1,
+                top: TOP_OFFSET,
+                height: VIDEO_HEIGHT,
               }}
               resizeMode="cover"
               fadeDuration={0} // Instant load for better UX
@@ -1137,7 +1142,9 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                // height: SCREEN_HEIGHT,
+                top: TOP_OFFSET,
+                height: VIDEO_HEIGHT,
                 zIndex: showThumbnail ? 0 : 2,
               }}
               player={player}
@@ -1257,7 +1264,7 @@ const ReelItem = ({
             });
           }}
         >
-          <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
+          <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
         </TouchableOpacity>
 
@@ -1526,7 +1533,14 @@ const ReelsFeed = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar hidden />
+      <StatusBar
+        hidden={false}
+        barStyle="light-content"
+        backgroundColor="#000000"
+        translucent={false}
+      />
+
+      <View style={styles.topBarBackground} />
 
       {/* Top Navigation Bar with Tabs */}
       <View style={styles.topBar}>
@@ -1633,14 +1647,25 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black'
   },
-
+  topBarBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,  // StatusBar (40) + Tabs area (60)
+    backgroundColor: 'black',
+    zIndex: 998,  // Behind tabs but above video
+  },
   topBar: {
     position: 'absolute',
-    top: 40,
+    top: 35,
     left: 0,
     right: 0,
     zIndex: 999,
     alignItems: 'center',
+    // backgroundColor: '#0000',
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
   },
 
   tabsContainer: {

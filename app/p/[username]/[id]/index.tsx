@@ -1027,7 +1027,7 @@ const UserReelItem = ({
             }
           });
         }}>
-          <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
+          <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.shares?.length || 0)}</Text>
         </TouchableOpacity>
 

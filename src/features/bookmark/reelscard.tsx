@@ -116,7 +116,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
 
   const { reelId } = useLocalSearchParams<{ reelId: string }>();
-const reel = useReelFromBookmarks(reelId);
+  const reel = useReelFromBookmarks(reelId);
   console.log("hhhhhh", reel?.comments);
 
 
@@ -354,7 +354,7 @@ const reel = useReelFromBookmarks(reelId);
 
         {/* SHARE */}
         <TouchableOpacity style={styles.actionButton}>
-          <Ionicons name="share-social-outline" size={35} color="#fff" />
+          <Ionicons name="paper-plane-outline" size={35} color="#fff" />
           <Text style={styles.actionText}>0</Text>
         </TouchableOpacity>
 
