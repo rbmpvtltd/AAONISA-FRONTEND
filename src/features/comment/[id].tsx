@@ -1515,10 +1515,15 @@ const CommentPage = () => {
     prev: any;
   }
 
-  const toggleArr = (arr: string[], value: string) =>
-    arr.includes(value)
-      ? arr.filter((v) => v !== value)
-      : [...arr, value];
+  // const toggleArr = (arr: string[], value: string) =>
+  //   arr.includes(value)
+  //     ? arr.filter((v) => v !== value)
+  //     : [...arr, value];
+
+  const toggleArr = (arr: any[], user: any) =>
+    arr.some((u) => u.id === user.id)
+      ? arr.filter((u) => u.id !== user.id)
+      : [...arr, user];
 
   const likeMutation = useMutation<void, Error, LikeVars, CommentContext>({
     mutationFn: async ({ commentId }) => {
@@ -1536,7 +1541,7 @@ const CommentPage = () => {
           if (!parentId && comment.uuid === commentId) {
             return {
               ...comment,
-              likedBy: toggleArr(comment.likedBy, currentUser.username),
+              likedBy: toggleArr(comment.likedBy, currentUser),
             };
           }
 
@@ -1548,7 +1553,7 @@ const CommentPage = () => {
                 r.uuid === commentId
                   ? {
                     ...r,
-                    likedBy: toggleArr(r.likedBy, currentUser.username),
+                    likedBy: toggleArr(r.likedBy, currentUser),
                   }
                   : r
               ),
@@ -1568,9 +1573,7 @@ const CommentPage = () => {
       }
     },
 
-    onSettled: () => {
-      queryClient.invalidateQueries({ queryKey: ["comments", postId] });
-    },
+
   });
 
 
@@ -1590,6 +1593,7 @@ const CommentPage = () => {
   // ------------------------------------------
 
   // console.log("Comments:", comments);
+  console.log("likesCount", comments?.likesCount);
 
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -1690,13 +1694,15 @@ const CommentPage = () => {
                             >
                               <Icon
                                 name={
-                                  reply.likedBy.includes(currentUser.username)
+                                  // reply.likedBy.includes(currentUser.username)
+                                  reply.likedBy.some((u: any) => u.id === currentUser.id)
                                     ? "heart"
                                     : "heart-outline"
                                 }
                                 size={16}
                                 color={
-                                  reply.likedBy.includes(currentUser.username)
+                                  // reply.likedBy.includes(currentUser.username)
+                                  reply.likedBy.some((u: any) => u.id === currentUser.id)
                                     ? "red"
                                     : theme.text
                                 }
@@ -1734,18 +1740,29 @@ const CommentPage = () => {
               <TouchableOpacity onPress={() => handleToggleLike(item.uuid)}>
                 <Icon
                   name={
-                    item.likedBy.includes(currentUser.username)
+                    // item.likedBy.includes(currentUser.username)
+                    item.likedBy.some((u: any) => u.id === currentUser.id)
                       ? "heart"
                       : "heart-outline"
                   }
                   size={windowWidth * 0.05}
                   color={
-                    item.likedBy.includes(currentUser.username)
+                    // item.likedBy.includes(currentUser.username)
+                    item.likedBy.some((u: any) => u.id === currentUser.id)
                       ? "red"
                       : theme.text
                   }
                 />
               </TouchableOpacity>
+              <Text
+                style={{
+                  fontSize: 12,
+                  color: theme.subtitle,
+                  marginLeft: 4,
+                }}
+              >
+                {item.likedBy.length}
+              </Text>
             </View>
           )}
         />

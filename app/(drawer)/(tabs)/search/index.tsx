@@ -273,7 +273,7 @@ const ThumbnailCard = ({ item, router }: any) => {
         console.log("Navigating to video:", item.id);
         router.push({
           pathname: "/(drawer)/(tabs)/reels",
-          params: { videoId: item.id, tab: 'Explore' }
+          params: { videoId: item.id || item.uuid, tab: 'Explore' }
         });
       }}
       style={{ marginBottom: spacing }}

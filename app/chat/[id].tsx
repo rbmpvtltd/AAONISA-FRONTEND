@@ -1085,7 +1085,7 @@ function MessageBubble({
           alignSelf: align,
         }}
       >
-          {timeAgo(new Date(m.createdAt).toISOString())}
+        {timeAgo(new Date(m.createdAt).toISOString())}
         {/* {new Date(m.createdAt).toLocaleTimeString([], {
           hour: "2-digit",
           minute: "2-digit",
@@ -1380,92 +1380,92 @@ export default function ChatDetailScreen() {
                 />
               )}
               <TouchableOpacity onPress={() => router.push(`/profile/${username}`)} >
-              <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
-                {username || 'Chat'}
-              </Text>
+                <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
+                  {username || 'Chat'}
+                </Text>
               </TouchableOpacity>
             </View>
           ),
         }}
       />
-    <KeyboardAvoidingView
-      style={{ flex: 1, backgroundColor: theme.background }}
-      behavior={Platform.OS === "ios" ? "padding" : "height"}
-      keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
-    >
-      <View style={[styles.container, { padding }]}>
-        <FlatList
-          ref={flatRef}
-          data={chatMessages
-            .slice()
-            .sort(
-              (a, b) =>
-                new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-            )}
-          keyExtractor={(item) => item.id.toString()}
-          renderItem={({ item }) => (
-            <MessageBubble
-              m={item}
-              fontSize={fontSize}
-              bubblePadding={bubblePadding}
-              onLongPress={(msg) => setSelectedMessage(msg)}
-            />
-          )}
-          contentContainerStyle={{ paddingBottom: 20 }}
-          showsVerticalScrollIndicator={false}
-          onContentSizeChange={() => {
-            flatRef.current?.scrollToEnd({ animated: false });
-          }}
-        />
-
-        <Composer
-          onSend={sendMessageToSocket}
-          inputFontSize={fontSize}
-          padding={padding}
-        />
-      </View>
-
-      <Modal
-        visible={!!selectedMessage}
-        transparent
-        animationType="fade"
-        onRequestClose={() => setSelectedMessage(null)}
+      <KeyboardAvoidingView
+        style={{ flex: 1, backgroundColor: theme.background }}
+        behavior={Platform.OS === "ios" ? "padding" : "height"}
+        keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
       >
-        <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
-          <View
-            style={[
-              styles.modalBox,
-              { backgroundColor: theme.background, width: modalWidth },
-            ]}
-          >
-            <TouchableOpacity onPress={handleDeleteForMe} style={styles.modalBtn}>
-              <Text style={[styles.modalText, { color: theme.text, fontSize }]}>
-                Delete for Me
-              </Text>
-            </TouchableOpacity>
+        <View style={[styles.container, { padding }]}>
+          <FlatList
+            ref={flatRef}
+            data={chatMessages
+              .slice()
+              .sort(
+                (a, b) =>
+                  new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
+              )}
+            keyExtractor={(item) => item.id.toString()}
+            renderItem={({ item }) => (
+              <MessageBubble
+                m={item}
+                fontSize={fontSize}
+                bubblePadding={bubblePadding}
+                onLongPress={(msg) => setSelectedMessage(msg)}
+              />
+            )}
+            contentContainerStyle={{ paddingBottom: 20 }}
+            showsVerticalScrollIndicator={false}
+            onContentSizeChange={() => {
+              flatRef.current?.scrollToEnd({ animated: false });
+            }}
+          />
 
-            <TouchableOpacity
-              onPress={handleDeleteForEveryone}
-              style={styles.modalBtn}
-            >
-              <Text style={[styles.modalText, { color: theme.text, fontSize }]}>
-                Delete for Everyone
-              </Text>
-            </TouchableOpacity>
-
-            <TouchableOpacity
-              onPress={() => setSelectedMessage(null)}
-              style={styles.modalBtn}
-            >
-              <Text style={[styles.modalText, { color: theme.link, fontSize }]}>
-                Cancel
-              </Text>
-            </TouchableOpacity>
-          </View>
+          <Composer
+            onSend={sendMessageToSocket}
+            inputFontSize={fontSize}
+            padding={padding}
+          />
         </View>
-      </Modal>
-    </KeyboardAvoidingView>
-            </>
+
+        <Modal
+          visible={!!selectedMessage}
+          transparent
+          animationType="fade"
+          onRequestClose={() => setSelectedMessage(null)}
+        >
+          <View style={[styles.modalOverlay, { backgroundColor: theme.overlay }]}>
+            <View
+              style={[
+                styles.modalBox,
+                { backgroundColor: theme.background, width: modalWidth },
+              ]}
+            >
+              <TouchableOpacity onPress={handleDeleteForMe} style={styles.modalBtn}>
+                <Text style={[styles.modalText, { color: theme.text, fontSize }]}>
+                  Delete for Me
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={handleDeleteForEveryone}
+                style={styles.modalBtn}
+              >
+                <Text style={[styles.modalText, { color: theme.text, fontSize }]}>
+                  Delete for Everyone
+                </Text>
+              </TouchableOpacity>
+
+              <TouchableOpacity
+                onPress={() => setSelectedMessage(null)}
+                style={styles.modalBtn}
+              >
+                <Text style={[styles.modalText, { color: theme.link, fontSize }]}>
+                  Cancel
+                </Text>
+              </TouchableOpacity>
+            </View>
+          </View>
+        </Modal>
+      </KeyboardAvoidingView>
+    </>
   );
 }
 
