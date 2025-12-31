@@ -957,7 +957,6 @@ const ReelItem = ({
   activeTab,
   setActiveTab,
 }: any) => {
-
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
   const [showOptions, setShowOptions] = useState(false);
   const bottomContentBottom = SCREEN_HEIGHT * 0.12;
@@ -965,8 +964,6 @@ const ReelItem = ({
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const { openBookmarkPanel } = useBookmarkStore();
-  const TOP_OFFSET = 100; // StatusBar (40) + Tabs (60)
-  const VIDEO_HEIGHT = SCREEN_HEIGHT - TOP_OFFSET;
 
   const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const [showFullCaption, setShowFullCaption] = useState(false);
@@ -980,7 +977,7 @@ const ReelItem = ({
   const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
   const [liked, setLiked] = useState(item.isLiked ?? false);
-
+  const isMountedRef = useRef(true);
 
   console.log("REEL id:", item.id || item.uuid);
   // 🎯 Only create player for current and adjacent videos (preload ±2)
@@ -1021,23 +1018,55 @@ const ReelItem = ({
   }, [isFocused, currentIndex, index, isMuted, player, shouldLoadVideo]);
 
   // Loading state & duration with thumbnail hide
+  // useEffect(() => {
+  //   if (!player) return;
+
+  //   const listener = player.addListener("statusChange", () => {
+  //     if (player.status === "loading") {
+  //       setIsLoading(true);
+  //       setShowThumbnail(true);
+  //     }
+
+  //     if (player.status === "readyToPlay") {
+  //       setIsLoading(false);
+  //       // Hide thumbnail after video is ready (with slight delay for smooth transition)
+  //       setTimeout(() => setShowThumbnail(false), 300);
+  //     }
+
+  //     if (player.status === "readyToPlay" && player.duration != null) {
+  //       setDuration(player.duration);
+  //     }
+  //   });
+
+  //   return () => listener.remove();
+  // }, [player]);
+
   useEffect(() => {
     if (!player) return;
 
     const listener = player.addListener("statusChange", () => {
-      if (player.status === "loading") {
-        setIsLoading(true);
-        setShowThumbnail(true);
-      }
+      if (!isMountedRef.current) return;
 
-      if (player.status === "readyToPlay") {
-        setIsLoading(false);
-        // Hide thumbnail after video is ready (with slight delay for smooth transition)
-        setTimeout(() => setShowThumbnail(false), 300);
-      }
+      try {
+        if (player.status === "loading") {
+          setIsLoading(true);
+          setShowThumbnail(true);
+        }
 
-      if (player.status === "readyToPlay" && player.duration != null) {
-        setDuration(player.duration);
+        if (player.status === "readyToPlay") {
+          setIsLoading(false);
+          setTimeout(() => {
+            if (isMountedRef.current) {
+              setShowThumbnail(false);
+            }
+          }, 300);
+        }
+
+        if (player.status === "readyToPlay" && player.duration != null) {
+          setDuration(player.duration);
+        }
+      } catch (error) {
+        console.log("Status change error:", error);
       }
     });
 
@@ -1115,10 +1144,8 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                // height: SCREEN_HEIGHT,
+                height: SCREEN_HEIGHT,
                 zIndex: 1,
-                top: TOP_OFFSET,
-                height: VIDEO_HEIGHT,
               }}
               resizeMode="cover"
               fadeDuration={0} // Instant load for better UX
@@ -1142,9 +1169,7 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                // height: SCREEN_HEIGHT,
-                top: TOP_OFFSET,
-                height: VIDEO_HEIGHT,
+                height: SCREEN_HEIGHT,
                 zIndex: showThumbnail ? 0 : 2,
               }}
               player={player}
@@ -1264,7 +1289,7 @@ const ReelItem = ({
             });
           }}
         >
-          <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
+          <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
         </TouchableOpacity>
 
@@ -1533,14 +1558,7 @@ const ReelsFeed = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar
-        hidden={false}
-        barStyle="light-content"
-        backgroundColor="#000000"
-        translucent={false}
-      />
-
-      <View style={styles.topBarBackground} />
+      <StatusBar hidden />
 
       {/* Top Navigation Bar with Tabs */}
       <View style={styles.topBar}>
@@ -1647,25 +1665,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black'
   },
-  topBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100,  // StatusBar (40) + Tabs area (60)
-    backgroundColor: 'black',
-    zIndex: 998,  // Behind tabs but above video
-  },
+
   topBar: {
     position: 'absolute',
-    top: 35,
+    top: 40,
     left: 0,
     right: 0,
     zIndex: 999,
     alignItems: 'center',
-    // backgroundColor: '#0000',
-    backgroundColor: 'transparent',
-    paddingVertical: 10,
   },
 
   tabsContainer: {
