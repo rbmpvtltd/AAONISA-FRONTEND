@@ -979,6 +979,13 @@ const ReelItem = ({
   const [liked, setLiked] = useState(item.isLiked ?? false);
   const isMountedRef = useRef(true);
 
+  useEffect(() => {
+    isMountedRef.current = true;
+    return () => {
+      isMountedRef.current = false;
+    };
+  }, []);
+
   console.log("REEL id:", item.id || item.uuid);
   // 🎯 Only create player for current and adjacent videos (preload ±2)
   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
@@ -1017,30 +1024,6 @@ const ReelItem = ({
     }
   }, [isFocused, currentIndex, index, isMuted, player, shouldLoadVideo]);
 
-  // Loading state & duration with thumbnail hide
-  // useEffect(() => {
-  //   if (!player) return;
-
-  //   const listener = player.addListener("statusChange", () => {
-  //     if (player.status === "loading") {
-  //       setIsLoading(true);
-  //       setShowThumbnail(true);
-  //     }
-
-  //     if (player.status === "readyToPlay") {
-  //       setIsLoading(false);
-  //       // Hide thumbnail after video is ready (with slight delay for smooth transition)
-  //       setTimeout(() => setShowThumbnail(false), 300);
-  //     }
-
-  //     if (player.status === "readyToPlay" && player.duration != null) {
-  //       setDuration(player.duration);
-  //     }
-  //   });
-
-  //   return () => listener.remove();
-  // }, [player]);
-
   useEffect(() => {
     if (!player) return;
 
@@ -1073,6 +1056,64 @@ const ReelItem = ({
     return () => listener.remove();
   }, [player]);
 
+  // View tracking (10 seconds)
+  // useEffect(() => {
+  //   if (!shouldLoadVideo) return;
+
+  //   let frameId: number;
+  //   const checkTime = () => {
+  //     try {
+  //       if (currentIndex === index && player?.playing) {
+  //         const time = player.currentTime;
+  //         if (!viewed && time >= 10) {
+  //           setViewed(true);
+  //           markViewedMutation.mutate(item.uuid);
+  //           console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
+  //         }
+  //       }
+  //     } catch (e) {
+  //       console.log("View tracking error:", e);
+  //     }
+  //     frameId = requestAnimationFrame(checkTime);
+  //   };
+
+  //   frameId = requestAnimationFrame(checkTime);
+  //   return () => cancelAnimationFrame(frameId);
+  // }, [player, currentIndex, index, viewed, shouldLoadVideo, item.uuid, markViewedMutation]);
+
+  useEffect(() => {
+    if (!shouldLoadVideo) return;
+
+    let frameId: number;
+    const checkTime = () => {
+      if (!isMountedRef.current) return;
+
+      try {
+        if (currentIndex === index && player?.playing) {
+          const time = player.currentTime;
+          if (!viewed && time >= 10) {
+            setViewed(true);
+            markViewedMutation.mutate(item.uuid);
+            console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
+          }
+        }
+      } catch (e) {
+        console.log("View tracking error:", e);
+      }
+
+      if (isMountedRef.current) {
+        frameId = requestAnimationFrame(checkTime);
+      }
+    };
+
+    frameId = requestAnimationFrame(checkTime);
+    return () => cancelAnimationFrame(frameId);
+  }, [player, currentIndex, index, viewed, shouldLoadVideo, item.uuid, markViewedMutation]);
+
+  const reelId = item.uuid || item.id;
+
+
+
   // Like handler with optimistic update
   const handleLike = async () => {
     const newLiked = !liked;
@@ -1087,33 +1128,6 @@ const ReelItem = ({
       setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
     }
   };
-
-  // View tracking (10 seconds)
-  useEffect(() => {
-    if (!shouldLoadVideo) return;
-
-    let frameId: number;
-    const checkTime = () => {
-      try {
-        if (currentIndex === index && player?.playing) {
-          const time = player.currentTime;
-          if (!viewed && time >= 10) {
-            setViewed(true);
-            markViewedMutation.mutate(item.uuid);
-            console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
-          }
-        }
-      } catch (e) {
-        console.log("View tracking error:", e);
-      }
-      frameId = requestAnimationFrame(checkTime);
-    };
-
-    frameId = requestAnimationFrame(checkTime);
-    return () => cancelAnimationFrame(frameId);
-  }, [player, currentIndex, index, viewed, shouldLoadVideo, item.uuid, markViewedMutation]);
-
-  const reelId = item.uuid || item.id;
 
   // Long press handlers for pause/resume
   const handleLongPressIn = () => {
