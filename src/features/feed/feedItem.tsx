@@ -778,6 +778,7 @@
 
 import BottomDrawer from "@/src/components/ui/BottomDrawer";
 import ReportDrawer from "@/src/components/ui/ReportDrawer";
+import { useLike } from "@/src/hooks/useLike";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { formatCount } from "@/src/utils/formatCount";
@@ -805,8 +806,6 @@ export const FeedItem = React.memo(
         const [isPlaying, setIsPlaying] = useState(false);
         const [isFullscreen, setIsFullscreen] = useState(false);
         const [showControls, setShowControls] = useState(true);
-        const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
-        const [liked, setLiked] = useState(item.isLiked);
         const [showFullCaption, setShowFullCaption] = useState(false);
         const [showThumbnail, setShowThumbnail] = useState(true);
         const [captionLayout, setCaptionLayout] = useState({ lineCount: 0 });
@@ -820,8 +819,16 @@ export const FeedItem = React.memo(
         const { openBookmarkPanel } = useBookmarkStore();
         const likeMutation = useLikeMutation();
 
-
-
+        const {
+            liked,
+            likesCount,
+            handleLike,
+        } = useLike({
+            isLiked: item.isLiked,
+            likesCount: item.likesCount,
+            id: item.uuid || item.id,
+            likeMutation,
+        });
         console.log("Item Adnnnnnnnnnnnnnnnnnn", item)
 
         // Player setup
@@ -867,24 +874,6 @@ export const FeedItem = React.memo(
                 return () => clearTimeout(timer);
             }
         }, [showControls]);
-
-
-        const handleLike = async () => {
-            const newLiked = !liked;
-
-            // UI update
-            setLiked(newLiked);
-            setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
-
-            try {
-                await likeMutation.mutateAsync(item.uuid || item.id);
-            } catch (err) {
-                // revert on error
-                setLiked(!newLiked);
-                setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
-            }
-        };
-
 
         const truncateText = (text: string, maxWords: number = 6) => {
             const words = text.split(" ");

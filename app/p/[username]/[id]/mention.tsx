@@ -5,6 +5,7 @@ import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { createReelGesture } from '@/src/hooks/ReelGestures';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
+import { useLike } from '@/src/hooks/useLike';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useDeleteVideo } from '@/src/hooks/videosMutation';
@@ -67,11 +68,23 @@ const MentionedReelItem = ({
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const [showThumbnail, setShowThumbnail] = useState(true);
-  const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [paused, setPaused] = useState(false);
-  const [liked, setLiked] = useState(item.isLiked);
+  // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+  // const [liked, setLiked] = useState(item.isLiked);
+
+  const {
+    liked,
+    likesCount,
+    handleLike,
+  } = useLike({
+    isLiked: item.isLiked,
+    likesCount: item.likesCount,
+    id: item.uuid || item.id,
+    likeMutation,
+  });
+
 
   // Get video owner's profile info
   const profilePicture = item.user?.userProfile?.ProfilePicture || item.userProfile?.ProfilePicture;
@@ -123,21 +136,21 @@ const MentionedReelItem = ({
     }
   }, [isFocused, currentIndex, index, isMuted]);
 
-  const handleLike = async () => {
-    const newLiked = !liked;
+  // const handleLike = async () => {
+  //   const newLiked = !liked;
 
-    // UI update
-    setLiked(newLiked);
-    setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
+  //   // UI update
+  //   setLiked(newLiked);
+  //   setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
 
-    try {
-      await likeMutation.mutateAsync(item.uuid || item.id);
-    } catch (err) {
-      // revert on error
-      setLiked(!newLiked);
-      setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
-    }
-  };
+  //   try {
+  //     await likeMutation.mutateAsync(item.uuid || item.id);
+  //   } catch (err) {
+  //     // revert on error
+  //     setLiked(!newLiked);
+  //     setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
+  //   }
+  // };
 
   useEffect(() => {
     let frameId: number;
