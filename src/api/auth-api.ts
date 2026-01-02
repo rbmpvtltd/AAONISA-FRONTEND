@@ -85,7 +85,6 @@ async function loginUser(reqBody: any) {
   };
   const body = reqBody;
   const apiUrl = createApiUrl('/users/login');
-  alert(apiUrl);
   console.log("apiulrl; ", apiUrl)
   const { data } = await axios.post(apiUrl, body, config);
   return data;
