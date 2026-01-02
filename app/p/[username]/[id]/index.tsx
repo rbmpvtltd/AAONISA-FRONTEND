@@ -624,6 +624,7 @@
 
 // export default UserReelsFeed;
 
+import AudioBottomSheet from '@/app/(drawer)/(tabs)/reels/AudioBottomSheet';
 import VideoProgressBar from '@/app/(drawer)/(tabs)/reels/videoProgressBar';
 import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
@@ -704,6 +705,7 @@ const UserReelItem = ({
   const [paused, setPaused] = useState(false);
   const [showThumbnail, setShowThumbnail] = useState(true);
   const [liked, setLiked] = useState(item.isLiked);
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
 
   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
 
@@ -845,6 +847,8 @@ const UserReelItem = ({
 
 
   console.log("item.comments?.length ", item.comments?.length);
+  console.log("item audio mkjmkjmkjmkjmkjmkjmkjk", item);
+
 
   const isOwnProfile = item.userProfile?.id === currentUserId;
 
@@ -978,12 +982,33 @@ const UserReelItem = ({
             </View>
           )}
         </View>
-        <View style={styles.musicInfo}>
+
+        {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
             {item.audio?.name || "Original Sound"}
           </Text>
-        </View>
+        </View> */}
+
+
+        <TouchableOpacity
+          style={styles.musicInfo}
+          onPress={() => setShowAudioSheet(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.musicIcon}>♪</Text>
+          <Text style={styles.musicText} numberOfLines={1}>
+            {item.audio?.isOriginal === false
+              ? item.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color="#fff"
+            style={{ marginLeft: 4 }}
+          />
+        </TouchableOpacity>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1068,6 +1093,67 @@ const UserReelItem = ({
           setShowReportDrawer(false);
         }}
       />
+      <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: item.audio?.isOriginal ?? true,
+          name: item.audio?.name,
+          artist: item.audio?.artist,
+          coverImage: item.audio?.coverImage || item.thumbnailUrl,
+          duration: item.duration ? `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')}` : undefined,
+          usedCount: item.audio?.usedCount,
+          videos: item.audio?.videos || [],
+          audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+        }}
+        uploaderInfo={{
+          username: reelUsername || item.user?.username,
+          profilePic: profilePicture || item.user?.profilePic,
+        }}
+        onUseAudio={async () => {
+          console.log('🎵 Use Audio clicked from profile:', item);
+
+          try {
+            router.push({
+              pathname: '/(drawer)/(tabs)/createReels',
+              params: {
+                // Audio metadata
+                audioId: item.audio?.id || `audio_${item.uuid}`,
+                audioUrl: item.videoUrl,
+                audioName: item.audio?.isOriginal === false
+                  ? item.audio?.name
+                  : 'Original Sound',
+                isOriginal: String(item.audio?.isOriginal ?? true),
+
+                // Source info
+                sourceVideoId: item.uuid,
+                sourceUsername: reelUsername || item.user?.username,
+                duration: String(item.duration || 0),
+
+                // For display
+                thumbnailUrl: item.thumbnailUrl,
+              }
+            });
+          } catch (error) {
+            console.error('❌ Audio use error:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Error',
+              text2: 'Failed to use audio. Please try again.'
+            });
+          }
+        }}
+        onVideoPress={(videoId) => {
+          console.log('Video clicked:', videoId);
+          setShowAudioSheet(false);
+          // Navigate to that video
+          router.push({
+            pathname: `/(drawer)/(tabs)/reels`,
+            params: { videoId, tab: 'Explore' }
+          });
+        }}
+      />
+
     </View>
   );
 };
@@ -1314,9 +1400,17 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 18,
   },
-  musicInfo: { flexDirection: 'row', alignItems: 'center' },
+  musicInfo: {
+    flexDirection: 'row', alignItems: 'center',
+    paddingVertical: 4,  // n
+    maxWidth: '90%',    // n
+  },
   musicIcon: { fontSize: 16, marginRight: 8, color: '#fff' },
-  musicText: { color: '#fff', fontSize: 14 },
+  musicText: {
+    color: '#fff'
+    , fontSize: 14.,
+    flex: 1 // n
+  },
   rightActions: {
     position: 'absolute',
     right: '4%',
