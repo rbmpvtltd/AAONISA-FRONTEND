@@ -941,6 +941,7 @@ import {
 } from "react-native";
 import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AudioBottomSheet from './AudioBottomSheet';
 import VideoProgressBar from './videoProgressBar';
 
 
@@ -990,6 +991,9 @@ const ReelItem = ({
     id: item.uuid || item.id,
     likeMutation,
   });
+  const TOP_OFFSET = 100; // StatusBar (40) + Tabs (60)
+  const VIDEO_HEIGHT = SCREEN_HEIGHT - TOP_OFFSET;
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
 
 
   useEffect(() => {
@@ -1143,6 +1147,9 @@ const ReelItem = ({
     onLongPressOut: handleLongPressOut,
   });
 
+
+  console.log("item BBBBBBBBBBBBBBBBB+++++++++++++++++++", item);
+
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <GestureDetector gesture={composedGesture}>
@@ -1155,8 +1162,12 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                // height: SCREEN_HEIGHT,
                 zIndex: 1,
+
+                top: TOP_OFFSET,
+                height: VIDEO_HEIGHT,
+
               }}
               resizeMode="cover"
               fadeDuration={0} // Instant load for better UX
@@ -1180,8 +1191,11 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                // height: SCREEN_HEIGHT,
                 zIndex: showThumbnail ? 0 : 2,
+
+                top: TOP_OFFSET,
+                height: VIDEO_HEIGHT,
               }}
               player={player}
               contentFit="cover"
@@ -1252,12 +1266,40 @@ const ReelItem = ({
           )}
         </View>
 
-        <View style={styles.musicInfo}>
+        {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
             {item.audio?.name || "Original Sound"}
           </Text>
-        </View>
+        </View> */}
+
+        {/* <TouchableOpacity
+          style={styles.musicInfo}
+          onPress={() => setShowAudioSheet(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.musicIcon}>♪</Text>
+          <Text style={styles.musicText} numberOfLines={1}>
+            {item.audio?.isOriginal === false
+              ? item.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
+        </TouchableOpacity> */}
+
+        <TouchableOpacity
+          style={styles.musicInfo}
+          onPress={() => setShowAudioSheet(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.musicIcon}>♪</Text>
+          <Text style={styles.musicText} numberOfLines={1}>
+            {item.audio?.isOriginal === false
+              ? item.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
+        </TouchableOpacity>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1300,7 +1342,7 @@ const ReelItem = ({
             });
           }}
         >
-          <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
+          <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
         </TouchableOpacity>
 
@@ -1339,6 +1381,113 @@ const ReelItem = ({
           setShowReportDrawer(false);
         }}
         videoId={item.id || item.uuid}
+      />
+
+      {/* <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: item.audio?.isOriginal ?? true,
+          name: item.audio?.name,
+          artist: item.audio?.artist,
+          coverImage: item.audio?.coverImage,
+          duration: item.audio?.duration,
+          usedCount: item.audio?.usedCount,
+          videos: item.audio?.videos || [],
+        }}
+        uploaderInfo={{
+          username: item.user.username,
+          profilePic: item.user.profilePic,
+        }}
+        onUseAudio={() => {
+          console.log('Use Audio clicked:', item.audio);
+          // TODO: Navigate to create reel with this audio
+          router.push({
+            pathname: '/(drawer)/(tabs)/createReels',
+            params: { audioId: item.audio?.id }
+          });
+        }}
+      /> */}
+
+
+
+      <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: item.audio?.isOriginal ?? true,
+          name: item.audio?.name,
+          artist: item.audio?.artist,
+          coverImage: item.audio?.coverImage || item.thumbnailUrl,
+          duration: item.audio?.duration,
+          usedCount: item.audio?.usedCount,
+          videos: item.audio?.videos || [],
+          audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+        }}
+        uploaderInfo={{
+          username: item.user.username,
+          profilePic: item.user.profilePic,
+        }}
+        onUseAudio={async () => {
+          console.log('🎵 Use Audio clicked:', item);
+
+          try {
+            // ✅ Method 1: Simple - Pass video URL as audio source
+            router.push({
+              pathname: '/(drawer)/(tabs)/createReels',
+              params: {
+                // Audio metadata
+                audioId: item.audio?.id || `audio_${item.id}`,
+                audioUrl: item.videoUrl,  // Video URL works as audio
+                audioName: item.audio?.isOriginal === false
+                  ? item.audio?.name
+                  : 'Original Sound',
+                isOriginal: String(item.audio?.isOriginal ?? true),
+
+                // Source info
+                sourceVideoId: item.id || item.uuid,
+                sourceUsername: item.user.username,
+                duration: String(item.duration || 0),
+
+                // For display
+                thumbnailUrl: item.thumbnailUrl,
+              }
+            });
+
+            /* ✅ Method 2: Extract audio first (optional, for better control)
+            const { extractAudioFromVideo } = await import('@/src/utils/audioExtractor');
+            
+            const result = await extractAudioFromVideo(
+              item.videoUrl, 
+              item.id || item.uuid
+            );
+            
+            if (result.success && result.audioUri) {
+              router.push({
+                pathname: '/create-reel',
+                params: {
+                  audioUri: result.audioUri,
+                  audioName: item.audio?.name || 'Original Sound',
+                  // ... other params
+                }
+              });
+            }
+            */
+
+          } catch (error) {
+            console.error('❌ Audio use error:', error);
+            alert('Failed to use audio. Please try again.');
+          }
+        }}
+        onVideoPress={(videoId) => {
+          console.log('Video clicked:', videoId);
+          setShowAudioSheet(false);
+          // Navigate to that specific video
+          router.push({
+            pathname: '/(drawer)/(tabs)/reels',
+            params: { videoId, tab: activeTab }
+          });
+        }}
       />
     </View>
   );
@@ -1569,8 +1718,13 @@ const ReelsFeed = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar hidden />
+      <StatusBar hidden={false}
+        barStyle="light-content"
+        backgroundColor="black"
+        translucent={false} />
 
+
+      <View style={styles.topBarBackground} />
       {/* Top Navigation Bar with Tabs */}
       <View style={styles.topBar}>
         <View style={styles.tabsContainer}>
@@ -1676,14 +1830,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black'
   },
-
+  topBarBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,  // StatusBar (40) + Tabs area (60)
+    backgroundColor: 'black',
+    zIndex: 998,  // Behind tabs but above video
+  },
   topBar: {
     position: 'absolute',
-    top: 40,
+    top: 35,
     left: 0,
     right: 0,
     zIndex: 999,
     alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
   },
 
   tabsContainer: {
@@ -1747,7 +1911,10 @@ const styles = StyleSheet.create({
 
   musicInfo: {
     flexDirection: 'row',
-    alignItems: 'center'
+    alignItems: 'center',
+    paddingVertical: 4, // n
+    maxWidth: '85%', // n
+
   },
 
   musicIcon: {
@@ -1758,7 +1925,10 @@ const styles = StyleSheet.create({
 
   musicText: {
     color: '#fff',
-    fontSize: 13
+    fontSize: 13,
+    flex: 1, // n
+    marginRight: 4,
+
   },
 
   rightActions: {
