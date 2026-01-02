@@ -1227,7 +1227,7 @@ export default function ChatDetailScreen() {
         type: isReelMessage ? 'reel' : 'text',
         ...(isReelMessage && {
           reelData: {
-            reelId: data.reelid,
+            videoId: data.reelid,
             url: data.url || data.reelUrl,
             thumbnail: data.thumbnail || data.thumbnailUrl,
           }

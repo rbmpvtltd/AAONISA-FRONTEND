@@ -915,6 +915,7 @@ import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
 import { createReelGesture } from '@/src/hooks/ReelGestures';
 import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
+import { useLike } from '@/src/hooks/useLike';
 import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useLikeMutation } from '@/src/hooks/userLikeMutation';
@@ -965,7 +966,6 @@ const ReelItem = ({
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const { openBookmarkPanel } = useBookmarkStore();
 
-  const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
@@ -976,8 +976,21 @@ const ReelItem = ({
   const markViewedMutation = useMarkViewedMutation(item.id);
   const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
-  const [liked, setLiked] = useState(item.isLiked ?? false);
+  // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+  // const [liked, setLiked] = useState(item.isLiked ?? false);
   const isMountedRef = useRef(true);
+
+  const {
+    liked,
+    likesCount,
+    handleLike,
+  } = useLike({
+    isLiked: item.isLiked,
+    likesCount: item.likesCount,
+    id: item.uuid || item.id,
+    likeMutation,
+  });
+
 
   useEffect(() => {
     isMountedRef.current = true;
@@ -1112,22 +1125,6 @@ const ReelItem = ({
 
   const reelId = item.uuid || item.id;
 
-
-
-  // Like handler with optimistic update
-  const handleLike = async () => {
-    const newLiked = !liked;
-    setLiked(newLiked);
-    setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
-
-    try {
-      await likeMutation.mutateAsync(item.uuid || item.id);
-    } catch (err) {
-      // Revert on error
-      setLiked(!newLiked);
-      setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
-    }
-  };
 
   // Long press handlers for pause/resume
   const handleLongPressIn = () => {

@@ -5,7 +5,7 @@ export interface Message {
   fromMe: boolean;
   type?: 'text' | 'reel';  // Optional type field
   reelData?: {              // Optional reelData field
-    reelId: string;
+    videoId: string;
     url: string;
     thumbnail: string;
   };
