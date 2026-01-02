@@ -717,8 +717,6 @@ const UserReelItem = ({
     likeMutation,
   });
 
-
-  const [liked, setLiked] = useState(item.isLiked);
   const [showAudioSheet, setShowAudioSheet] = useState(false);
 
   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
