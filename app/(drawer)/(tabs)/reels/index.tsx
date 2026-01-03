@@ -1383,34 +1383,6 @@ const ReelItem = ({
         videoId={item.id || item.uuid}
       />
 
-      {/* <AudioBottomSheet
-        visible={showAudioSheet}
-        onClose={() => setShowAudioSheet(false)}
-        audioData={{
-          isOriginal: item.audio?.isOriginal ?? true,
-          name: item.audio?.name,
-          artist: item.audio?.artist,
-          coverImage: item.audio?.coverImage,
-          duration: item.audio?.duration,
-          usedCount: item.audio?.usedCount,
-          videos: item.audio?.videos || [],
-        }}
-        uploaderInfo={{
-          username: item.user.username,
-          profilePic: item.user.profilePic,
-        }}
-        onUseAudio={() => {
-          console.log('Use Audio clicked:', item.audio);
-          // TODO: Navigate to create reel with this audio
-          router.push({
-            pathname: '/(drawer)/(tabs)/createReels',
-            params: { audioId: item.audio?.id }
-          });
-        }}
-      /> */}
-
-
-
       <AudioBottomSheet
         visible={showAudioSheet}
         onClose={() => setShowAudioSheet(false)}
@@ -1428,57 +1400,36 @@ const ReelItem = ({
           username: item.user.username,
           profilePic: item.user.profilePic,
         }}
+
         onUseAudio={async () => {
           console.log('🎵 Use Audio clicked:', item);
 
           try {
-            // ✅ Method 1: Simple - Pass video URL as audio source
             router.push({
               pathname: '/(drawer)/(tabs)/createReels',
               params: {
                 // Audio metadata
                 audioId: item.audio?.id || `audio_${item.id}`,
-                audioUrl: item.videoUrl,  // Video URL works as audio
+                audioUrl: item.videoUrl,
                 audioName: item.audio?.isOriginal === false
                   ? item.audio?.name
                   : 'Original Sound',
+                audioArtist: item.audio?.isOriginal === false
+                  ? item.audio?.artist
+                  : item.user.username,
                 isOriginal: String(item.audio?.isOriginal ?? true),
 
-                // Source info
-                sourceVideoId: item.id || item.uuid,
-                sourceUsername: item.user.username,
-                duration: String(item.duration || 0),
-
-                // For display
-                thumbnailUrl: item.thumbnailUrl,
+                // ✅ NEW: Add these fields
+                preSelectedAudio: 'true',  // Flag to indicate audio is pre-selected
+                coverImage: item.thumbnailUrl || item.audio?.coverImage,
               }
             });
-
-            /* ✅ Method 2: Extract audio first (optional, for better control)
-            const { extractAudioFromVideo } = await import('@/src/utils/audioExtractor');
-            
-            const result = await extractAudioFromVideo(
-              item.videoUrl, 
-              item.id || item.uuid
-            );
-            
-            if (result.success && result.audioUri) {
-              router.push({
-                pathname: '/create-reel',
-                params: {
-                  audioUri: result.audioUri,
-                  audioName: item.audio?.name || 'Original Sound',
-                  // ... other params
-                }
-              });
-            }
-            */
-
           } catch (error) {
             console.error('❌ Audio use error:', error);
             alert('Failed to use audio. Please try again.');
           }
         }}
+
         onVideoPress={(videoId) => {
           console.log('Video clicked:', videoId);
           setShowAudioSheet(false);

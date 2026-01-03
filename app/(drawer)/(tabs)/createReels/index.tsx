@@ -14,6 +14,7 @@ type MusicOption = {
   uri: string;
 };
 
+
 const { width: SCREEN_WIDTH } = Dimensions.get('window');
 const TRIM_HANDLE_WIDTH = 40;
 const TIMELINE_HEIGHT = 60;
@@ -88,6 +89,27 @@ export default function CreateReel() {
   //   };
   // }, []);
 
+  const preSelectedAudioData: {
+    id: string;
+    title: string;
+    artist: string;
+    uri: string;
+    coverImage?: string;
+  } | null = params.preSelectedAudio === 'true' ? {
+    id: params.audioId as string,
+    title: params.audioName as string,
+    artist: params.audioArtist as string,
+    uri: params.audioUrl as string,
+    coverImage: params.coverImage as string,
+  } : null;
+
+
+  useEffect(() => {
+    if (preSelectedAudioData) {
+      console.log('📦 Pre-selected audio data:', preSelectedAudioData);
+    }
+  }, [preSelectedAudioData]);
+
   useEffect(() => {
     if (params.contentType === 'story') {
       setContentType('story');
@@ -157,15 +179,17 @@ export default function CreateReel() {
             videoUri={videoUri}
             contentType={contentType}
             musicOptions={musicOptions}
-            onDiscard={discardVideo}
+            // onDiscard={discardVideo}
+            onDiscard={() => setVideoUri(null)}
             onUpload={uploadVideo}
+            preSelectedAudio={preSelectedAudioData}
           />
         </>
       )
         : (
           <>
             {/* Content Type Selector */}
-            <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType} />
+            <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType} preSelectedAudio={preSelectedAudioData} />
           </>
         )}
     </View>

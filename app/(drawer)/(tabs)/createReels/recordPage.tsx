@@ -1,13 +1,29 @@
 import { Ionicons } from "@expo/vector-icons";
 import { CameraView } from "expo-camera"; // assuming expo-camera
-import { useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import { PanResponder, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 // agar aap koi aur package use kar rahe ho toh yahan change kar lena
+import { Audio } from "expo-av";
 import * as ImagePicker from "expo-image-picker";
 import Toast from "react-native-toast-message";
-const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
+
+interface CameraScreenProps {
+    onImagePick: (uri: string) => void;
+    setContentType: (type: 'story' | 'reels' | 'news') => void;
+    contentType: 'story' | 'reels' | 'news';
+    preSelectedAudio?: {
+        id: string;
+        title: string;
+        artist: string;
+        uri: string;
+    } | null;
+}
+
+
+const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAudio }: CameraScreenProps) => {
     //   const cameraRef = useRef(null);
     const zoomSliderRef = useRef<View>(null)
+    const audioSoundRef = useRef<Audio.Sound | null>(null);
 
     const [facing, setFacing] = useState<"front" | "back">("back");
     const [isRecording, setIsRecording] = useState(false);
@@ -17,6 +33,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
     const recordingStartTimeRef = useRef<number | null>(null);
     const autoStopTimeoutRef = useRef<NodeJS.Timeout | number | null>(null);
     const timerIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
+    const [audioDuration, setAudioDuration] = useState<number | null>(null);
     const getContentTypeIcon = (type: string) => {
         switch (type) {
             case "story":
@@ -34,10 +51,119 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
         setFacing((prev) => (prev === "back" ? "front" : "back"));
     };
 
-    const startRecording = async () => {
+    useEffect(() => {
+        const getAudioDuration = async () => {
+            if (preSelectedAudio?.uri) {
+                try {
+                    const { sound, status } = await Audio.Sound.createAsync(
+                        { uri: preSelectedAudio.uri },
+                        { shouldPlay: false }
+                    );
+
+                    if (status.isLoaded && status.durationMillis) {
+                        const durationInSeconds = Math.floor(status.durationMillis / 1000);
+                        setAudioDuration(durationInSeconds);
+                        console.log('🎵 Audio duration:', durationInSeconds, 'seconds');
+                    }
+
+                    await sound.unloadAsync();
+                } catch (error) {
+                    console.error('Error getting audio duration:', error);
+                }
+            }
+        };
+
+        getAudioDuration();
+    }, [preSelectedAudio]);
+
+    // const startRecordingWithAudio = async () => {
+    //     try {
+    //         setIsRecording(true);
+
+    //         // If audio is selected, play it during recording
+    //         if (preSelectedAudio?.uri) {
+    //             const { sound } = await Audio.Sound.createAsync(
+    //                 { uri: preSelectedAudio.uri },
+    //                 { shouldPlay: true, volume: 1.0, isLooping: true }
+    //             );
+    //             audioSoundRef.current = sound;
+    //             await sound.playAsync();
+    //         }
+
+    //         // Start camera recording here
+    //         // ... your existing camera recording code
+
+    //         const startRecording = async () => {
+    //             if (!cameraRef.current) {
+    //                 // Alert.alert('Error', 'Camera not ready.');
+    //                 Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' })
+    //                 return;
+    //             }
+
+    //             try {
+    //                 setIsRecording(true);
+    //                 setRecordTime(0);
+    //                 recordingStartTimeRef.current = Date.now();
+
+    //                 timerIntervalRef.current = setInterval(() => {
+    //                     if (recordingStartTimeRef.current) {
+    //                         const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
+    //                         setRecordTime(elapsedSec);
+    //                     }
+    //                 }, 1000);
+
+    //                 const durationMiliSecs = contentType === 'story' ? 30000 : 120000;
+
+    //                 autoStopTimeoutRef.current = setTimeout(() => {
+    //                     if (cameraRef.current) cameraRef.current.stopRecording();
+    //                 }, durationMiliSecs);
+    //                 const maxDurationSec = contentType === 'story' ? 30 : 120;
+    //                 const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
+    //                 const video = await cameraRef.current.recordAsync(options);
+
+    //                 const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
+    //                 if (elapsed < 2000) {
+    //                     // Alert.alert('Too short', 'Please record at least 2 seconds.');
+    //                     Toast.show({ type: "info", text1: 'Too short', text2: 'Please record at least 2 seconds.' })
+    //                     return;
+    //                 }
+
+    //                 if (!video) throw new Error('Video is null');
+
+    //                 onImagePick(video.uri);
+    //                 // Alert.alert('Video recorded successfully.');
+    //                 Toast.show({ type: "success", text1: 'Video recorded successfully.' })
+    //             } catch (err: any) {
+    //                 // Alert.alert('Error', err.message || 'Recording failed');
+    //                 Toast.show({ type: "error", text1: 'Error', text2: err.message || 'Recording failed' })
+    //             } finally {
+    //                 setIsRecording(false);
+    //                 recordingStartTimeRef.current = null;
+
+    //                 if (autoStopTimeoutRef.current) {
+    //                     clearTimeout(autoStopTimeoutRef.current);
+    //                     autoStopTimeoutRef.current = null;
+    //                 }
+
+    //                 if (timerIntervalRef.current) {
+    //                     clearInterval(timerIntervalRef.current);
+    //                     timerIntervalRef.current = null;
+    //                 }
+
+    //                 setRecordTime(0);
+    //             }
+    //         };
+
+
+    //     } catch (error) {
+    //         console.error('Error starting recording with audio:', error);
+    //     }
+    // };
+
+
+    const startRecordingWithAudio = async () => {
         if (!cameraRef.current) {
-            // Alert.alert('Error', 'Camera not ready.');
-            Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' })
+            Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' });
             return;
         }
 
@@ -46,6 +172,19 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
             setRecordTime(0);
             recordingStartTimeRef.current = Date.now();
 
+            // ✅ 1. PLAY AUDIO IF SELECTED
+            if (preSelectedAudio?.uri) {
+                const { sound } = await Audio.Sound.createAsync(
+                    { uri: preSelectedAudio.uri },
+                    { shouldPlay: true, volume: 1.0, isLooping: false } // ❌ NO LOOP
+                );
+                audioSoundRef.current = sound;
+                await sound.playAsync();
+
+                console.log('🎵 Audio started playing');
+            }
+
+            // ✅ 2. START TIMER
             timerIntervalRef.current = setInterval(() => {
                 if (recordingStartTimeRef.current) {
                     const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
@@ -53,53 +192,94 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
                 }
             }, 1000);
 
-            const durationMiliSecs = contentType === 'story' ? 30000 : 120000;
+            // ✅ 3. CALCULATE MAX DURATION
+            let maxDurationSec: number;
 
+            if (preSelectedAudio && audioDuration) {
+                // 🎵 If audio is selected, record for audio duration
+                maxDurationSec = audioDuration;
+                console.log('📹 Recording will stop after', maxDurationSec, 'seconds (audio length)');
+            } else {
+                // 📹 Default duration based on content type
+                maxDurationSec = contentType === 'story' ? 30 : 120;
+                console.log('📹 Recording will stop after', maxDurationSec, 'seconds (default)');
+            }
+
+            // ✅ 4. AUTO-STOP TIMER
             autoStopTimeoutRef.current = setTimeout(() => {
-                if (cameraRef.current) cameraRef.current.stopRecording();
-            }, durationMiliSecs);
-            const maxDurationSec = contentType === 'story' ? 30 : 120;
-            const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
-            const video = await cameraRef.current.recordAsync(options);
+                console.log('⏱️ Auto-stopping recording...');
+                if (cameraRef.current) {
+                    cameraRef.current.stopRecording();
+                }
+            }, maxDurationSec * 1000);
 
+            // ✅ 5. START CAMERA RECORDING
+            const video = await cameraRef.current.recordAsync({
+                maxDuration: maxDurationSec,
+                quality: '720p',
+                mute: false
+            });
+
+            // ✅ 6. CHECK MINIMUM DURATION
             const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
             if (elapsed < 2000) {
-                // Alert.alert('Too short', 'Please record at least 2 seconds.');
-                Toast.show({ type: "info", text1: 'Too short', text2: 'Please record at least 2 seconds.' })
+                Toast.show({
+                    type: "info",
+                    text1: 'Too short',
+                    text2: 'Please record at least 2 seconds.'
+                });
                 return;
             }
 
             if (!video) throw new Error('Video is null');
 
+            // ✅ 7. SUCCESS - SEND VIDEO URI
+            console.log('✅ Recording completed:', video.uri);
             onImagePick(video.uri);
-            // Alert.alert('Video recorded successfully.');
-            Toast.show({ type: "success", text1: 'Video recorded successfully.' })
+            Toast.show({ type: "success", text1: 'Video recorded successfully!' });
+
         } catch (err: any) {
-            // Alert.alert('Error', err.message || 'Recording failed');
-            Toast.show({ type: "error", text1: 'Error', text2: err.message || 'Recording failed' })
+            console.error('❌ Recording error:', err);
+            Toast.show({
+                type: "error",
+                text1: 'Error',
+                text2: err.message || 'Recording failed'
+            });
         } finally {
-            setIsRecording(false);
-            recordingStartTimeRef.current = null;
-
-            if (autoStopTimeoutRef.current) {
-                clearTimeout(autoStopTimeoutRef.current);
-                autoStopTimeoutRef.current = null;
-            }
-
-            if (timerIntervalRef.current) {
-                clearInterval(timerIntervalRef.current);
-                timerIntervalRef.current = null;
-            }
-
-            setRecordTime(0);
+            // ✅ CLEANUP
+            await stopRecordingWithAudio();
         }
     };
 
-    const stopRecording = () => {
-        if (!cameraRef.current) return;
+    const stopRecordingWithAudio = async () => {
+        console.log('🛑 Stopping recording...');
 
-        cameraRef.current.stopRecording();
+        setIsRecording(false);
+        recordingStartTimeRef.current = null;
 
+        // Stop audio
+        if (audioSoundRef.current) {
+            try {
+                await audioSoundRef.current.stopAsync();
+                await audioSoundRef.current.unloadAsync();
+                audioSoundRef.current = null;
+                console.log('🎵 Audio stopped');
+            } catch (e) {
+                console.log('Error stopping audio:', e);
+            }
+        }
+
+        // Stop camera
+        if (cameraRef.current) {
+            try {
+                cameraRef.current.stopRecording();
+                console.log('📹 Camera stopped');
+            } catch (e) {
+                console.log('Error stopping camera:', e);
+            }
+        }
+
+        // Clear timers
         if (autoStopTimeoutRef.current) {
             clearTimeout(autoStopTimeoutRef.current);
             autoStopTimeoutRef.current = null;
@@ -109,7 +289,67 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
             clearInterval(timerIntervalRef.current);
             timerIntervalRef.current = null;
         }
+
+        setRecordTime(0);
     };
+
+    // const stopRecordingWithAudio = async () => {
+    //     try {
+    //         setIsRecording(false);
+
+    //         // Stop and unload audio
+    //         if (audioSoundRef.current) {
+    //             await audioSoundRef.current.stopAsync();
+    //             await audioSoundRef.current.unloadAsync();
+    //             audioSoundRef.current = null;
+    //         }
+
+    //         // Stop camera recording here
+    //         // ... your existing camera stop code
+    //         const stopRecording = () => {
+    //             if (!cameraRef.current) return;
+
+    //             cameraRef.current.stopRecording();
+
+    //             if (autoStopTimeoutRef.current) {
+    //                 clearTimeout(autoStopTimeoutRef.current);
+    //                 autoStopTimeoutRef.current = null;
+    //             }
+
+    //             if (timerIntervalRef.current) {
+    //                 clearInterval(timerIntervalRef.current);
+    //                 timerIntervalRef.current = null;
+    //             }
+    //         };
+
+    //     } catch (error) {
+    //         console.error('Error stopping recording:', error);
+    //     }
+    // };
+
+    // useEffect(() => {
+    //     return () => {
+    //         if (audioSoundRef.current) {
+    //             audioSoundRef.current.unloadAsync();
+    //         }
+    //     };
+    // }, []);
+
+    useEffect(() => {
+        return () => {
+            if (audioSoundRef.current) {
+                audioSoundRef.current.unloadAsync();
+            }
+            if (autoStopTimeoutRef.current) {
+                clearTimeout(autoStopTimeoutRef.current);
+            }
+            if (timerIntervalRef.current) {
+                clearInterval(timerIntervalRef.current);
+            }
+        };
+    }, []);
+
+
     const pickVideo = async () => {
         try {
             // Permission check
@@ -201,10 +441,22 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
             {isRecording && (
                 <View style={styles.timerContainer}>
                     <Text style={styles.timerText}>
-                        {recordTime}/{contentType === "story" ? "30" : "120"}
+                        {recordTime}/{audioDuration || (contentType === "story" ? "30" : "120")}
                     </Text>
                 </View>
             )}
+
+            {/* Audio Indicator */}
+            {preSelectedAudio && (
+                <View style={styles.audioIndicator}>
+                    <Ionicons name="musical-notes" size={20} color="#0095f6" />
+                    <Text style={styles.audioName}>{preSelectedAudio.title}</Text>
+                    {audioDuration && (
+                        <Text style={styles.audioDuration}> • {audioDuration}s</Text>
+                    )}
+                </View>
+            )}
+
 
             {/* Vertical Zoom Slider */}
             <View
@@ -231,15 +483,28 @@ const CameraScreen = ({ onImagePick, setContentType, contentType }: any) => {
                 </TouchableOpacity>
 
                 {/* Record Button */}
-                <TouchableOpacity
+                {/* <TouchableOpacity
                     style={[styles.recordButton, isRecording && styles.recordingButton]}
                     onPress={isRecording ? stopRecording : startRecording}
-                />
+                /> */}
+                <TouchableOpacity
+                    onPress={isRecording ? stopRecordingWithAudio : startRecordingWithAudio}
+                    style={[
+                        styles.recordButton,
+                        isRecording && styles.recordingButton
+                    ]}
+                    disabled={isRecording && !cameraRef.current}
+                >
+                    {/* Button content */}
+                </TouchableOpacity>
+
+
 
                 {/* Gallery */}
                 <TouchableOpacity style={styles.button} onPress={pickVideo}>
                     <Ionicons name="images-outline" size={30} color="white" />
                 </TouchableOpacity>
+
             </View>
         </View>
     );
@@ -259,6 +524,30 @@ const styles = StyleSheet.create({
         width: "100%",
         zIndex: 10,
         paddingHorizontal: 20,
+    },
+    audioIndicator: {
+        position: 'absolute',
+        top: 120,
+        alignSelf: 'center',
+        flexDirection: 'row',
+        alignItems: 'center',
+        backgroundColor: 'rgba(0, 0, 0, 0.7)',
+        paddingHorizontal: 16,
+        paddingVertical: 8,
+        borderRadius: 20,
+        borderWidth: 1,
+        borderColor: '#0095f6',
+    },
+    audioName: {
+        color: 'white',
+        marginLeft: 8,
+        fontSize: 14,
+        fontWeight: '600',
+    },
+    audioDuration: {
+        color: '#0095f6',
+        fontSize: 12,
+        fontWeight: '600',
     },
     contentTypeButton: {
         flexDirection: "row",
