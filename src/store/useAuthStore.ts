@@ -144,6 +144,7 @@ interface AuthState {
   token: string;
   verifyingEmail: boolean;
   verifyingPhone: boolean;
+  resetOtpFlow: () => void;
 
   setEmailOrPhone: (value: string) => void;
   setEmail: (value: string) => void;
@@ -228,6 +229,15 @@ export const useAuthStore = create<AuthState>((set) => ({
       await AsyncStorage.removeItem("accessToken");
     }
   },
+  resetOtpFlow: () =>
+  set({
+    otpSent: false,
+    emailOtpSent: false,
+    phoneOtpSent: false,
+    otp: ["", "", "", "", "", ""],
+    verifyingEmail: false,
+    verifyingPhone: false,
+  }),
 
   resetAuth: () =>
     set({
