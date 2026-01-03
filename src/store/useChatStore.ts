@@ -95,7 +95,7 @@ type ChatState = {
 
   setCurrentChat: (chatId: string) => void;
   clearCurrentChat: () => void;
-  getMessages: () => Message[]|[];
+  getMessages: () => Message[] | [];
   addMessage: (msg: Message) => void;
   deleteMessageForMe: (msgId: string) => void;
   deleteMessageForEveryone: (msgId: string) => void;
@@ -116,16 +116,16 @@ export const useChatStore = create<ChatState>((set, get) => ({
   setChats: (chats) => set({ chats }),
 
   // Set the current chat
-  setCurrentChat: (chatId) =>
-  {
+  setCurrentChat: (chatId) => {
     set((state) => ({
       currentChatId: chatId,
       messages: { ...state.messages, [chatId]: state.messages[chatId] ?? [] },
       selectedMessage: null,
-    }))},
+    }))
+  },
 
   // Clear the current chat messages from store
-  clearCurrentChat: () =>{
+  clearCurrentChat: () => {
     console.log("clearing current chat")
     set((state) => {
       const chatId = state.currentChatId;
@@ -135,14 +135,15 @@ export const useChatStore = create<ChatState>((set, get) => ({
         currentChatId: null,
         selectedMessage: null,
       };
-    })},
-    getMessages: () => {
-  const state = get();
-  if (!state.currentChatId) return [];
-  return state.messages[state.currentChatId] ?? [];
-},
+    })
+  },
+  getMessages: () => {
+    const state = get();
+    if (!state.currentChatId) return [];
+    return state.messages[state.currentChatId] ?? [];
+  },
 
-  addMessage: (msg) =>{
+  addMessage: (msg) => {
     set((state) => {
       const chatId = state.currentChatId;
       if (!chatId) return state;
@@ -151,7 +152,8 @@ export const useChatStore = create<ChatState>((set, get) => ({
       return {
         messages: { ...state.messages, [chatId]: [...existing, msg] },
       };
-    })},
+    })
+  },
   deleteMessageForMe: (msgId) =>
     set((state) => {
       const chatId = state.currentChatId;

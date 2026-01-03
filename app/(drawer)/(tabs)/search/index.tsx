@@ -221,16 +221,16 @@ export default function ExploreScreen() {
             >
               <View style={styles.masonryRow}>
                 {/* {columns.map((col, colIndex) => (
-                  <View key={colIndex} style={styles.column}>
-                    {col.map((item) => (
-                      <ThumbnailCard
-                        key={item.id}
-                        item={item}
-                        router={router}
-                      />
-                    ))}
-                  </View>
-                ))} */}
+                    <View key={colIndex} style={styles.column}>
+                      {col.map((item) => (
+                        <ThumbnailCard
+                          key={item.id}
+                          item={item}
+                          router={router}
+                        />
+                      ))}
+                    </View>
+                  ))} */}
                 {columns.map((col, colIndex) => (
                   <View key={`col-${colIndex}`} style={styles.column}>
                     {col.map((item, itemIndex) => (
@@ -245,9 +245,9 @@ export default function ExploreScreen() {
 
               </View>
               {/* 
-              {isFetchingNextPage && (
-                <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
-              )} */}
+                {isFetchingNextPage && (
+                  <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+                )} */}
               {isFetchingNextPage && !isRefetching && (
                 <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
               )}
