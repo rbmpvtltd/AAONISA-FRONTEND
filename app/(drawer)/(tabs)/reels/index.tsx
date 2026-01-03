@@ -941,6 +941,7 @@ import {
 } from "react-native";
 import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
+import AudioBottomSheet from './AudioBottomSheet';
 import VideoProgressBar from './videoProgressBar';
 
 
@@ -978,6 +979,8 @@ const ReelItem = ({
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
 
+
+
   const {
     liked,
     likesCount,
@@ -988,6 +991,11 @@ const ReelItem = ({
     id: item.uuid || item.id,
     likeMutation,
   });
+
+
+  const TOP_OFFSET = 100; // StatusBar (40) + Tabs (60)
+  const VIDEO_HEIGHT = SCREEN_HEIGHT - TOP_OFFSET;
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
 
   //  Single useEffect for mount/unmount
   useEffect(() => {
@@ -1135,9 +1143,10 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                height: VIDEO_HEIGHT,
                 zIndex: 1,
-                opacity: showThumbnail ? 0 : 1,
+                // opacity: showThumbnail ? 0 : 1,
+                top: TOP_OFFSET,
               }}
               resizeMode="cover"
               fadeDuration={0} // Instant load for better UX
@@ -1161,8 +1170,11 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
+                // height: SCREEN_HEIGHT,
                 zIndex: showThumbnail ? 0 : 2,
+
+                top: TOP_OFFSET,
+                height: VIDEO_HEIGHT,
               }}
               player={player}
               contentFit="cover"
@@ -1233,12 +1245,26 @@ const ReelItem = ({
           )}
         </View>
 
-        <View style={styles.musicInfo}>
+        {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
             {item.audio?.name || "Original Sound"}
           </Text>
-        </View>
+        </View> */}
+
+        <TouchableOpacity
+          style={styles.musicInfo}
+          onPress={() => setShowAudioSheet(true)}
+          activeOpacity={0.7}
+        >
+          <Text style={styles.musicIcon}>♪</Text>
+          <Text style={styles.musicText} numberOfLines={1}>
+            {item.audio?.isOriginal === false
+              ? item.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
+        </TouchableOpacity>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1611,6 +1637,7 @@ const ReelsFeed = () => {
       <StatusBar hidden />
 
       {/* Top Navigation Bar with Tabs */}
+      <View style={styles.topBarBackground} />
       <View style={styles.topBar}>
         <View style={styles.tabsContainer}>
           {['Explore', 'News', 'Followings'].map((tab) => (
@@ -1715,14 +1742,24 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black'
   },
-
+  topBarBackground: {
+    position: 'absolute',
+    top: 0,
+    left: 0,
+    right: 0,
+    height: 100,  // StatusBar (40) + Tabs area (60)
+    backgroundColor: 'black',
+    zIndex: 998,  // Behind tabs but above video
+  },
   topBar: {
     position: 'absolute',
-    top: 40,
+    top: 35,
     left: 0,
     right: 0,
     zIndex: 999,
     alignItems: 'center',
+    backgroundColor: 'transparent',
+    paddingVertical: 10,
   },
 
   tabsContainer: {
