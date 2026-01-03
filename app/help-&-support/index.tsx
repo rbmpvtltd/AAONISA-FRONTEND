@@ -10,6 +10,8 @@ interface CopyrightForm {
   contentLink: string;
 }
 
+const SUPPORT_EMAIL = "hithoy.help@gmail.com";
+
 const HelpSupportScreen: React.FC = () => {
   const theme = useAppTheme();
   const [expandedTopic, setExpandedTopic] = useState<string | null>(null);
@@ -24,24 +26,44 @@ const HelpSupportScreen: React.FC = () => {
     setExpandedTopic(expandedTopic === topicId ? null : topicId);
   };
 
+
   const handleEmailSupport = () => {
-    Linking.openURL('mailto:support@example.com?subject=Support Request');
+    Linking.openURL(`mailto:${SUPPORT_EMAIL}?subject=Support Request`);
   };
+
 
   const handleSubmitCopyright = () => {
     if (!copyrightForm.name || !copyrightForm.proof || !copyrightForm.contentLink) {
-      // Alert.alert('Error', 'Please fill in all fields');
-      Toast.show({ type: "error", text1: 'Error', text2: 'Please fill in all fields' });
+      Toast.show({
+        type: "error",
+        text1: "Error",
+        text2: "Please fill in all fields",
+      });
       return;
     }
 
-    const emailBody = `Name: ${copyrightForm.name}%0D%0AProof of Ownership: ${copyrightForm.proof}%0D%0AContent Link: ${copyrightForm.contentLink}`;
-    Linking.openURL(`mailto:copyright@example.com?subject=Copyright Infringement Report&body=${emailBody}`);
+    const body = `
+Name: ${copyrightForm.name}
 
-    setCopyrightForm({ name: '', proof: '', contentLink: '' });
+Proof of Ownership:
+${copyrightForm.proof}
+
+Content Link:
+${copyrightForm.contentLink}
+  `;
+
+    Linking.openURL(
+      `mailto:${SUPPORT_EMAIL}?subject=Copyright Infringement Report&body=${encodeURIComponent(body)}`
+    );
+
+    setCopyrightForm({ name: "", proof: "", contentLink: "" });
     setShowCopyrightForm(false);
-    // Alert.alert('Success', 'Your copyright report has been submitted');
-    Toast.show({ type: "success", text1: "Success", text2: "Your copyright report has been submitted" })
+
+    Toast.show({
+      type: "success",
+      text1: "Success",
+      text2: "Your copyright report has been submitted",
+    });
   };
 
   const styles = StyleSheet.create({
@@ -401,7 +423,7 @@ const HelpSupportScreen: React.FC = () => {
             </View>
             <View>
               <Text style={styles.contactTitle}>Email Support</Text>
-              <Text style={styles.emailText}>support@example.com</Text>
+              <Text style={styles.emailText}>hithoy.help@gmail.com</Text>
             </View>
           </View>
           <Text style={styles.chevron}>▶</Text>

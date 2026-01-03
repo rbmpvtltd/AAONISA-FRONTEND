@@ -70,6 +70,15 @@ export default function CustomDrawer(props: any) {
     );
   };
 
+  const navigateAndClose = (
+    path: Parameters<typeof router.push>[0]
+  ) => {
+    props.navigation.closeDrawer();
+
+    setTimeout(() => {
+      router.push(path);
+    }, 250);
+  };
 
   return (
     <SafeAreaView style={{ flex: 1 }}>
@@ -89,7 +98,7 @@ export default function CustomDrawer(props: any) {
             )}
             labelStyle={{ color: theme.text }}
             onPress={() => {
-              router.push("/profile/edit")
+              navigateAndClose("/profile/edit")
             }}
           />
 
@@ -99,7 +108,9 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="star-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/(drawer)/comming-soon") }}
+            onPress={() => {
+              navigateAndClose("/(drawer)/comming-soon")
+            }}
           />
 
           <DrawerItem
@@ -108,7 +119,9 @@ export default function CustomDrawer(props: any) {
               <MaterialIcons name="workspace-premium" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/(drawer)/comming-soon") }}
+            onPress={() => {
+              navigateAndClose("/(drawer)/comming-soon")
+            }}
           />
 
           <DrawerItem
@@ -117,7 +130,10 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="bookmark-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/(drawer)/(tabs)/profile/savedScreen") }}
+
+            onPress={() => {
+              navigateAndClose("/(drawer)/(tabs)/profile/savedScreen")
+            }}
           />
 
           <DrawerItem
@@ -126,7 +142,9 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="help-circle-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/help-&-support") }}
+            onPress={() => {
+              navigateAndClose("/help-&-support")
+            }}
           />
 
           <DrawerItem
@@ -135,7 +153,9 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="lock-closed-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/privecy-policy") }}
+            onPress={() => {
+              navigateAndClose("/privecy-policy")
+            }}
           />
 
           <DrawerItem
@@ -144,7 +164,9 @@ export default function CustomDrawer(props: any) {
               <Ionicons name="document-text-outline" color={theme.text} size={size} />
             )}
             labelStyle={{ color: theme.text }}
-            onPress={() => { router.push("/terms-&-conditions") }}
+            onPress={() => {
+              navigateAndClose("/terms-&-conditions")
+            }}
           />
 
           {/*Dark Mode */}

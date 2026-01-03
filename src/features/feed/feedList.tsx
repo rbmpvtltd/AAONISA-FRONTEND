@@ -172,6 +172,9 @@ export const FeedList = () => {
     itemVisiblePercentThreshold: 80,
   });
 
+  // const [randomSeed] = useState(() => Math.random());
+  const [randomSeed, setRandomSeed] = useState(Date.now());
+
   const {
     data,
     fetchNextPage,
@@ -181,16 +184,45 @@ export const FeedList = () => {
     isError,
     refetch,
   } = useInfiniteQuery({
-    queryKey: ["admin-videos-feed"],
-    queryFn: ({ pageParam = 1 }) =>
-      getAdminVideosFeed(pageParam, 10),
+    queryKey: ["admin-videos-feed", randomSeed],
+    enabled: isFocused,
+
+    queryFn: async ({ pageParam = 1 }) => {
+      console.log("🔥 FETCH admin feed page:", pageParam);
+
+      const useRandom = pageParam === 1;
+      const res = await getAdminVideosFeed(pageParam, 10, useRandom);
+
+      const rawData = Array.isArray(res?.data) ? res.data : [];
+
+      const parsed = rawData
+        .filter((item: any) => item?.id && item?.videoUrl)
+        .map((item: any) => ({
+          ...item,
+          likes: item.likesCount || 0,
+          comments: item.commentsCount || 0,
+          shares: item.sharesCount || 0,
+          isLiked: item.isLiked || false,
+        }));
+
+      console.log(`✅ Parsed ${parsed.length} admin reels (random: ${useRandom})`);
+
+      return {
+        reels: parsed,
+        nextPage: parsed.length < 10 ? null : pageParam + 1,
+      };
+    },
+
     initialPageParam: 1,
-    getNextPageParam: (lastPage) =>
-      lastPage.hasNextPage ? lastPage.page + 1 : undefined,
+    getNextPageParam: (lastPage) => lastPage.nextPage,
+
+    staleTime: 0,
+    gcTime: 10000,
   });
 
+
   const feedVideos =
-    data?.pages.flatMap(page => page.data) ?? [];
+    data?.pages.flatMap(page => page.reels) ?? [];
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: any) => {
@@ -209,6 +241,16 @@ export const FeedList = () => {
     (id: string) => router.push(`../../../comment/${id}`),
     []
   );
+
+  const handleEndReached = useCallback(() => {
+    console.log(`🎯 End! hasNext: ${hasNextPage}`);
+    if (hasNextPage && !isFetchingNextPage) {
+      console.log("🚀 Loading page", (data?.pages || []).length + 1);
+      fetchNextPage();
+    }
+  }, [hasNextPage, isFetchingNextPage, fetchNextPage, data]);
+
+
   if (isLoading) {
     return (
       <View style={{ flex: 1, justifyContent: "center", backgroundColor: "#000" }}>
@@ -231,8 +273,8 @@ export const FeedList = () => {
     <View style={{ flex: 1, backgroundColor: "#000" }}>
       <FlatList
         data={feedVideos}
-        keyExtractor={(item) => item.id}
-        // keyExtractor={(item, index) => item?.id ? String(item.id) : `feed-item-${index}`}
+        // keyExtractor={(item) => item.id}
+        keyExtractor={(item, index) => item?.id ? String(item.id) : `feed-item-${index}`}
         renderItem={({ item, index }) => (
           <FeedItem
             item={item}
@@ -252,12 +294,25 @@ export const FeedList = () => {
         showsVerticalScrollIndicator={false}
         viewabilityConfig={viewConfigRef.current}
         onViewableItemsChanged={onViewableItemsChanged}
-        onEndReached={() => {
-          if (hasNextPage && !isFetchingNextPage) {
-            fetchNextPage();
-          }
-        }}
-        onEndReachedThreshold={0.5}
+        onEndReached={handleEndReached}
+        onEndReachedThreshold={0.8}
+      // onEndReached={() => {
+      //   if (hasNextPage && !isFetchingNextPage) {
+      //     fetchNextPage();
+      //   }
+      // }}
+      // onEndReachedThreshold={0.5}
+
+      // ListFooterComponent={
+      //   isFetchingNextPage ? (
+      //     <View style={{ padding: 30, alignItems: "center" }}>
+      //       <ActivityIndicator size="large" color="#fff" />
+      //       <Text style={{ color: "#fff", marginTop: 10 }}>
+      //         Loading more...
+      //       </Text>
+      //     </View>
+      //   ) : null
+      // }
       />
 
       {isFetchingNextPage && (

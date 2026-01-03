@@ -14,7 +14,7 @@ const getToken = async () => {
   }
 };
 
-export async function getAdminVideosFeed(page: number, limit: number) {
+export async function getAdminVideosFeed(page: number, limit: number, random: boolean = false) {
   const token = await getToken();
 
   const config = {
@@ -25,7 +25,7 @@ export async function getAdminVideosFeed(page: number, limit: number) {
     // withCredentials: true,
   };
 
-  const apiUrl = createApiUrl(`/videos/getAdminVideosFeed?page=${page}&limit=${limit}`);
+  const apiUrl = createApiUrl(`/videos/getAdminVideosFeed?page=${page}&limit=${limit}&random=${random}`);
   const { data } = await axios.get(apiUrl, config);
   console.log("data", data);
 

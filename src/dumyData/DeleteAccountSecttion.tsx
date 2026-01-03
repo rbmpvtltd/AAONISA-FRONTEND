@@ -1,4 +1,5 @@
 import { Ionicons } from "@expo/vector-icons";
+import { useRouter } from "expo-router";
 import { useState } from "react";
 import { Alert, Text, TouchableOpacity, View } from "react-native";
 import { useAppTheme } from "../constants/themeHelper";
@@ -7,10 +8,10 @@ type DeleteAccountProps = {
   theme: ReturnType<typeof useAppTheme>;
 };
 
-export const DeleteAccountSection :React.FC<DeleteAccountProps> = ({ theme }) => {
+export const DeleteAccountSection: React.FC<DeleteAccountProps> = ({ theme }) => {
   const [selectedReason, setSelectedReason] = useState("");
   const [showDeleteButton, setShowDeleteButton] = useState(false);
-
+  const router = useRouter();
   const reasons = [
     "I am not using the app",
     "I have another account",
@@ -19,7 +20,7 @@ export const DeleteAccountSection :React.FC<DeleteAccountProps> = ({ theme }) =>
     "Other reasons",
   ];
 
-  const handleReason = (reason : any) => {
+  const handleReason = (reason: any) => {
     setSelectedReason(reason);
     setShowDeleteButton(true);
   };
@@ -27,18 +28,23 @@ export const DeleteAccountSection :React.FC<DeleteAccountProps> = ({ theme }) =>
   const confirmDelete = () => {
     Alert.alert(
       "Delete Account",
-      "Are you sure you want to delete your account?\n\nAdmin will review your request and your account will be permanently deleted within 15 days.",
+      "Your request to delete your account has been received.\n\nYour account will be scheduled for deletion. You can recover your account within 30 days by logging back in.",
+
       [
         { text: "Cancel", style: "cancel" },
-        { text: "Yes, Delete", style: "destructive", onPress: () => console.log("Delete Requested") },
+        {
+          text: "Yes, Delete", style: "destructive", onPress: () =>
+            router.push("/")
+        },
       ]
     );
+
   };
 
   return (
     <View>
       <Text style={{ color: theme.text, fontSize: 14, marginBottom: 10, lineHeight: 22 }}>
-        Your account will be deleted by admin.  
+        Your account will be deleted by admin.
         After you request deletion, your account will be permanently removed within 15 days.
       </Text>
 
