@@ -1044,7 +1044,7 @@ export const ProfileScreen: React.FC = () => {
         currentUser?.username === profile?.username ||
         currentUser?.id === profile?.id;
 
-    console.log("who mention ", profile?.mentionedVideos || []);
+    console.log('vvvvvvvvvvvvvvvvvvvvvvvv', profile);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <TopHeader

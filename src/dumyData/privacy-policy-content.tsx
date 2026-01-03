@@ -72,11 +72,11 @@ export const getPrivacyPolicySections = (theme: ReturnType<typeof useAppTheme>):
         <TouchableOpacity
           onPress={() => {
             // mailto link
-            Linking.openURL(`mailto:support@yourapp.com`);
+            Linking.openURL(`mailto:hithoy.help@gmail.com`);
           }}
         >
           <Text style={{ color: theme.link, textDecorationLine: "underline" }}>
-            support@yourapp.com
+            hithoy.help@gmail.com
           </Text>
         </TouchableOpacity>
       </View>
@@ -85,9 +85,9 @@ export const getPrivacyPolicySections = (theme: ReturnType<typeof useAppTheme>):
   {
     id: "Delete",
     title: " 10. Delete Your Account",
-    body:(
-          <DeleteAccountSection theme={theme} />
+    body: (
+      <DeleteAccountSection theme={theme} />
     )
-     
+
   }
 ];

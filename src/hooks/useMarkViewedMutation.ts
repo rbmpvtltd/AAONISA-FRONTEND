@@ -1,3 +1,4 @@
+import { queryClient } from "@/app/_layout";
 import { useMutation } from "@tanstack/react-query";
 import { markViewed } from "../api/profile-api";
 
@@ -5,6 +6,7 @@ export const useMarkViewedMutation = (reelId: string) => {
   return useMutation({
     mutationFn: () => markViewed(reelId),
     onSuccess: () => {
+      queryClient.invalidateQueries({ queryKey: ["userProfile"] });
       console.log("✅ View marked successfully!");
     },
     onError: (error) => {
