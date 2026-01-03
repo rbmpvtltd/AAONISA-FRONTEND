@@ -941,7 +941,6 @@ import {
 } from "react-native";
 import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-import AudioBottomSheet from './AudioBottomSheet';
 import VideoProgressBar from './videoProgressBar';
 
 
@@ -977,8 +976,6 @@ const ReelItem = ({
   const markViewedMutation = useMarkViewedMutation(item.id);
   const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
-  // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
-  // const [liked, setLiked] = useState(item.isLiked ?? false);
   const isMountedRef = useRef(true);
 
   const {
@@ -991,11 +988,8 @@ const ReelItem = ({
     id: item.uuid || item.id,
     likeMutation,
   });
-  const TOP_OFFSET = 100; // StatusBar (40) + Tabs (60)
-  const VIDEO_HEIGHT = SCREEN_HEIGHT - TOP_OFFSET;
-  const [showAudioSheet, setShowAudioSheet] = useState(false);
 
-
+  //  Single useEffect for mount/unmount
   useEffect(() => {
     isMountedRef.current = true;
     return () => {
@@ -1017,28 +1011,35 @@ const ReelItem = ({
     }
   );
 
-  // Volume control
-  useEffect(() => {
-    if (!player) return;
-    player.volume = isMuted ? 0 : 1;
-  }, [isMuted, player]);
-
-  // Play/Pause logic
+  // Combined Play/Pause + Volume + Cleanup logic
   useEffect(() => {
     if (!player || !shouldLoadVideo) return;
 
-    if (!isFocused) {
-      player.pause();
-      return;
+    const shouldPlay = isFocused && currentIndex === index;
+
+    try {
+      if (shouldPlay) {
+        player.play();
+        player.volume = isMuted ? 0 : 1;
+      } else {
+        player.pause();
+        player.volume = 0;
+      }
+    } catch (error) {
+      console.log("Player control error:", error);
     }
 
-    if (currentIndex === index) {
-      player.play();
-      player.volume = isMuted ? 0 : 1;
-    } else {
-      player.pause();
-      player.volume = 0;
-    }
+    // Safe cleanup
+    return () => {
+      try {
+        if (player && isMountedRef.current) {
+          player.pause();
+          player.volume = 0;
+        }
+      } catch (error) {
+        console.log("Cleanup error:", error);
+      }
+    };
   }, [isFocused, currentIndex, index, isMuted, player, shouldLoadVideo]);
 
   useEffect(() => {
@@ -1060,10 +1061,10 @@ const ReelItem = ({
               setShowThumbnail(false);
             }
           }, 300);
-        }
 
-        if (player.status === "readyToPlay" && player.duration != null) {
-          setDuration(player.duration);
+          if (player.duration != null) {
+            setDuration(player.duration);
+          }
         }
       } catch (error) {
         console.log("Status change error:", error);
@@ -1074,30 +1075,6 @@ const ReelItem = ({
   }, [player]);
 
   // View tracking (10 seconds)
-  // useEffect(() => {
-  //   if (!shouldLoadVideo) return;
-
-  //   let frameId: number;
-  //   const checkTime = () => {
-  //     try {
-  //       if (currentIndex === index && player?.playing) {
-  //         const time = player.currentTime;
-  //         if (!viewed && time >= 10) {
-  //           setViewed(true);
-  //           markViewedMutation.mutate(item.uuid);
-  //           console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
-  //         }
-  //       }
-  //     } catch (e) {
-  //       console.log("View tracking error:", e);
-  //     }
-  //     frameId = requestAnimationFrame(checkTime);
-  //   };
-
-  //   frameId = requestAnimationFrame(checkTime);
-  //   return () => cancelAnimationFrame(frameId);
-  // }, [player, currentIndex, index, viewed, shouldLoadVideo, item.uuid, markViewedMutation]);
-
   useEffect(() => {
     if (!shouldLoadVideo) return;
 
@@ -1129,7 +1106,6 @@ const ReelItem = ({
 
   const reelId = item.uuid || item.id;
 
-
   // Long press handlers for pause/resume
   const handleLongPressIn = () => {
     setPaused(true);
@@ -1147,9 +1123,6 @@ const ReelItem = ({
     onLongPressOut: handleLongPressOut,
   });
 
-
-  console.log("item BBBBBBBBBBBBBBBBB+++++++++++++++++++", item);
-
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <GestureDetector gesture={composedGesture}>
@@ -1162,12 +1135,9 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                // height: SCREEN_HEIGHT,
+                height: SCREEN_HEIGHT,
                 zIndex: 1,
-
-                top: TOP_OFFSET,
-                height: VIDEO_HEIGHT,
-
+                opacity: showThumbnail ? 0 : 1,
               }}
               resizeMode="cover"
               fadeDuration={0} // Instant load for better UX
@@ -1191,11 +1161,8 @@ const ReelItem = ({
               style={{
                 position: 'absolute',
                 width: SCREEN_WIDTH,
-                // height: SCREEN_HEIGHT,
+                height: SCREEN_HEIGHT,
                 zIndex: showThumbnail ? 0 : 2,
-
-                top: TOP_OFFSET,
-                height: VIDEO_HEIGHT,
               }}
               player={player}
               contentFit="cover"
@@ -1266,40 +1233,12 @@ const ReelItem = ({
           )}
         </View>
 
-        {/* <View style={styles.musicInfo}>
+        <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
             {item.audio?.name || "Original Sound"}
           </Text>
-        </View> */}
-
-        {/* <TouchableOpacity
-          style={styles.musicInfo}
-          onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.musicIcon}>♪</Text>
-          <Text style={styles.musicText} numberOfLines={1}>
-            {item.audio?.isOriginal === false
-              ? item.audio?.name || "Unknown Audio"
-              : "Original Sound"}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
-        </TouchableOpacity> */}
-
-        <TouchableOpacity
-          style={styles.musicInfo}
-          onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
-        >
-          <Text style={styles.musicIcon}>♪</Text>
-          <Text style={styles.musicText} numberOfLines={1}>
-            {item.audio?.isOriginal === false
-              ? item.audio?.name || "Unknown Audio"
-              : "Original Sound"}
-          </Text>
-          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
-        </TouchableOpacity>
+        </View>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1342,7 +1281,7 @@ const ReelItem = ({
             });
           }}
         >
-          <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
+          <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
         </TouchableOpacity>
 
@@ -1669,13 +1608,8 @@ const ReelsFeed = () => {
 
   return (
     <View style={styles.container}>
-      <StatusBar hidden={false}
-        barStyle="light-content"
-        backgroundColor="black"
-        translucent={false} />
+      <StatusBar hidden />
 
-
-      <View style={styles.topBarBackground} />
       {/* Top Navigation Bar with Tabs */}
       <View style={styles.topBar}>
         <View style={styles.tabsContainer}>
@@ -1781,24 +1715,14 @@ const styles = StyleSheet.create({
     flex: 1,
     backgroundColor: 'black'
   },
-  topBarBackground: {
-    position: 'absolute',
-    top: 0,
-    left: 0,
-    right: 0,
-    height: 100,  // StatusBar (40) + Tabs area (60)
-    backgroundColor: 'black',
-    zIndex: 998,  // Behind tabs but above video
-  },
+
   topBar: {
     position: 'absolute',
-    top: 35,
+    top: 40,
     left: 0,
     right: 0,
     zIndex: 999,
     alignItems: 'center',
-    backgroundColor: 'transparent',
-    paddingVertical: 10,
   },
 
   tabsContainer: {
@@ -1862,10 +1786,7 @@ const styles = StyleSheet.create({
 
   musicInfo: {
     flexDirection: 'row',
-    alignItems: 'center',
-    paddingVertical: 4, // n
-    maxWidth: '85%', // n
-
+    alignItems: 'center'
   },
 
   musicIcon: {
@@ -1876,10 +1797,7 @@ const styles = StyleSheet.create({
 
   musicText: {
     color: '#fff',
-    fontSize: 13,
-    flex: 1, // n
-    marginRight: 4,
-
+    fontSize: 13
   },
 
   rightActions: {

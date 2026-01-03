@@ -1396,12 +1396,13 @@ export default function ChatDetailScreen() {
         <View style={[styles.container, { padding }]}>
           <FlatList
             ref={flatRef}
-            data={chatMessages
-              .slice()
-              .sort(
-                (a, b) =>
-                  new Date(a.createdAt).getTime() - new Date(b.createdAt).getTime()
-              )}
+            data={ //chatMessages
+              // .slice()
+              // .sort(
+              //   (a, b) =>
+              //     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
+              // ) || 
+              chatMessages.sort((a, b) => b.createdAt - a.createdAt)}
             keyExtractor={(item) => item.id.toString()}
             renderItem={({ item }) => (
               <MessageBubble
@@ -1411,6 +1412,7 @@ export default function ChatDetailScreen() {
                 onLongPress={(msg) => setSelectedMessage(msg)}
               />
             )}
+            // inverted
             contentContainerStyle={{ paddingBottom: 20 }}
             showsVerticalScrollIndicator={false}
             onContentSizeChange={() => {
