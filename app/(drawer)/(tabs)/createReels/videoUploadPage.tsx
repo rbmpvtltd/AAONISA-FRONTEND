@@ -65,6 +65,14 @@ interface VideoPreviewProps {
         selectedMusicId: string | null,
         musicVolume: number
     ) => void;
+    // preSelectedAudio: () => void;
+    preSelectedAudio?: {
+        id: string;
+        title: string;
+        artist: string;
+        uri: string;
+        coverImage?: string;
+    } | null;
 }
 
 export const VideoPreview: React.FC<VideoPreviewProps> = ({
@@ -73,6 +81,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     musicOptions,
     onDiscard,
     onUpload,
+    preSelectedAudio,
 }) => {
     const videoRef = useRef<Video>(null);
     const [isPlaying, setIsPlaying] = useState(false);
@@ -95,6 +104,8 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
     const [isUploadingStory, setIsUploadingStory] = useState(false);
     const router = useRouter()
 
+    const hasPreSelectedAudio = preSelectedAudio && preSelectedAudio.uri;
+
     const prevMusicVolume = useRef(50);
     function filterNameToHex(filter: string): string {
         switch (filter?.toLowerCase()) {
@@ -108,6 +119,33 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
             default: return "#00000000"; // transparent fallback
         }
     }
+
+    // useEffect(() => {
+    //     if (preSelectedAudio) {
+    //         // Add to music options if not already there
+    //         const exists = musicOptions.find(m => m.id === preSelectedAudio.id);
+    //         if (!exists) {
+    //             musicOptions.push({
+    //                 id: preSelectedAudio.id,
+    //                 title: preSelectedAudio.title,
+    //                 artist: preSelectedAudio.artist,
+    //                 uri: preSelectedAudio.uri,
+    //             });
+    //         }
+
+    //         // Auto-select it
+    //         setSelectedMusicId(preSelectedAudio.id);
+
+    //         // Store in upload store
+    //         useUploadStore.getState().selectMusic({
+    //             id: preSelectedAudio.id,
+    //             uri: preSelectedAudio.uri,
+    //             startMs: 0,
+    //             endMs: 30000, // Default 30 seconds
+    //             volume: 50,
+    //         });
+    //     }
+    // }, [preSelectedAudio]);
 
     function mapOverlayToBackend(overlay: any) {
         console.log(overlay)
@@ -391,9 +429,21 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                     zIndex: 110,
                                 }}
                             >
-                                <TouchableOpacity onPress={() => setIsSelectingMusic(true)}>
-                                    <Ionicons name="musical-notes" size={32} color="white" />
-                                </TouchableOpacity>
+                                {!hasPreSelectedAudio && (
+                                    <TouchableOpacity onPress={() => setIsSelectingMusic(true)}>
+                                        <Ionicons name="musical-notes" size={32} color="white" />
+                                    </TouchableOpacity>
+                                )}
+
+
+                                {hasPreSelectedAudio && (
+                                    <View style={{
+                                        display: "none"
+                                    }}>
+                                        <Ionicons name="musical-note" size={28} color="#0095f6" />
+                                    </View>
+                                )}
+
                                 <TouchableOpacity onPress={() => setIsTrimming(true)}>
                                     <Ionicons name="cut" size={32} color="white" />
                                 </TouchableOpacity>
@@ -499,7 +549,7 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
 
                         {/* Music Selection Overlay */}
                         {isSelectingMusic && (
-                            <MusicScreen setIsSelectingMusic={setIsSelectingMusic} setSelectedMusicId={setSelectedMusicId} musicOptions={musicOptions} isSelectingMusic={isSelectingMusic} selectedMusicId={selectedMusicId} soundRef={soundRef} />
+                            <MusicScreen setIsSelectingMusic={setIsSelectingMusic} setSelectedMusicId={setSelectedMusicId} musicOptions={musicOptions} isSelectingMusic={isSelectingMusic} selectedMusicId={selectedMusicId} soundRef={soundRef} preSelectedAudio={preSelectedAudio} />
 
                         )}
 

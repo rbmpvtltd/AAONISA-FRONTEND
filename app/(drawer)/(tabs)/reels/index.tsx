@@ -1321,6 +1321,64 @@ const ReelItem = ({
         }}
         videoId={item.id || item.uuid}
       />
+
+      <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: item.audio?.isOriginal ?? true,
+          name: item.audio?.name,
+          artist: item.audio?.artist,
+          coverImage: item.audio?.coverImage || item.thumbnailUrl,
+          duration: item.audio?.duration,
+          usedCount: item.audio?.usedCount,
+          videos: item.audio?.videos || [],
+          audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+        }}
+        uploaderInfo={{
+          username: item.user.username,
+          profilePic: item.user.profilePic,
+        }}
+
+        onUseAudio={async () => {
+          console.log('🎵 Use Audio clicked:', item);
+
+          try {
+            router.push({
+              pathname: '/(drawer)/(tabs)/createReels',
+              params: {
+                // Audio metadata
+                audioId: item.audio?.id || `audio_${item.id}`,
+                audioUrl: item.videoUrl,
+                audioName: item.audio?.isOriginal === false
+                  ? item.audio?.name
+                  : 'Original Sound',
+                audioArtist: item.audio?.isOriginal === false
+                  ? item.audio?.artist
+                  : item.user.username,
+                isOriginal: String(item.audio?.isOriginal ?? true),
+
+                // ✅ NEW: Add these fields
+                preSelectedAudio: 'true',  // Flag to indicate audio is pre-selected
+                coverImage: item.thumbnailUrl || item.audio?.coverImage,
+              }
+            });
+          } catch (error) {
+            console.error('❌ Audio use error:', error);
+            alert('Failed to use audio. Please try again.');
+          }
+        }}
+
+        onVideoPress={(videoId) => {
+          console.log('Video clicked:', videoId);
+          setShowAudioSheet(false);
+          // Navigate to that specific video
+          router.push({
+            pathname: '/(drawer)/(tabs)/reels',
+            params: { videoId, tab: activeTab }
+          });
+        }}
+      />
     </View>
   );
 };

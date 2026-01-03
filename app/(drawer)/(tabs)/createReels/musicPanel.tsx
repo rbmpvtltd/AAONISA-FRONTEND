@@ -3,7 +3,7 @@ import { useUploadStore } from "@/src/store/reelUploadStore";
 import { Ionicons } from "@expo/vector-icons";
 import Slider from "@react-native-community/slider";
 import { Audio } from "expo-av";
-import  { useEffect, useRef, useState } from "react";
+import { useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   ScrollView,
@@ -12,7 +12,7 @@ import {
   TouchableOpacity,
   View,
 } from "react-native";
-const MusicScreen = ({ setIsSelectingMusic, setSelectedMusicId, musicOptions, isSelectingMusic, selectedMusicId, soundRef }: { setIsSelectingMusic: any, setSelectedMusicId: any, musicOptions: any, isSelectingMusic: any, selectedMusicId: any, soundRef: any }) => {
+const MusicScreen = ({ setIsSelectingMusic, setSelectedMusicId, musicOptions, isSelectingMusic, selectedMusicId, soundRef, preSelectedAudio }: { setIsSelectingMusic: any, setSelectedMusicId: any, musicOptions: any, isSelectingMusic: any, selectedMusicId: any, soundRef: any, preSelectedAudio?: any; }) => {
   const [soundDuration, setSoundDuration] = useState(0);
   const [soundPosition, setSoundPosition] = useState(0);
   const [range, setRange] = useState({ from: 0, to: 0 });
@@ -21,8 +21,6 @@ const MusicScreen = ({ setIsSelectingMusic, setSelectedMusicId, musicOptions, is
 
   const [startInput, setStartInput] = useState({ min: "0", sec: "0" });
   const [endInput, setEndInput] = useState({ min: "0", sec: "0" });
-
-
 
   // Cleanup sound on unmount
   useEffect(() => {
@@ -45,6 +43,7 @@ const MusicScreen = ({ setIsSelectingMusic, setSelectedMusicId, musicOptions, is
     //   cleanupSound();
     // };
   }, [selectedMusicId, range]);
+
   const getSelectedMusicMetadata = (music: any, range: { from: number; to: number }) => {
     if (!music || !music.uri) return null;
 
@@ -73,6 +72,8 @@ const MusicScreen = ({ setIsSelectingMusic, setSelectedMusicId, musicOptions, is
     setSoundDuration(0);
     setRange({ from: 0, to: 0 });
   };
+
+
 
   const onPlaybackStatusUpdate = (status: any, jobId: number) => {
     // Ignore old jobs
