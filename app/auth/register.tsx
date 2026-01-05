@@ -38,6 +38,8 @@ const Register = () => {
   const [showPassword, setShowPassword] = React.useState(false);
   const [acceptTerms, setAcceptTerms] = React.useState(false);
   const [usernameAvailable, setUsernameAvailable] = React.useState(null);
+  const [otpTimer, setOtpTimer] = React.useState(0);
+
 
   const {
     emailOrPhone,
@@ -50,12 +52,26 @@ const Register = () => {
     setPassword,
     setOtp,
     setOtpSent,
-    resetAuth
+    resetAuth,
+    resetOtpFlow
   } = useAuthStore();
 
 
   // declare refs (same file where TextInput is imported from 'react-native')
   const otpRefs = React.useRef<(TextInput | null)[]>([]);
+  const startOtpTimer = () => {
+    setOtpTimer(60);
+  };
+
+  useEffect(() => {
+    if (otpTimer === 0) return;
+
+    const interval = setInterval(() => {
+      setOtpTimer((prev) => prev - 1);
+    }, 1000);
+
+    return () => clearInterval(interval);
+  }, [otpTimer]);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -90,20 +106,52 @@ const Register = () => {
   //   setUsernameAvailable(res.available);
   // };
 
+  // const handleSendOtp = async () => {
+  //   try {
+  //     const data = await registerUser({ emailOrPhone, username });
+  //     if (data.success) {
+  //       setOtpSent(true);
+  //       // Alert.alert("OTP Sent", "Check your email/phone for the OTP");
+  //       Toast.show({ type: "success", text1: "OTP Sent", text2: "Check your email/phone for the OTP" })
+  //     } else {
+  //       // Alert.alert("Error", data.message);
+  //       Toast.show({ type: "error", text1: "Error", text2: data.message });
+  //     }
+  //   } catch (error) {
+  //     // Alert.alert("Error", "invalid OTP");
+  //     Toast.show({ type: "error", text1: "Error", text2: "invalid OTP" })
+  //   }
+  // };
   const handleSendOtp = async () => {
     try {
       const data = await registerUser({ emailOrPhone, username });
       if (data.success) {
         setOtpSent(true);
-        // Alert.alert("OTP Sent", "Check your email/phone for the OTP");
-        Toast.show({ type: "success", text1: "OTP Sent", text2: "Check your email/phone for the OTP" })
-      } else {
-        // Alert.alert("Error", data.message);
-        Toast.show({ type: "error", text1: "Error", text2: data.message });
+        Toast.show({
+          type: "success",
+          text1: "OTP Sent",
+          text2: "Check your email/phone",
+        });
+        startOtpTimer(); // ⏱ timer start
+      }else{
+        Toast.show({
+          type: "error",
+          text1: "Error",
+          text2: data.message,
+        });
       }
-    } catch (error) {
-      // Alert.alert("Error", "invalid OTP");
-      Toast.show({ type: "error", text1: "Error", text2: "invalid OTP" })
+    } catch (err: any) {
+      resetOtpFlow(); // 🔥 IMPORTANT
+      
+      const msg =
+        err?.response?.data?.message ||
+        "Email / Phone / Username already in use";
+
+      Toast.show({
+        type: "error",
+        text1: "Conflict",
+        text2: msg,
+      });
     }
   };
 
@@ -145,15 +193,30 @@ const Register = () => {
 
   // FIX: Email/Phone input handler
   const handleEmailPhoneChange = (text: string) => {
-    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    const cleanText = text.toLowerCase().replace(/\s+/g, "");
     setEmailOrPhone(cleanText);
+    resetOtpFlow();
+    setOtpTimer(0);
   };
+
 
   // FIX: Username input handler
   const handleUsernameChange = (text: string) => {
-    const cleanText = text.toLowerCase().replace(/\s+/g, '');
+    const cleanText = text.toLowerCase().replace(/\s+/g, "");
     setUsername(cleanText);
+    resetOtpFlow();
+    setOtpTimer(0);
   };
+  const getPasswordStrength = (password: string) => {
+  let score = 0;
+  if (password.length >= 6) score++;
+  if (/[A-Z]/.test(password)) score++;
+  if (/[0-9]/.test(password)) score++;
+  if (/[^A-Za-z0-9]/.test(password)) score++;
+
+  return score;
+};
+
 
   // FIX: Password input handler
   const handlePasswordChange = (text: string) => {
@@ -235,11 +298,24 @@ const Register = () => {
             </View>
           ) : null}
 
-          <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>
+          {/* <TouchableOpacity style={[styles.verifyButton, { backgroundColor: theme.buttonBg }]} onPress={handleSendOtp}>
             <Text style={[styles.verifyText, { color: theme.buttonText }]}>
               {otpSent ? "Resend OTP" : "Send OTP"}
             </Text>
+          </TouchableOpacity> */}
+          <TouchableOpacity
+            style={[
+              styles.verifyButton,
+              { backgroundColor: otpTimer > 0 ? "#999" : theme.buttonBg },
+            ]}
+            onPress={handleSendOtp}
+            disabled={otpTimer > 0}
+          >
+            <Text style={styles.verifyText}>
+              {otpTimer > 0 ? `Resend OTP in ${otpTimer}s` : "Send OTP"}
+            </Text>
           </TouchableOpacity>
+
 
           <TextInput
             placeholder="User Name"
@@ -291,6 +367,34 @@ const Register = () => {
               />
             </TouchableOpacity>
           </View>
+          {password.length > 0 && (
+  <View style={{ marginBottom: 10 }}>
+    <View style={{ flexDirection: "row", height: 6 }}>
+      {[1, 2, 3, 4].map((i) => (
+        <View
+          key={i}
+          style={{
+            flex: 1,
+            marginRight: 4,
+            backgroundColor:
+              getPasswordStrength(password) >= i
+                ? i <= 2
+                  ? "red"
+                  : i === 3
+                  ? "orange"
+                  : "green"
+                : "#ddd",
+          }}
+        />
+      ))}
+    </View>
+    <Text style={{ fontSize: 12, marginTop: 4 }}>
+      {["Weak", "Okay", "Good", "Strong"][getPasswordStrength(password) - 1] ||
+        "Weak"}
+    </Text>
+  </View>
+)}
+
 
 
           {/* <Text style={[styles.policy, { color: theme.subtitle }]}>
