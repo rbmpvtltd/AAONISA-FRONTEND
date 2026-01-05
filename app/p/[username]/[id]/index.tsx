@@ -660,7 +660,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // Reel Item Component
@@ -1003,12 +1003,13 @@ const UserReelItem = ({
         </View> */}
 
 
-        <TouchableOpacity
+        <Pressable
           style={styles.musicInfo}
           onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
+        // activeOpacity={0.7}
         >
-          <Text style={styles.musicIcon}>♪</Text>
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
           <Text style={styles.musicText} numberOfLines={1}>
             {item.audio?.isOriginal === false
               ? item.audio?.name || "Unknown Audio"
@@ -1020,7 +1021,7 @@ const UserReelItem = ({
             color="#fff"
             style={{ marginLeft: 4 }}
           />
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1130,6 +1131,7 @@ const UserReelItem = ({
               pathname: '/(drawer)/(tabs)/createReels',
               params: {
                 // Audio metadata
+                preSelectedAudio: 'true',
                 audioId: item.audio?.id || `audio_${item.uuid}`,
                 audioUrl: item.videoUrl,
                 audioName: item.audio?.isOriginal === false
@@ -1143,7 +1145,9 @@ const UserReelItem = ({
                 duration: String(item.duration || 0),
 
                 // For display
-                thumbnailUrl: item.thumbnailUrl,
+                // thumbnailUrl: item.thumbnailUrl,
+                coverImage: item.thumbnailUrl || item.audio?.coverImage,
+
               }
             });
           } catch (error) {

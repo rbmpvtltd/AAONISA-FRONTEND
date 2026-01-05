@@ -1,61 +1,4 @@
-// import { ResizeMode, Video } from "expo-av";
-// import { useLocalSearchParams, useRouter } from "expo-router";
-// import { useMemo } from "react";
-// import { StyleSheet, Text, TouchableOpacity, View } from "react-native";
-// import { useBookmarkStore } from "../../store/useBookmarkStore"; // <-- apne path ke hisab se adjust karo
-
-// const ReelsCard = () => {
-//   const router = useRouter();
-//   const { reelId } = useLocalSearchParams<{ reelId: string }>();
-
-//   const getReelById = useBookmarkStore((s) => s.getReelById);
-
-//   const reel = useMemo(() => getReelById(reelId!), [reelId]);
-
-//   if (!reel) {
-//     return (
-//       <View style={styles.center}>
-//         <Text style={{ color: "#fff", fontSize: 16 }}> Reel Not Found</Text>
-
-//         <TouchableOpacity onPress={() => router.back()} style={styles.backBtn}>
-//           <Text style={{ color: "#000" }}>Go Back</Text>
-//         </TouchableOpacity>
-//       </View>
-//     );
-//   }
-
-//   return (
-//     <View style={styles.container}>
-//       <Video
-//         source={{ uri: reel.videoUrl }}
-//         style={styles.video}
-//         resizeMode={ResizeMode.COVER}
-//         shouldPlay
-//         isMuted={false}
-//         useNativeControls
-//       />
-
-//       <Text style={styles.caption}>ID: {reel.uuid}</Text>
-//     </View>
-//   );
-// };
-
-// const styles = StyleSheet.create({
-//   container: { flex: 1, backgroundColor: "#000", justifyContent: "center" },
-//   video: { width: "100%", height: "90%" },
-//   caption: { color: "#fff", textAlign: "center", marginTop: 5 },
-//   center: { flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: "#000" },
-//   backBtn: {
-//     marginTop: 10,
-//     backgroundColor: "#fff",
-//     paddingHorizontal: 12,
-//     paddingVertical: 6,
-//     borderRadius: 6
-//   }
-// });
-
-// export default ReelsCard;
-
+import AudioBottomSheet from "@/app/(drawer)/(tabs)/reels/AudioBottomSheet";
 import BottomDrawer from "@/src/components/ui/BottomDrawer";
 import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
 import { useQueryClient } from "@tanstack/react-query";
@@ -74,6 +17,7 @@ import {
   View,
   useWindowDimensions
 } from "react-native";
+import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
 
 export const useReelFromBookmarks = (reelId?: string) => {
@@ -118,6 +62,8 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
   const { reelId } = useLocalSearchParams<{ reelId: string }>();
   const reel = useReelFromBookmarks(reelId);
   console.log("hhhhhh", reel?.comments);
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
+  const profilePicture = reel.user?.userProfile?.ProfilePicture || reel.userProfile?.ProfilePicture;
 
 
   //  Reel Not Found UI
@@ -307,11 +253,33 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         )}
 
         {/* MUSIC ROW */}
-        <View style={styles.musicRow}>
-          <Text style={styles.musicIcon}>♪</Text>
-          {/* <Text style={styles.musicText}>Original Sound - GBSHCHBCHHJHJHJH</Text> */}
-          {/* <Text style={styles.musicText}>Original Sound - {reel.user.username}</Text> */}
-        </View>
+        {/* <View style={styles.musicRow}>
+          <Text style={styles.musicIcon}>♪</Text> */}
+        {/* <Text style={styles.musicText}>Original Sound - GBSHCHBCHHJHJHJH</Text> */}
+        {/* <Text style={styles.musicText}>Original Sound - {reel.user.username}</Text> */}
+        {/* </View> */}
+
+
+        <Pressable
+          style={styles.musicRow}
+          onPress={() => setShowAudioSheet(true)}
+        // activeOpacity={0.7}
+        >
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
+          <Text style={styles.musicText} numberOfLines={1}>
+            {reel.audio?.isOriginal === false
+              ? reel.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color="#fff"
+            style={{ marginLeft: 4 }}
+          />
+        </Pressable>
+
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(reel?.created_at)}
@@ -374,6 +342,71 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         reelId={reel.uuid || reel.id}
         reelUrl={reel.videoUrl}
       />
+
+
+      <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: reel.audio?.isOriginal ?? true,
+          name: reel.audio?.name,
+          artist: reel.audio?.artist,
+          coverImage: reel.audio?.coverImage || reel.thumbnailUrl,
+          duration: reel.duration ? `${Math.floor(reel.duration / 60)}:${String(reel.duration % 60).padStart(2, '0')}` : undefined,
+          usedCount: reel.audio?.usedCount,
+          videos: reel.audio?.videos || [],
+          audioUrl: reel.videoUrl,  // ✅ Add audio URL for preview
+        }}
+        uploaderInfo={{
+          username: reel.user?.username,
+          profilePic: profilePicture || reel.user?.profilePic,
+        }}
+        onUseAudio={async () => {
+          console.log('🎵 Use Audio clicked from profile:', reel);
+
+          try {
+            router.push({
+              pathname: '/(drawer)/(tabs)/createReels',
+              params: {
+                // Audio metadata
+                preSelectedAudio: 'true',
+                audioId: reel.audio?.id || `audio_${reel.uuid}`,
+                audioUrl: reel.videoUrl,
+                audioName: reel.audio?.isOriginal === false
+                  ? reel.audio?.name
+                  : 'Original Sound',
+                isOriginal: String(reel.audio?.isOriginal ?? true),
+
+                // Source info
+                sourceVideoId: reel.uuid,
+                sourceUsername: reel.user?.username,
+                duration: String(reel.duration || 0),
+
+                // For display
+                // thumbnailUrl: reel.thumbnailUrl,
+                coverImage: reel.thumbnailUrl || reel.audio?.coverImage,
+              }
+            });
+          } catch (error) {
+            console.error('❌ Audio use error:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Error',
+              text2: 'Failed to use audio. Please try again.'
+            });
+          }
+        }}
+        onVideoPress={(videoId) => {
+          console.log('Video clicked:', videoId);
+          setShowAudioSheet(false);
+          // Navigate to that video
+          router.push({
+            pathname: `/(drawer)/(tabs)/reels`,
+            params: { videoId, tab: 'Explore' }
+          });
+        }}
+      />
+
     </View>
   );
 }
