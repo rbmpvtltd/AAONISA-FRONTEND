@@ -939,7 +939,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AudioBottomSheet from './AudioBottomSheet';
 import VideoProgressBar from './videoProgressBar';
@@ -974,7 +974,7 @@ const ReelItem = ({
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
-  const markViewedMutation = useMarkViewedMutation(item.id);
+  const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
   const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
@@ -1095,7 +1095,7 @@ const ReelItem = ({
           const time = player.currentTime;
           if (!viewed && time >= 10) {
             setViewed(true);
-            markViewedMutation.mutate(item.uuid);
+            markViewedMutation.mutate(item.uuid || item.id);
             console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
           }
         }
@@ -1252,19 +1252,20 @@ const ReelItem = ({
           </Text>
         </View> */}
 
-        <TouchableOpacity
+        <Pressable
           style={styles.musicInfo}
           onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
+        // activeOpacity={0.7}
         >
-          <Text style={styles.musicIcon}>♪</Text>
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
           <Text style={styles.musicText} numberOfLines={1}>
             {item.audio?.isOriginal === false
               ? item.audio?.name || "Unknown Audio"
               : "Original Sound"}
           </Text>
           <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1300,15 +1301,15 @@ const ReelItem = ({
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => {
-            addShare(item.id);
+            addShare(item.id || item.uuid);
             router.push({
               pathname: `/chat`,
-              params: { shareMode: "true", reelId: item.id }
+              params: { shareMode: "true", reelId: item.id || item.uuid },
             });
           }}
         >
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
+          <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
         </TouchableOpacity>
 
         {/* More Options Button */}

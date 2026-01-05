@@ -76,90 +76,6 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
         getAudioDuration();
     }, [preSelectedAudio]);
 
-    // const startRecordingWithAudio = async () => {
-    //     try {
-    //         setIsRecording(true);
-
-    //         // If audio is selected, play it during recording
-    //         if (preSelectedAudio?.uri) {
-    //             const { sound } = await Audio.Sound.createAsync(
-    //                 { uri: preSelectedAudio.uri },
-    //                 { shouldPlay: true, volume: 1.0, isLooping: true }
-    //             );
-    //             audioSoundRef.current = sound;
-    //             await sound.playAsync();
-    //         }
-
-    //         // Start camera recording here
-    //         // ... your existing camera recording code
-
-    //         const startRecording = async () => {
-    //             if (!cameraRef.current) {
-    //                 // Alert.alert('Error', 'Camera not ready.');
-    //                 Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' })
-    //                 return;
-    //             }
-
-    //             try {
-    //                 setIsRecording(true);
-    //                 setRecordTime(0);
-    //                 recordingStartTimeRef.current = Date.now();
-
-    //                 timerIntervalRef.current = setInterval(() => {
-    //                     if (recordingStartTimeRef.current) {
-    //                         const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
-    //                         setRecordTime(elapsedSec);
-    //                     }
-    //                 }, 1000);
-
-    //                 const durationMiliSecs = contentType === 'story' ? 30000 : 120000;
-
-    //                 autoStopTimeoutRef.current = setTimeout(() => {
-    //                     if (cameraRef.current) cameraRef.current.stopRecording();
-    //                 }, durationMiliSecs);
-    //                 const maxDurationSec = contentType === 'story' ? 30 : 120;
-    //                 const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
-    //                 const video = await cameraRef.current.recordAsync(options);
-
-    //                 const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
-    //                 if (elapsed < 2000) {
-    //                     // Alert.alert('Too short', 'Please record at least 2 seconds.');
-    //                     Toast.show({ type: "info", text1: 'Too short', text2: 'Please record at least 2 seconds.' })
-    //                     return;
-    //                 }
-
-    //                 if (!video) throw new Error('Video is null');
-
-    //                 onImagePick(video.uri);
-    //                 // Alert.alert('Video recorded successfully.');
-    //                 Toast.show({ type: "success", text1: 'Video recorded successfully.' })
-    //             } catch (err: any) {
-    //                 // Alert.alert('Error', err.message || 'Recording failed');
-    //                 Toast.show({ type: "error", text1: 'Error', text2: err.message || 'Recording failed' })
-    //             } finally {
-    //                 setIsRecording(false);
-    //                 recordingStartTimeRef.current = null;
-
-    //                 if (autoStopTimeoutRef.current) {
-    //                     clearTimeout(autoStopTimeoutRef.current);
-    //                     autoStopTimeoutRef.current = null;
-    //                 }
-
-    //                 if (timerIntervalRef.current) {
-    //                     clearInterval(timerIntervalRef.current);
-    //                     timerIntervalRef.current = null;
-    //                 }
-
-    //                 setRecordTime(0);
-    //             }
-    //         };
-
-
-    //     } catch (error) {
-    //         console.error('Error starting recording with audio:', error);
-    //     }
-    // };
-
 
     const startRecordingWithAudio = async () => {
         if (!cameraRef.current) {
@@ -172,19 +88,18 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
             setRecordTime(0);
             recordingStartTimeRef.current = Date.now();
 
-            // ✅ 1. PLAY AUDIO IF SELECTED
+            // 1️⃣ Play audio if selected
             if (preSelectedAudio?.uri) {
                 const { sound } = await Audio.Sound.createAsync(
                     { uri: preSelectedAudio.uri },
-                    { shouldPlay: true, volume: 1.0, isLooping: false } // ❌ NO LOOP
+                    { shouldPlay: true, volume: 1.0, isLooping: false }
                 );
                 audioSoundRef.current = sound;
                 await sound.playAsync();
-
                 console.log('🎵 Audio started playing');
             }
 
-            // ✅ 2. START TIMER
+            // 2️⃣ Start timer
             timerIntervalRef.current = setInterval(() => {
                 if (recordingStartTimeRef.current) {
                     const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
@@ -192,20 +107,17 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
                 }
             }, 1000);
 
-            // ✅ 3. CALCULATE MAX DURATION
+            // 3️⃣ Calculate max duration
             let maxDurationSec: number;
-
             if (preSelectedAudio && audioDuration) {
-                // 🎵 If audio is selected, record for audio duration
                 maxDurationSec = audioDuration;
                 console.log('📹 Recording will stop after', maxDurationSec, 'seconds (audio length)');
             } else {
-                // 📹 Default duration based on content type
                 maxDurationSec = contentType === 'story' ? 30 : 120;
                 console.log('📹 Recording will stop after', maxDurationSec, 'seconds (default)');
             }
 
-            // ✅ 4. AUTO-STOP TIMER
+            // 4️⃣ Auto-stop timer
             autoStopTimeoutRef.current = setTimeout(() => {
                 console.log('⏱️ Auto-stopping recording...');
                 if (cameraRef.current) {
@@ -213,41 +125,63 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
                 }
             }, maxDurationSec * 1000);
 
-            // ✅ 5. START CAMERA RECORDING
-            const video = await cameraRef.current.recordAsync({
-                maxDuration: maxDurationSec,
-                quality: '720p',
-                mute: false
-            });
+            // 5️⃣ Start camera recording
+            // const maxDurationSec = contentType === 'story' ? 30 : 120;
+            const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
+            const video = await cameraRef.current.recordAsync(options);
 
-            // ✅ 6. CHECK MINIMUM DURATION
+            // const video = await cameraRef.current.recordAsync({
+            //     maxDuration: maxDurationSec,
+            //     quality: '720p',
+            //     mute: false
+            // });
+
+            // 6️⃣ Calculate elapsed time
             const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
-            if (elapsed < 2000) {
+
+            // ✅ IMPORTANT: Cleanup FIRST(before checking duration)
+            await stopRecordingWithAudio();
+
+            // 7️⃣ Check minimum duration(10 seconds)
+            if (elapsed < 10000) {
+                console.log('❌ Video too short:', elapsed / 1000, 'seconds');
                 Toast.show({
-                    type: "info",
-                    text1: 'Too short',
-                    text2: 'Please record at least 2 seconds.'
+                    type: "error",
+                    text1: 'Video too short!',
+                    text2: 'Please record at least 10 seconds.'
                 });
-                return;
+                return; // ✅ Exit WITHOUT calling onImagePick
             }
 
-            if (!video) throw new Error('Video is null');
+            // 8️⃣ Check if video exists
+            if (!video) {
+                throw new Error('Video is null');
+            }
 
-            // ✅ 7. SUCCESS - SEND VIDEO URI
+            // 9️⃣ SUCCESS - Send video(only if >= 10 seconds)
             console.log('✅ Recording completed:', video.uri);
-            onImagePick(video.uri);
-            Toast.show({ type: "success", text1: 'Video recorded successfully!' });
+            console.log('✅ Duration:', Math.floor(elapsed / 1000), 'seconds');
 
+            onImagePick(video.uri); // ✅ This only runs if video >= 10 seconds
+
+            Toast.show({
+                type: "success",
+                text1: 'Video recorded!',
+                text2: `Duration: ${Math.floor(elapsed / 1000)} seconds`
+            });
+            // Toast.show({
+            //     type: "error",
+            //     text1: 'Video too short!',
+            //     text2: 'Please record at least 10 seconds.'
+            // });
         } catch (err: any) {
             console.error('❌ Recording error:', err);
+            await stopRecordingWithAudio(); // Cleanup on error
             Toast.show({
                 type: "error",
-                text1: 'Error',
-                text2: err.message || 'Recording failed'
+                text1: 'Recording failed',
+                text2: err.message || 'Please try again'
             });
-        } finally {
-            // ✅ CLEANUP
-            await stopRecordingWithAudio();
         }
     };
 
@@ -292,48 +226,6 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
 
         setRecordTime(0);
     };
-
-    // const stopRecordingWithAudio = async () => {
-    //     try {
-    //         setIsRecording(false);
-
-    //         // Stop and unload audio
-    //         if (audioSoundRef.current) {
-    //             await audioSoundRef.current.stopAsync();
-    //             await audioSoundRef.current.unloadAsync();
-    //             audioSoundRef.current = null;
-    //         }
-
-    //         // Stop camera recording here
-    //         // ... your existing camera stop code
-    //         const stopRecording = () => {
-    //             if (!cameraRef.current) return;
-
-    //             cameraRef.current.stopRecording();
-
-    //             if (autoStopTimeoutRef.current) {
-    //                 clearTimeout(autoStopTimeoutRef.current);
-    //                 autoStopTimeoutRef.current = null;
-    //             }
-
-    //             if (timerIntervalRef.current) {
-    //                 clearInterval(timerIntervalRef.current);
-    //                 timerIntervalRef.current = null;
-    //             }
-    //         };
-
-    //     } catch (error) {
-    //         console.error('Error stopping recording:', error);
-    //     }
-    // };
-
-    // useEffect(() => {
-    //     return () => {
-    //         if (audioSoundRef.current) {
-    //             audioSoundRef.current.unloadAsync();
-    //         }
-    //     };
-    // }, []);
 
     useEffect(() => {
         return () => {
@@ -478,7 +370,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
             {/* Controls */}
             <View style={styles.buttonContainer}>
                 {/* Flip Camera */}
-                <TouchableOpacity style={styles.button} onPress={toggleCameraFacing}>
+                <TouchableOpacity style={styles.button} onPress={toggleCameraFacing} disabled={isRecording}>
                     <Ionicons name="camera-reverse-outline" size={30} color="white" />
                 </TouchableOpacity>
 
@@ -501,7 +393,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
 
 
                 {/* Gallery */}
-                <TouchableOpacity style={styles.button} onPress={pickVideo}>
+                <TouchableOpacity style={styles.button} onPress={pickVideo} disabled={isRecording} >
                     <Ionicons name="images-outline" size={30} color="white" />
                 </TouchableOpacity>
 
@@ -642,3 +534,6 @@ const styles = StyleSheet.create({
         fontSize: 12,
     },
 });
+
+
+// ========================================================

@@ -189,7 +189,7 @@
 import { getUserSessionsWithLatestMessage, sendReelToChats } from "@/src/api/chat-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
-import { useQuery, useQueryClient } from "@tanstack/react-query";
+import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
@@ -323,21 +323,6 @@ export default function ChatListScreen() {
   const padding = width < 360 ? 12 : width < 400 ? 16 : 20;
 
 
-  if (isLoading)
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={theme.text} />
-        <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
-      </View>
-    );
-
-
-  if (isError)
-    return (
-      <Text style={{ color: "red", marginTop: 20, textAlign: "center" }}>
-        Failed to load chat list
-      </Text>
-    );
   const getLastMessagePreview = (latest: any) => {
     if (!latest) return "Start chatting...";
 
@@ -430,43 +415,48 @@ export default function ChatListScreen() {
 
   // };
 
+  const sendReelToChatsMutation = useMutation({
+    mutationFn: (data: any) => sendReelToChats(data.reelId, data.sessionIds),
+
+    onSuccess: async () => {
+      await queryClient.invalidateQueries({ queryKey: ["admin-videos-feed"] });
+      await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
+      await queryClient.invalidateQueries({ queryKey: ["reels"] });
+
+      Toast.show({
+        type: "success",
+        text1: "Reel sent successfully!",
+      });
+
+      router.back();
+    }
+  });
+
   const handleSend = async () => {
     if (!reelId) return;
-
-    // 🔥 OPTIMISTIC UPDATE
-    queryClient.setQueryData(["sessions"], (old: any[] | undefined) => {
-      if (!old) return old;
-
-      return old
-        .map((session) => {
-          if (selectedChats.includes(session.sessionId)) {
-            return {
-              ...session,
-              latestMessage: {
-                text: JSON.stringify({ type: "reels" }),
-                createdAt: new Date().toISOString(),
-              },
-            };
-          }
-          return session;
-        })
-        .sort((a, b) => {
-          const tA = new Date(a.latestMessage?.createdAt || a.createdAt).getTime();
-          const tB = new Date(b.latestMessage?.createdAt || b.createdAt).getTime();
-          return tB - tA;
-        });
-    });
-
-    try {
-      await sendReelToChats(reelId as string, selectedChats);
-      router.back();
-    } catch (e) {
-      console.error(e);
-      // alert("Failed to send reel");
-      Toast.show({ type: "error", text1: "Failed to send reel" })
-    }
+    sendReelToChatsMutation.mutate({
+      reelId: reelId as string,
+      sessionIds: selectedChats
+    })
   };
 
+
+
+  if (isLoading)
+    return (
+      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+        <ActivityIndicator size="large" color={theme.text} />
+        <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
+      </View>
+    );
+
+
+  if (isError)
+    return (
+      <Text style={{ color: "red", marginTop: 20, textAlign: "center" }}>
+        Failed to load chat list
+      </Text>
+    );
 
   if (chatList.length === 0) {
     return (
@@ -474,7 +464,6 @@ export default function ChatListScreen() {
         <Text style={{ color: theme.subtitle, fontSize: 16 }}>No chats yet</Text>
       </View>
     );
-
 
   }
   return (

@@ -97,7 +97,7 @@ So we can fix it faster.`
 To request a feature or share feedback:
 
 • Go to Settings → Help & Support → Send Feedback  
-• Or email us at: support@yourapp.com  
+• Or email us at: hithoy.help@gmail.com
 
 Your suggestions help us improve and add new features.`
   }

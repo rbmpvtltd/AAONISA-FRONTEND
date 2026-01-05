@@ -660,7 +660,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 // Reel Item Component
@@ -695,7 +695,7 @@ const UserReelItem = ({
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const [showOptions, setShowOptions] = React.useState(false);
-  const markViewedMutation = useMarkViewedMutation(item.id);
+  const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
   const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
@@ -791,7 +791,7 @@ const UserReelItem = ({
           const time = player.currentTime;
           if (!viewed && time >= 10) {
             setViewed(true);
-            markViewedMutation.mutate(item.uuid);
+            markViewedMutation.mutate(item.uuid || item.id);
             console.log(` User viewed reel: ${item.uuid} | Time watched: ${time}s`);
           }
         }
@@ -1003,12 +1003,13 @@ const UserReelItem = ({
         </View> */}
 
 
-        <TouchableOpacity
+        <Pressable
           style={styles.musicInfo}
           onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
+        // activeOpacity={0.7}
         >
-          <Text style={styles.musicIcon}>♪</Text>
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
           <Text style={styles.musicText} numberOfLines={1}>
             {item.audio?.isOriginal === false
               ? item.audio?.name || "Unknown Audio"
@@ -1020,7 +1021,7 @@ const UserReelItem = ({
             color="#fff"
             style={{ marginLeft: 4 }}
           />
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -1055,17 +1056,17 @@ const UserReelItem = ({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => {
-          addShare(item.id);
+          addShare(item.id || item.uuid);
           router.push({
             pathname: `/chat`,
             params: {
               shareMode: "true",
-              reelId: item.id
+              reelId: item.id || item.uuid
             }
           });
         }}>
           <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatCount(item.shares?.length || 0)}</Text>
+          <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
@@ -1130,6 +1131,7 @@ const UserReelItem = ({
               pathname: '/(drawer)/(tabs)/createReels',
               params: {
                 // Audio metadata
+                preSelectedAudio: 'true',
                 audioId: item.audio?.id || `audio_${item.uuid}`,
                 audioUrl: item.videoUrl,
                 audioName: item.audio?.isOriginal === false
@@ -1143,7 +1145,9 @@ const UserReelItem = ({
                 duration: String(item.duration || 0),
 
                 // For display
-                thumbnailUrl: item.thumbnailUrl,
+                // thumbnailUrl: item.thumbnailUrl,
+                coverImage: item.thumbnailUrl || item.audio?.coverImage,
+
               }
             });
           } catch (error) {
@@ -1214,6 +1218,7 @@ const UserReelsFeed = () => {
 
 
   const videos = profile?.videos ?? [];
+  // console.log('vvvvvvvvvvvvvvvvvvvvvvvv', profile);
 
   // Zustand actions (no data)
   const {

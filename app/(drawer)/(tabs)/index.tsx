@@ -201,7 +201,7 @@ import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
-import { useQuery } from "@tanstack/react-query";
+import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
 import { ActivityIndicator, Text, View } from "react-native";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
@@ -213,6 +213,19 @@ const HomePage = () => {
   const { setCategories } = useBookmarkStore();
   const [refreshing, setRefreshing] = useState(false);
 
+  // useFocusEffect(
+  //   useCallback(() => {
+  //     // 🔁 Jab bhi Home tab focus ho
+  //     refetchStories();
+  //     refetchBookmarks();
+
+  //     return () => {
+  //       // optional cleanup
+  //     };
+  //   }, [])
+  // );
+
+  const queryClient = useQueryClient();
   // Stories
   const {
     data: stories = [],
@@ -294,13 +307,23 @@ const HomePage = () => {
   const handleRefresh = async () => {
     setRefreshing(true);
     try {
-      await Promise.all([refetchStories(), refetchBookmarks()]);
+      // Clear admin feed cache to force new random data
+      queryClient.removeQueries({ queryKey: ["admin-videos-feed"] });
+
+      // Refetch stories and bookmarks
+      await Promise.all([
+        refetchStories(),
+        refetchBookmarks(),
+      ]);
+
+      console.log("✅ Refresh complete - new random feed will load");
     } catch (err) {
       console.error("Refresh error:", err);
     } finally {
       setRefreshing(false);
     }
   };
+
 
   return (
     <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.background }}>
@@ -326,4 +349,4 @@ const HomePage = () => {
   );
 };
 
-export default HomePage;
+export default HomePage;                                                 
