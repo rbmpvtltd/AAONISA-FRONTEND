@@ -974,7 +974,7 @@ const ReelItem = ({
   const [duration, setDuration] = useState<number | null>(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
-  const markViewedMutation = useMarkViewedMutation(item.id);
+  const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
   const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
@@ -1095,7 +1095,7 @@ const ReelItem = ({
           const time = player.currentTime;
           if (!viewed && time >= 10) {
             setViewed(true);
-            markViewedMutation.mutate(item.uuid);
+            markViewedMutation.mutate(item.uuid || item.id);
             console.log(`✅ Viewed: ${item.uuid || item.id} at ${time}s`);
           }
         }
@@ -1300,10 +1300,10 @@ const ReelItem = ({
         <TouchableOpacity
           style={styles.actionButton}
           onPress={() => {
-            addShare(item.id);
+            addShare(item.id || item.uuid);
             router.push({
               pathname: `/chat`,
-              params: { shareMode: "true", reelId: item.id }
+              params: { shareMode: "true", reelId: item.id || item.uuid },
             });
           }}
         >

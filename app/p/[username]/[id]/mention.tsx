@@ -62,7 +62,7 @@ const MentionedReelItem = ({
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const [showOptions, setShowOptions] = React.useState(false);
-  const markViewedMutation = useMarkViewedMutation(item.id);
+  const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
   const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
@@ -161,7 +161,7 @@ const MentionedReelItem = ({
           const time = player.currentTime;
           if (!viewed && time >= 10) {
             setViewed(true);
-            markViewedMutation.mutate(item.uuid);
+            markViewedMutation.mutate(item.uuid || item.id);
             console.log(` User viewed mentioned reel: ${item.uuid} | Time watched: ${time}s`);
           }
         }
@@ -370,17 +370,17 @@ const MentionedReelItem = ({
         </TouchableOpacity>
 
         <TouchableOpacity style={styles.actionButton} onPress={() => {
-          addShare(item.id);
+          addShare(item.id || item.uuid);
           router.push({
             pathname: `/chat`,
             params: {
               shareMode: "true",
-              reelId: item.id
+              reelId: item.id || item.uuid
             }
           });
         }}>
           <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatCount(item.shares?.length || 0)}</Text>
+          <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
         </TouchableOpacity>
 
         <TouchableOpacity
