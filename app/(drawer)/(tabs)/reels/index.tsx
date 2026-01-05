@@ -939,7 +939,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 import AudioBottomSheet from './AudioBottomSheet';
 import VideoProgressBar from './videoProgressBar';
@@ -1252,19 +1252,20 @@ const ReelItem = ({
           </Text>
         </View> */}
 
-        <TouchableOpacity
+        <Pressable
           style={styles.musicInfo}
           onPress={() => setShowAudioSheet(true)}
-          activeOpacity={0.7}
+        // activeOpacity={0.7}
         >
-          <Text style={styles.musicIcon}>♪</Text>
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
           <Text style={styles.musicText} numberOfLines={1}>
             {item.audio?.isOriginal === false
               ? item.audio?.name || "Unknown Audio"
               : "Original Sound"}
           </Text>
           <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
-        </TouchableOpacity>
+        </Pressable>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}

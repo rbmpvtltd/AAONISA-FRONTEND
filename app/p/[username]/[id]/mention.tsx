@@ -1,3 +1,4 @@
+import AudioBottomSheet from '@/app/(drawer)/(tabs)/reels/AudioBottomSheet';
 import VideoProgressBar from '@/app/(drawer)/(tabs)/reels/videoProgressBar';
 import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
@@ -33,7 +34,7 @@ import {
   useWindowDimensions,
   View
 } from "react-native";
-import { GestureDetector, ScrollView } from 'react-native-gesture-handler';
+import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
 
@@ -47,6 +48,7 @@ const MentionedReelItem = ({
   fadeAnim,
   likeMutation,
   currentUserId,
+  reelUsername,
   addShare,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
@@ -73,6 +75,8 @@ const MentionedReelItem = ({
   const [paused, setPaused] = useState(false);
   // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   // const [liked, setLiked] = useState(item.isLiked);
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
+
 
   const {
     liked,
@@ -332,12 +336,33 @@ const MentionedReelItem = ({
           )}
         </View>
 
-        <View style={styles.musicInfo}>
+        {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
           <Text style={styles.musicText}>
             {item.audio?.name || "Original Sound"}
           </Text>
-        </View>
+        </View> */}
+
+
+        <Pressable
+          style={styles.musicInfo}
+          onPress={() => setShowAudioSheet(true)}
+        // activeOpacity={0.7}
+        >
+          {/* <Text style={styles.musicIcon}>♪</Text> */}
+          <Ionicons name="musical-notes" size={16} color="#fff" />
+          <Text style={styles.musicText} numberOfLines={1}>
+            {item.audio?.isOriginal === false
+              ? item.audio?.name || "Unknown Audio"
+              : "Original Sound"}
+          </Text>
+          <Ionicons
+            name="chevron-forward"
+            size={16}
+            color="#fff"
+            style={{ marginLeft: 4 }}
+          />
+        </Pressable>
 
         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
           {getTimeAgo(item.created_at)}
@@ -418,6 +443,71 @@ const MentionedReelItem = ({
           setShowReportDrawer(false);
         }}
       />
+
+
+      <AudioBottomSheet
+        visible={showAudioSheet}
+        onClose={() => setShowAudioSheet(false)}
+        audioData={{
+          isOriginal: item.audio?.isOriginal ?? true,
+          name: item.audio?.name,
+          artist: item.audio?.artist,
+          coverImage: item.audio?.coverImage || item.thumbnailUrl,
+          duration: item.duration ? `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')}` : undefined,
+          usedCount: item.audio?.usedCount,
+          videos: item.audio?.videos || [],
+          audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+        }}
+        uploaderInfo={{
+          username: reelUsername || item.user?.username,
+          profilePic: profilePicture || item.user?.profilePic,
+        }}
+        onUseAudio={async () => {
+          console.log('🎵 Use Audio clicked from profile:', item);
+
+          try {
+            router.push({
+              pathname: '/(drawer)/(tabs)/createReels',
+              params: {
+                // Audio metadata
+                preSelectedAudio: 'true',
+                audioId: item.audio?.id || `audio_${item.uuid}`,
+                audioUrl: item.videoUrl,
+                audioName: item.audio?.isOriginal === false
+                  ? item.audio?.name
+                  : 'Original Sound',
+                isOriginal: String(item.audio?.isOriginal ?? true),
+
+                // Source info
+                sourceVideoId: item.uuid,
+                sourceUsername: reelUsername || item.user?.username,
+                duration: String(item.duration || 0),
+
+                // For display
+                // thumbnailUrl: item.thumbnailUrl,
+                coverImage: item.thumbnailUrl || item.audio?.coverImage,
+              }
+            });
+          } catch (error) {
+            console.error('❌ Audio use error:', error);
+            Toast.show({
+              type: 'error',
+              text1: 'Error',
+              text2: 'Failed to use audio. Please try again.'
+            });
+          }
+        }}
+        onVideoPress={(videoId) => {
+          console.log('Video clicked:', videoId);
+          setShowAudioSheet(false);
+          // Navigate to that video
+          router.push({
+            pathname: `/(drawer)/(tabs)/reels`,
+            params: { videoId, tab: 'Explore' }
+          });
+        }}
+      />
+
     </View >
   );
 };
