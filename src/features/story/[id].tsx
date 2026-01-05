@@ -607,7 +607,7 @@ export default function StoryViewPage() {
   const [isMuted, setIsMuted] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
 
- // Stories
+  // Stories
   const {
     data: userStories = [],
     isLoading: storiesLoading,

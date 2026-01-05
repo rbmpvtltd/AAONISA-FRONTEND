@@ -1308,7 +1308,7 @@ const ReelItem = ({
           }}
         >
           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
-          <Text style={styles.actionText}>{formatCount(item.shares)}</Text>
+          <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
         </TouchableOpacity>
 
         {/* More Options Button */}

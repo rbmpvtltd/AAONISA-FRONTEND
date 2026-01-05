@@ -1067,7 +1067,7 @@ export const FeedItem = React.memo(
 
                         <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
                             <Icon name="paper-plane-outline" size={22} color={theme.text} />
-                            <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.shares ?? 0)}</Text>
+                            <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.sharesCount || 0)}</Text>
                         </TouchableOpacity>
 
                         {/* <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareDrawer(true)} >
