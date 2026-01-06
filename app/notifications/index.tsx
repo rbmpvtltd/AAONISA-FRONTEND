@@ -44,6 +44,8 @@ const NotificationItem = ({ item, theme, width }: any) => {
     }
   };
 
+  console.log("item ==================================>", item);
+
   const handleRedirect = () => {
     switch (item.type) {
       case "LIKE":

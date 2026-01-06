@@ -67,7 +67,7 @@
     },
     "extra": {
       "router": {},
-      "EXPO_PUBLIC_LOCAL_API_URL": "https://api.hithoy.com/api",
+      "EXPO_PUBLIC_LOCAL_API_URL": "https://testing.hithoy.com/api",
       "eas": {
         "owner": "rbm.jodhpur03",
         "projectId": "56c200f2-bdaa-4915-a657-b92ed431b7f4"
