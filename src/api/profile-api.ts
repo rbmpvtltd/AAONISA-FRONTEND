@@ -88,7 +88,8 @@
 import { createApiUrl } from '@/util';
 import AsyncStorage from '@react-native-async-storage/async-storage';
 import axios from 'axios';
-import convertToBase64Expo from '../../app/profile/base64Converter';
+import * as ImageManipulator from 'expo-image-manipulator';
+// import convertToBase64Expo from '../../app/profile/base64Converter';
 
 
 import { Platform } from 'react-native';
@@ -196,6 +197,93 @@ const getToken = async () => {
 // }
 
 
+// async function updateProfile(profileData: any, imageChanged: boolean) {
+//   try {
+//     let base64Image: string | null = null;
+
+//     // ✅ If user picked a new image (local file)
+//     if (
+//       imageChanged &&
+//       profileData.ProfilePicture &&
+//       !profileData.ProfilePicture.startsWith("http")
+//     ) {
+//       base64Image = await convertToBase64Expo(profileData.ProfilePicture);
+//     }
+
+//     const payload = {
+//       username: profileData.username || "",
+//       name: profileData.name || "",
+//       bio: profileData.bio || "",
+//       url: profileData.url || "",
+
+//       // ✅ Backend expects STRING ("true"/"false") 
+//       imageChanged: String(imageChanged),
+
+//       // ✅ BASE64 or null for delete image
+//       ProfilePicture: base64Image               // new image
+//     };
+
+//     console.log("✅ FINAL PAYLOAD SENDING:", payload);
+
+//     const token = await getToken();
+//     const apiUrl = createApiUrl("/users/update-profile");
+
+//     const res = await axios.post(apiUrl, payload, {
+//       headers: {
+//         Authorization: `Bearer ${token}`,
+//         "Content-Type": "application/json",
+//       },
+//     });
+
+//     console.log("✅ FINAL RESPONSE:", res.data);
+//     return res.data;
+
+//   } catch (err: any) {
+//     console.log("❌ UPDATE PROFILE ERROR:", err?.response?.data || err);
+//     throw err;
+//   }
+// }
+
+
+async function compressImage(uri: string): Promise<string> {
+  try {
+    const manipResult = await ImageManipulator.manipulateAsync(
+      uri,
+      [
+        { resize: { width: 800 } }, // Max width 800px (maintains aspect ratio)
+      ],
+      {
+        compress: 0.7, // 70% quality (0-1 range)
+        format: ImageManipulator.SaveFormat.JPEG,
+      }
+    );
+    return manipResult.uri;
+  } catch (error) {
+    console.error('Image compression failed:', error);
+    return uri; // Return original if compression fails
+  }
+}
+
+async function convertToBase64Expo(uri: string): Promise<string> {
+  try {
+    const response = await fetch(uri);
+    const blob = await response.blob();
+
+    return new Promise((resolve, reject) => {
+      const reader = new FileReader();
+      reader.onloadend = () => {
+        const base64data = reader.result as string;
+        resolve(base64data);
+      };
+      reader.onerror = reject;
+      reader.readAsDataURL(blob);
+    });
+  } catch (error) {
+    console.error('Base64 conversion failed:', error);
+    throw error;
+  }
+}
+
 async function updateProfile(profileData: any, imageChanged: boolean) {
   try {
     let base64Image: string | null = null;
@@ -206,7 +294,13 @@ async function updateProfile(profileData: any, imageChanged: boolean) {
       profileData.ProfilePicture &&
       !profileData.ProfilePicture.startsWith("http")
     ) {
-      base64Image = await convertToBase64Expo(profileData.ProfilePicture);
+      // ✅ COMPRESS IMAGE FIRST
+      console.log('🔄 Compressing image...');
+      const compressedUri = await compressImage(profileData.ProfilePicture);
+      console.log('✅ Image compressed successfully');
+
+      // Convert compressed image to base64
+      base64Image = await convertToBase64Expo(compressedUri);
     }
 
     const payload = {
@@ -214,15 +308,11 @@ async function updateProfile(profileData: any, imageChanged: boolean) {
       name: profileData.name || "",
       bio: profileData.bio || "",
       url: profileData.url || "",
-
-      // ✅ Backend expects STRING ("true"/"false") 
       imageChanged: String(imageChanged),
-
-      // ✅ BASE64 or null for delete image
-      ProfilePicture: base64Image               // new image
+      ProfilePicture: base64Image
     };
 
-    console.log("✅ FINAL PAYLOAD SENDING:", payload);
+    console.log("✅ FINAL PAYLOAD SENDING (image compressed)");
 
     const token = await getToken();
     const apiUrl = createApiUrl("/users/update-profile");
