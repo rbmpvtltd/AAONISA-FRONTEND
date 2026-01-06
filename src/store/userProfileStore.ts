@@ -112,14 +112,14 @@ interface ProfileState {
   userId: string;
   name: string;
   bio: string;
-  url : string,
-  isFollowing : boolean,
+  url: string,
+  isFollowing: boolean,
   ProfilePicture: string | null;
   followersCount: number;
   followingsCount: number;
   postsCount: number;
-  likes : number,
-  views : number,
+  likes: number,
+  views: number,
 
   setUsername: (username: string) => void;
   setUserId: (username: string) => void;
@@ -130,14 +130,14 @@ interface ProfileState {
   setFollowersCount: (count: number) => void;
   setFollowingsCount: (count: number) => void;
   setPostCount: (count: number) => void;
-  setLikes : (like : number) => void;
-  setViews : (view : number) => void;
+  setLikes: (like: number) => void;
+  setViews: (view: number) => void;
 
   toggleFollow: () => void;
   toggleLike: (id: string) => void;
   addComment: (id: string) => void;
   addShare: (id: string) => void;
-      resetProfile: () => void;
+  resetProfile: () => void;
 }
 
 export const useProfileStore = create<ProfileState>((set) => ({
@@ -153,13 +153,13 @@ export const useProfileStore = create<ProfileState>((set) => ({
   userId: "",
   name: "",
   bio: "",
-  url : "",
+  url: "",
   ProfilePicture: "",
   followersCount: 0,
   followingsCount: 0,
   postsCount: 0,
-  likes : 0,
-  views : 0,
+  likes: 0,
+  views: 0,
   isFollowing: false,
 
   setUsername: (username) => set({ username }),
@@ -170,9 +170,9 @@ export const useProfileStore = create<ProfileState>((set) => ({
   setFollowersCount: (count) => set({ followersCount: count }),
   setFollowingsCount: (count) => set({ followingsCount: count }),
   setPostCount: (count) => set({ postsCount: count }),
-  setLikes : (count) => set({likes : count}),
-  setViews : (count) => set({views : count}),
-     setUrl: (url) => set({ url }),
+  setLikes: (count) => set({ likes: count }),
+  setViews: (count) => set({ views: count }),
+  setUrl: (url) => set({ url }),
 
 
   // ✅ Follow toggle logic
@@ -183,40 +183,40 @@ export const useProfileStore = create<ProfileState>((set) => ({
     })),
 
   // ✅ Like toggle logic
-//   toggleLike: (id) =>
-//     set((state) => ({
-//       videos: state.videos.map((video) =>
-//         video.id === id
-//           ? {
-//               ...video,
-//               isLiked: !video.isLiked,
-//               likes: video.isLiked
-//                 ? (video.likes || 0) - 1
-//                 : (video.likes || 0) + 1,
-//             }
-//           : video
-//       ),
-//     })),
+  //   toggleLike: (id) =>
+  //     set((state) => ({
+  //       videos: state.videos.map((video) =>
+  //         video.id === id
+  //           ? {
+  //               ...video,
+  //               isLiked: !video.isLiked,
+  //               likes: video.isLiked
+  //                 ? (video.likes || 0) - 1
+  //                 : (video.likes || 0) + 1,
+  //             }
+  //           : video
+  //       ),
+  //     })),
 
-// toggleLike: (id) =>
-//   set((state) => {
-//     // Copy array safely (no reference link)
-//     const updatedVideos = state.videos.map((video) => {
-//       if (video.id === id) {
-//         const isLiked = !video.isLiked;
-//         const likesCount = isLiked
-//           ? (video.likes || 0) + 1
-//           : (video.likes || 0) - 1;
-//         return { ...video, isLiked, likes: likesCount };
-//       }
-//       return { ...video }; // clone others too
-//     });
+  // toggleLike: (id) =>
+  //   set((state) => {
+  //     // Copy array safely (no reference link)
+  //     const updatedVideos = state.videos.map((video) => {
+  //       if (video.id === id) {
+  //         const isLiked = !video.isLiked;
+  //         const likesCount = isLiked
+  //           ? (video.likes || 0) + 1
+  //           : (video.likes || 0) - 1;
+  //         return { ...video, isLiked, likes: likesCount };
+  //       }
+  //       return { ...video }; // clone others too
+  //     });
 
-//     return { videos: updatedVideos };
-//   }),
+  //     return { videos: updatedVideos };
+  //   }),
 
   toggleLike: (id) =>
-    set((state) => ({ 
+    set((state) => ({
       videos: state.videos.map((video) => {
         if (video.uuid === id) {
           const isLiked = !video.isLiked;
@@ -241,7 +241,7 @@ export const useProfileStore = create<ProfileState>((set) => ({
       ),
     })),
 
-    
+
 
   // ✅ Add share count
   addShare: (id) =>
@@ -253,19 +253,19 @@ export const useProfileStore = create<ProfileState>((set) => ({
       ),
     })),
 
-    resetProfile: () =>
-        set({
-            username: "",
-            // userId: "",
-            name: "",
-            bio: "",
-            ProfilePicture: null,
-            url: "",
-            likes: 0,
-            views: 0,
-            followersCount: 0,
-            followingsCount: 0,
-            postsCount: 0,
-            videos: [],
-        }),
+  resetProfile: () =>
+    set({
+      username: "",
+      // userId: "",
+      name: "",
+      bio: "",
+      ProfilePicture: null,
+      url: "",
+      likes: 0,
+      views: 0,
+      followersCount: 0,
+      followingsCount: 0,
+      postsCount: 0,
+      videos: [],
+    }),
 }));
