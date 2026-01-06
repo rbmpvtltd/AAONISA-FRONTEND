@@ -53,17 +53,23 @@ const NotificationItem = ({ item, theme, width }: any) => {
         router.push({
           pathname: "/(drawer)/(tabs)/reels",
           params: {
-
-            reelId: item.referenceId,
-
-            // videoId: item.referenceId, // Video/Reel ID
-            // id: item.referenceId,      // Same as videoId
-            // tab: "explore",
+            // username: item.sender?.username,
+            // id: item.id,
+            videoId: item.referenceId, // Video/Reel ID
+            id: item.referenceId,      // Same as videoId
+            // tab: "explore",    
           },
         });
         break;
 
-
+      // case "FOLLOW":
+      //     router.push({
+      //       pathname: "/profile/[username]",
+      //       params: {
+      //         username: item.sender.username,
+      //       },
+      //     });
+      //   break;
       case "FOLLOW":
         const username = item.sender?.username || item.sender?.name?.toLowerCase().replace(/\s+/g, '');
         if (username) {
@@ -73,6 +79,15 @@ const NotificationItem = ({ item, theme, width }: any) => {
         }
         break;
 
+      // case "MESSAGE":
+      //   router.push({
+      //     pathname: "/chat/[id]",
+      //     params: {
+      //       username : item.sender?.username,
+      //       id: item.sender?.id,
+      //     },
+      //   });
+      //   break;
 
       case "MENTION":
         router.push({
