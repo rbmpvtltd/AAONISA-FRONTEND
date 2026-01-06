@@ -34,6 +34,20 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
     const autoStopTimeoutRef = useRef<NodeJS.Timeout | number | null>(null);
     const timerIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
     const [audioDuration, setAudioDuration] = useState<number | null>(null);
+
+    // ✅ FIX 1: Reset zoom when component mounts or audio changes
+    useEffect(() => {
+        console.log('🎬 CameraScreen mounted - Resetting zoom to 0');
+        setZoom(0); // Force reset zoom to 0
+    }, [preSelectedAudio]); // Reset when audio changes
+
+    // ✅ FIX 2: Reset zoom when content type changes
+    useEffect(() => {
+        console.log('📹 Content type changed:', contentType);
+        setZoom(0); // Reset zoom when switching between story/reels/news
+    }, [contentType]);
+
+
     const getContentTypeIcon = (type: string) => {
         switch (type) {
             case "story":
@@ -49,6 +63,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
 
     const toggleCameraFacing = () => {
         setFacing((prev) => (prev === "back" ? "front" : "back"));
+        setZoom(0); // ✅ Reset zoom when flipping camera
     };
 
     useEffect(() => {
@@ -301,7 +316,10 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
                             styles.contentTypeButton,
                             contentType === type && styles.contentTypeButtonActive,
                         ]}
-                        onPress={() => { setContentType(type); }}
+                        onPress={() => {
+                            setContentType(type);
+                            setZoom(0);
+                        }}
                     >
                         <Ionicons
                             name={getContentTypeIcon(type)}
@@ -536,4 +554,3 @@ const styles = StyleSheet.create({
 });
 
 
-// ========================================================

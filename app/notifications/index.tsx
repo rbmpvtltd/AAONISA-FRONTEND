@@ -44,63 +44,50 @@ const NotificationItem = ({ item, theme, width }: any) => {
     }
   };
 
+  console.log("item ==================================>", item);
+
   const handleRedirect = () => {
-  switch (item.type) {
-    case "LIKE":
-    case "COMMENT":
-      router.push({
-        pathname: "/(drawer)/(tabs)/reels",
-        params: {
-          // username: item.sender?.username,
-          // id: item.id,
-            videoId: item.referenceId, // Video/Reel ID
-            id: item.referenceId,      // Same as videoId
-            // tab: "explore",    
-        },
-      });
-      break;
+    switch (item.type) {
+      case "LIKE":
+      case "COMMENT":
+        router.push({
+          pathname: "/(drawer)/(tabs)/reels",
+          params: {
 
-    // case "FOLLOW":
-    //     router.push({
-    //       pathname: "/profile/[username]",
-    //       params: {
-    //         username: item.sender.username,
-    //       },
-    //     });
-    //   break;
-    case "FOLLOW":
-  const username = item.sender?.username || item.sender?.name?.toLowerCase().replace(/\s+/g, '');
-  if (username) {
-    router.push(`/profile/${username}`);
-  } else {
-    console.error("No username found:", item.sender);
-  }
-  break;
+            reelId: item.referenceId,
 
-    // case "MESSAGE":
-    //   router.push({
-    //     pathname: "/chat/[id]",
-    //     params: {
-    //       username : item.sender?.username,
-    //       id: item.sender?.id,
-    //     },
-    //   });
-    //   break;
+            // videoId: item.referenceId, // Video/Reel ID
+            // id: item.referenceId,      // Same as videoId
+            // tab: "explore",
+          },
+        });
+        break;
 
-    case "MENTION":
-      router.push({
-        pathname: "/(drawer)/(tabs)/reels",
-        params: {
+
+      case "FOLLOW":
+        const username = item.sender?.username || item.sender?.name?.toLowerCase().replace(/\s+/g, '');
+        if (username) {
+          router.push(`/profile/${username}`);
+        } else {
+          console.error("No username found:", item.sender);
+        }
+        break;
+
+
+      case "MENTION":
+        router.push({
+          pathname: "/(drawer)/(tabs)/reels",
+          params: {
             videoId: item.referenceId,
-            id: item.referenceId,  
-        },
-      });
-      break;
+            id: item.referenceId,
+          },
+        });
+        break;
 
-    default:
-      router.push("/notifications");
-  }
-};
+      default:
+        router.push("/notifications");
+    }
+  };
 
   const avatarSize = width * 0.13;
   const fontSize = width * 0.04;
