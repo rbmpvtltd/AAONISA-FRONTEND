@@ -204,8 +204,8 @@ const Register = () => {
   const handleUsernameChange = (text: string) => {
     const cleanText = text.toLowerCase().replace(/\s+/g, "");
     setUsername(cleanText);
-    resetOtpFlow();
-    setOtpTimer(0);
+    // resetOtpFlow();
+    // setOtpTimer(0);
   };
   const getPasswordStrength = (password: string) => {
   let score = 0;
