@@ -19,7 +19,7 @@
         "EXPO_PUBLIC_LOCAL_API_URL": "https://testing.hithoy.com/api"
       },
       "android": {
-        "buildType": "app-bundle",
+        "buildType": "apk",
         "autoIncrement": true
       }
     }
