@@ -32,6 +32,23 @@
         "foregroundImage": "./assets/images/icon-hithoye(1).png",
         "backgroundColor": "#FFFFFF"
       },
+      "intentFilters": [
+        {
+          "action": "VIEW",
+          "autoVerify": true,
+          "data": [
+            {
+              "scheme": "https",
+              "host": "testing.hithoy.com",
+              "pathPrefix": "/"
+            }
+          ],
+          "category": [
+            "BROWSABLE",
+            "DEFAULT"
+          ]
+        }
+      ],
       "edgeToEdgeEnabled": true,
       "package": "com.rbm.HitHoy",
       "usesCleartextTraffic": true

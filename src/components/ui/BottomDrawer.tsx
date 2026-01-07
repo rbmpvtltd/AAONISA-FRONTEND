@@ -39,26 +39,26 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
 
 
 
-  const availablePlatforms = [
-    { name: 'WhatsApp', urlScheme: 'whatsapp://send?text=', color: '#25D366', icon: 'logo-whatsapp' },
-    { name: 'Telegram', urlScheme: 'tg://msg?text=', color: '#229ED9', icon: 'send-outline' },
-    { name: 'Facebook', urlScheme: 'fb://facewebmodal/f?href=', color: '#1877F2', icon: 'logo-facebook' },
-    { name: 'Instagram', urlScheme: 'instagram://share?text=', color: '#C13584', icon: 'logo-instagram' },
-  ];
+  // const availablePlatforms = [
+  //   { name: 'WhatsApp', urlScheme: 'whatsapp://send?text=', color: '#25D366', icon: 'logo-whatsapp' },
+  //   { name: 'Telegram', urlScheme: 'tg://msg?text=', color: '#229ED9', icon: 'send-outline' },
+  //   { name: 'Facebook', urlScheme: 'fb://facewebmodal/f?href=', color: '#1877F2', icon: 'logo-facebook' },
+  //   { name: 'Instagram', urlScheme: 'instagram://share?text=', color: '#C13584', icon: 'logo-instagram' },
+  // ];
 
-  const [activePlatforms, setActivePlatforms] = useState<any[]>([]);
-  useEffect(() => {
-    const checkApps = async () => {
-      const available: any[] = [];
-      for (let platform of availablePlatforms) {
-        const canOpen = await Linking.canOpenURL(platform.urlScheme);
-        if (canOpen) available.push(platform);
-      }
-      setActivePlatforms(available);
-    };
+  // const [activePlatforms, setActivePlatforms] = useState<any[]>([]);
+  // useEffect(() => {
+  //   const checkApps = async () => {
+  //     const available: any[] = [];
+  //     for (let platform of availablePlatforms) {
+  //       const canOpen = await Linking.canOpenURL(platform.urlScheme);
+  //       if (canOpen) available.push(platform);
+  //     }
+  //     setActivePlatforms(available);
+  //   };
 
-    checkApps();
-  }, []);
+  //   checkApps();
+  // }, []);
 
   useEffect(() => {
     if (visible) {
@@ -105,7 +105,7 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
         break;
       default:
         await Share.share({
-          message: `Check this reel: ${reelUrl}`,
+          message: `${reelUrl}`,
         });
         return;
     }
@@ -121,31 +121,6 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
       console.log("Error opening app:", error);
     }
   };
-
-
-  // const handleDownloadReel = async () => {
-  //   try {
-  //     const { status } = await MediaLibrary.requestPermissionsAsync();
-  //     if (status !== "granted") {
-  //       alert("Permission to access gallery is required!");
-  //       return;
-  //     }
-
-  //     const fileUri = FileSystem.documentDirectory + "reel.mp4";
-  //     const downloadResumable = FileSystem.createDownloadResumable(
-  //       reelUrl,
-  //       fileUri
-  //     );
-
-  //     const { uri } = (await downloadResumable.downloadAsync())!;
-  //     const asset = await MediaLibrary.createAssetAsync(uri);
-  //     await MediaLibrary.createAlbumAsync("Download", asset, false);
-  //     Alert.alert("Download complete!", "Video saved to gallery 🎉");
-  //   } catch (error) {
-  //     console.log("Download error:", error);
-  //     Alert.alert("Error", "Failed to download the video.");
-  //   }
-  // };
 
   const handleDownloadReel = async () => {
     try {
@@ -212,62 +187,82 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
           },
         ]}
       >
-        {!showSharePanel ? (
-          <>
-            <TouchableOpacity style={styles.optionButton} onPress={onSave}>
-              <Ionicons name="bookmark-outline" size={22} color={theme.text} />
-              <Text style={[styles.optionText, { color: theme.text }]}>
-                Save
+        {/* {!showSharePanel ? ( */}
+        <>
+          <TouchableOpacity style={styles.optionButton} onPress={onSave}>
+            <Ionicons name="bookmark-outline" size={22} color={theme.text} />
+            <Text style={[styles.optionText, { color: theme.text }]}>
+              Save
+            </Text>
+          </TouchableOpacity>
+
+          {/* NEW: Show Delete button only for owner */}
+          {isOwner && onDelete && (
+            <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
+              <Ionicons name="trash-outline" size={22} color="#FF3B30" />
+              <Text style={[styles.optionText, { color: "#FF3B30" }]}>
+                Delete
               </Text>
             </TouchableOpacity>
+          )}
 
-            {/* NEW: Show Delete button only for owner */}
-            {isOwner && onDelete && (
-              <TouchableOpacity style={styles.optionButton} onPress={handleDelete}>
-                <Ionicons name="trash-outline" size={22} color="#FF3B30" />
-                <Text style={[styles.optionText, { color: "#FF3B30" }]}>
-                  Delete
-                </Text>
-              </TouchableOpacity>
+          <TouchableOpacity style={styles.optionButton} onPress={onReport}>
+            <Ionicons
+              name="alert-circle-outline"
+              size={22}
+              color={theme.text}
+            />
+            <Text style={[styles.optionText, { color: theme.text }]}>
+              Report
+            </Text>
+          </TouchableOpacity>
+
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={() => handleSharePlatform("other")}
+          >
+            <Ionicons
+              name="share-social-outline"
+              size={22}
+              color={theme.text}
+            />
+            <Text style={[styles.optionText, { color: theme.text }]}>
+              Share Video
+            </Text>
+          </TouchableOpacity>
+
+
+          <TouchableOpacity
+            style={styles.optionButton}
+            onPress={handleDownloadReel}
+          >
+            {downloading ? (
+              <ActivityIndicator size="small" color={theme.text} />
+            ) : (
+              <Ionicons
+                name="arrow-down-circle-outline"
+                size={22}
+                color={theme.text}
+              />
             )}
+            <Text style={[styles.optionText, { color: theme.text }]}>
+              Download Video
+            </Text>
+          </TouchableOpacity>
 
-            <TouchableOpacity style={styles.optionButton} onPress={onReport}>
-              <Ionicons
-                name="alert-circle-outline"
-                size={22}
-                color={theme.text}
-              />
-              <Text style={[styles.optionText, { color: theme.text }]}>
-                Report
-              </Text>
-            </TouchableOpacity>
+        </>
+        {/* // ) : ( */}
+        {/* //   <View>
+        //     <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 15, }}>
+        //       <TouchableOpacity onPress={() => setShowSharePanel(false)}>
+        //         <Ionicons name="arrow-back" size={24} color={theme.text} style={{ marginRight: 8 }} />
+        //       </TouchableOpacity>
 
-            <TouchableOpacity
-              style={styles.optionButton}
-              onPress={() => setShowSharePanel(true)}
-            >
-              <Ionicons
-                name="share-social-outline"
-                size={22}
-                color={theme.text}
-              />
-              <Text style={[styles.optionText, { color: theme.text }]}>
-                Share Video
-              </Text>
-            </TouchableOpacity>
-          </>
-        ) : (
-          <View>
-            <View style={{ flexDirection: "row", alignItems: "center", marginBottom: 15, }}>
-              <TouchableOpacity onPress={() => setShowSharePanel(false)}>
-                <Ionicons name="arrow-back" size={24} color={theme.text} style={{ marginRight: 8 }} />
-              </TouchableOpacity>
-
-              <Text style={[styles.shareTitle, { color: theme.text }]}>Share Reel</Text>
-            </View>
+        //       <Text style={[styles.shareTitle, { color: theme.text }]}>Share Reel</Text>
+        //     </View> */}
 
 
-            <TouchableOpacity
+        {/* <TouchableOpacity
               style={styles.optionButton}
               onPress={handleCopyLink}
             >
@@ -275,9 +270,9 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
               <Text style={[styles.optionText, { color: theme.text }]}>
                 Copy Link
               </Text>
-            </TouchableOpacity>
+            </TouchableOpacity> */}
 
-            <View style={styles.socialRow}>
+        {/* <View style={styles.socialRow}>
               {activePlatforms.map((platform) => (
                 <TouchableOpacity
                   key={platform.name}
@@ -292,26 +287,26 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
                 onPress={() => handleSharePlatform("other")}
               >
                 <Ionicons name="share-outline" size={30} color={theme.text} />
-              </TouchableOpacity>
+              </TouchableOpacity> */}
 
-              {/* <TouchableOpacity
+        {/* <TouchableOpacity
                 style={styles.optionButton}
                 onPress={handleDownloadReel}
               >
                 <Ionicons name="arrow-down-circle" size={30} color={theme.text} />
               </TouchableOpacity> */}
 
-              {downloading ? (
+        {/* {downloading ? (
                 <ActivityIndicator size="large" color={theme.text} />
               ) : (
                 <TouchableOpacity style={styles.optionButton} onPress={handleDownloadReel}>
                   <Ionicons name="arrow-down-circle" size={30} color={theme.text} />
                 </TouchableOpacity>
-              )}
+              )} */}
 
-            </View>
-          </View>
-        )}
+        {/* </View> */}
+        {/* // </View> */}
+        {/* // )} */}
       </Animated.View>
     </View>
   );
