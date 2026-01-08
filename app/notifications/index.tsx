@@ -48,17 +48,23 @@ const NotificationItem = ({ item, theme, width }: any) => {
 
   const handleRedirect = () => {
     switch (item.type) {
+
       case "LIKE":
+        console.log("arbaaz chouhan");
       case "COMMENT":
+        console.log('====================================');
+        console.log(" pppppppppppppppp", item.referenceId,);
+        console.log('====================================');
         router.push({
           pathname: "/(drawer)/(tabs)/reels",
           params: {
             // username: item.sender?.username,
             // id: item.id,
             videoId: item.referenceId, // Video/Reel ID
-            id: item.referenceId,      // Same as videoId
+            // id: item.referenceId,      // Same as videoId
             // tab: "explore",    
           },
+
         });
         break;
 
@@ -94,7 +100,7 @@ const NotificationItem = ({ item, theme, width }: any) => {
           pathname: "/(drawer)/(tabs)/reels",
           params: {
             videoId: item.referenceId,
-            id: item.referenceId,
+            // id: item.referenceId,
           },
         });
         break;
@@ -120,7 +126,7 @@ const NotificationItem = ({ item, theme, width }: any) => {
       ]}
     >
       <Image
-        source={{ uri: item.sender?.profilePicture || DEFAULT_AVATAR }}
+        source={{ uri: item.sender?.profilePicture || item.sender?.ProfilePicture || DEFAULT_AVATAR }}
         style={{
           width: avatarSize,
           height: avatarSize,
@@ -150,7 +156,9 @@ const NotificationList = () => {
   const { width } = useWindowDimensions();
 
   const { data, isLoading, isError, refetch } = useNotifications();
-
+  console.log('====================================');
+  console.log("data resvied in notification page", data);
+  console.log('====================================');
   if (isLoading) {
     return (
       <SafeAreaView style={[styles.center, { backgroundColor: theme.background }]}>

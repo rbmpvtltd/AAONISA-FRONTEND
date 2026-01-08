@@ -606,6 +606,11 @@ export default function StoryViewPage() {
   const [paused, setPaused] = useState(false);
   const [isMuted, setIsMuted] = useState(false);
   const [showViewers, setShowViewers] = useState(false);
+  const [isVideoLoading, setIsVideoLoading] = useState(true);
+  const [showThumbnail, setShowThumbnail] = useState(true);
+  const [isVideoReady, setIsVideoReady] = useState(false);
+
+
 
   // Stories
   const {
@@ -618,6 +623,8 @@ export default function StoryViewPage() {
   const userStory = userStories.find((u: any) =>
     u.stories.some((s: any) => s.id === id)
   );
+
+  console.log("userStoryuserStoryuserStoryuserStoryuserStoryuserStory", userStory);
 
   const storyList = userStory?.stories || [];
   const currentStory = storyList[currentIndex];
@@ -639,6 +646,35 @@ export default function StoryViewPage() {
   const markStoryViewedLocal = (storyId: string) => {
     setViewedStories((prev) => new Set(prev).add(storyId));
   };
+
+  useEffect(() => {
+    if (!player) return;
+
+    const sub = player.addListener("statusChange", (event) => {
+      console.log("🎥 VIDEO STATUS:", event.status);
+
+      if (event.status === "loading") {
+        setIsVideoLoading(true);
+        setShowThumbnail(true);
+        setIsVideoReady(false);
+      }
+
+      if (event.status === "readyToPlay") {
+        setIsVideoLoading(false);
+        setShowThumbnail(false);
+        setIsVideoReady(true);
+      }
+    });
+
+    return () => {
+      sub.remove();
+    };
+  }, [player]);
+
+  // useEffect(() => {
+  //   setShowThumbnail(true);
+  // }, [currentStory?.videoUrl]);
+
 
   useEffect(() => {
     if (player) {
@@ -720,6 +756,7 @@ export default function StoryViewPage() {
   // Progress animation
   useEffect(() => {
     if (!currentStory || !socket || !currentUser) return;
+    if (!isVideoReady) return;
 
     // Don't send view count for own story
     if (!isOwnStory) {
@@ -747,7 +784,7 @@ export default function StoryViewPage() {
     });
 
     return () => anim.stop();
-  }, [currentIndex]);
+  }, [currentIndex, isVideoReady]);
 
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
@@ -755,6 +792,7 @@ export default function StoryViewPage() {
       return;
     }
 
+    console.log("arbaaz khan 11111 arbaaz", userStory?.usernamer)
     const currentUserIndex = userStories.findIndex(
       (u: any) => u.username === userStory?.username
     );
@@ -771,6 +809,41 @@ export default function StoryViewPage() {
       router.back();
     }
   };
+
+  // const handleNext = () => {
+  //   console.log("Current index:", currentIndex);
+  //   console.log("Story list length:", storyList.length);
+
+  //   if (currentIndex < storyList.length - 1) {
+  //     setCurrentIndex(i => i + 1);
+  //     return;
+  //   }
+
+  //   const currentUserIndex = userStories.findIndex(
+  //     u => u.username === userStory?.username
+  //   );
+
+  //   console.log("Current user index:", currentUserIndex);
+
+  //   if (currentUserIndex < userStories.length - 1) {
+  //     const nextUser = userStories[currentUserIndex + 1];
+  //     const nextStory =
+  //       nextUser.stories.find((s: any) => !viewedStories.has(s.id)) ||
+  //       nextUser.stories[0];
+
+  //     console.log("Next user:", nextUser.username);
+  //     console.log("Next story ID:", nextStory.id);
+
+  //     const path = `/story/${nextStory.id}`;
+  //     console.log("Router replace →", path);
+
+  //     router.replace(path);
+  //   } else {
+  //     console.log("End of stories → back()");
+  //     router.back();
+  //   }
+  // };
+
 
   const handlePrevious = () => {
     if (currentIndex > 0) {
@@ -857,6 +930,24 @@ export default function StoryViewPage() {
         allowsPictureInPicture={false}
         nativeControls={false}
       />
+
+
+
+      {showThumbnail && (
+        <Image
+          source={{
+            uri: currentStory?.thumbnailUrl || currentStory?.posterUrl,
+          }}
+          style={styles.video}
+          resizeMode="cover"
+        />
+      )}
+
+      {isVideoLoading && (
+        <View style={styles.loaderOverlay}>
+          <ActivityIndicator size="large" color="#fff" />
+        </View>
+      )}
 
       {/* Top bar with progress */}
       <View style={styles.topBar}>
@@ -1089,4 +1180,13 @@ const styles = StyleSheet.create({
     paddingTop: 60,
   },
   noViewersText: { color: "#666", fontSize: 16, marginTop: 12 },
-});
+  loaderOverlay: {
+    position: "absolute",
+    width,
+    height,
+    justifyContent: "center",
+    alignItems: "center",
+    backgroundColor: "rgba(0,0,0,0.4)",
+  },
+
+}); 
