@@ -77,6 +77,119 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
     }, [preSelectedAudio]);
 
 
+    // const startRecordingWithAudio = async () => {
+    //     if (!cameraRef.current) {
+    //         Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' });
+    //         return;
+    //     }
+
+    //     try {
+    //         setIsRecording(true);
+    //         setRecordTime(0);
+    //         // recordingStartTimeRef.current = Date.now();
+    //         const startTime = Date.now();
+    //         recordingStartTimeRef.current = startTime;
+
+    //         // 1️⃣ Play audio if selected
+    //         if (preSelectedAudio?.uri) {
+    //             const { sound } = await Audio.Sound.createAsync(
+    //                 { uri: preSelectedAudio.uri },
+    //                 { shouldPlay: true, volume: 1.0, isLooping: false }
+    //             );
+    //             audioSoundRef.current = sound;
+    //             await sound.playAsync();
+    //             console.log('🎵 Audio started playing');
+    //         }
+
+    //         // 2️⃣ Start timer
+    //         // timerIntervalRef.current = setInterval(() => {
+    //         //     if (recordingStartTimeRef.current) {
+    //         //         const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
+    //         //         setRecordTime(elapsedSec);
+    //         //     }
+    //         // }, 1000);
+
+    //         timerIntervalRef.current = setInterval(() => {
+    //             setRecordTime(Math.floor((Date.now() - startTime) / 1000));
+    //         }, 1000);
+
+    //         // 3️⃣ Calculate max duration
+    //         let maxDurationSec: number;
+    //         if (preSelectedAudio && audioDuration) {
+    //             maxDurationSec = audioDuration;
+    //             console.log('📹 Recording will stop after', maxDurationSec, 'seconds (audio length)');
+    //         } else {
+    //             maxDurationSec = contentType === 'story' ? 30 : 120;
+    //             console.log('📹 Recording will stop after', maxDurationSec, 'seconds (default)');
+    //         }
+
+    //         // 4️⃣ Auto-stop timer
+    //         autoStopTimeoutRef.current = setTimeout(() => {
+    //             console.log('⏱️ Auto-stopping recording...');
+    //             if (cameraRef.current) {
+    //                 cameraRef.current.stopRecording();
+    //             }
+    //         }, maxDurationSec * 100);
+
+    //         // 5️⃣ Start camera recording
+    //         // const maxDurationSec = contentType === 'story' ? 30 : 120;
+    //         const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
+    //         const video = await cameraRef.current.recordAsync(options);
+
+    //         // 6️⃣ Calculate elapsed time
+    //         // const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
+    //         const elapsedMs = Date.now() - startTime;
+    //         const elapsedSec = Math.floor(elapsedMs / 1000);
+
+    //         // ✅ IMPORTANT: Cleanup FIRST(before checking duration)
+    //         await stopRecordingWithAudio();
+
+    //         // 7️⃣ Check minimum duration(10 seconds)
+    //         if (elapsedSec < 10000) {
+    //             console.log('❌ Video too short:', elapsedSec / 1000, 'seconds');
+    //             Toast.show({
+    //                 type: "error",
+    //                 text1: 'Video too short!',
+    //                 text2: 'Please record at least 10 seconds.'
+    //             });
+    //             return; // ✅ Exit WITHOUT calling onImagePick
+    //         }
+
+    //         // 8️⃣ Check if video exists
+    //         if (!video) {
+    //             throw new Error('Video is null');
+    //         }
+
+    //         // 9️⃣ SUCCESS - Send video(only if >= 10 seconds)
+    //         console.log('✅ Recording completed:', video.uri);
+    //         console.log('✅ Duration:', Math.floor(elapsedSec / 1000), 'seconds');
+
+    //         onImagePick(video.uri); // ✅ This only runs if video >= 10 seconds
+
+    //         Toast.show({
+    //             type: "success",
+    //             text1: 'Video recorded!',
+    //             text2: `Duration: ${Math.floor(elapsedSec / 1000)} seconds`
+    //         });
+    //         console.log('====================================');
+    //         console.log("assssssssssssssss");
+    //         console.log('====================================');
+    //         // Toast.show({
+    //         //     type: "error",
+    //         //     text1: 'Video too short!',
+    //         //     text2: 'Please record at least 10 seconds.'
+    //         // });
+    //     } catch (err: any) {
+    //         console.error('❌ Recording error:', err);
+    //         await stopRecordingWithAudio(); // Cleanup on error
+    //         Toast.show({
+    //             type: "error",
+    //             text1: 'Recording failed',
+    //             text2: err.message || 'Please try again'
+    //         });
+    //     }
+    // };
+
     const startRecordingWithAudio = async () => {
         if (!cameraRef.current) {
             Toast.show({ type: "error", text1: 'Error', text2: 'Camera not ready.' });
@@ -86,7 +199,8 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
         try {
             setIsRecording(true);
             setRecordTime(0);
-            recordingStartTimeRef.current = Date.now();
+            const startTime = Date.now();
+            recordingStartTimeRef.current = startTime;
 
             // 1️⃣ Play audio if selected
             if (preSelectedAudio?.uri) {
@@ -101,10 +215,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
 
             // 2️⃣ Start timer
             timerIntervalRef.current = setInterval(() => {
-                if (recordingStartTimeRef.current) {
-                    const elapsedSec = Math.floor((Date.now() - recordingStartTimeRef.current) / 1000);
-                    setRecordTime(elapsedSec);
-                }
+                setRecordTime(Math.floor((Date.now() - startTime) / 1000));
             }, 1000);
 
             // 3️⃣ Calculate max duration
@@ -126,57 +237,53 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
             }, maxDurationSec * 1000);
 
             // 5️⃣ Start camera recording
-            // const maxDurationSec = contentType === 'story' ? 30 : 120;
             const options = { maxDuration: maxDurationSec, quality: '720p', mute: false };
             const video = await cameraRef.current.recordAsync(options);
 
-            // const video = await cameraRef.current.recordAsync({
-            //     maxDuration: maxDurationSec,
-            //     quality: '720p',
-            //     mute: false
-            // });
-
             // 6️⃣ Calculate elapsed time
-            const elapsed = Date.now() - (recordingStartTimeRef.current ?? 0);
+            const elapsedMs = Date.now() - startTime;
+            const elapsedSec = Math.floor(elapsedMs / 1000);
 
-            // ✅ IMPORTANT: Cleanup FIRST(before checking duration)
-            await stopRecordingWithAudio();
+            console.log(`📹 Recording stopped. Duration: ${elapsedSec} seconds`);
 
-            // 7️⃣ Check minimum duration(10 seconds)
-            if (elapsed < 10000) {
-                console.log('❌ Video too short:', elapsed / 1000, 'seconds');
+            // ✅ FIX: Check 10 SECONDS, not 10000
+            if (elapsedSec < 10) {
+                console.log('❌ Video too short:', elapsedSec, 'seconds');
+
+                // Cleanup BAAD mein
+                await stopRecordingWithAudio();
+
                 Toast.show({
                     type: "error",
                     text1: 'Video too short!',
                     text2: 'Please record at least 10 seconds.'
                 });
-                return; // ✅ Exit WITHOUT calling onImagePick
+                return;
             }
+
+            // 7️⃣ Cleanup
+            await stopRecordingWithAudio();
 
             // 8️⃣ Check if video exists
             if (!video) {
                 throw new Error('Video is null');
             }
 
-            // 9️⃣ SUCCESS - Send video(only if >= 10 seconds)
+            // 9️⃣ SUCCESS
             console.log('✅ Recording completed:', video.uri);
-            console.log('✅ Duration:', Math.floor(elapsed / 1000), 'seconds');
+            console.log('✅ Duration:', elapsedSec, 'seconds');
 
-            onImagePick(video.uri); // ✅ This only runs if video >= 10 seconds
+            onImagePick(video.uri);
 
             Toast.show({
                 type: "success",
                 text1: 'Video recorded!',
-                text2: `Duration: ${Math.floor(elapsed / 1000)} seconds`
+                text2: `Duration: ${elapsedSec} seconds`
             });
-            // Toast.show({
-            //     type: "error",
-            //     text1: 'Video too short!',
-            //     text2: 'Please record at least 10 seconds.'
-            // });
+
         } catch (err: any) {
             console.error('❌ Recording error:', err);
-            await stopRecordingWithAudio(); // Cleanup on error
+            await stopRecordingWithAudio();
             Toast.show({
                 type: "error",
                 text1: 'Recording failed',

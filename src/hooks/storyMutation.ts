@@ -5,13 +5,11 @@ import { useQuery } from "@tanstack/react-query";
 
 export const useStoriesQuery = () => {
   return useQuery({
-    queryKey: ['stories'],
-    queryFn: async () => {
-      const data = await getAllStories();
-      return data || [];
-    },
-    staleTime: 0,                 
-    refetchOnMount: "always",     
-    retry: 1,
+    queryKey: ["stories"],
+    queryFn: getAllStories,
+    staleTime: 1000 * 60 * 5, // ✅ 5 minutes
+    gcTime: 1000 * 60 * 10,
+    // refetchOnMount: false,
+    // refetchOnWindowFocus: false,
   });
 };

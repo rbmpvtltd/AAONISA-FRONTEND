@@ -389,15 +389,67 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
                                     const durationSec = status.durationMillis / 1000;
                                     setVideoDuration(durationSec);
 
-                                    // Trim logic
-                                    const maxDuration = contentType === "story" ? 30 : 120;
-                                    setTrimEnd(Math.min(maxDuration, durationSec));
+                                    // ✅ Story-specific validation (10-30 seconds only)
+                                    if (contentType === "story") {
+                                        if (durationSec < 10) {
+                                            console.warn(`❌ Story too short: ${durationSec.toFixed(1)}s`);
 
-                                    // ---------------- Duration Check ----------------
-                                    if (durationSec < 10) {
-                                        console.warn("Video too short! Discarding...");
-                                        onDiscard(); // Back to previous screen
+                                            Toast.show({
+                                                type: "error",
+                                                text1: 'Story too short!',
+                                                text2: 'Story must be at least 10 seconds.'
+                                            });
+
+                                            setTimeout(() => {
+                                                onDiscard();
+                                            }, 1500);
+                                            return;
+                                        }
+
+                                        if (durationSec > 30) {
+                                            console.warn(`❌ Story too long: ${durationSec.toFixed(1)}s`);
+
+                                            Toast.show({
+                                                type: "error",
+                                                text1: 'Story too long!',
+                                                text2: 'Story can only be up to 30 seconds. Please trim it.'
+                                            });
+
+                                            setTimeout(() => {
+                                                onDiscard();
+                                            }, 1500);
+                                            return;
+
+                                            // Don't discard, just set trim to 30 seconds
+                                            // setTrimEnd(30);
+                                            // useUploadStore.getState().setVideoUri(videoUri, contentType);
+                                            // return;
+                                        }
+
+                                        // Valid story (10-30 seconds)
+                                        // setTrimEnd(durationSec);
+                                    } else {
+                                        // Reels/News validation (min 10 seconds, max 120 seconds)
+                                        if (durationSec < 10) {
+                                            console.warn(`❌ Video too short: ${durationSec.toFixed(1)}s`);
+
+                                            Toast.show({
+                                                type: "error",
+                                                text1: 'Video too short!',
+                                                text2: 'Please select a video of at least 10 seconds.'
+                                            });
+
+                                            setTimeout(() => {
+                                                onDiscard();
+                                            }, 1500);
+                                            return;
+                                        }
+
+                                        const maxDuration = 120;
+                                        setTrimEnd(Math.min(maxDuration, durationSec));
                                     }
+
+                                    console.log(`✅ Video loaded: ${durationSec.toFixed(1)}s (${contentType})`);
                                     useUploadStore.getState().setVideoUri(videoUri, contentType);
                                 }
                             }}
