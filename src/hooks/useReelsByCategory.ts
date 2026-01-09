@@ -24,17 +24,46 @@
 //   });
 // };
 
-import { getCategoryReel } from "@/src/api/reels-api";
+import { getCategoryReel, getReelsByWithMainId } from "@/src/api/reels-api";
 import { useInfiniteQuery } from "@tanstack/react-query";
 
-export const useReelsByCategory = (category: string) => {
+export const useReelsByCategory = (
+  category: string,
+  redirected = false,
+  reelId?: string
+) => {
   return useInfiniteQuery({
-    queryKey: ["reels", category],
+    queryKey: ["reels", category, redirected, reelId],
 
     queryFn: async ({ pageParam = 1 }) => {
+
+      // 🔗 CASE 1: Deep link se aaye
+      if (redirected && reelId) {
+
+        const res = await getReelsByWithMainId(reelId);
+        const reelsData = Array.isArray(res?.data) ? res.data : [];
+
+        const parsed = reelsData
+          .filter((item: any) => item?.id && item?.videoUrl)
+          .map((item: any) => ({
+            ...item,
+            likes: item.likesCount || 0,
+            comments: item.commentsCount || 0,
+            shares: item.sharesCount || 0,
+            isLiked: item.isLiked || false,
+          }));
+
+        return {
+          reels: parsed,
+          nextPage: 2,
+        };
+      }
+
+      // 🎲 CASE 2: Normal behaviour (tumhara existing code)
       console.log("🔥 FETCH reels page:", pageParam);
       const useRandom = pageParam === 1;
       const res = await getCategoryReel(category, pageParam, 20, useRandom);
+
       const reelsData = Array.isArray(res?.data) ? res.data : [];
 
       const parsed = reelsData
@@ -47,18 +76,13 @@ export const useReelsByCategory = (category: string) => {
           isLiked: item.isLiked || false,
         }));
 
-      console.log(`✅ Parsed ${parsed.length} reels (random: ${useRandom})`);
       return {
         reels: parsed,
-        // nextPage: parsed.length === 20 ? pageParam + 1 : null,
         nextPage: parsed.length < 20 ? null : pageParam + 1,
-
       };
     },
 
     getNextPageParam: (lastPage) => lastPage.nextPage,
-
-    // caching off — just like Instagram
     initialPageParam: 1,
     staleTime: 0,
     gcTime: 10000,

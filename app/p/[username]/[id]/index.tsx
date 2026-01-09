@@ -1093,8 +1093,8 @@ const UserReelItem = ({
         onDelete={owner ? handleDeleteReel : undefined}
         onReport={() => setShowReportDrawer(true)}
         // onShare={() => console.log("Shared")}
-        reelId={item.id}
-        reelUrl={item.videoUrl}
+        reelId={item.id || item.uuid}
+        reelUrl={item.id || item.uuid}
         isOwner={owner}
       />
 

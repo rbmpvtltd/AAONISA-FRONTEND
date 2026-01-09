@@ -967,16 +967,14 @@ import { useCallback, useEffect, useRef, useState } from "react";
 import {
   FlatList,
   Image,
-  KeyboardAvoidingView,
   Modal,
-  Platform,
   Pressable,
   StyleSheet,
   Text,
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
 
 import { GetCurrentUser } from "@/src/api/profile-api";
@@ -1388,11 +1386,12 @@ export default function ChatDetailScreen() {
           ),
         }}
       />
-      <KeyboardAvoidingView
+      {/* <KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: theme.background }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
-      >
+      > */}
+      <>
         <View style={[styles.container, { padding }]}>
           <FlatList
             ref={flatRef}
@@ -1466,7 +1465,9 @@ export default function ChatDetailScreen() {
             </View>
           </View>
         </Modal>
-      </KeyboardAvoidingView>
+      </>
+
+      {/* </KeyboardAvoidingView> */}
     </>
   );
 }

@@ -46,6 +46,21 @@ const getCategoryReel = async (type: string, page: number, limit: number, random
   return data;
 };
 
+const getReelsByWithMainId = async (reelId: string) => {
+  const token = await getToken();
 
-export { getAllStreamIds, getCategoryReel };
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl(`/videos/explore/${reelId}`);
+  const { data } = await axios.get(apiUrl, config);
+  return data;
+}
+
+export { getAllStreamIds, getCategoryReel, getReelsByWithMainId };
 

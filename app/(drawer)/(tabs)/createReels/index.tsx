@@ -1,6 +1,6 @@
 import { useLocalSearchParams } from 'expo-router';
 import { useEffect, useState } from 'react';
-import { Dimensions, StyleSheet, View } from 'react-native';
+import { Dimensions, StyleSheet } from 'react-native';
 import { Video as VideoCompressor } from 'react-native-compressor';
 import Toast from 'react-native-toast-message';
 import CameraScreen from './recordPage';
@@ -44,6 +44,7 @@ const musicOptions: MusicOption[] = [
 export default function CreateReel() {
   // const [permission, requestPermission] = useCameraPermissions();
   const [videoUri, setVideoUri] = useState<string | null>(null);
+  const [selectedVideoUri, setSelectedVideoUri] = useState<string | null>(null)
   // const [contentType, setContentType] = useState<ContentType>('reels');
   const params = useLocalSearchParams();
   const [contentType, setContentType] = useState<ContentType>(
@@ -153,6 +154,17 @@ export default function CreateReel() {
   };
 
 
+  const handleVideoSelect = (uri: string) => {
+    setSelectedVideoUri(uri);
+  };
+
+  const handleDiscard = () => {
+    // ✅ Properly reset all states
+    setSelectedVideoUri(null);
+    // Reset any other relevant states
+  };
+
+
   // Show loading while permission is being checked
   // if (hasCameraPermission === null) {
   //   return <View style={styles.container} />;
@@ -171,28 +183,47 @@ export default function CreateReel() {
   // }
 
   return (
-    <View style={styles.container}>
-      {/* Video Preview on the same screen */}
-      {videoUri ? (
-        <>
-          <VideoPreview
-            videoUri={videoUri}
-            contentType={contentType}
-            musicOptions={musicOptions}
-            // onDiscard={discardVideo}
-            onDiscard={() => setVideoUri(null)}
-            onUpload={uploadVideo}
-            preSelectedAudio={preSelectedAudioData}
-          />
-        </>
-      )
-        : (
-          <>
-            {/* Content Type Selector */}
-            <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType} preSelectedAudio={preSelectedAudioData} />
-          </>
-        )}
-    </View>
+    // <View style={styles.container}>
+    //   {/* Video Preview on the same screen */}
+    //   {videoUri ? (
+    //     <>
+    //       <VideoPreview
+    //         videoUri={videoUri}
+    //         contentType={contentType}
+    //         musicOptions={musicOptions}
+    //         // onDiscard={discardVideo}
+    //         onDiscard={() => setVideoUri(null)}
+    //         onUpload={uploadVideo}
+    //         preSelectedAudio={preSelectedAudioData}
+    //       />
+    //     </>
+    //   )
+    //     : (
+    //       <>
+    //         {/* Content Type Selector */}
+    //         <CameraScreen onImagePick={setVideoUri} setContentType={setContentType} contentType={contentType} preSelectedAudio={preSelectedAudioData} />
+    //       </>
+    //     )}
+    // </View>
+
+
+    <>
+      {!selectedVideoUri ? (
+        <CameraScreen
+          onImagePick={handleVideoSelect}
+          setContentType={setContentType} contentType={contentType} preSelectedAudio={preSelectedAudioData}
+        />
+      ) : (
+        <VideoPreview
+          videoUri={selectedVideoUri}
+          onDiscard={handleDiscard}
+          contentType={contentType}
+          musicOptions={musicOptions}
+          onUpload={uploadVideo}
+          preSelectedAudio={preSelectedAudioData}
+        />
+      )}
+    </>
   );
 }
 const styles = StyleSheet.create({
