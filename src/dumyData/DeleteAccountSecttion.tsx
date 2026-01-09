@@ -26,6 +26,7 @@ export const DeleteAccountSection: React.FC<DeleteAccountProps> = ({ theme }) =>
   };
 
   const confirmDelete = () => {
+    
     Alert.alert(
       "Delete Account",
       "Your request to delete your account has been received.\n\nYour account will be scheduled for deletion. You can recover your account within 30 days by logging back in.",
