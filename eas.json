@@ -13,7 +13,6 @@
       },
       "ios": {
         "simulator": false,
-        "buildType": "development",
         "autoIncrement": true
       }
     },
@@ -28,7 +27,6 @@
         "autoIncrement": true
       },
       "ios": {
-        "buildType": "archive",
         "autoIncrement": true
       }
     }
