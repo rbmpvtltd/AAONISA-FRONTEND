@@ -21,7 +21,8 @@
         "NSCameraUsageDescription": "Camera access is required to take photos and videos.",
         "NSMicrophoneUsageDescription": "Microphone access is required for recording audio.",
         "NSPhotoLibraryUsageDescription": "Photo library access is required to select photos.",
-        "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library."
+        "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library.",
+        "ITSAppUsesNonExemptEncryption": false
       }
     },
     "android": {
