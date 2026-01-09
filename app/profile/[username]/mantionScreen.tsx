@@ -19,10 +19,14 @@ export const MentionedScreen: React.FC<MentionedScreenProps> = ({
   const theme = useAppTheme();
   const router = useRouter();
 
-  const handlePressVideo = (index: number) => {
-    const video = mentionedVideos[index];
-    if (!video) return;
-    router.push(`/p/${username}/${video.uuid}/mention`);
+  // const handlePressVideo = (index: number) => {
+  //   const video = mentionedVideos[index];
+  //   if (!video) return;
+  //   router.push(`/p/${username}/${video.uuid}/mention`);
+  // };
+
+  const handlePressVideo = (uuid: string) => {
+    router.push(`/p/${username}/${uuid}/mention`);
   };
 
   if (!mentionedVideos || mentionedVideos.length === 0) {
@@ -47,15 +51,24 @@ export const MentionedScreen: React.FC<MentionedScreenProps> = ({
       keyExtractor={(item: any) => item.uuid}
       numColumns={POSTS_PER_ROW}
       columnWrapperStyle={styles.row}
-      renderItem={({ item, index }) => (
+      // renderItem={({ item, index }) => (
+      //   <VideoItem
+      //     image={item.thumbnailUrl}
+      //     id={item.uuid}
+      //     // username={username}
+      //     // index={index}
+      //     onPressItem={handlePressVideo}
+      //   />
+      // )}
+      renderItem={({ item }) => (
         <VideoItem
           image={item.thumbnailUrl}
-          id={item.uuid}
-          username={username}
-          index={index}
+          uuid={item.uuid}
           onPressItem={handlePressVideo}
         />
       )}
+
+
       showsVerticalScrollIndicator={false}
       contentContainerStyle={[
         styles.gridContainer,

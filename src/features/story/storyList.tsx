@@ -238,6 +238,7 @@
 //   },
 // });
 
+// features/story/storyList.tsx
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
@@ -370,7 +371,7 @@ export const StoryList = memo(({
     const story = user.stories.find((s: any) => !s.viewed) || user.stories[0];
     router.push(`/story/${story.id}`);
     console.log('====================================');
-    console.log(`/story/${story.id}`);
+    console.log("story is here ", `/story/${story.id}`);
     console.log('====================================');
   }, [userStories]);
 

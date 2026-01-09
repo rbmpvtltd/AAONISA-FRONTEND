@@ -133,7 +133,7 @@ export default function RootLayout() {
       const decoded: any = jwtDecode(accessToken);
       const now = Date.now() / 1000;
 
-      console.log("⏳ Time Left:", decoded.exp - now);
+      // console.log("⏳ Time Left:", decoded.exp - now);
 
       if (decoded.exp < now) {
         console.log("⛔ Token Expired -> Logging out");

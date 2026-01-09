@@ -1,14 +1,19 @@
+// import AudioBottomSheet from '@/app/(drawer)/(tabs)/reels/AudioBottomSheet';
+// import VideoProgressBar from '@/app/(drawer)/(tabs)/reels/videoProgressBar';
 // import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
 // import BottomDrawer from '@/src/components/ui/BottomDrawer';
 // import ReportDrawer from '@/src/components/ui/ReportDrawer';
 // import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
+// import { createReelGesture } from '@/src/hooks/ReelGestures';
 // import { getTimeAgo } from '@/src/hooks/ReelsUploadTime';
+// import { useLike } from '@/src/hooks/useLike';
 // import { useMarkViewedMutation } from '@/src/hooks/useMarkViewedMutation';
 // import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 // import { useDeleteVideo } from '@/src/hooks/videosMutation';
 // import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 // import { useReelsStore } from '@/src/store/useReelsStore';
 // import { useProfileStore } from '@/src/store/userProfileStore';
+// import { formatCount } from '@/src/utils/formatCount';
 // import { useIsFocused } from '@react-navigation/native';
 // import { useQuery } from '@tanstack/react-query';
 // import { router, useLocalSearchParams } from "expo-router";
@@ -22,7 +27,6 @@
 //   Image,
 //   NativeScrollEvent,
 //   NativeSyntheticEvent,
-//   Pressable,
 //   StatusBar,
 //   StyleSheet,
 //   Text,
@@ -30,7 +34,8 @@
 //   useWindowDimensions,
 //   View
 // } from "react-native";
-// import { ScrollView } from 'react-native-gesture-handler';
+// import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
+// import Toast from 'react-native-toast-message';
 // import Ionicons from 'react-native-vector-icons/Ionicons';
 // // Reel Item Component
 // const UserReelItem = ({
@@ -48,6 +53,7 @@
 //   addShare,
 //   reelUsername,
 //   profilePicture,
+//   currentUserProfile,
 //   owner,
 // }: any) => {
 //   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
@@ -63,39 +69,74 @@
 //   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
 //   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
 //   const [showOptions, setShowOptions] = React.useState(false);
-//   const markViewedMutation = useMarkViewedMutation();
+//   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
 //   const [viewed, setViewed] = useState(false);
 //   const [showFullCaption, setShowFullCaption] = useState(false);
 //   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
 //   const [showReportDrawer, setShowReportDrawer] = useState(false);
+//   const isFocused = useIsFocused();
 //   const [isLoading, setIsLoading] = useState(true);
-
-//   const [liked, setLiked] = useState(
-//     Array.isArray(item.likes)
-//       ? item.likes.some((like: any) => like.user_id === currentUserId)
-//       : false
-//   );
-
-//   const player = useVideoPlayer({ uri: item.videoUrl }, (instance) => {
-//     instance.loop = true;
-//     instance.volume = isMuted ? 0 : 1;
-
-//     // VIDEO LOADED EVENT
-//     instance.addListener("statusChange", (event) => {
-//       if (event.status === "loading") {
-//         setIsLoading(true);
-//       }
-
-//       if (event.status === "readyToPlay") {
-//         setIsLoading(false); // video is fully ready
-//       }
-//     });
-
+//   const [paused, setPaused] = useState(false);
+//   const [showThumbnail, setShowThumbnail] = useState(true);
+//   // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
+//   // const [liked, setLiked] = useState(item.isLiked);
+//   const {
+//     liked,
+//     likesCount,
+//     handleLike,
+//   } = useLike({
+//     isLiked: item.isLiked,
+//     likesCount: item.likesCount,
+//     id: item.uuid || item.id,
+//     likeMutation,
 //   });
+
+//   const [showAudioSheet, setShowAudioSheet] = useState(false);
+
+//   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
+
+//   const player = useVideoPlayer(
+//     shouldLoadVideo ? { uri: item.videoUrl } : null,
+//     (instance) => {
+//       if (!instance) return;
+
+//       instance.loop = true;
+//       instance.volume = isMuted ? 0 : 1;
+
+//       // VIDEO LOADED EVENT
+//       instance.addListener("statusChange", (event) => {
+//         if (event.status === "loading") {
+//           setIsLoading(true);
+//           setShowThumbnail(true);
+//         }
+
+//         if (event.status === "readyToPlay") {
+//           setIsLoading(false);
+//           setTimeout(() => setShowThumbnail(false), 300);
+//         }
+
+//         // if (event.status === "error") {
+//         //   console.error(`❌ Video ${index} load failed`);
+//         //   setIsLoading(false);
+//         //   Toast.show({
+//         //     type: 'error',
+//         //     text1: 'Video Error',
+//         //     text2: 'Failed to load video'
+//         //   });
+//         // }
+//       });
+
+
+//     });
 
 //   // Handle play/pause based on scroll safely
 //   useEffect(() => {
 //     if (!player) return;
+
+//     if (!isFocused) {
+//       player.pause();
+//       return;
+//     }
 
 //     if (currentIndex === index) {
 //       if (player.currentTime < 0.5) player.currentTime = 0;
@@ -105,22 +146,27 @@
 //       try { player.pause(); } catch { }
 //       player.volume = 0;
 //     }
-//   }, [currentIndex, index, isMuted]);
+//   }, [isFocused, currentIndex, index, isMuted]);
 
-//   const handleLike = async () => {
-//     const newLiked = !liked;
-//     setLiked(newLiked);
+//   // const handleLike = async () => {
+//   //   const newLiked = !liked;
 
-//     try {
-//       await likeMutation.mutateAsync(item.uuid);
-//     } catch (error) {
-//       console.log("Like failed:", error);
-//       setLiked(!newLiked);
-//     }
-//   };
+//   //   // UI update
+//   //   setLiked(newLiked);
+//   //   setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
 
+//   //   try {
+//   //     await likeMutation.mutateAsync(item.uuid || item.id);
+//   //   } catch (err) {
+//   //     // revert on error
+//   //     setLiked(!newLiked);
+//   //     setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
+//   //   }
+//   // };
 
 //   useEffect(() => {
+//     if (!shouldLoadVideo) return;
+
 //     let frameId: number;
 
 //     const checkTime = () => {
@@ -130,7 +176,7 @@
 //           const time = player.currentTime;
 //           if (!viewed && time >= 10) {
 //             setViewed(true);
-//             markViewedMutation.mutate(item.uuid);
+//             markViewedMutation.mutate(item.uuid || item.id);
 //             console.log(` User viewed reel: ${item.uuid} | Time watched: ${time}s`);
 //           }
 //         }
@@ -143,16 +189,18 @@
 
 //     frameId = requestAnimationFrame(checkTime);
 //     return () => cancelAnimationFrame(frameId);
-//   }, [player, currentIndex, index, viewed]);
+//   }, [player, currentIndex, shouldLoadVideo, index, viewed]);
 
-//   // console.log("username in profile", reelUsername);
-//   // console.log("user item.ProfilePicture ", profilePicture);
-//   // console.log("user comment resived", item.comments);
-//   // console.log("user audio", item.audio);
 
-//   // console.log("=============================");
-//   // console.log("item :", item)
-//   // console.log("=============================");
+//   const handleLongPressIn = () => {
+//     setPaused(true);
+//     player.pause();
+//   };
+
+//   const handleLongPressOut = () => {
+//     setPaused(false);
+//     player.play();
+//   };
 
 
 //   const deleteVideo = useDeleteVideo();
@@ -169,7 +217,8 @@
 //             deleteVideo.mutate(item.uuid, {
 //               onSuccess: () => {
 //                 router.replace("/(drawer)/(tabs)/profile");
-//                 Alert.alert("Success", "Reel deleted successfully!");
+//                 // Alert.alert("Success", "Reel deleted successfully!");
+//                 Toast.show({ type: "success", text1: "Success", text2: "Reel deleted successfully!" })
 //               },
 //             });
 //           },
@@ -178,54 +227,110 @@
 //     );
 //   };
 
+//   const reelGesture = createReelGesture({
+//     onTap: handleToggleMute,
+//     onLongPressIn: handleLongPressIn,
+//     onLongPressOut: handleLongPressOut,
+//   });
+
+
+//   // const reelGesture = React.useMemo(() => {
+//   //   return createReelGesture({
+//   //     onTap: handleToggleMute,
+//   //     onLongPressIn: handleLongPressIn,
+//   //     onLongPressOut: handleLongPressOut,
+//   //   });
+//   // }, []);
+
+
+//   console.log("item.comments?.length ", item.comments?.length);
+//   console.log("item audio mkjmkjmkjmkjmkjmkjmkjk", item);
+
+
+//   const isOwnProfile = item.userProfile?.id === currentUserId;
+
 //   return (
 //     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
+
 //       {/* Video Player */}
-//       <Pressable
+//       {/* <Pressable
 //         style={{ flex: 1 }}
 //         onPress={handleToggleMute}
-//       >
-//         {/* <View style={{ flex: 1 }}> */}
-//         {isLoading && (
-//           <View style={{
-//             position: "absolute",
-//             top: "45%",
-//             left: "45%",
-//             zIndex: 9999
-//           }}>
-//             <ActivityIndicator size="large" color="#fff" />
-//           </View>
-//         )}
+//         onLongPress={handleLongPressIn}
+//         onPressOut={handleLongPressOut}
+//         delayLongPress={150}
+//       > */}
 
-//         <VideoView
-//           style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-//           key={`video-${item.id}-${index}`}
-//           player={player}
-//           allowsFullscreen={false}
-//           allowsPictureInPicture={false}
-//           contentFit="cover"
-//           nativeControls={false}
-//         />
+//       <GestureDetector gesture={reelGesture}>
+//         <Animated.View style={{ flex: 1 }}>
 
-//         {/* Volume Icon */}
-//         {showIcon && (
-//           <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
-//             <Ionicons
-//               name={isMuted ? "volume-mute" : "volume-high"}
-//               size={ACTION_ICON_SIZE}
-//               color="#fff"
+//           {showThumbnail && item.thumbnailUrl && (
+//             <Image
+//               source={{ uri: item.thumbnailUrl }}
+//               style={{
+//                 position: 'absolute',
+//                 width: SCREEN_WIDTH,
+//                 height: SCREEN_HEIGHT,
+//                 zIndex: 1,
+//               }}
+//               resizeMode="cover"
+//               fadeDuration={0}
 //             />
-//           </Animated.View>
-//         )}
-//       </Pressable>
+//           )}
+
+//           {shouldLoadVideo && (
+//             <VideoView
+//               style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
+//               key={`video-${item.id}-${index}`}
+//               player={player}
+//               allowsFullscreen={false}
+//               allowsPictureInPicture={false}
+//               contentFit="cover"
+//               nativeControls={false}
+//             />
+//           )}
+
+//           {/* <View style={{ flex: 1 }}> */}
+//           {isLoading && !shouldLoadVideo && (
+//             <View style={{
+//               position: "absolute",
+//               top: "45%",
+//               left: "45%",
+//               zIndex: 9999
+//             }}>
+//               <ActivityIndicator size="large" color="#fff" />
+//             </View>
+//           )}
+
+
+//           {/* Volume Icon */}
+//           {showIcon && (
+//             <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
+//               <Ionicons
+//                 name={isMuted ? "volume-mute" : "volume-high"}
+//                 size={ACTION_ICON_SIZE}
+//                 color="#fff"
+//               />
+//             </Animated.View>
+//           )}
+//           {/* </Pressable> */}
+//         </Animated.View>
+//       </GestureDetector>
 
 //       {/* Bottom Info */}
 //       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
 //         <View style={styles.userInfo}>
 //           <TouchableOpacity
 //             style={{ flexDirection: 'row', alignItems: 'center' }}
+//             // onPress={() => {
+//             //   router.push(`/profile`);
+//             // }}
 //             onPress={() => {
-//               router.push(`/profile`);
+//               if (isOwnProfile) {
+//                 router.push('/profile');
+//               } else {
+//                 router.push(`/profile/${reelUsername}`);
+//               }
 //             }}
 //           >
 //             <Image
@@ -276,12 +381,34 @@
 //             </View>
 //           )}
 //         </View>
-//         <View style={styles.musicInfo}>
+
+//         {/* <View style={styles.musicInfo}>
 //           <Text style={styles.musicIcon}>♪</Text>
 //           <Text style={styles.musicText}>
-//             {item.audio || "Original Sound"}
+//             {item.audio?.name || "Original Sound"}
 //           </Text>
-//         </View>
+//         </View> */}
+
+
+//         <Pressable
+//           style={styles.musicInfo}
+//           onPress={() => setShowAudioSheet(true)}
+//         // activeOpacity={0.7}
+//         >
+//           {/* <Text style={styles.musicIcon}>♪</Text> */}
+//           <Ionicons name="musical-notes" size={16} color="#fff" />
+//           <Text style={styles.musicText} numberOfLines={1}>
+//             {item.audio?.isOriginal === false
+//               ? item.audio?.name || "Unknown Audio"
+//               : "Original Sound"}
+//           </Text>
+//           <Ionicons
+//             name="chevron-forward"
+//             size={16}
+//             color="#fff"
+//             style={{ marginLeft: 4 }}
+//           />
+//         </Pressable>
 
 //         <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
 //           {getTimeAgo(item.created_at)}
@@ -302,7 +429,7 @@
 //             color={liked ? '#FF0000' : '#fff'}
 //           />
 //           <Text style={styles.actionText}>
-//             {Array.isArray(item.likes) ? item.likes.length : 0}
+//             {formatCount(likesCount)}
 //           </Text>
 //         </TouchableOpacity>
 
@@ -312,21 +439,21 @@
 //           onPress={() => router.push(`/comment/${item.uuid}`)}
 //         >
 //           <Ionicons name="chatbubble-outline" size={ACTION_ICON_SIZE} color="#fff" />
-//           <Text style={styles.actionText}>{item.comments?.length || 0}</Text>
+//           <Text style={styles.actionText}>{formatCount(item.comments?.length || 0)}</Text>
 //         </TouchableOpacity>
 
 //         <TouchableOpacity style={styles.actionButton} onPress={() => {
-//           addShare(item.id);
+//           addShare(item.id || item.uuid);
 //           router.push({
 //             pathname: `/chat`,
 //             params: {
 //               shareMode: "true",
-//               reelId: item.id
+//               reelId: item.id || item.uuid
 //             }
 //           });
 //         }}>
-//           <Ionicons name="share-social-outline" size={ACTION_ICON_SIZE} color="#fff" />
-//           <Text style={styles.actionText}>{item.shares?.length || 0}</Text>
+//           <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
+//           <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
 //         </TouchableOpacity>
 
 //         <TouchableOpacity
@@ -337,6 +464,13 @@
 //         </TouchableOpacity>
 //       </View>
 
+//       <VideoProgressBar
+//         player={player}
+//         isActive={currentIndex === index && isFocused}
+//         paused={paused}
+//       />
+
+
 //       {/* Bottom Drawer - Perfectly Styled */}
 //       <BookmarkPanel />
 //       <BottomDrawer
@@ -345,7 +479,7 @@
 //         onSave={() => { openBookmarkPanel(item.uuid || item.id); setShowOptions(false); }}
 //         onDelete={owner ? handleDeleteReel : undefined}
 //         onReport={() => setShowReportDrawer(true)}
-//         onShare={() => console.log("Shared")}
+//         // onShare={() => console.log("Shared")}
 //         reelId={item.id}
 //         reelUrl={item.videoUrl}
 //         isOwner={owner}
@@ -359,6 +493,70 @@
 //           setShowReportDrawer(false);
 //         }}
 //       />
+//       <AudioBottomSheet
+//         visible={showAudioSheet}
+//         onClose={() => setShowAudioSheet(false)}
+//         audioData={{
+//           isOriginal: item.audio?.isOriginal ?? true,
+//           name: item.audio?.name,
+//           artist: item.audio?.artist,
+//           coverImage: item.audio?.coverImage || item.thumbnailUrl,
+//           duration: item.duration ? `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')}` : undefined,
+//           usedCount: item.audio?.usedCount,
+//           videos: item.audio?.videos || [],
+//           audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+//         }}
+//         uploaderInfo={{
+//           username: reelUsername || item.user?.username,
+//           profilePic: profilePicture || item.user?.profilePic,
+//         }}
+//         onUseAudio={async () => {
+//           console.log('🎵 Use Audio clicked from profile:', item);
+
+//           try {
+//             router.push({
+//               pathname: '/(drawer)/(tabs)/createReels',
+//               params: {
+//                 // Audio metadata
+//                 preSelectedAudio: 'true',
+//                 audioId: item.audio?.id || `audio_${item.uuid}`,
+//                 audioUrl: item.videoUrl,
+//                 audioName: item.audio?.isOriginal === false
+//                   ? item.audio?.name
+//                   : 'Original Sound',
+//                 isOriginal: String(item.audio?.isOriginal ?? true),
+
+//                 // Source info
+//                 sourceVideoId: item.uuid,
+//                 sourceUsername: reelUsername || item.user?.username,
+//                 duration: String(item.duration || 0),
+
+//                 // For display
+//                 // thumbnailUrl: item.thumbnailUrl,
+//                 coverImage: item.thumbnailUrl || item.audio?.coverImage,
+
+//               }
+//             });
+//           } catch (error) {
+//             console.error('❌ Audio use error:', error);
+//             Toast.show({
+//               type: 'error',
+//               text1: 'Error',
+//               text2: 'Failed to use audio. Please try again.'
+//             });
+//           }
+//         }}
+//         onVideoPress={(videoId) => {
+//           console.log('Video clicked:', videoId);
+//           setShowAudioSheet(false);
+//           // Navigate to that video
+//           router.push({
+//             pathname: `/(drawer)/(tabs)/reels`,
+//             params: { videoId, tab: 'Explore' }
+//           });
+//         }}
+//       />
+
 //     </View>
 //   );
 // };
@@ -383,8 +581,10 @@
 //     queryKey: ["userProfile", username],
 //     queryFn: () => GetProfileUsername(username as string || ""),
 //     enabled: !!username,
-//   });
 
+//     staleTime: 1000 * 60 * 30,
+//     gcTime: 1000 * 60 * 60 * 6,
+//   });
 
 //   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
 //     queryKey: ["currentUser"],
@@ -392,13 +592,20 @@
 //   });
 
 
-//   const owner = profile?.userProfile.username === currentUser?.userProfile.username;
-//   // console.log('====================================');
-//   // console.log("owner", owner)
-//   // console.log('====================================');
-//   console.log("profile.videos.audio", profile?.videos?.audio);
+//   // const owner = profile?.userProfile.username === currentUser?.userProfile.username;
+
+//   const owner = currentUser?.id === profile?.id ||
+//     currentUser?.userProfile?.id === profile?.userProfile?.id;
+
+//   console.log('====================================');
+//   console.log("currentUser ID:", currentUser?.id);
+//   console.log("profile ID:", profile?.id);
+//   console.log("owner:", owner);
+//   console.log('====================================');
+
 
 //   const videos = profile?.videos ?? [];
+//   // console.log('vvvvvvvvvvvvvvvvvvvvvvvv', profile);
 
 //   // Zustand actions (no data)
 //   const {
@@ -445,13 +652,11 @@
 //   const updateURL = (idx: number) => {
 //     const reel = videos[idx];
 //     if (!reel) return;
-//     router.replace(`/p/${username}/${reel.uuid}`);
+//     // router.replace(`/p/${username}/${reel.uuid}`);
 
 //     router.setParams({ id: reel.id, username: username });
 //     updateReelURL(reel.id);
 //   };
-
-//   console.log("durection resived", videos[currentIndex]?.duration);
 
 //   useEffect(() => {
 //     if (!autoScroll || videos.length === 0) return;
@@ -477,7 +682,6 @@
 
 //     return () => clearTimeout(timer);
 //   }, [autoScroll, videos.length, currentIndex]);
-
 
 //   // Scroll handling
 //   const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
@@ -600,9 +804,17 @@
 //     marginBottom: 8,
 //     lineHeight: 18,
 //   },
-//   musicInfo: { flexDirection: 'row', alignItems: 'center' },
+//   musicInfo: {
+//     flexDirection: 'row', alignItems: 'center',
+//     paddingVertical: 4,  // n
+//     maxWidth: '90%',    // n
+//   },
 //   musicIcon: { fontSize: 16, marginRight: 8, color: '#fff' },
-//   musicText: { color: '#fff', fontSize: 14 },
+//   musicText: {
+//     color: '#fff'
+//     , fontSize: 14.,
+//     flex: 1 // n
+//   },
 //   rightActions: {
 //     position: 'absolute',
 //     right: '4%',
@@ -624,6 +836,8 @@
 
 // export default UserReelsFeed;
 
+
+
 import AudioBottomSheet from '@/app/(drawer)/(tabs)/reels/AudioBottomSheet';
 import VideoProgressBar from '@/app/(drawer)/(tabs)/reels/videoProgressBar';
 import { GetCurrentUser, GetProfileUsername } from '@/src/api/profile-api';
@@ -638,13 +852,12 @@ import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useDeleteVideo } from '@/src/hooks/videosMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
-import { useProfileStore } from '@/src/store/userProfileStore';
 import { formatCount } from '@/src/utils/formatCount';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
 import { useVideoPlayer, VideoView } from 'expo-video';
-import React, { useEffect, useRef, useState } from 'react';
+import { memo, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import {
   ActivityIndicator,
   Alert,
@@ -663,8 +876,9 @@ import {
 import { GestureDetector, Pressable, ScrollView } from 'react-native-gesture-handler';
 import Toast from 'react-native-toast-message';
 import Ionicons from 'react-native-vector-icons/Ionicons';
-// Reel Item Component
-const UserReelItem = ({
+
+//  MEMOIZED Reel Item - Prevent unnecessary re-renders
+const UserReelItem = memo(({
   item,
   index,
   currentIndex,
@@ -673,39 +887,31 @@ const UserReelItem = ({
   showIcon,
   fadeAnim,
   likeMutation,
-  // toggleLike,
-  // addComment,
   currentUserId,
   addShare,
   reelUsername,
   profilePicture,
-  currentUserProfile,
   owner,
 }: any) => {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
   const {
-    categories,
-    panelVisible,
     openBookmarkPanel,
-    closePanel,
-    addCategory,
-    saveToCategory
   } = useBookmarkStore();
-  const { username } = useProfileStore();
+
   const AVATAR_SIZE = SCREEN_WIDTH * 0.08;
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
-  const [showOptions, setShowOptions] = React.useState(false);
+
+  const [showOptions, setShowOptions] = useState(false);
   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
   const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
-  const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const isFocused = useIsFocused();
   const [isLoading, setIsLoading] = useState(true);
   const [paused, setPaused] = useState(false);
   const [showThumbnail, setShowThumbnail] = useState(true);
-  // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
-  // const [liked, setLiked] = useState(item.isLiked);
+  const [showAudioSheet, setShowAudioSheet] = useState(false);
+
   const {
     liked,
     likesCount,
@@ -717,8 +923,7 @@ const UserReelItem = ({
     likeMutation,
   });
 
-  const [showAudioSheet, setShowAudioSheet] = useState(false);
-
+  //  Only load videos within 2 indices
   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
 
   const player = useVideoPlayer(
@@ -729,7 +934,6 @@ const UserReelItem = ({
       instance.loop = true;
       instance.volume = isMuted ? 0 : 1;
 
-      // VIDEO LOADED EVENT
       instance.addListener("statusChange", (event) => {
         if (event.status === "loading") {
           setIsLoading(true);
@@ -738,13 +942,14 @@ const UserReelItem = ({
 
         if (event.status === "readyToPlay") {
           setIsLoading(false);
-          setTimeout(() => setShowThumbnail(false), 300);
+          //Faster thumbnail removal
+          setTimeout(() => setShowThumbnail(false), 200);
         }
       });
+    }
+  );
 
-    });
-
-  // Handle play/pause based on scroll safely
+  // Play/pause logic
   useEffect(() => {
     if (!player) return;
 
@@ -761,38 +966,21 @@ const UserReelItem = ({
       try { player.pause(); } catch { }
       player.volume = 0;
     }
-  }, [isFocused, currentIndex, index, isMuted]);
+  }, [isFocused, currentIndex, index, isMuted, player]);
 
-  // const handleLike = async () => {
-  //   const newLiked = !liked;
-
-  //   // UI update
-  //   setLiked(newLiked);
-  //   setLikesCount((prev: number) => newLiked ? prev + 1 : Math.max(0, prev - 1));
-
-  //   try {
-  //     await likeMutation.mutateAsync(item.uuid || item.id);
-  //   } catch (err) {
-  //     // revert on error
-  //     setLiked(!newLiked);
-  //     setLikesCount((prev: number) => newLiked ? prev - 1 : prev + 1);
-  //   }
-  // };
-
+  //  View tracking with proper cleanup
   useEffect(() => {
-    if (!shouldLoadVideo) return;
+    if (!shouldLoadVideo || !player) return;
 
     let frameId: number;
 
     const checkTime = () => {
       try {
-        // Only mark when current reel is active and playing
         if (currentIndex === index && player?.playing) {
           const time = player.currentTime;
           if (!viewed && time >= 10) {
             setViewed(true);
             markViewedMutation.mutate(item.uuid || item.id);
-            console.log(` User viewed reel: ${item.uuid} | Time watched: ${time}s`);
           }
         }
       } catch (e) {
@@ -806,20 +994,20 @@ const UserReelItem = ({
     return () => cancelAnimationFrame(frameId);
   }, [player, currentIndex, shouldLoadVideo, index, viewed]);
 
-
-  const handleLongPressIn = () => {
+  //  Gesture handlers
+  const handleLongPressIn = useCallback(() => {
     setPaused(true);
-    player.pause();
-  };
+    if (player) player.pause();
+  }, [player]);
 
-  const handleLongPressOut = () => {
+  const handleLongPressOut = useCallback(() => {
     setPaused(false);
-    player.play();
-  };
+    if (player) player.play();
+  }, [player]);
 
-
+  //Delete handler
   const deleteVideo = useDeleteVideo();
-  const handleDeleteReel = () => {
+  const handleDeleteReel = useCallback(() => {
     Alert.alert(
       "Delete Reel",
       "Are you sure you want to delete this reel?",
@@ -832,7 +1020,6 @@ const UserReelItem = ({
             deleteVideo.mutate(item.uuid, {
               onSuccess: () => {
                 router.replace("/(drawer)/(tabs)/profile");
-                // Alert.alert("Success", "Reel deleted successfully!");
                 Toast.show({ type: "success", text1: "Success", text2: "Reel deleted successfully!" })
               },
             });
@@ -840,75 +1027,41 @@ const UserReelItem = ({
         },
       ]
     );
-  };
+  }, [item.uuid, deleteVideo]);
 
-  const reelGesture = createReelGesture({
-    onTap: handleToggleMute,
-    onLongPressIn: handleLongPressIn,
-    onLongPressOut: handleLongPressOut,
-  });
-
-
-  // const reelGesture = React.useMemo(() => {
-  //   return createReelGesture({
-  //     onTap: handleToggleMute,
-  //     onLongPressIn: handleLongPressIn,
-  //     onLongPressOut: handleLongPressOut,
-  //   });
-  // }, []);
-
-
-  console.log("item.comments?.length ", item.comments?.length);
-  console.log("item audio mkjmkjmkjmkjmkjmkjmkjk", item);
-
+  //Gesture creation
+  const reelGesture = useMemo(() =>
+    createReelGesture({
+      onTap: handleToggleMute,
+      onLongPressIn: handleLongPressIn,
+      onLongPressOut: handleLongPressOut,
+    }),
+    [handleToggleMute, handleLongPressIn, handleLongPressOut]
+  );
 
   const isOwnProfile = item.userProfile?.id === currentUserId;
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
 
-      {/* Video Player */}
-      {/* <Pressable
-        style={{ flex: 1 }}
-        onPress={handleToggleMute}
-        onLongPress={handleLongPressIn}
-        onPressOut={handleLongPressOut}
-        delayLongPress={150}
-      > */}
-
       <GestureDetector gesture={reelGesture}>
         <Animated.View style={{ flex: 1 }}>
 
+          {/*  Show thumbnail only when needed */}
           {showThumbnail && item.thumbnailUrl && (
             <Image
               source={{ uri: item.thumbnailUrl }}
-              style={{
-                position: 'absolute',
-                width: SCREEN_WIDTH,
-                height: SCREEN_HEIGHT,
-                zIndex: 1,
-              }}
+              style={styles.thumbnail}
               resizeMode="cover"
               fadeDuration={0}
             />
           )}
 
-          {/* <View style={{ flex: 1 }}> */}
-          {isLoading && (
-            <View style={{
-              position: "absolute",
-              top: "45%",
-              left: "45%",
-              zIndex: 9999
-            }}>
-              <ActivityIndicator size="large" color="#fff" />
-            </View>
-          )}
-
+          {/*  Conditional video rendering */}
           {shouldLoadVideo && (
             <VideoView
-              style={{ position: 'absolute', width: SCREEN_WIDTH, height: SCREEN_HEIGHT }}
-              key={`video-${item.id}-${index}`}
+              style={styles.videoView}
+              key={`video-${item.uuid}-${index}`}
               player={player}
               allowsFullscreen={false}
               allowsPictureInPicture={false}
@@ -916,6 +1069,14 @@ const UserReelItem = ({
               nativeControls={false}
             />
           )}
+
+          {/*: Show loader only when actually loading */}
+          {isLoading && shouldLoadVideo && (
+            <View style={styles.loaderContainer}>
+              <ActivityIndicator size="large" color="#fff" />
+            </View>
+          )}
+
           {/* Volume Icon */}
           {showIcon && (
             <Animated.View style={[styles.centerIcon, { opacity: fadeAnim }]}>
@@ -926,7 +1087,6 @@ const UserReelItem = ({
               />
             </Animated.View>
           )}
-          {/* </Pressable> */}
         </Animated.View>
       </GestureDetector>
 
@@ -934,10 +1094,7 @@ const UserReelItem = ({
       <View style={[styles.bottomContent, { bottom: SCREEN_HEIGHT * 0.12 }]}>
         <View style={styles.userInfo}>
           <TouchableOpacity
-            style={{ flexDirection: 'row', alignItems: 'center' }}
-            // onPress={() => {
-            //   router.push(`/profile`);
-            // }}
+            style={styles.userInfoRow}
             onPress={() => {
               if (isOwnProfile) {
                 router.push('/profile');
@@ -947,7 +1104,7 @@ const UserReelItem = ({
             }}
           >
             <Image
-              source={{ uri: profilePicture ? profilePicture : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
+              source={{ uri: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
               style={{
                 width: AVATAR_SIZE,
                 height: AVATAR_SIZE,
@@ -956,80 +1113,57 @@ const UserReelItem = ({
                 borderColor: '#fff',
               }}
             />
-
             <Text style={styles.username}>{reelUsername}</Text>
           </TouchableOpacity>
         </View>
-        {/* <Text style={styles.caption}>{item.caption}</Text> */}
-        <View style={{ marginBottom: 8 }}>
-          {/* NORMAL caption (2 lines only) */}
-          {!showFullCaption && (
+
+        {/* Caption */}
+        <View style={styles.captionContainer}>
+          {!showFullCaption ? (
             <>
               <Text style={styles.caption} numberOfLines={2}>
                 {item.caption}
               </Text>
-
               {item.caption?.length > 100 && (
                 <TouchableOpacity onPress={() => setShowFullCaption(true)}>
-                  <Text style={{ color: "#ccc", marginTop: 4 }}>More</Text>
+                  <Text style={styles.moreButton}>More</Text>
                 </TouchableOpacity>
               )}
             </>
-          )}
-
-          {/* EXPANDED caption with SCROLL like Instagram */}
-          {showFullCaption && (
-            <View style={{ maxHeight: 220 }}>
-              {/* caption scrollable */}
+          ) : (
+            <View style={styles.expandedCaption}>
               <ScrollView nestedScrollEnabled={true}>
                 <Text style={styles.caption}>{item.caption}</Text>
               </ScrollView>
-
-              {/* LESS button */}
               {item.caption?.length > 100 && (
                 <TouchableOpacity onPress={() => setShowFullCaption(false)}>
-                  <Text style={{ color: "#ccc", marginTop: 4 }}>Less</Text>
+                  <Text style={styles.moreButton}>Less</Text>
                 </TouchableOpacity>
               )}
             </View>
           )}
         </View>
 
-        {/* <View style={styles.musicInfo}>
-          <Text style={styles.musicIcon}>♪</Text>
-          <Text style={styles.musicText}>
-            {item.audio?.name || "Original Sound"}
-          </Text>
-        </View> */}
-
-
+        {/* Audio Info */}
         <Pressable
           style={styles.musicInfo}
           onPress={() => setShowAudioSheet(true)}
-        // activeOpacity={0.7}
         >
-          {/* <Text style={styles.musicIcon}>♪</Text> */}
           <Ionicons name="musical-notes" size={16} color="#fff" />
           <Text style={styles.musicText} numberOfLines={1}>
             {item.audio?.isOriginal === false
               ? item.audio?.name || "Unknown Audio"
               : "Original Sound"}
           </Text>
-          <Ionicons
-            name="chevron-forward"
-            size={16}
-            color="#fff"
-            style={{ marginLeft: 4 }}
-          />
+          <Ionicons name="chevron-forward" size={16} color="#fff" style={{ marginLeft: 4 }} />
         </Pressable>
 
-        <Text style={{ color: "#ccc", fontSize: 12, marginTop: 4 }}>
+        <Text style={styles.timeAgo}>
           {getTimeAgo(item.created_at)}
         </Text>
-
       </View>
 
-      {/* Right Actions - Improved Layout */}
+      {/* Right Actions */}
       <View style={[styles.rightActions, { bottom: SCREEN_HEIGHT * 0.12 }]}>
         <TouchableOpacity
           style={styles.actionButton}
@@ -1041,11 +1175,8 @@ const UserReelItem = ({
             size={ACTION_ICON_SIZE}
             color={liked ? '#FF0000' : '#fff'}
           />
-          <Text style={styles.actionText}>
-            {formatCount(likesCount)}
-          </Text>
+          <Text style={styles.actionText}>{formatCount(likesCount)}</Text>
         </TouchableOpacity>
-
 
         <TouchableOpacity
           style={styles.actionButton}
@@ -1055,16 +1186,16 @@ const UserReelItem = ({
           <Text style={styles.actionText}>{formatCount(item.comments?.length || 0)}</Text>
         </TouchableOpacity>
 
-        <TouchableOpacity style={styles.actionButton} onPress={() => {
-          addShare(item.id || item.uuid);
-          router.push({
-            pathname: `/chat`,
-            params: {
-              shareMode: "true",
-              reelId: item.id || item.uuid
-            }
-          });
-        }}>
+        <TouchableOpacity
+          style={styles.actionButton}
+          onPress={() => {
+            addShare(item.id || item.uuid);
+            router.push({
+              pathname: `/chat`,
+              params: { shareMode: "true", reelId: item.id || item.uuid }
+            });
+          }}
+        >
           <Ionicons name="paper-plane-outline" size={ACTION_ICON_SIZE} color="#fff" />
           <Text style={styles.actionText}>{formatCount(item.sharesCount || 0)}</Text>
         </TouchableOpacity>
@@ -1083,8 +1214,6 @@ const UserReelItem = ({
         paused={paused}
       />
 
-
-      {/* Bottom Drawer - Perfectly Styled */}
       <BookmarkPanel />
       <BottomDrawer
         visible={showOptions}
@@ -1106,6 +1235,7 @@ const UserReelItem = ({
           setShowReportDrawer(false);
         }}
       />
+
       <AudioBottomSheet
         visible={showAudioSheet}
         onClose={() => setShowAudioSheet(false)}
@@ -1117,41 +1247,29 @@ const UserReelItem = ({
           duration: item.duration ? `${Math.floor(item.duration / 60)}:${String(item.duration % 60).padStart(2, '0')}` : undefined,
           usedCount: item.audio?.usedCount,
           videos: item.audio?.videos || [],
-          audioUrl: item.videoUrl,  // ✅ Add audio URL for preview
+          audioUrl: item.videoUrl,
         }}
         uploaderInfo={{
           username: reelUsername || item.user?.username,
           profilePic: profilePicture || item.user?.profilePic,
         }}
         onUseAudio={async () => {
-          console.log('🎵 Use Audio clicked from profile:', item);
-
           try {
             router.push({
               pathname: '/(drawer)/(tabs)/createReels',
               params: {
-                // Audio metadata
                 preSelectedAudio: 'true',
                 audioId: item.audio?.id || `audio_${item.uuid}`,
                 audioUrl: item.videoUrl,
-                audioName: item.audio?.isOriginal === false
-                  ? item.audio?.name
-                  : 'Original Sound',
+                audioName: item.audio?.isOriginal === false ? item.audio?.name : 'Original Sound',
                 isOriginal: String(item.audio?.isOriginal ?? true),
-
-                // Source info
                 sourceVideoId: item.uuid,
                 sourceUsername: reelUsername || item.user?.username,
                 duration: String(item.duration || 0),
-
-                // For display
-                // thumbnailUrl: item.thumbnailUrl,
                 coverImage: item.thumbnailUrl || item.audio?.coverImage,
-
               }
             });
           } catch (error) {
-            console.error('❌ Audio use error:', error);
             Toast.show({
               type: 'error',
               text1: 'Error',
@@ -1160,19 +1278,25 @@ const UserReelItem = ({
           }
         }}
         onVideoPress={(videoId) => {
-          console.log('Video clicked:', videoId);
           setShowAudioSheet(false);
-          // Navigate to that video
           router.push({
             pathname: `/(drawer)/(tabs)/reels`,
             params: { videoId, tab: 'Explore' }
           });
         }}
       />
-
     </View>
   );
-};
+}, (prevProps, nextProps) => {
+  // CUSTOM COMPARISON: Only re-render when these change
+  return (
+    prevProps.index === nextProps.index &&
+    prevProps.currentIndex === nextProps.currentIndex &&
+    prevProps.isMuted === nextProps.isMuted &&
+    prevProps.showIcon === nextProps.showIcon &&
+    prevProps.item.uuid === nextProps.item.uuid
+  );
+});
 
 // Feed Component
 const UserReelsFeed = () => {
@@ -1184,46 +1308,37 @@ const UserReelsFeed = () => {
   const { id, username } = useLocalSearchParams();
 
   const [isMuted, setIsMuted] = useState(false);
-  const [currentIndex, setCurrentIndex] = useState(0);
 
-  // NEW: Track video durations
-  // const [videoDurations, setVideoDurations] = useState<Record<string, number>>({});
-
-  // Fetch profile + videos
-  const { data: profile } = useQuery({
+  // Fetch data
+  const { data: profile, isLoading: profileLoading } = useQuery({
     queryKey: ["userProfile", username],
     queryFn: () => GetProfileUsername(username as string || ""),
     enabled: !!username,
-
     staleTime: 1000 * 60 * 30,
     gcTime: 1000 * 60 * 60 * 6,
   });
 
-  const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+  const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
 
+  const videos = profile?.videos ?? [];
 
-  // const owner = profile?.userProfile.username === currentUser?.userProfile.username;
+  // Calculate initial index with useMemo
+  const initialIndex = useMemo(() => {
+    if (!videos.length || !id) return 0;
+    const startIdx = videos.findIndex((v: any) => v.uuid === id);
+    return startIdx > -1 ? startIdx : 0;
+  }, [id, videos.length]);
+
+  // Use initialIndex as state initial value
+  const [currentIndex, setCurrentIndex] = useState(initialIndex);
 
   const owner = currentUser?.id === profile?.id ||
     currentUser?.userProfile?.id === profile?.userProfile?.id;
 
-  console.log('====================================');
-  console.log("currentUser ID:", currentUser?.id);
-  console.log("profile ID:", profile?.id);
-  console.log("owner:", owner);
-  console.log('====================================');
-
-
-  const videos = profile?.videos ?? [];
-  // console.log('vvvvvvvvvvvvvvvvvvvvvvvv', profile);
-
-  // Zustand actions (no data)
   const {
-    // toggleLike,
-    // addComment,
     addShare,
     showIcon,
     setShowIcon,
@@ -1232,72 +1347,37 @@ const UserReelsFeed = () => {
     autoScroll,
   } = useReelsStore();
 
-
-  // NEW: Callback to receive duration from child
-  // const handleDurationReady = (videoId: string, duration: number) => {
-  //   setVideoDurations(prev => ({
-  //     ...prev,
-  //     [videoId]: duration
-  //   }));
-  // };
-
-  // Find start index from URL param id
-  useEffect(() => {
-    if (!videos.length || !id) return;
-
-    // uuid se match karo
-    const startIdx = videos.findIndex((v: any) => v.uuid === id);
-
-    if (startIdx > -1) {
-      setCurrentIndex(startIdx);
-      // Thoda delay do taaki FlatList ready ho
-      setTimeout(() => {
-        flatListRef.current?.scrollToIndex({
-          index: startIdx,
-          animated: false,
-          viewPosition: 0,
-        });
-      }, 100);
-    }
-  }, [id, videos]);
-
-  // Sync URL when swiping
-  const updateURL = (idx: number) => {
+  // Update URL without causing re-renders
+  const updateURL = useCallback((idx: number) => {
     const reel = videos[idx];
     if (!reel) return;
-    // router.replace(`/p/${username}/${reel.uuid}`);
+    router.setParams({ id: reel.uuid, username: username as string });
+    updateReelURL(reel.uuid);
+  }, [videos, username]);
 
-    router.setParams({ id: reel.id, username: username });
-    updateReelURL(reel.id);
-  };
-
+  // Auto-scroll logic
   useEffect(() => {
     if (!autoScroll || videos.length === 0) return;
 
-    // current video ki duration lo
     const currentVideoDuration = videos[currentIndex]?.duration;
-
     if (!currentVideoDuration) return;
 
     const timer = setTimeout(() => {
-      const nextIndex =
-        currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
-
+      const nextIndex = currentIndex + 1 < videos.length ? currentIndex + 1 : 0;
       setCurrentIndex(nextIndex);
 
       flatListRef.current?.scrollToIndex({
         index: nextIndex,
         animated: true,
       });
-
       updateURL(nextIndex);
     }, currentVideoDuration * 1000);
 
     return () => clearTimeout(timer);
-  }, [autoScroll, videos.length, currentIndex]);
+  }, [autoScroll, videos.length, currentIndex, updateURL]);
 
   // Scroll handling
-  const onMomentumEnd = (e: NativeSyntheticEvent<NativeScrollEvent>) => {
+  const onMomentumEnd = useCallback((e: NativeSyntheticEvent<NativeScrollEvent>) => {
     const y = e.nativeEvent.contentOffset.y;
     const idx = Math.round(y / SCREEN_HEIGHT);
 
@@ -1305,15 +1385,15 @@ const UserReelsFeed = () => {
       setCurrentIndex(idx);
       updateURL(idx);
     }
-  };
+  }, [currentIndex, videos, SCREEN_HEIGHT, updateURL]);
 
   // Mute on blur
   useEffect(() => {
     setIsMuted(!isFocused);
   }, [isFocused]);
 
-  // Toggle mute with animation
-  const handleToggleMute = () => {
+  //  Toggle mute
+  const handleToggleMute = useCallback(() => {
     setIsMuted(prev => !prev);
     setShowIcon(true);
 
@@ -1324,63 +1404,104 @@ const UserReelsFeed = () => {
             .start(() => setShowIcon(false));
         }, 1200);
       });
-  };
+  }, [fadeAnim, setShowIcon]);
 
-  // Render
+  // getItemLayout for instant scrolling
+  const getItemLayout = useCallback((data: any, index: number) => ({
+    length: SCREEN_HEIGHT,
+    offset: SCREEN_HEIGHT * index,
+    index,
+  }), [SCREEN_HEIGHT]);
+
+  // renderItem with useCallback
+  const renderItem = useCallback(({ item, index }: any) => (
+    <UserReelItem
+      item={item}
+      index={index}
+      currentIndex={currentIndex}
+      isMuted={isMuted}
+      handleToggleMute={handleToggleMute}
+      showIcon={showIcon}
+      fadeAnim={fadeAnim}
+      addShare={addShare}
+      likeMutation={likeMutation}
+      reelUsername={profile?.username}
+      profilePicture={profile?.userProfile?.ProfilePicture}
+      owner={owner}
+      currentUserId={currentUser?.userProfile?.id}
+    />
+  ), [currentIndex, isMuted, handleToggleMute, showIcon, fadeAnim, addShare, likeMutation, profile, owner, currentUser]);
+
+  //  Loading state
+  if (profileLoading || !videos.length) {
+    return (
+      <View style={[styles.container, { justifyContent: 'center', alignItems: 'center' }]}>
+        <ActivityIndicator size="large" color="#fff" />
+      </View>
+    );
+  }
+
   return (
     <View style={styles.container}>
       <StatusBar hidden />
 
       <FlatList
         ref={flatListRef}
-        onScrollToIndexFailed={(info) => {
-          const wait = new Promise(resolve => setTimeout(resolve, 500));
-          wait.then(() => {
-            flatListRef.current?.scrollToIndex({
-              index: info.index,
-              animated: false,
-            });
-          });
-        }}
         data={videos}
-        renderItem={({ item, index }) => (
-          <UserReelItem
-            item={item}
-            index={index}
-            currentIndex={currentIndex}
-            isMuted={isMuted}
-            handleToggleMute={handleToggleMute}
-            showIcon={showIcon}
-            fadeAnim={fadeAnim}
-            // toggleLike={(uuid: string) => likeMutation.mutate(uuid)}
-            // addComment={addComment}
-            addShare={addShare}
-            likeMutation={likeMutation}
-            reelUsername={profile?.username}
-            profilePicture={profile?.userProfile?.ProfilePicture}
-            owner={owner}
-            currentUserId={currentUser?.userProfile?.id}
-          />
-        )}
+
+        //  CRITICAL PERFORMANCE PROPS
+        initialScrollIndex={initialIndex}
+        getItemLayout={getItemLayout}
+        removeClippedSubviews={true}
+        maxToRenderPerBatch={3}
+        windowSize={5}
+        initialNumToRender={1}
+        updateCellsBatchingPeriod={50}
+
+        renderItem={renderItem}
         keyExtractor={(item) => item.uuid}
-        // keyExtractor={(item, i) => item.id?.toString() ?? i.toString()}
+
         pagingEnabled
         showsVerticalScrollIndicator={false}
         snapToInterval={SCREEN_HEIGHT}
         onMomentumScrollEnd={onMomentumEnd}
         decelerationRate="fast"
-      />
 
-      {/* <B9 */}
+        onScrollToIndexFailed={(info) => {
+          setTimeout(() => {
+            flatListRef.current?.scrollToIndex({
+              index: info.index,
+              animated: false,
+            });
+          }, 100);
+        }}
+      />
     </View>
   );
 };
 
-// Improved Styles
+//  Styles
 const styles = StyleSheet.create({
   container: {
     flex: 1,
     backgroundColor: 'black'
+  },
+  thumbnail: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+    zIndex: 1,
+  },
+  videoView: {
+    position: 'absolute',
+    width: '100%',
+    height: '100%',
+  },
+  loaderContainer: {
+    position: "absolute",
+    top: "45%",
+    left: "45%",
+    zIndex: 9999
   },
   centerIcon: {
     position: "absolute",
@@ -1405,11 +1526,18 @@ const styles = StyleSheet.create({
     alignItems: 'center',
     marginBottom: 8
   },
+  userInfoRow: {
+    flexDirection: 'row',
+    alignItems: 'center'
+  },
   username: {
     color: '#fff',
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  captionContainer: {
+    marginBottom: 8
   },
   caption: {
     color: '#fff',
@@ -1417,16 +1545,28 @@ const styles = StyleSheet.create({
     marginBottom: 8,
     lineHeight: 18,
   },
-  musicInfo: {
-    flexDirection: 'row', alignItems: 'center',
-    paddingVertical: 4,  // n
-    maxWidth: '90%',    // n
+  expandedCaption: {
+    maxHeight: 220
   },
-  musicIcon: { fontSize: 16, marginRight: 8, color: '#fff' },
+  moreButton: {
+    color: "#ccc",
+    marginTop: 4
+  },
+  musicInfo: {
+    flexDirection: 'row',
+    alignItems: 'center',
+    paddingVertical: 4,
+    maxWidth: '90%',
+  },
   musicText: {
-    color: '#fff'
-    , fontSize: 14.,
-    flex: 1 // n
+    color: '#fff',
+    fontSize: 14,
+    flex: 1
+  },
+  timeAgo: {
+    color: "#ccc",
+    fontSize: 12,
+    marginTop: 4
   },
   rightActions: {
     position: 'absolute',

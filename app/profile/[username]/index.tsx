@@ -558,7 +558,6 @@ import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useVideoPlayer, VideoView } from "expo-video";
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
@@ -582,6 +581,7 @@ const fontScale = width / 380;
 
 // Instagram style post dimensions
 const POSTS_PER_ROW = 3;
+const PAGE_SIZE = 9;
 const POST_SPACING = 2; // Instagram uses very small gaps
 const POST_SIZE = (width - (POST_SPACING * (POSTS_PER_ROW + 1))) / POSTS_PER_ROW;
 
@@ -769,109 +769,106 @@ export const Tabs: React.FC<{
     </View>
 );
 
-
 type VideoItemProps = {
-    videoUrl?: string;
-    image?: string;
-    id: string;
-    username: string;
-    index: number;
-    onPressItem: (index: number) => void;
+    image: string;
+    uuid: string;
+    onPressItem: (uuid: string) => void;
 };
 
 export const VideoItem: React.FC<VideoItemProps> = ({
-    videoUrl,
     image,
-    id,
-    username,
-    index,
+    uuid,
     onPressItem,
 }) => {
-    const [isLoading, setIsLoading] = useState(true);
-    const player = videoUrl
-        ? useVideoPlayer(videoUrl, (p) => {
-            p.loop = true;
-            p.muted = true;
-            p.pause();
-        })
-        : null;
-
     const theme = useAppTheme();
-
-    useEffect(() => {
-        if (player) {
-            player.pause();
-            player.currentTime = 0;
-        }
-    }, [player]);
 
     return (
         <TouchableOpacity
             activeOpacity={0.9}
-            onPress={() => onPressItem(index)}
+            onPress={() => onPressItem(uuid)}
             style={[styles.postContainer, { backgroundColor: theme.background }]}
         >
-            {image ? (
-                <Image
-                    source={{ uri: image }}
-                    style={styles.postMedia}
-                    resizeMode="cover"
-                />
-            ) : videoUrl && player ? (
-                <VideoView
-                    style={styles.postMedia}
-                    player={player}
-                    allowsFullscreen={false}
-                    allowsPictureInPicture={false}
-                    contentFit="cover"
-                    nativeControls={false}
-                />
-            ) : null}
+            <Image
+                source={{ uri: image }}
+                style={styles.postMedia}
+                resizeMode="cover"
+            />
         </TouchableOpacity>
     );
 };
 
-export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({ videos, username }) => {
+
+export const PostGrid: React.FC<{ videos: any[]; username: string }> = ({
+    videos,
+    username,
+}) => {
     const router = useRouter();
     const theme = useAppTheme();
 
-    const handlePressVideo = (index: number) => {
-        const video = videos[index];
-        if (!video) return;
-        router.push(`/p/${username}/${video.uuid}`);
+    const [page, setPage] = useState(1);
+    const [loadingMore, setLoadingMore] = useState(false);
+
+    const displayedVideos = videos.slice(0, page * PAGE_SIZE);
+
+    const loadMore = () => {
+        if (loadingMore) return;
+        if (displayedVideos.length >= videos.length) return;
+
+        setLoadingMore(true);
+        setTimeout(() => {
+            setPage(prev => prev + 1);
+            setLoadingMore(false);
+        }, 800);
     };
 
-    console.log("videos ==>", videos)
+    const handlePressVideo = (uuid: string) => {
+        console.log('🎯 Navigating to:', `/p/${username}/${uuid}`);
+        router.push(`/p/${username}/${uuid}`);
+    };
 
-    if (!videos || videos.length === 0) {
+    if (!videos?.length) {
         return (
-            <View style={{ alignItems: "center", marginTop: 50, }}>
-                <Text style={{ color: theme.text }}>No videos uploaded yet.</Text>
+            <View style={{ alignItems: "center", marginTop: 50 }}>
+                <Text style={{ color: theme.text }}>
+                    No videos uploaded yet.
+                </Text>
             </View>
         );
     }
 
     return (
         <FlatList
-            data={videos}
-            keyExtractor={(item: any) => item.uuid}
+            data={displayedVideos}
+            keyExtractor={(item) => item.uuid}
             numColumns={POSTS_PER_ROW}
             columnWrapperStyle={styles.row}
-            renderItem={({ item, index }) => (
+            renderItem={({ item }) => (
                 <VideoItem
                     image={item.thumbnailUrl}
-                    // videoUrl={item.videoUrl}
-                    id={item.uuid}
-                    username={username}
-                    index={index}
+                    uuid={item.uuid}
                     onPressItem={handlePressVideo}
                 />
             )}
+            onEndReached={loadMore}
+            onEndReachedThreshold={0.5}
+            ListFooterComponent={
+                loadingMore ? (
+                    <ActivityIndicator
+                        style={{ marginVertical: 20 }}
+                        size="large"
+                        color={theme.text}
+                    />
+                ) : null
+            }
             showsVerticalScrollIndicator={false}
-            contentContainerStyle={{ paddingBottom: 20, backgroundColor: theme.background }}
+            contentContainerStyle={{
+                paddingBottom: 20,
+                backgroundColor: theme.background,
+            }}
         />
     );
 };
+
 
 export const ProfileScreen: React.FC = () => {
     const theme = useAppTheme();

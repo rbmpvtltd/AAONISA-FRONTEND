@@ -144,6 +144,7 @@ import { MentionedScreen } from "@/app/profile/[username]/mantionScreen";
 import { GetCurrentUser, GetProfileUsername } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useQuery } from "@tanstack/react-query";
+import { useRouter } from 'expo-router';
 import { useState } from "react";
 import { ActivityIndicator, FlatList, View } from "react-native";
 import { RefreshControl } from "react-native-gesture-handler";
@@ -153,6 +154,7 @@ export default function MyProfileScreen() {
   const theme = useAppTheme();
   const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
 
+  const router = useRouter();
 
   const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
     queryKey: ["currentUser"],
@@ -299,20 +301,33 @@ export default function MyProfileScreen() {
           activeTab === "posts" ? item.uuid : index.toString()
         }
         //  columnWrapperStyle={{ gap: 2, paddingHorizontal: 2, marginBottom: 2 }}
-        renderItem={({ item, index }) =>
+        // renderItem={({ item, index }) =>
+        //   activeTab === "posts" ? (
+        //     <VideoItem
+        //       image={item.thumbnailUrl}
+        //       id={item.uuid}
+        //       username={profile?.username}
+        //       index={index}
+        //       onPressItem={() => {
+        //         const { router } = require("expo-router");
+        //         router.push(`/p/${profile?.username}/${item.uuid}`);
+        //       }}
+        //     />
+        //   ) : null
+        // }
+
+        renderItem={({ item }) =>
           activeTab === "posts" ? (
             <VideoItem
               image={item.thumbnailUrl}
-              id={item.uuid}
-              username={profile?.username}
-              index={index}
-              onPressItem={() => {
-                const { router } = require("expo-router");
-                router.push(`/p/${profile?.username}/${item.uuid}`);
+              uuid={item.uuid}
+              onPressItem={(uuid) => {
+                router.push(`/p/${profile?.username}/${uuid}`);
               }}
             />
           ) : null
         }
+
         ListEmptyComponent={
           activeTab === "reels" ? (
             // <View style={{ alignItems: "center", marginTop: 80 }}>
