@@ -979,8 +979,6 @@ const ReelItem = ({
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
 
-
-
   const {
     liked,
     likesCount,
@@ -1335,8 +1333,7 @@ const ReelItem = ({
         }}
         onReport={() => setShowReportDrawer(true)}
         reelId={item.id || item.uuid}
-        reelUrl={item.id}
-
+        reelUrl={item.videoUrl}
       />
 
       {/* Report Drawer */}
@@ -1431,10 +1428,6 @@ const ReelsFeed = () => {
     fadeAnim,
     updateReelURL,
     autoScroll,
-    setRedirectedFromShare,
-    redirectedFromShare,
-    reels: storeReels,
-
   } = useReelsStore();
 
   useEffect(() => {
@@ -1455,20 +1448,14 @@ const ReelsFeed = () => {
     isError,
     refetch,
     isRefetching,
+  } = useReelsByCategory(activeTab.toLowerCase());
 
-  } = useReelsByCategory(activeTab.toLowerCase(), !redirectedFromShare);
-
-  // const reels = data?.pages.flatMap((p: any) => p.reels) || [];
-  const reels = redirectedFromShare
-    ? storeReels
-    : data?.pages.flatMap((p) => p.reels) || [];
-
-
+  const reels = data?.pages.flatMap((p: any) => p.reels) || [];
 
 
   const onRefresh = useCallback(async () => {
     console.log("🔄 Pull to refresh triggered");
-    setRedirectedFromShare(false);
+
     // Reset to top
     setCurrentIndex(0);
 
@@ -1495,18 +1482,9 @@ const ReelsFeed = () => {
     if (!reels[index]) return;
     const reelId = reels[index].id || reels[index].uuid;
     if (String(id) === String(reelId)) return;
-    router.setParams({ id: reelId, videoId: reelId, tab: activeTab, });
+    router.setParams({ id: reelId, videoId: reelId, tab: activeTab });
     updateReelURL(reelId);
   }, [reels, id, activeTab, updateReelURL]);
-
-
-  // useEffect(() => {
-  //   if (redirectedFromShare && reels.length > 0) {
-  //     setTimeout(() => {
-  //       setRedirectedFromShare(false);
-  //     }, 500);
-  //   }
-  // }, [redirectedFromShare, reels.length]);
 
   // Auto-scroll logic (based on video duration)
   // useEffect(() => {
@@ -1564,28 +1542,6 @@ const ReelsFeed = () => {
       }
     }
   }, [videoId, reels.length, setCurrentIndex, updateReelURL]);
-
-  // useEffect(() => {
-  //   if (redirectedFromShare) return; // 🔥 BLOCK DURING REDIRECT
-
-  //   if (videoId && reels.length > 0 && flatListRef.current) {
-  //     const targetIndex = reels.findIndex(
-  //       (r) => String(r.id) === String(videoId) || String(r.uuid) === String(videoId)
-  //     );
-
-  //     if (targetIndex !== -1) {
-  //       setTimeout(() => {
-  //         setCurrentIndex(targetIndex);
-  //         flatListRef.current?.scrollToIndex({
-  //           index: targetIndex,
-  //           animated: false,
-  //         });
-  //         updateReelURL(reels[targetIndex].id || reels[targetIndex].uuid);
-  //       }, 100);
-  //     }
-  //   }
-  // }, [videoId, reels.length, redirectedFromShare]);
-
 
   // Handle scroll events
   const handleScroll = useCallback((event: any) => {
@@ -1740,10 +1696,6 @@ const ReelsFeed = () => {
           if (index !== currentIndex && reels[index]) {
             setCurrentIndex(index);
             updateURL(index);
-
-            if (redirectedFromShare) {
-              setRedirectedFromShare(false);
-            }
           }
         }}
 
