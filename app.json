@@ -16,7 +16,14 @@
     "newArchEnabled": true,
     "ios": {
       "supportsTablet": true,
-      "bundleIdentifier": "com.rbm.HitHoy"
+      "bundleIdentifier": "com.rbm.HitHoy",
+      "infoPlist": {
+        "NSCameraUsageDescription": "Camera access is required to take photos and videos.",
+        "NSMicrophoneUsageDescription": "Microphone access is required for recording audio.",
+        "NSPhotoLibraryUsageDescription": "Photo library access is required to select photos.",
+        "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library.",
+        "ITSAppUsesNonExemptEncryption": false
+      }
     },
     "android": {
       "useNextNotificationsApi": true,

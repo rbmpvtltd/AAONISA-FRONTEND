@@ -976,7 +976,7 @@ import {
   TextInput,
   TouchableOpacity,
   useWindowDimensions,
-  View
+  View,
 } from "react-native";
 
 import { GetCurrentUser } from "@/src/api/profile-api";
