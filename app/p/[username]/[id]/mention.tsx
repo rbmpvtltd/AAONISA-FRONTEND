@@ -430,8 +430,8 @@ const MentionedReelItem = ({
         onSave={() => { openBookmarkPanel(item.uuid || item.id); setShowOptions(false); }}
         onDelete={owner ? handleDeleteReel : undefined}
         onReport={() => setShowReportDrawer(true)}
-        reelId={item.id}
-        reelUrl={item.videoUrl}
+        reelId={item.id || item.uuid}
+        reelUrl={item.id || item.uuid}
         isOwner={owner}
       />
 

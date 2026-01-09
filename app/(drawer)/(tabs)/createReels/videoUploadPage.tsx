@@ -240,10 +240,12 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         try {
             const response = await uploadReel(formData);
             console.log("Upload response:", response);
+
             useUploadStore.getState().resetAll();
+            onDiscard();
             // alert("Upload successful!");
             Toast.show({ type: "success", text1: "Upload successful!" })
-            router.push("/(drawer)/(tabs)/createReels");
+            router.replace("/(drawer)/(tabs)/createReels");
             resetPreview();
             onDiscard()
         } catch (err: any) {
@@ -252,12 +254,12 @@ export const VideoPreview: React.FC<VideoPreviewProps> = ({
         }
         finally {
             setIsUploadingStory(false);
-            router.push("/(drawer)/(tabs)/createReels");
+            // router.push("/(drawer)/(tabs)/createReels");
         }
         // Alert.alert("Story uploaded successfully!");
         Toast.show({ type: "success", text1: "Story uploaded successfully!" })
 
-        router.push("/(drawer)/(tabs)/createReels");
+        router.replace("/(drawer)/(tabs)/createReels");
     }
 
     const setMusicVolumeStore = useUploadStore((state) => state.setMusicVolume);

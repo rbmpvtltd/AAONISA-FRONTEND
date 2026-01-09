@@ -17,6 +17,7 @@ export interface ReelItem {
   // comments?: number;
   shares?: number;
   isLiked?: boolean;
+  redirectedFromShare?: boolean;
 }
 
 interface ReelsState {
@@ -27,6 +28,7 @@ interface ReelsState {
   showIcon: boolean;
   fadeAnim: Animated.Value;
   autoScroll: boolean;                 // NEW: auto scroll toggle
+  redirectedFromShare?: boolean;
 
   // Actions
   // toggleLike: (id: string) => void;
@@ -37,7 +39,9 @@ interface ReelsState {
   toggleMute: () => void;
   setShowIcon: (val: boolean) => void;
   setAutoScroll: (value: boolean) => void; // NEW: setter function
-
+  resetReels: () => void;
+  setReels: (reels: ReelItem[]) => void;
+  setRedirectedFromShare: (v: boolean) => void;
   //  fetchReelsByCategory: (category: 'explore' | 'news' | 'followings') => Promise<void>;
 
   //   NEW: URL Management Functions
@@ -69,8 +73,8 @@ export const useReelsStore = create<ReelsState>((set, get) => ({
   setShowIcon: (val: boolean) => set({ showIcon: val }),
   setAutoScroll: (value: boolean) => set({ autoScroll: value }),
   resetReels: () => set({ currentIndex: 0, reels: [] }),
-
-
+  setReels: (reels: ReelItem[]) => set({ reels }),
+  setRedirectedFromShare: (v: boolean) => set({ redirectedFromShare: v }),
   //  NEW: URL Update Function
   updateReelURL: (reelId: string) => {
     // Expo Router ke through URL update karo
