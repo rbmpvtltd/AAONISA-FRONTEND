@@ -5,10 +5,15 @@
   },
   "build": {
     "development": {
+      "node": "20.19.4",
       "developmentClient": true,
       "distribution": "internal",
       "android": {
         "buildType": "apk",
+        "autoIncrement": true
+      },
+      "ios": {
+        "simulator": false,
         "autoIncrement": true
       }
     },
@@ -20,6 +25,9 @@
       },
       "android": {
         "buildType": "apk",
+        "autoIncrement": true
+      },
+      "ios": {
         "autoIncrement": true
       }
     }
