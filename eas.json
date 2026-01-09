@@ -10,6 +10,11 @@
       "android": {
         "buildType": "apk",
         "autoIncrement": true
+      },
+      "ios": {
+        "simulator": false,
+        "buildType": "development",
+        "autoIncrement": true
       }
     },
     "production": {
@@ -20,6 +25,10 @@
       },
       "android": {
         "buildType": "apk",
+        "autoIncrement": true
+      },
+      "ios": {
+        "buildType": "archive",
         "autoIncrement": true
       }
     }
