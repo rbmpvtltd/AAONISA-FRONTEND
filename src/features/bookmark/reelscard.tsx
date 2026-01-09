@@ -340,7 +340,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         onSave={() => { }}
         onReport={() => console.log("Reported")}
         reelId={reel.uuid || reel.id}
-        reelUrl={reel.videoUrl}
+        reelUrl={reel.id || reel.uuid}
       />
 
 

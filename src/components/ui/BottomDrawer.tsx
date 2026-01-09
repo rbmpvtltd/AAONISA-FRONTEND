@@ -81,12 +81,12 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
   // const shareUrl = `https://justsearchapp/(drawer)/(tabs)/reels/${reelId}`;
 
   const handleCopyLink = async () => {
-    await Clipboard.setStringAsync(reelUrl);
+    await Clipboard.setStringAsync(`testing.hithoy.com/reels/${reelUrl}&redirected=true`);
     alert("Link copied successfully!");
   };
 
   const handleSharePlatform = async (platform: string) => {
-    const encodedUrl = encodeURIComponent(reelUrl);
+    const encodedUrl = encodeURIComponent(`testing.hithoy.com/reels/${reelUrl}&redirected=true`);
 
     let url = "";
 
@@ -105,7 +105,7 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
         break;
       default:
         await Share.share({
-          message: `${reelUrl}`,
+          message: `testing.hithoy.com/reels/${reelUrl}&redirected=true`,
         });
         return;
     }

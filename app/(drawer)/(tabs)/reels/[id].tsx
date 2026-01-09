@@ -1,27 +1,50 @@
+import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useReelsStore } from '@/src/store/useReelsStore';
-import { useLocalSearchParams } from 'expo-router';
+import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
 import { Text, View } from 'react-native';
 
 export default function ReelDetailScreen() {
-  const { id } = useLocalSearchParams();
-  const { reels, setCurrentIndex } = useReelsStore();
+  const params = useLocalSearchParams();
+  const rawParam = params.id as string | undefined;
+
+  let reelId: string | undefined;
+  let redirected = false;
+
+  if (rawParam) {
+    const [idPart, queryPart] = rawParam.split("&");
+    reelId = idPart;
+    redirected = queryPart?.includes("redirected=true") ?? false;
+  }
+
+  const { reels, setCurrentIndex, setReels, setRedirectedFromShare } = useReelsStore();
+
+  // 🔹 Only fetch if redirected === true
+  const { data, isLoading } = useReelsByCategory(
+    "explore",
+    redirected,  // only true triggers API fetch for single reel
+    reelId
+  );
 
   useEffect(() => {
-    if (id && reels.length > 0) {
-      const index = reels.findIndex((reel) => reel.id === id);
-      if (index !== -1) {
-        setCurrentIndex(index);
+    if (redirected && data?.pages) {
+      const allReels = data.pages.flatMap((page) => page.reels);
+      if (redirected && allReels.length > 0) {
+        setReels(allReels);
+        setCurrentIndex(0);
+        setRedirectedFromShare(true);
+        router.replace('/reels');
       }
+    } else if (!redirected && reelId && reels.length > 0) {
+      // only change index, no data fetch
+      const index = reels.findIndex((r) => r.id === reelId);
+      if (index !== -1) setCurrentIndex(index);
     }
-  }, [id, reels]);
+  }, [redirected, data, reelId, reels, setCurrentIndex, setReels]);
 
-  // Yahan aap directly ReelsFeed component return kar sakte hain
-  // ya phir individual reel display kar sakte hain
   return (
     <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      <Text>Loading Reel: {id}</Text>
-
+      {isLoading && redirected && <Text>Loading Reel...</Text>}
     </View>
   );
 }
