@@ -1333,7 +1333,7 @@ const ReelItem = ({
         }}
         onReport={() => setShowReportDrawer(true)}
         reelId={item.id || item.uuid}
-        reelUrl={item.videoUrl}
+        reelUrl={item.id || item.uuid}
       />
 
       {/* Report Drawer */}

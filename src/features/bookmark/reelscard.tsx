@@ -1,6 +1,10 @@
 import AudioBottomSheet from "@/app/(drawer)/(tabs)/reels/AudioBottomSheet";
 import BottomDrawer from "@/src/components/ui/BottomDrawer";
+import ReportDrawer from "@/src/components/ui/ReportDrawer";
 import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
+import { useBookmarkStore } from "@/src/store/useBookmarkStore";
+import { useReelsStore } from "@/src/store/useReelsStore";
+import { formatCount } from "@/src/utils/formatCount";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
@@ -58,8 +62,10 @@ type ReelType = {
 
 export default function SingleReel({ currentUserId, likeMutation }: any) {
   const { height: SCREEN_HEIGHT, width: SCREEN_WIDTH } = useWindowDimensions();
-
+  const { addShare } = useReelsStore();
   const { reelId } = useLocalSearchParams<{ reelId: string }>();
+  const { openBookmarkPanel } = useBookmarkStore();
+  const [showReportDrawer, setShowReportDrawer] = useState(false);
   const reel = useReelFromBookmarks(reelId);
   console.log("hhhhhh", reel?.comments);
   const [showAudioSheet, setShowAudioSheet] = useState(false);
@@ -321,9 +327,15 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
 
 
         {/* SHARE */}
-        <TouchableOpacity style={styles.actionButton}>
+        <TouchableOpacity style={styles.actionButton} onPress={() => {
+          addShare(reel.id || reel.uuid);
+          router.push({
+            pathname: `/chat`,
+            params: { shareMode: "true", reelId: reel.id || reel.uuid },
+          });
+        }}>
           <Ionicons name="paper-plane-outline" size={35} color="#fff" />
-          <Text style={styles.actionText}>0</Text>
+          <Text style={styles.actionText}>{formatCount(reel.sharesCount || 0)}</Text>
         </TouchableOpacity>
 
 
@@ -337,10 +349,26 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
       <BottomDrawer
         visible={showOptions}
         onClose={() => setShowOptions(false)}
-        onSave={() => { }}
-        onReport={() => console.log("Reported")}
+        // onSave={() => { }}
+        onSave={() => {
+          openBookmarkPanel(reel.id || reel.uuid);
+          setShowOptions(false);
+        }}
+        // onReport={() => console.log("Reported")}
+        onReport={() => setShowReportDrawer(true)}
         reelId={reel.uuid || reel.id}
         reelUrl={reel.id || reel.uuid}
+      />
+
+
+      <ReportDrawer
+        visible={showReportDrawer}
+        onClose={() => setShowReportDrawer(false)}
+        onSelect={(reason: string) => {
+          console.log("Reported for:", reason);
+          setShowReportDrawer(false);
+        }}
+        videoId={reel.id || reel.uuid}
       />
 
 
