@@ -1225,6 +1225,7 @@ const UserReelItem = memo(({
         reelId={item.id || item.uuid}
         reelUrl={item.id || item.uuid}
         isOwner={owner}
+        reelDownloadUrl={item.videoUrl}
       />
 
       <ReportDrawer
@@ -1234,6 +1235,7 @@ const UserReelItem = memo(({
           console.log("User reported for:", reason);
           setShowReportDrawer(false);
         }}
+        videoId={item.id || item.uuid}
       />
 
       <AudioBottomSheet

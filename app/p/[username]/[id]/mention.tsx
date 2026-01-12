@@ -433,6 +433,7 @@ const MentionedReelItem = ({
         reelId={item.id || item.uuid}
         reelUrl={item.id || item.uuid}
         isOwner={owner}
+        reelDownloadUrl={item.videoUrl}
       />
 
       <ReportDrawer
@@ -442,6 +443,7 @@ const MentionedReelItem = ({
           console.log("User reported for:", reason);
           setShowReportDrawer(false);
         }}
+        videoId={item.id || item.uuid}
       />
 
 
