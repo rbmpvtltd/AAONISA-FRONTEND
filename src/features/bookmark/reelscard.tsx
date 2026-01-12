@@ -23,6 +23,7 @@ import {
 } from "react-native";
 import Toast from "react-native-toast-message";
 import Ionicons from "react-native-vector-icons/Ionicons";
+import BookmarkPanel from "./bookmarkPanel";
 
 export const useReelFromBookmarks = (reelId?: string) => {
   const qc = useQueryClient();
@@ -345,6 +346,9 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         </TouchableOpacity>
       </View>
 
+
+      <BookmarkPanel />
+
       {/* OPTIONS DRAWER */}
       <BottomDrawer
         visible={showOptions}
@@ -358,6 +362,7 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         onReport={() => setShowReportDrawer(true)}
         reelId={reel.uuid || reel.id}
         reelUrl={reel.id || reel.uuid}
+        reelDownloadUrl={reel.videoUrl}
       />
 
 

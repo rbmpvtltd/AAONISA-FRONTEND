@@ -26,12 +26,13 @@ interface BottomDrawerProps {
   onReport: () => void;
   onDelete?: () => void; // NEW: Optional delete callback
   reelUrl: string;
+  reelDownloadUrl: string;
   reelId: string;
   isOwner?: boolean; // NEW: Flag to check if current user is owner
 }
 
 
-const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, reelId, isOwner = false }: BottomDrawerProps) => {
+const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, reelDownloadUrl, reelId, isOwner = false }: BottomDrawerProps) => {
   const slideAnim = useRef(new Animated.Value(SCREEN_HEIGHT)).current;
   const theme = useAppTheme();
   const [showSharePanel, setShowSharePanel] = useState(false);
@@ -133,7 +134,7 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
         return;
       }
 
-      const fileExt = reelUrl.split("?")[0].split(".").pop() || "mp4";
+      const fileExt = reelDownloadUrl.split("?")[0].split(".").pop() || "mp4";
 
       //  Unique filename (no overwrite)
       const fileName = `reel_${Date.now()}.${fileExt}`;
@@ -142,7 +143,7 @@ const BottomDrawer = ({ visible, onClose, onSave, onReport, onDelete, reelUrl, r
 
       //  FAST Download (Instagram-like)
       const download = FileSystem.createDownloadResumable(
-        reelUrl,
+        reelDownloadUrl,
         fileUri,
         { cache: true }
       );
