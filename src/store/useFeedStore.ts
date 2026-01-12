@@ -93,7 +93,7 @@ export interface Photo {
   likes: number;
   liked: boolean;
   saved: boolean;
-   comments: number; // add this
+  comments: number; // add this
   shares: number;   // add this
 }
 
@@ -108,6 +108,8 @@ interface FeedState {
   setLoading: (value: boolean) => void;
   toggleMute: () => void;
   reset: () => void;
+  scrollToTop: () => void;
+  setScrollToTop: (fn: () => void) => void;
 }
 
 export const useFeedStore = create<FeedState>((set) => ({
@@ -118,13 +120,13 @@ export const useFeedStore = create<FeedState>((set) => ({
 
   // setPhotos: (updater) => set((state) => ({ photos: updater(state.photos) })),
   setPhotos: (updater) =>
-  set((state) => ({
-    photos: updater(state.photos).map(photo => ({
-      ...photo,
-      comments: photo.comments ?? 0,
-      shares: photo.shares ?? 0,
+    set((state) => ({
+      photos: updater(state.photos).map(photo => ({
+        ...photo,
+        comments: photo.comments ?? 0,
+        shares: photo.shares ?? 0,
+      })),
     })),
-  })),
 
 
   addPhotos: (newPhotos) =>
@@ -132,12 +134,12 @@ export const useFeedStore = create<FeedState>((set) => ({
       photos: [
         ...state.photos,
         ...newPhotos
-        .filter((photo) => !state.photos.some((p) => p.id === photo.id))
-        .map(photo => ({
-          ...photo,
-          comments: photo.comments ?? 0,
-          shares: photo.shares ?? 0,
-        })),
+          .filter((photo) => !state.photos.some((p) => p.id === photo.id))
+          .map(photo => ({
+            ...photo,
+            comments: photo.comments ?? 0,
+            shares: photo.shares ?? 0,
+          })),
       ],
     })),
 
@@ -145,4 +147,6 @@ export const useFeedStore = create<FeedState>((set) => ({
   setLoading: (value) => set({ loading: value }),
   toggleMute: () => set((state) => ({ isMuted: !state.isMuted })),
   reset: () => set({ photos: [], page: 0, loading: false }),
+  scrollToTop: () => { },
+  setScrollToTop: (fn) => set({ scrollToTop: fn }),
 }));

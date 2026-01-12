@@ -346,6 +346,16 @@ const HomePage = () => {
         }
       />
     </GestureHandlerRootView>
+
+
+    // <GestureHandlerRootView style={{ flex: 1, backgroundColor: theme.background }}>
+    //   {/* STORIES */}
+    //   <StoryList theme={theme} stories={stories} />
+
+    //   {/* FEED (ONLY vertical scroll) */}
+    //   <FeedList
+    //   />
+    // </GestureHandlerRootView>
   );
 };
 
