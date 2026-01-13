@@ -35,6 +35,7 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
     const timerIntervalRef = useRef<NodeJS.Timeout | number | null>(null);
     const [audioDuration, setAudioDuration] = useState<number | null>(null);
 
+
     // ✅ FIX 1: Reset zoom when component mounts or audio changes
     useEffect(() => {
         console.log('🎬 CameraScreen mounted - Resetting zoom to 0');
@@ -46,7 +47,6 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
         console.log('📹 Content type changed:', contentType);
         setZoom(0); // Reset zoom when switching between story/reels/news
     }, [contentType]);
-
 
     const getContentTypeIcon = (type: string) => {
         switch (type) {
@@ -60,6 +60,25 @@ const CameraScreen = ({ onImagePick, setContentType, contentType, preSelectedAud
                 return "ellipse-outline";
         }
     };
+
+    useEffect(() => {
+        const setupAudio = async () => {
+            try {
+                await Audio.setAudioModeAsync({
+                    allowsRecordingIOS: true,
+                    playsInSilentModeIOS: true,
+                    staysActiveInBackground: false,
+                    shouldDuckAndroid: true,
+                    playThroughEarpieceAndroid: false,
+                });
+                console.log('🎵 Audio session initialized');
+            } catch (error) {
+                console.error('Audio setup error:', error);
+            }
+        };
+
+        setupAudio();
+    }, []);
 
     const toggleCameraFacing = () => {
         setFacing((prev) => (prev === "back" ? "front" : "back"));
