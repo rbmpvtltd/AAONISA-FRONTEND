@@ -1017,6 +1017,13 @@ const ReelItem = ({
     }
   );
 
+  // Reset paused state when switching videos
+  useEffect(() => {
+    if (currentIndex !== index) {
+      setPaused(false);
+    }
+  }, [currentIndex, index]);
+
   // Combined Play/Pause + Volume + Cleanup logic
   useEffect(() => {
     if (!player || !shouldLoadVideo) return;
@@ -1114,11 +1121,17 @@ const ReelItem = ({
 
   // Long press handlers for pause/resume
   const handleLongPressIn = () => {
+    // if (isLoading || !player?.playing) return;
+    if (isLoading || !player?.playing || currentIndex !== index) return;
+
     setPaused(true);
     if (player) player.pause();
   };
 
   const handleLongPressOut = () => {
+    // if (isLoading || !player) return;
+    if (isLoading || !player || currentIndex !== index) return;
+
     setPaused(false);
     if (player) player.play();
   };

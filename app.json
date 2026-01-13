@@ -18,9 +18,9 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rbm.HitHoy",
       "infoPlist": {
-        "NSCameraUsageDescription": "Camera access is required to take photos and videos.",
-        "NSMicrophoneUsageDescription": "Microphone access is required for recording audio.",
-        "NSPhotoLibraryUsageDescription": "Photo library access is required to select photos.",
+        "NSCameraUsageDescription": "This app requires camera access to capture photos and videos for user-created reels and visual content",
+        "NSMicrophoneUsageDescription": "This app requires microphone access to record audio for reels, videos, and voice-enabled content created by the user.",
+        "NSPhotoLibraryUsageDescription": "This app requires access to media files to allow users to select an image for their profile picture.",
         "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library.",
         "ITSAppUsesNonExemptEncryption": false
       }
