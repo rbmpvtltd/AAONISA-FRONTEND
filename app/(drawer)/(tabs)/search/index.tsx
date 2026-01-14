@@ -1,7 +1,7 @@
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Dimensions,
@@ -19,13 +19,110 @@ import { SafeAreaView } from "react-native-safe-area-context";
 import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
+import { Animated, Easing } from "react-native";
 
-const { width } = Dimensions.get("window");
+const { width, height } = Dimensions.get("window");
 const numColumns = 3;
 const spacing = 8;
 const columnWidth = Math.floor((width - spacing * (numColumns + 1)) / numColumns);
 
 const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+const BOTTOM_PADDING = 100;
+
+const SkeletonBox = ({
+  width,
+  height,
+  radius = 10,
+  style,
+}: any) => {
+  const opacity = useRef(new Animated.Value(0.35)).current;
+
+  useEffect(() => {
+    Animated.loop(
+      Animated.sequence([
+        Animated.timing(opacity, {
+          toValue: 0.6,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+        Animated.timing(opacity, {
+          toValue: 0.35,
+          duration: 800,
+          easing: Easing.inOut(Easing.ease),
+          useNativeDriver: true,
+        }),
+      ])
+    ).start();
+  }, []);
+
+  return (
+    <Animated.View
+      style={[
+        {
+          width,
+          height,
+          borderRadius: radius,
+          backgroundColor: "#2a2a2a",
+          opacity,
+        },
+        style,
+      ]}
+    />
+  );
+};
+
+const ExploreSkeleton = () => {
+  return (
+    <View style={{ flexDirection: "row", gap: spacing, padding: spacing }}>
+      {Array.from({ length: numColumns }).map((_, col) => (
+        <View key={col} style={{ width: columnWidth, gap: spacing }}>
+          {Array.from({ length: 7 }).map((_, i) => {
+            const height =
+              i % 3 === 0
+                ? Math.round(columnWidth * 1.5)
+                : Math.round((columnWidth * 16) / 9);
+
+            return (
+              <SkeletonBox
+                key={i}
+                width={columnWidth}
+                height={height}
+                radius={12}
+              />
+            );
+          })}
+        </View>
+      ))}
+    </View>
+  );
+};
+
+const SearchUserSkeleton = () => (
+  <>
+    {Array.from({ length: 7 }).map((_, i) => (
+      <View
+        key={i}
+        style={{
+          flexDirection: "row",
+          alignItems: "center",
+          padding: 14,
+          borderRadius: 14,
+          marginBottom: 10,
+          backgroundColor: "#1e1e1e",
+        }}
+      >
+        <SkeletonBox width={48} height={48} radius={24} />
+        <View style={{ marginLeft: 12 }}>
+          <SkeletonBox width={140} height={14} radius={6} />
+          <View style={{ height: 8 }} />
+          <SkeletonBox width={90} height={12} radius={6} />
+        </View>
+      </View>
+    ))}
+  </>
+);
 
 export default function ExploreScreen() {
   const theme = useAppTheme();
@@ -106,18 +203,22 @@ export default function ExploreScreen() {
   }, [videos]);
 
 
+  // if (isError) {
+  //   return (
+  //     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+  //       <View style={styles.center}>
+  //         <Text style={{ color: theme.text, fontSize: 16 }}>
+  //           Failed to load explore feed.
+  //         </Text>
+  //         <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
+  //           <Text style={{ color: theme.buttonBg }}>Retry</Text>
+  //         </TouchableOpacity>
+  //       </View>
+  //     </SafeAreaView>
+  //   );
+  // }
 
-  if (videoLoading) {
-    return (
-      <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-        <View style={styles.center}>
-          <ActivityIndicator size="large" color={theme.text} />
-        </View>
-      </SafeAreaView>
-    );
-  }
-
-  if (isError) {
+  if (isError && videos.length === 0) {
     return (
       <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
         <View style={styles.center}>
@@ -133,7 +234,7 @@ export default function ExploreScreen() {
   }
 
   return (
-    <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+    <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.background }]}>
       <View style={[styles.container, { backgroundColor: theme.background }]}>
 
         {/* SEARCH BAR */}
@@ -158,7 +259,7 @@ export default function ExploreScreen() {
 
         {/* SEARCH RESULTS */}
         {debouncedQuery ? (
-          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: 40 }}>
+          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
 
             {/*  NO RESULTS FOUND */}
             {!searchLoading && filteredSearchResults.length === 0 ? (
@@ -171,7 +272,9 @@ export default function ExploreScreen() {
             ) : null}
 
             {/*  SEARCH RESULTS LIST */}
-            {filteredSearchResults.map((u: any) => (
+            {searchLoading ? (
+              <SearchUserSkeleton />
+            ) : (filteredSearchResults.map((u: any) => (
               <TouchableOpacity
                 key={u.id}
                 style={[styles.userItem, { backgroundColor: theme.buttonBg }]}
@@ -192,13 +295,13 @@ export default function ExploreScreen() {
                   )}
                 </View>
               </TouchableOpacity>
-            ))}
+            )))}
           </ScrollView>
         ) : (
           <>
             {/* EXPLORE GRID */}
             <ScrollView
-              contentContainerStyle={{ padding: spacing }}
+              contentContainerStyle={{ padding: spacing, paddingBottom: BOTTOM_PADDING }}
               refreshControl={
                 <RefreshControl
                   refreshing={isRefetching}
@@ -210,8 +313,8 @@ export default function ExploreScreen() {
               onScroll={({ nativeEvent }) => {
                 const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
                 if (
-                  hasNextPage &&
-                  contentOffset.y + layoutMeasurement.height + 300 >= contentSize.height
+                  hasNextPage && !isFetchingNextPage &&
+                  contentOffset.y + layoutMeasurement.height + 200 >= contentSize.height
                 ) {
                   fetchNextPage();
                 }
@@ -219,37 +322,40 @@ export default function ExploreScreen() {
               scrollEventThrottle={100}
               showsVerticalScrollIndicator={false}
             >
-              <View style={styles.masonryRow}>
-                {/* {columns.map((col, colIndex) => (
-                    <View key={colIndex} style={styles.column}>
-                      {col.map((item) => (
+              {videoLoading && videos.length === 0 ? (
+                <ExploreSkeleton />
+              ) : (
+                <View style={styles.masonryRow}>
+                  {columns.map((col, colIndex) => (
+                    <View key={`col-${colIndex}`} style={styles.column}>
+                      {col.map((item, itemIndex) => (
                         <ThumbnailCard
-                          key={item.id}
+                          key={`${item.id}-${colIndex}-${itemIndex}`}
                           item={item}
                           router={router}
                         />
                       ))}
                     </View>
-                  ))} */}
-                {columns.map((col, colIndex) => (
-                  <View key={`col-${colIndex}`} style={styles.column}>
-                    {col.map((item, itemIndex) => (
-                      <ThumbnailCard
-                        key={`${item.id}-${colIndex}-${itemIndex}`}
-                        item={item}
-                        router={router}
-                      />
-                    ))}
-                  </View>
-                ))}
+                  ))}
 
-              </View>
-              {/* 
-                {isFetchingNextPage && (
-                  <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
-                )} */}
+                </View>
+              )}
               {isFetchingNextPage && !isRefetching && (
                 <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+              )}
+
+              {isError && videos.length > 0 && !isFetchingNextPage && (
+                <TouchableOpacity
+                  onPress={() => fetchNextPage()}
+                  style={{
+                    paddingVertical: 16,
+                    alignItems: "center",
+                  }}
+                >
+                  <Text style={{ color: theme.subtitle }}>
+                    Tap to retry loading more
+                  </Text>
+                </TouchableOpacity>
               )}
 
             </ScrollView>
@@ -268,7 +374,7 @@ const ThumbnailCard = ({ item, router }: any) => {
 
   return (
     <TouchableOpacity
-      activeOpacity={0.9}
+      activeOpacity={0.85}
       onPress={() => {
         console.log("Navigating to video:", item.id);
         router.push({
@@ -335,3 +441,4 @@ const styles = StyleSheet.create({
     gap: spacing,
   },
 });
+
