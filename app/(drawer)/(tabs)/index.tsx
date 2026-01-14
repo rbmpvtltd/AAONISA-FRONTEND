@@ -194,6 +194,8 @@
 
 
 import { getAllBookmarks } from "@/src/api/tab-api";
+import { FeedListSkeleton } from "@/src/components/homeFeedSkeleton";
+import { StoryListSkeleton } from "@/src/components/storySkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { FeedList } from "@/src/features/feed/feedList";
 import { StoryList } from "@/src/features/story/storyList";
@@ -203,7 +205,7 @@ import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
 import { useEffect, useState } from "react";
-import { ActivityIndicator, Text, View } from "react-native";
+import { ActivityIndicator, Text } from "react-native";
 import { FlatList, GestureHandlerRootView, RefreshControl } from "react-native-gesture-handler";
 
 const HomePage = () => {
@@ -278,28 +280,9 @@ const HomePage = () => {
 
   if (storiesError || bookmarksError) {
     return (
-      <GestureHandlerRootView
-        style={{ flex: 1, justifyContent: "center", alignItems: "center", backgroundColor: theme.background }}
-      >
-        <View style={{ padding: 20, alignItems: "center" }}>
-          <Text style={{ color: theme.text, fontSize: 16, marginBottom: 10 }}>
-            Failed to load data
-          </Text>
-          <Text style={{ color: theme.text, fontSize: 12, marginBottom: 20, textAlign: "center" }}>
-            {storiesError ? "Stories: Authentication required" : ""}
-            {storiesError && bookmarksError ? "\n" : ""}
-            {bookmarksError ? "Bookmarks: Authentication required" : ""}
-          </Text>
-          <Text
-            style={{ color: theme.text, fontSize: 14 }}
-            onPress={() => {
-              refetchStories();
-              refetchBookmarks();
-            }}
-          >
-            Tap to Retry
-          </Text>
-        </View>
+      <GestureHandlerRootView>
+        <StoryListSkeleton />
+        <FeedListSkeleton theme={theme} count={5} />
       </GestureHandlerRootView>
     );
   }
