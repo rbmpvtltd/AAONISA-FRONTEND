@@ -409,7 +409,7 @@ export const FeedList = () => {
     enabled: isFocused,
 
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("🔥 FETCH admin feed page:", pageParam);
+      console.log("FETCH admin feed page:", pageParam);
 
       const useRandom = pageParam === 1;
       const res = await getAdminVideosFeed(pageParam, 10, useRandom);
@@ -426,7 +426,7 @@ export const FeedList = () => {
           isLiked: item.isLiked || false,
         }));
 
-      console.log(`✅ Parsed ${parsed.length} admin reels (random: ${useRandom})`);
+      console.log(` Parsed ${parsed.length} admin reels (random: ${useRandom})`);
 
       return {
         reels: parsed,
@@ -448,14 +448,14 @@ export const FeedList = () => {
   const scrollToTopHandler = useCallback(() => {
     if (flatListRef.current && feedVideos.length > 0) {
       try {
-        // Paginated FlatList ke liye scrollToIndex better hai
+        // Paginated FlatList ke liye scrollToIndex
         flatListRef.current.scrollToIndex({
           index: 0,
         });
         setActiveIndex(0);
-        console.log("✅ Scrolled to first video");
+        console.log("Scrolled to first video");
       } catch (error) {
-        console.log("⚠️ ScrollToIndex failed, trying scrollToOffset");
+        console.log("ScrollToIndex failed, trying scrollToOffset");
         // Fallback
         flatListRef.current.scrollToOffset({ offset: 0, animated: true });
         setActiveIndex(0);
@@ -495,9 +495,9 @@ export const FeedList = () => {
   );
 
   const handleEndReached = useCallback(() => {
-    console.log(`🎯 End! hasNext: ${hasNextPage}`);
+    console.log(`End! hasNext: ${hasNextPage}`);
     if (hasNextPage && !isFetchingNextPage) {
-      console.log("🚀 Loading page", (data?.pages || []).length + 1);
+      console.log("Loading page", (data?.pages || []).length + 1);
       fetchNextPage();
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, data]);
@@ -547,12 +547,7 @@ export const FeedList = () => {
         onViewableItemsChanged={onViewableItemsChanged}
         onEndReached={handleEndReached}
         onEndReachedThreshold={0.8}
-        // ScrollToIndex ke liye important
-        // getItemLayout={(data, index) => ({
-        //   length: 700, // FeedItem ki exact height (styles.reel.height se match honi chahiye)
-        //   offset: 700 * index,
-        //   index,
-        // })}
+
         onScrollToIndexFailed={(info) => {
           console.log("ScrollToIndex failed:", info);
           // Retry after small delay

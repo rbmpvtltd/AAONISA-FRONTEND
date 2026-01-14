@@ -26,6 +26,9 @@ export default function ReelDetailScreen() {
     reelId
   );
 
+  console.log('====================================');
+  console.log("reelIdreelIdreelIdreelId", reelId);
+  console.log('====================================');
   useEffect(() => {
     if (redirected && data?.pages) {
       const allReels = data.pages.flatMap((page) => page.reels);

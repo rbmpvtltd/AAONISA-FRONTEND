@@ -903,7 +903,6 @@ const UserReelItem = memo(({
 
   const [showOptions, setShowOptions] = useState(false);
   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
-  const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
   const isFocused = useIsFocused();
@@ -911,6 +910,7 @@ const UserReelItem = memo(({
   const [paused, setPaused] = useState(false);
   const [showThumbnail, setShowThumbnail] = useState(true);
   const [showAudioSheet, setShowAudioSheet] = useState(false);
+  const [viewed, setViewed] = useState(item.isViewed === true);
 
   const {
     liked,
