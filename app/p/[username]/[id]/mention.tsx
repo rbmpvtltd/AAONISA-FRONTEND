@@ -65,7 +65,6 @@ const MentionedReelItem = ({
   const ACTION_ICON_SIZE = SCREEN_WIDTH * 0.08;
   const [showOptions, setShowOptions] = React.useState(false);
   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
-  const [viewed, setViewed] = useState(false);
   const [showFullCaption, setShowFullCaption] = useState(false);
   const [showBottomDrawer, setShowBottomDrawer] = useState(false);
   const [showReportDrawer, setShowReportDrawer] = useState(false);
@@ -76,6 +75,7 @@ const MentionedReelItem = ({
   // const [likesCount, setLikesCount] = useState(item.likesCount ?? 0);
   // const [liked, setLiked] = useState(item.isLiked);
   const [showAudioSheet, setShowAudioSheet] = useState(false);
+  const [viewed, setViewed] = useState(item.isViewed === true);
 
 
   const {

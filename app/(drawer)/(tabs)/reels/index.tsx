@@ -975,7 +975,7 @@ const ReelItem = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
-  const [viewed, setViewed] = useState(false);
+  const [viewed, setViewed] = useState(item.isViewed === true);;
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
 

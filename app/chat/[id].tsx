@@ -1028,6 +1028,11 @@ function MessageBubble({
   const handleReelPress = () => {
     if (!reelData) return;
 
+    console.log('====================================');
+    console.log('arbaaz');
+    console.log(`/(drawer)/(tabs)/reel/${reelData.reelId}`);
+    console.log('====================================');
+
     router.push({
       pathname: "/(drawer)/(tabs)/reels",
       params: {
@@ -1036,6 +1041,7 @@ function MessageBubble({
       },
     });
   };
+  console.log("🔍 Reel Data:", reelData);
 
   return (
     <Pressable
@@ -1227,7 +1233,7 @@ export default function ChatDetailScreen() {
         type: isReelMessage ? 'reel' : 'text',
         ...(isReelMessage && {
           reelData: {
-            videoId: data.reelid,
+            videoId: data.reelId,
             url: data.url || data.reelUrl,
             thumbnail: data.thumbnail || data.thumbnailUrl,
           }
@@ -1403,7 +1409,7 @@ export default function ChatDetailScreen() {
                 //   (a, b) =>
                 //     new Date(b.createdAt).getTime() - new Date(a.createdAt).getTime()
                 // ) || 
-                chatMessages.sort((a, b) => b.createdAt - a.createdAt)}
+                chatMessages.sort((a, b) => a.createdAt - b.createdAt)}
               keyExtractor={(item) => item.id.toString()}
               renderItem={({ item }) => (
                 <MessageBubble
