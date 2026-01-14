@@ -374,13 +374,14 @@
 
 
 import { getAdminVideosFeed } from "@/src/api/admin-feed-api";
+import { FeedListSkeleton } from "@/src/components/homeFeedSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useFeedStore } from "@/src/store/useFeedStore";
 import { useIsFocused } from "@react-navigation/native";
 import { useInfiniteQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import { useCallback, useEffect, useRef, useState } from "react";
-import { ActivityIndicator, FlatList, Text, View } from "react-native";
+import { ActivityIndicator, FlatList, View } from "react-native";
 import { FeedItem } from "./feedItem";
 
 export const FeedList = () => {
@@ -502,23 +503,28 @@ export const FeedList = () => {
     }
   }, [hasNextPage, isFetchingNextPage, fetchNextPage, data]);
 
-  if (isLoading) {
+  // if (isLoading) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", backgroundColor: "#000" }}>
+  //       <ActivityIndicator color={theme.text} />
+  //     </View>
+  //   );
+  // }
+
+  if (isLoading || isError) {
     return (
-      <View style={{ flex: 1, justifyContent: "center", backgroundColor: "#000" }}>
-        <ActivityIndicator color={theme.text} />
-      </View>
-    );
+      <FeedListSkeleton theme={theme} count={5} />);
   }
 
-  if (isError) {
-    return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <Text onPress={() => refetch()} style={{ color: "red" }}>
-          Retry
-        </Text>
-      </View>
-    );
-  }
+  // if (isError) {
+  //   return (
+  //     <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+  //       <Text onPress={() => refetch()} style={{ color: "red" }}>
+  //         Retry
+  //       </Text>
+  //     </View>
+  //   );
+  // }
 
   return (
     <View style={{ flex: 1, backgroundColor: "#000" }}>

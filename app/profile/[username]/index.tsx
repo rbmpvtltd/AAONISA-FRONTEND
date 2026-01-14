@@ -552,37 +552,28 @@
 
 // // ==================================================
 
+import { PostGridSkeleton, ProfileHeaderSkeleton, TabsSkeleton, TopHeaderSkeleton, UserInfoSkeleton } from "@/src/components/profilePageSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { formatCount } from "@/src/utils/formatCount";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-router";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Animated,
     Dimensions,
-    Easing,
     FlatList,
     Image,
     Linking,
     StyleSheet,
     Text,
     TouchableOpacity,
-    View,
-    ViewStyle
+    View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
 import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
 import { MentionedScreen } from "./mantionScreen";
-
-interface SkeletonProps {
-    width: number;
-    height: number;
-    radius?: number;
-    style?: ViewStyle | ViewStyle[];
-}
 
 const { width, height } = Dimensions.get("window");
 const imageSize = width / 3;
@@ -594,121 +585,6 @@ const POSTS_PER_ROW = 3;
 const PAGE_SIZE = 9;
 const POST_SPACING = 2; // Instagram uses very small gaps
 const POST_SIZE = (width - (POST_SPACING * (POSTS_PER_ROW + 1))) / POSTS_PER_ROW;
-
-const Skeleton: React.FC<SkeletonProps> = ({
-    width,
-    height,
-    radius = 6,
-    style,
-}) => {
-    const opacity = useRef(new Animated.Value(0.3)).current;
-
-    useEffect(() => {
-        const loop = Animated.loop(
-            Animated.sequence([
-                Animated.timing(opacity, {
-                    toValue: 0.6,
-                    duration: 800,
-                    easing: Easing.inOut(Easing.ease),
-                    useNativeDriver: true,
-                }),
-                Animated.timing(opacity, {
-                    toValue: 0.3,
-                    duration: 800,
-                    easing: Easing.inOut(Easing.ease),
-                    useNativeDriver: true,
-                }),
-            ])
-        );
-
-        loop.start();
-        return () => loop.stop();
-    }, []);
-
-    return (
-        <Animated.View
-            style={[
-                {
-                    width,
-                    height,
-                    borderRadius: radius,
-                    backgroundColor: "#2a2a2a",
-                    opacity,
-                },
-                style,
-            ]}
-        />
-    );
-};
-
-
-
-const ProfileHeaderSkeleton: React.FC = () => {
-    return (
-        <View style={styles.header}>
-            <Skeleton
-                width={profilePicSize}
-                height={profilePicSize}
-                radius={profilePicSize / 2}
-            />
-
-            <View style={{ flex: 1, marginLeft: width * 0.05 }}>
-                <View style={{ flexDirection: "row", justifyContent: "space-between" }}>
-                    {[1, 2, 3].map((i) => (
-                        <View key={i} style={{ alignItems: "center" }}>
-                            <Skeleton width={40} height={14} />
-                            <View style={{ height: 6 }} />
-                            <Skeleton width={50} height={12} />
-                        </View>
-                    ))}
-                </View>
-
-                <View style={{ flexDirection: "row", marginTop: 12 }}>
-                    <Skeleton width={60} height={14} />
-                    <View style={{ width: 12 }} />
-                    <Skeleton width={60} height={14} />
-                </View>
-            </View>
-        </View>
-    );
-};
-
-
-const UserInfoSkeleton: React.FC = () => {
-    return (
-        <View style={styles.userInfo}>
-            <Skeleton width={140} height={16} />
-            <View style={{ height: 8 }} />
-            <Skeleton width={220} height={13} />
-            <View style={{ height: 6 }} />
-            <Skeleton width={180} height={13} />
-
-            <View style={{ flexDirection: "row", marginTop: 14, gap: 10 }}>
-                <Skeleton width={140} height={36} radius={6} />
-                <Skeleton width={140} height={36} radius={6} />
-            </View>
-        </View>
-    );
-};
-
-
-const PostGridSkeleton: React.FC = () => {
-    return (
-        <View>
-            {Array.from({ length: 4 }).map((_, rowIndex) => (
-                <View key={rowIndex} style={styles.row}>
-                    {Array.from({ length: POSTS_PER_ROW }).map((_, colIndex) => (
-                        <Skeleton
-                            key={colIndex}
-                            width={POST_SIZE}
-                            height={POST_SIZE}
-                        />
-                    ))}
-                </View>
-            ))}
-        </View>
-    );
-};
 
 
 export const TopHeader: React.FC<{ userName: string; theme: any; isOwnProfile: boolean }> = ({ userName, theme, isOwnProfile }) => {
@@ -851,21 +727,6 @@ export const UserInfo: React.FC<{
         </View>
     );
 };
-
-// export const Tabs: React.FC<{ theme: any }> = ({ theme }) => (
-//     <View style={[styles.tabs, { backgroundColor: theme.background }]}>
-//         {/* <TouchableOpacity style={styles.tab}>
-//             <MaterialCommunityIcons name="view-grid-outline" size={22} color={theme.text} />
-//         </TouchableOpacity> */}
-//         <TouchableOpacity style={styles.tab}>
-//             <Ionicons name="play-circle-outline" size={22} color={theme.text} />
-//         </TouchableOpacity>
-
-//             <TouchableOpacity style={styles.tab}>
-//                 <Ionicons name="person-circle-outline" size={22} color={theme.text} />
-//             </TouchableOpacity>
-//     </View>
-// );
 
 export const Tabs: React.FC<{
     theme: any;
@@ -1160,8 +1021,10 @@ export const ProfileScreen: React.FC = () => {
             // </View>
 
             <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
+                <TopHeaderSkeleton theme={theme} />
                 <ProfileHeaderSkeleton />
                 <UserInfoSkeleton />
+                <TabsSkeleton theme={theme} />
                 <PostGridSkeleton />
             </SafeAreaView>
         );
@@ -1199,49 +1062,6 @@ export const ProfileScreen: React.FC = () => {
                     username={profile?.username}
                 />
             ) : (
-                //         <View
-                //             key="reels"
-                //             style={{ flex: 1, marginTop: 40, alignItems: "center" }}
-                //         >
-                //              <View
-                //     style={{
-                //       flex: 1,
-                //       alignItems: "center",
-                //       paddingHorizontal: 30,
-                //     }}
-                //   >
-                //     <Ionicons
-                //       name="person-circle-outline"
-                //       size={64}
-                //       color="#777"
-                //     />
-
-                //     <Text
-                //       style={{
-                //         color: theme.text,
-                //         fontSize: 16,
-                //         fontWeight: "600",
-                //         marginTop: 12,
-                //       }}
-                //     >
-                //       No tagged reels yet
-                //     </Text>
-
-                //     <Text
-                //       style={{
-                //         color: theme.subtitle,
-                //         fontSize: 13,
-                //         marginTop: 6,
-                //         textAlign: "center",
-                //       }}
-                //     >
-                //       Reels you’re tagged in will appear here.
-                //     </Text>
-                //   </View>
-
-                //         </View>
-
-
                 <MentionedScreen
                     key="reels"
                     mentionedVideos={profile?.mentionedVideos || []}
