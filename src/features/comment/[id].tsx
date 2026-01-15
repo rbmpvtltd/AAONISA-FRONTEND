@@ -1298,7 +1298,6 @@
 import { router, useLocalSearchParams } from "expo-router";
 import { useEffect, useRef, useState } from "react";
 import {
-  ActivityIndicator,
   Alert,
   Dimensions,
   FlatList,
@@ -1323,6 +1322,7 @@ import {
 } from "@/src/api/comments-api";
 
 import { GetCurrentUser } from "@/src/api/profile-api";
+import CommentSkeleton from "@/src/components/commentSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { timeAgo } from "@/src/utils/timeAgo";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
@@ -1603,9 +1603,10 @@ const CommentPage = () => {
         keyboardVerticalOffset={90}
       >
         {isLoading && comments.length === 0 && (
-          <View style={styles.centerContainer}>
-            <ActivityIndicator size="large" color={theme.text} />
-          </View>
+          // <View style={styles.centerContainer}>
+          //   <ActivityIndicator size="large" color={theme.text} />
+          // </View>
+          <CommentSkeleton />
         )}
 
         <FlatList

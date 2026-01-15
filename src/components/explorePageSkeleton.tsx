@@ -1,5 +1,6 @@
 import { useEffect, useRef } from "react";
 import { Animated, Dimensions, Easing, View } from "react-native";
+import { useAppTheme } from "../constants/themeHelper";
 
 const { width, height } = Dimensions.get("window");
 const numColumns = 3;
@@ -75,27 +76,30 @@ export const ExploreSkeleton = () => {
     );
 };
 
-export const SearchUserSkeleton = () => (
-    <>
-        {Array.from({ length: 7 }).map((_, i) => (
-            <View
-                key={i}
-                style={{
-                    flexDirection: "row",
-                    alignItems: "center",
-                    padding: 14,
-                    borderRadius: 14,
-                    marginBottom: 10,
-                    backgroundColor: "#1e1e1e",
-                }}
-            >
-                <SkeletonBox width={48} height={48} radius={24} />
-                <View style={{ marginLeft: 12 }}>
-                    <SkeletonBox width={140} height={14} radius={6} />
-                    <View style={{ height: 8 }} />
-                    <SkeletonBox width={90} height={12} radius={6} />
+export const SearchUserSkeleton = () => {
+    const theme = useAppTheme();
+    return (
+        <>
+            {Array.from({ length: 7 }).map((_, i) => (
+                <View
+                    key={i}
+                    style={{
+                        flexDirection: "row",
+                        alignItems: "center",
+                        padding: 14,
+                        borderRadius: 14,
+                        marginBottom: 10,
+                        backgroundColor: theme.searchBg,
+                    }}
+                >
+                    <SkeletonBox width={48} height={48} radius={24} />
+                    <View style={{ marginLeft: 12 }}>
+                        <SkeletonBox width={140} height={14} radius={6} />
+                        <View style={{ height: 8 }} />
+                        <SkeletonBox width={90} height={12} radius={6} />
+                    </View>
                 </View>
-            </View>
-        ))}
-    </>
-);
+            ))}
+        </>
+    )
+};
