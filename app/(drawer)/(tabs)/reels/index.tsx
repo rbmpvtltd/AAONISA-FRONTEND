@@ -910,6 +910,7 @@
 
 // ====ARBAAZ CHOUHAN
 import { GetCurrentUser } from '@/src/api/profile-api';
+import ReelsSkeleton from '@/src/components/reelsSkeleton';
 import BottomDrawer from '@/src/components/ui/BottomDrawer';
 import ReportDrawer from '@/src/components/ui/ReportDrawer';
 import BookmarkPanel from '@/src/features/bookmark/bookmarkPanel';
@@ -975,7 +976,7 @@ const ReelItem = ({
   const [isLoading, setIsLoading] = useState(true);
   const [showThumbnail, setShowThumbnail] = useState(true);
   const markViewedMutation = useMarkViewedMutation(item.id || item.uuid);
-  const [viewed, setViewed] = useState(item.isViewed === true);;
+  const [viewed, setViewed] = useState(false);
   const [paused, setPaused] = useState(false);
   const isMountedRef = useRef(true);
 
@@ -1016,13 +1017,6 @@ const ReelItem = ({
       p.loop = true;
     }
   );
-
-  // Reset paused state when switching videos
-  useEffect(() => {
-    if (currentIndex !== index) {
-      setPaused(false);
-    }
-  }, [currentIndex, index]);
 
   // Combined Play/Pause + Volume + Cleanup logic
   useEffect(() => {
@@ -1121,17 +1115,11 @@ const ReelItem = ({
 
   // Long press handlers for pause/resume
   const handleLongPressIn = () => {
-    // if (isLoading || !player?.playing) return;
-    if (isLoading || !player?.playing || currentIndex !== index) return;
-
     setPaused(true);
     if (player) player.pause();
   };
 
   const handleLongPressOut = () => {
-    // if (isLoading || !player) return;
-    if (isLoading || !player || currentIndex !== index) return;
-
     setPaused(false);
     if (player) player.play();
   };
@@ -1348,7 +1336,6 @@ const ReelItem = ({
         reelId={item.id || item.uuid}
         reelUrl={item.uuid || item.id}
         reelDownloadUrl={item.videoUrl}
-
       />
 
       {/* Report Drawer */}
@@ -1621,26 +1608,32 @@ const ReelsFeed = () => {
   }, []);
 
   // Loading state
+  // if (isLoading) {
+  //   return (
+  //     <View style={styles.loadingContainer}>
+  //       <ActivityIndicator size="large" color="#fff" />
+  //       <Text style={styles.loadingText}>Loading Reels...</Text>
+  //     </View>
+  //   );
+  // }
+
   if (isLoading) {
-    return (
-      <View style={styles.loadingContainer}>
-        <ActivityIndicator size="large" color="#fff" />
-        <Text style={styles.loadingText}>Loading Reels...</Text>
-      </View>
-    );
+    return <ReelsSkeleton />;
   }
 
   // Error state
   if (isError) {
     return (
       <View style={styles.errorContainer}>
-        <Ionicons name="alert-circle-outline" size={60} color="red" />
-        <Text style={styles.errorText}>Failed to load reels</Text>
+        <Ionicons name="alert-circle-outline" size={56} color="red" />
+        <Text style={styles.errorText}> Can’t load reels right now</Text>
+        <Text style={styles.errorText}>Please check your internet connection</Text>
+
         <TouchableOpacity
           style={styles.retryButton}
-          onPress={() => window.location.reload()}
+          onPress={() => refetch()}
         >
-          <Text style={styles.retryText}>Retry</Text>
+          <Text style={styles.retryText}>Try again</Text>
         </TouchableOpacity>
       </View>
     );

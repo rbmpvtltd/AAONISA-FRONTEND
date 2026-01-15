@@ -773,11 +773,13 @@ export const VideoItem: React.FC<VideoItemProps> = ({
         <TouchableOpacity
             activeOpacity={0.9}
             onPress={() => onPressItem(uuid)}
-            style={[styles.postContainer, { backgroundColor: theme.background }]}
+            style={[styles.postContainer, {
+                backgroundColor: theme.searchBg,
+            }]}
         >
             <Image
                 source={{ uri: image }}
-                style={styles.postMedia}
+                style={[styles.postMedia]}
                 resizeMode="cover"
             />
         </TouchableOpacity>
