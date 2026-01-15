@@ -28,6 +28,7 @@
         "autoIncrement": true
       },
       "ios": {
+        "distribution": "store",
         "autoIncrement": true
       }
     }
