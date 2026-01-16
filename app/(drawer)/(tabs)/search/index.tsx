@@ -276,7 +276,7 @@ export default function ExploreScreen() {
 const ThumbnailCard = ({ item, router }: any) => {
   const itemHeight =
     item.height || Math.max(160, Math.round((columnWidth * 16) / 9));
-
+  const theme = useAppTheme();
   return (
     <TouchableOpacity
       activeOpacity={0.85}
@@ -295,7 +295,7 @@ const ThumbnailCard = ({ item, router }: any) => {
           width: columnWidth,
           height: itemHeight,
           borderRadius: 10,
-          backgroundColor: "#111",
+          backgroundColor: theme.searchBg,
         }}
         resizeMode="cover"
       />
