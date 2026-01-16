@@ -191,6 +191,8 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
     }
   };
 
+  console.log("boookkkkmaaark", reel);
+
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: "black" }}>
       {/* VIDEO */}
@@ -234,12 +236,13 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
           <Image source={{ uri: reel.user?.userProfile ? reel.user?.userProfile : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }} style={styles.avatar} />
           <Text style={styles.username}>{reel.user?.username}</Text>
         </TouchableOpacity>
+
         {/* CAPTION */}
-        {!showFullCaption ? (
+        {/* {!showFullCaption ? (
           <>
             <Text style={styles.caption} numberOfLines={2}>
               {reel?.caption}
-              {/* HELLO EVERYONE */}
+
             </Text>
             {reel.caption?.length > 100 && (
               <TouchableOpacity onPress={() => setShowFullCaption(true)}>
@@ -257,7 +260,65 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
               <Text style={styles.more}>Less</Text>
             </TouchableOpacity>
           </View>
-        )}
+        )} */}
+
+
+        {/* title */}
+        <View>
+          <Text style={{ color: "#ffffff" }}>
+            {reel.title || ""}
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: 12 }}>
+          {!showFullCaption ? (
+            <>
+              {/* Caption Preview */}
+              <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
+                {reel.caption}
+              </Text>
+
+              {/* Hashtags Preview */}
+              {reel.hashtags?.length > 0 && (
+                <Text style={styles.hashtag} numberOfLines={1} ellipsizeMode="tail">
+                  {reel.hashtags
+                    .map((hashtagObj: any) => `#${hashtagObj.tag.trim()}`)
+                    .join(" ")}
+                </Text>
+              )}
+
+              {/* More button - show if caption is long OR hashtags exist */}
+              {(reel.caption?.length > 100 || reel.hashtags?.length > 0) && (
+                <TouchableOpacity onPress={() => setShowFullCaption(true)}>
+                  <Text style={styles.moreText}>More</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Full Caption Scroll */}
+              <View style={{ maxHeight: 200 }}>
+                <ScrollView nestedScrollEnabled>
+                  <Text style={styles.caption}>{reel.caption}</Text>
+
+                  {/* Full Hashtags */}
+                  {reel.hashtags?.length > 0 && (
+                    <Text style={styles.hashtag}>
+                      {reel.hashtags
+                        .map((hashtagObj: any) => `#${hashtagObj.tag.trim()}`)
+                        .join(" ")}
+                    </Text>
+                  )}
+                </ScrollView>
+
+                {/* Less button */}
+                <TouchableOpacity onPress={() => setShowFullCaption(false)}>
+                  <Text style={styles.moreText}>Less</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
 
         {/* MUSIC ROW */}
         {/* <View style={styles.musicRow}>
@@ -488,5 +549,17 @@ const styles = StyleSheet.create({
     backgroundColor: "rgba(0,0,0,0.3)",
     padding: 15,
     borderRadius: 50,
+  },
+
+  hashtag: {
+    color: '#ccc',
+    fontSize: 13,
+    marginBottom: 4,
+  },
+
+  moreText: {
+    color: '#888',
+    fontSize: 13,
+    marginTop: 4,
   },
 });

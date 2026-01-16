@@ -1130,6 +1130,14 @@ const ReelItem = ({
     onLongPressOut: handleLongPressOut,
   });
 
+  const formatHashtags = (hashtags: string[] = []) => {
+    return hashtags
+      .flatMap(tag => tag.split(","))
+      .map(tag => tag.trim())
+      .filter(Boolean);
+  };
+
+
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <GestureDetector gesture={composedGesture}>
@@ -1216,33 +1224,65 @@ const ReelItem = ({
           </TouchableOpacity>
         </View>
 
-        <View style={{ marginBottom: 8 }}>
-          {!showFullCaption && (
+        {/* title */}
+        <View>
+          <Text style={{ color: "#ffffff" }}>
+            {item.title || ""}
+          </Text>
+        </View>
+
+
+        <View style={{ marginBottom: 12 }}>
+          {!showFullCaption ? (
             <>
-              <Text style={styles.caption} numberOfLines={2}>
+              {/* Caption Preview */}
+              <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
                 {item.caption}
               </Text>
-              {item.caption?.length > 100 && (
+
+
+              {item.hashtags?.length > 0 && (
+                <Text style={styles.hashtag} numberOfLines={1} ellipsizeMode="tail">
+                  {item.hashtags
+                    .flatMap((tag: string) => tag.split(","))
+                    .map((tag: string) => `#${tag.trim()}`)
+                    .join(" ")}
+                </Text>
+              )}
+
+
+              {(item.caption?.length > 100 || item.hashtags?.length > 0) && (
                 <TouchableOpacity onPress={() => setShowFullCaption(true)}>
-                  <Text style={{ color: "#ccc", marginTop: 4 }}>More</Text>
+                  <Text style={styles.moreText}>More</Text>
                 </TouchableOpacity>
               )}
             </>
-          )}
+          ) : (
+            <>
+              {/* Full Caption Scroll */}
+              <View style={{ maxHeight: 200 }}>
+                <ScrollView nestedScrollEnabled>
+                  <Text style={styles.caption}>{item.caption}</Text>
+                  {item.hashtags?.length > 0 && (
+                    <Text style={styles.hashtag}>
+                      {item.hashtags
+                        .flatMap((tag: string) => tag.split(","))
+                        .map((tag: string) => `#${tag.trim()}`)
+                        .join(" ")}
+                    </Text>
+                  )}
+                </ScrollView>
 
-          {showFullCaption && (
-            <View style={{ maxHeight: 200 }}>
-              <ScrollView nestedScrollEnabled={true}>
-                <Text style={styles.caption}>{item.caption}</Text>
-              </ScrollView>
-              {item.caption?.length > 100 && (
+                {/* Less button */}
                 <TouchableOpacity onPress={() => setShowFullCaption(false)}>
-                  <Text style={{ color: "#ccc", marginTop: 4 }}>Less</Text>
+                  <Text style={styles.moreText}>Less</Text>
                 </TouchableOpacity>
-              )}
-            </View>
+              </View>
+            </>
           )}
         </View>
+
+
 
         {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
@@ -1414,7 +1454,7 @@ const ReelsFeed = () => {
   const { height: SCREEN_HEIGHT } = useWindowDimensions();
   const flatListRef = useRef<FlatList>(null);
   const isFocused = useIsFocused();
-  const { id, videoId, tab } = useLocalSearchParams();
+  const { id, videoId, redirected, tab } = useLocalSearchParams();
   const likeMutation = useLikeMutation();
   const queryClient = useQueryClient();
   const {
@@ -1429,7 +1469,9 @@ const ReelsFeed = () => {
     setShowIcon,
     fadeAnim,
     updateReelURL,
+    setRedirectedFromShare,
     autoScroll,
+    redirectedFromShare
   } = useReelsStore();
 
   useEffect(() => {
@@ -1452,7 +1494,26 @@ const ReelsFeed = () => {
     isRefetching,
   } = useReelsByCategory(activeTab.toLowerCase());
 
-  const reels = data?.pages.flatMap((p: any) => p.reels) || [];
+  // const reels = data?.pages.flatMap((p: any) => p.reels) || [];
+  // const reels = redirectedFromShare
+  //   ? storeReels                 // ✅ shared reels
+  //   : data?.pages.flatMap((p: any) => p.reels) || [];
+
+  useEffect(() => {
+    if (redirected === 'true') {
+      setRedirectedFromShare(true);
+    } else {
+      setRedirectedFromShare(false);
+    }
+  }, [redirected, setRedirectedFromShare]);
+
+  const apiReels = data?.pages.flatMap((p: any) => p.reels) || [];
+  const storeReels = useReelsStore(state => state.reels);
+
+  const reels = redirectedFromShare
+    ? storeReels
+    : apiReels;
+
 
 
   const onRefresh = useCallback(async () => {
@@ -1604,7 +1665,8 @@ const ReelsFeed = () => {
 
   // Key extractor for FlatList
   const keyExtractor = useCallback((item: any, index: number) => {
-    return item?.id ? String(item.id) : `reel-${index}`;
+    // return item?.id ? String(item.id) : `reel-${index}`;
+    return `${item.id}-${index}`
   }, []);
 
   // Loading state
@@ -1665,7 +1727,8 @@ const ReelsFeed = () => {
       <FlatList
         ref={flatListRef}
         data={Array.isArray(reels) ? reels.filter(r => r?.id) : []}
-        keyExtractor={keyExtractor}
+        // keyExtractor={keyExtractor}
+        keyExtractor={(item, index) => `${item.id}-${index}`}
         renderItem={renderItem}
 
         // Paging & Snapping
@@ -1917,6 +1980,20 @@ const styles = StyleSheet.create({
     marginTop: 8,
     fontSize: 14,
   },
+
+
+  hashtag: {
+    color: '#ccc',
+    fontSize: 13,
+    marginBottom: 4,
+  },
+
+  moreText: {
+    color: '#888',
+    fontSize: 13,
+    marginTop: 4,
+  },
+
 });
 
 export default ReelsFeed;
