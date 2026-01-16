@@ -306,7 +306,65 @@ const MentionedReelItem = ({
           </TouchableOpacity>
         </View>
 
-        <View style={{ marginBottom: 8 }}>
+        {/* title */}
+        <View>
+          <Text style={{ color: "#ffffff" }}>
+            {item.title || ""}
+          </Text>
+        </View>
+
+        <View style={{ marginBottom: 12 }}>
+          {!showFullCaption ? (
+            <>
+              {/* Caption Preview */}
+              <Text style={styles.caption} numberOfLines={2} ellipsizeMode="tail">
+                {item.caption}
+              </Text>
+
+              {/* Hashtags Preview */}
+              {item.hashtags?.length > 0 && (
+                <Text style={styles.hashtag} numberOfLines={1} ellipsizeMode="tail">
+                  {item.hashtags
+                    .map((hashtagObj: any) => `#${hashtagObj.tag.trim()}`)
+                    .join(" ")}
+                </Text>
+              )}
+
+              {/* More button - show if caption is long OR hashtags exist */}
+              {(item.caption?.length > 100 || item.hashtags?.length > 0) && (
+                <TouchableOpacity onPress={() => setShowFullCaption(true)}>
+                  <Text style={styles.moreText}>More</Text>
+                </TouchableOpacity>
+              )}
+            </>
+          ) : (
+            <>
+              {/* Full Caption Scroll */}
+              <View style={{ maxHeight: 200 }}>
+                <ScrollView nestedScrollEnabled>
+                  <Text style={styles.caption}>{item.caption}</Text>
+
+                  {/* Full Hashtags */}
+                  {item.hashtags?.length > 0 && (
+                    <Text style={styles.hashtag}>
+                      {item.hashtags
+                        .map((hashtagObj: any) => `#${hashtagObj.tag.trim()}`)
+                        .join(" ")}
+                    </Text>
+                  )}
+                </ScrollView>
+
+                {/* Less button */}
+                <TouchableOpacity onPress={() => setShowFullCaption(false)}>
+                  <Text style={styles.moreText}>Less</Text>
+                </TouchableOpacity>
+              </View>
+            </>
+          )}
+        </View>
+
+
+        {/* <View style={{ marginBottom: 8 }}>
           {!showFullCaption && (
             <>
               <Text style={styles.caption} numberOfLines={2}>
@@ -334,7 +392,7 @@ const MentionedReelItem = ({
               )}
             </View>
           )}
-        </View>
+        </View> */}
 
         {/* <View style={styles.musicInfo}>
           <Text style={styles.musicIcon}>♪</Text>
@@ -749,6 +807,18 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 13,
     fontWeight: '600',
+    marginTop: 4,
+  },
+
+  hashtag: {
+    color: '#ccc',
+    fontSize: 13,
+    marginBottom: 4,
+  },
+
+  moreText: {
+    color: '#888',
+    fontSize: 13,
     marginTop: 4,
   },
 });
