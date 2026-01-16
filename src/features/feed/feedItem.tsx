@@ -1153,38 +1153,44 @@ export const FeedItem = React.memo(
                     )}
                 </View> */}
 
+                <View style={{ paddingHorizontal: 10, }}>
+                    <Text>{item.title || ""}</Text>
+                </View>
+
                 {/* Caption - Always visible */}
-                <View style={{ paddingHorizontal: 10, paddingBottom: 10, flex: 1 }}>
+                <View style={styles.captionWrapper}>
                     {showFullCaption ? (
-                        <View>
-                            <ScrollView
-                                style={{ maxHeight: 250 }}
-                                showsVerticalScrollIndicator={true}
-                                nestedScrollEnabled={true}
-                            >
-                                <Text style={{ color: theme.text, lineHeight: 20, paddingBottom: 4 }}>
-                                    {item.caption}
+                        <ScrollView
+                            style={styles.captionScrollView}
+                            showsVerticalScrollIndicator={true}
+                            nestedScrollEnabled={true}
+                        >
+                            <Text style={[styles.captionText, { color: theme.text }]}>
+                                {item.caption}
+                            </Text>
 
+                            {item.hashtags && item.hashtags.length > 0 && (
+                                <Text style={[styles.hashtagText, { marginTop: 4 }]}>
+                                    {item.hashtags
+                                        .flatMap((tag: string) => tag.split(","))
+                                        .map((tag: string) => `#${tag.trim()}`)
+                                        .join(" ")}
                                 </Text>
+                            )}
 
-
-                                <TouchableOpacity
-                                    onPress={() => setShowFullCaption(false)}
-                                    activeOpacity={0.7}
-                                    style={{ marginTop: 40 }}
-                                >
-                                    <Text style={{ color: '#4A9EFF', fontWeight: '600', fontSize: 14, }}>
-                                        Show less
-                                    </Text>
-                                </TouchableOpacity>
-                            </ScrollView>
-
-                        </View>
+                            <TouchableOpacity
+                                onPress={() => setShowFullCaption(false)}
+                                activeOpacity={0.7}
+                                style={styles.showLessButton}
+                            >
+                                <Text style={styles.showLessText}>Show less</Text>
+                            </TouchableOpacity>
+                        </ScrollView>
                     ) : (
-                        <View style={{ position: 'relative' }}>
+                        <View style={styles.captionCollapsed}>
                             <Text
-                                style={{ color: theme.text, lineHeight: 20, }}
-                                numberOfLines={5}
+                                style={[styles.captionText, { color: theme.text }]}
+                                numberOfLines={3}
                                 onTextLayout={(e) => {
                                     if (captionLayout.lineCount === 0) {
                                         setCaptionLayout({ lineCount: e.nativeEvent.lines.length });
@@ -1192,13 +1198,17 @@ export const FeedItem = React.memo(
                                 }}
                             >
                                 {item.caption}
-                                <Text style={{ color: "#4A9EFF", fontWeight: '600', fontSize: 14, }}>
+                            </Text>
+
+                            {item.hashtags && item.hashtags.length > 0 && (
+                                <Text style={[styles.hashtagText, { marginTop: 4 }]} numberOfLines={1}>
                                     {item.hashtags
-                                        ?.flatMap((tag: string) => tag.split(","))
+                                        .flatMap((tag: string) => tag.split(","))
                                         .map((tag: string) => `#${tag.trim()}`)
                                         .join(" ")}
                                 </Text>
-                            </Text>
+                            )}
+
 
                             {/* "...more" overlay at end of 5th line */}
                             {shouldShowMore && (
@@ -1467,5 +1477,36 @@ const styles = StyleSheet.create({
         padding: 8,
         borderRadius: 20,
         zIndex: 5,
+    },
+
+    captionWrapper: {
+        paddingHorizontal: 10,
+        paddingBottom: 10,
+        flex: 1,
+    },
+    captionScrollView: {
+        maxHeight: 250,
+    },
+    captionCollapsed: {
+        position: "relative",
+    },
+    captionText: {
+        lineHeight: 20,
+        fontSize: 14,
+    },
+    hashtagText: {
+        color: "#4A9EFF",
+        fontWeight: "600",
+        fontSize: 14,
+    },
+
+    showLessButton: {
+        marginTop: 12,
+        paddingVertical: 4,
+    },
+    showLessText: {
+        color: "#4A9EFF",
+        fontWeight: "600",
+        fontSize: 14,
     },
 });
