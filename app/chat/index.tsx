@@ -429,11 +429,26 @@ export default function ChatListScreen() {
       });
 
       router.back();
+    },
+    onError: (error: any) => {
+      Toast.show({
+        type: "error",
+        text1: "Failed to send reel",
+        text2: error?.message || "Please try again",
+      });
     }
   });
 
   const handleSend = async () => {
-    if (!reelId) return;
+    // if (!reelId) return;
+    if (!reelId || selectedChats.length === 0) return;
+
+    // // ✅ Immediate UI feedback
+    Toast.show({
+      type: "info",
+      text1: `Sending to ${selectedChats.length} chat${selectedChats.length > 1 ? 's' : ''}...`,
+    });
+
     sendReelToChatsMutation.mutate({
       reelId: reelId as string,
       sessionIds: selectedChats
@@ -535,14 +550,30 @@ export default function ChatListScreen() {
             style={{
               backgroundColor: theme.buttonBg,
               paddingVertical: 12,
+              marginBottom: 20,
               borderRadius: 8,
               alignItems: "center",
+              opacity: sendReelToChatsMutation.isPending ? 0.6 : 1,
             }}
             onPress={handleSend}
+            disabled={sendReelToChatsMutation.isPending}
           >
-            <Text style={{ color: theme.buttonText, fontSize: 16, fontWeight: "600" }}>
+            {/* <Text style={{ color: theme.buttonText, fontSize: 16, fontWeight: "600" }}>
               Send ({selectedChats.length})
-            </Text>
+            </Text> */}
+
+            {sendReelToChatsMutation.isPending ? (
+              <View style={{ flexDirection: 'row', alignItems: 'center', gap: 8 }}>
+                {/* <ActivityIndicator size="small" color={theme.buttonText} /> */}
+                <Text style={{ color: theme.buttonText, fontSize: 16, fontWeight: "600" }}>
+                  Sending...
+                </Text>
+              </View>
+            ) : (
+              <Text style={{ color: theme.buttonText, fontSize: 16, fontWeight: "600" }}>
+                Send ({selectedChats.length})
+              </Text>
+            )}
           </TouchableOpacity>
         </View>
       )}

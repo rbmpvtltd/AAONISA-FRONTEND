@@ -1526,6 +1526,7 @@ const styles = StyleSheet.create({
   },
   composerContainer: {
     borderTopWidth: 1,
+    paddingBottom: 10,
   },
   composerRow: {
     flexDirection: "row",
@@ -1540,6 +1541,8 @@ const styles = StyleSheet.create({
     marginBottom: 20,
   },
   sendBtn: {
+    // maxHeight: 100,
+    marginBottom: 20,
     borderRadius: 20,
     justifyContent: "center",
     alignItems: "center",

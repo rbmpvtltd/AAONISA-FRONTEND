@@ -3,10 +3,10 @@ function createApiUrl(url: string) {
   if (__DEV__) {
     console.log(`${process.env.EXPO_PUBLIC_LOCAL_API_URL}/api${url}`);
 
-    return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}/api${url}`;
+    return `https://testing.hithoy.com/api${url}`;
 
   }
-  return `${process.env.EXPO_PUBLIC_API_URL}/api${url}`;
+  return `https://testing.hithoy.com/api${url}`;
 }
 
 import AsyncStorage from "@react-native-async-storage/async-storage";
