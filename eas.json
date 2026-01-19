@@ -21,7 +21,7 @@
       "node": "20.19.4",
       "env": {
         "GOOGLE_SERVICES_JSON": "@GOOGLE_SERVICES_JSON",
-        "EXPO_PUBLIC_LOCAL_API_URL": "https://api.hithoy.com/api"
+        "EXPO_PUBLIC_LOCAL_API_URL": "https://testing.hithoy.com/api"
       },
       "android": {
         "buildType": "app-bundle",
