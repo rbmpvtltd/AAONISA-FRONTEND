@@ -18,8 +18,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rbm.HitHoy",
       "infoPlist": {
-        "NSCameraUsageDescription": "This app requires camera access to capture photos and videos for user-created reels and visual content",
-        "NSMicrophoneUsageDescription": "This app requires microphone access to record audio for reels, videos, and voice-enabled content created by the user.",
+        "NSCameraUsageDescription": "Camera access is required so you can record reels and take profile pictures inside the app.",
+        "NSMicrophoneUsageDescription": "Microphone access is required to record audio while creating reels inside the app.",
         "NSPhotoLibraryUsageDescription": "This app requires access to media files to allow users to select an image for their profile picture.",
         "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library.",
         "ITSAppUsesNonExemptEncryption": false
@@ -46,7 +46,7 @@
           "data": [
             {
               "scheme": "https",
-              "host": "testing.hithoy.com",
+              "host": "api.hithoy.com",
               "pathPrefix": "/"
             }
           ],
@@ -113,7 +113,7 @@
     },
     "extra": {
       "router": {},
-      "EXPO_PUBLIC_LOCAL_API_URL": "https://testing.hithoy.com/api",
+      "EXPO_PUBLIC_LOCAL_API_URL": "https://api.hithoy.com/api",
       "eas": {
         "owner": "rbm.jodhpur03",
         "projectId": "56c200f2-bdaa-4915-a657-b92ed431b7f4"
