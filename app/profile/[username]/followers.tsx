@@ -575,7 +575,7 @@ const FollowersScreen = () => {
     const isLoading = loadingUserId === item.id;
     const isCurrentUser = item.id === currentUser?.id;
 
-    // Instagram logic for button text
+    // logic for button text
     let buttonText = 'Follow';
     if (isFollowing) {
       buttonText = 'Following';
@@ -606,7 +606,7 @@ const FollowersScreen = () => {
             </Text>
           </View>
 
-          {/* Follow/Following Button - Instagram Style */}
+          {/* Follow/Unfollow Button */}
           {!isCurrentUser && (
             <TouchableOpacity
               onPress={() => handleFollowToggle(item.id, isFollowing)}
