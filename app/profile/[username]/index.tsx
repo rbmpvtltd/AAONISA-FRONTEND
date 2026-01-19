@@ -668,9 +668,10 @@ export const UserInfo: React.FC<{
     theme: any;
     profile: any;
     isFollowing: boolean;
+    followsMe: boolean;
     isOwnProfile: boolean;
     onFollowToggle: () => void;
-}> = ({ theme, profile, isFollowing, isOwnProfile, onFollowToggle }) => {
+}> = ({ theme, profile, isFollowing, isOwnProfile, onFollowToggle, followsMe }) => {
     if (!profile) return null;
 
     const user = profile.userProfile;
@@ -681,6 +682,14 @@ export const UserInfo: React.FC<{
             Linking.openURL(link).catch(() => console.log("Failed to open URL"));
         }
     };
+
+
+    let buttonText = 'Follow';
+    if (isFollowing) {
+        buttonText = 'Following';
+    } else if (followsMe) {
+        buttonText = 'Follow Back';
+    }
 
     return (
         <View style={styles.userInfo}>
@@ -701,12 +710,25 @@ export const UserInfo: React.FC<{
                 <View style={{ flexDirection: "row", gap: 10, marginTop: 10 }}>
                     <TouchableOpacity
                         onPress={onFollowToggle}
-                        style={[styles.followButton, { flex: 1 }]}
+                        style={[
+                            styles.followButton,
+                            {
+                                flex: 1,
+                                backgroundColor: isFollowing ? theme.inputBorder : '#0095f6',
+                                borderWidth: isFollowing ? 1 : 0,
+                                borderColor: isFollowing ? theme.subtitle : 'transparent',
+                            }
+                        ]}
                     >
-                        <Text style={{ color: "#fff", fontWeight: "600", textAlign: "center" }}>
-                            {isFollowing ? "Following" : "Follow"}
+                        <Text style={{
+                            color: isFollowing ? theme.text : "#fff",
+                            fontWeight: "600",
+                            textAlign: "center"
+                        }}>
+                            {buttonText}
                         </Text>
                     </TouchableOpacity>
+
 
                     <TouchableOpacity
                         onPress={() => router.push({
@@ -865,7 +887,7 @@ export const ProfileScreen: React.FC = () => {
     const { username } = useLocalSearchParams<{ username?: string }>();
     const [isFollowing, setIsFollowing] = useState(false);
     const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
-
+    const [followsMe, setFollowsMe] = useState(false);
 
     const {
         data: currentUser,
@@ -903,14 +925,31 @@ export const ProfileScreen: React.FC = () => {
     //     }
     // }, [profile?.followers, currentUser?.id]);
 
+    // useEffect(() => {
+    //     if (profile?.followersWithFlag && currentUser?.id) {
+    //         const alreadyFollowing = profile.followersWithFlag.some(
+    //             (f: any) => f.id === currentUser.id
+    //         );
+    //         setIsFollowing(alreadyFollowing);
+    //     }
+    // }, [profile?.followersWithFlag, currentUser?.id]);
+
     useEffect(() => {
-        if (profile?.followersWithFlag && currentUser?.id) {
-            const alreadyFollowing = profile.followersWithFlag.some(
+        if (profile && currentUser?.id) {
+            // Check if I follow this profile
+            const alreadyFollowing = profile.followersWithFlag?.some(
                 (f: any) => f.id === currentUser.id
-            );
+            ) || false;
+
+            // Check if this profile follows me
+            const profileFollowsMe = profile.followingsWithFlag?.some(
+                (f: any) => f.id === currentUser.id
+            ) || false;
+
             setIsFollowing(alreadyFollowing);
+            setFollowsMe(profileFollowsMe);
         }
-    }, [profile?.followersWithFlag, currentUser?.id]);
+    }, [profile, currentUser?.id]);
 
     // const followMutation = useMutation({
     //     mutationFn: (id: string) => followUser(id),
@@ -1051,6 +1090,7 @@ export const ProfileScreen: React.FC = () => {
                 isOwnProfile={isOwnProfile}
                 onFollowToggle={handleFollowToggle}
                 isFollowing={isFollowing}
+                followsMe={followsMe}
             />
             <Tabs theme={theme}
                 //  isOwnProfile={isOwnProfile}
