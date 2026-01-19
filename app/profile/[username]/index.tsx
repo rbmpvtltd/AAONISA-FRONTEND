@@ -554,6 +554,7 @@
 
 import { PostGridSkeleton, ProfileHeaderSkeleton, TabsSkeleton, TopHeaderSkeleton, UserInfoSkeleton } from "@/src/components/profilePageSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { formatCount } from "@/src/utils/formatCount";
 import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { DrawerActions } from "@react-navigation/native";
@@ -618,14 +619,64 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
     const totalLikes = profile.videos?.reduce((sum: number, video: any) => sum + (video.likes?.length || 0), 0) || 0;
     const totalViews = profile.videos?.reduce((sum: number, video: any) => sum + (video.views?.length || 0), 0) || 0;
 
+    // Stories
+    const {
+        data: userStories,
+    } = useStoriesQuery();
+
+    console.log(userStories, 'userStories');
+
+    const userStoryContainer = userStories?.find((item: any) => item.owner === profile.id);
+    const hasStory = userStoryContainer && userStoryContainer.stories?.length > 0;
+
+    console.log("arbaaz chouhan", hasStory, userStoryContainer?.owner, userStories?.length);
+    console.log("story arbaaz chouhan", userStoryContainer ? `/story/${userStoryContainer.owner}` : 'no story');
+
+    // ✅ Handle profile pic press
+    const handleProfilePicPress = () => {
+        if (hasStory && userStoryContainer) {
+            router.push({
+                pathname: `/story/[id]`,
+                params: {
+                    id: userStoryContainer?.stories?.[0]?.id
+                }
+            });
+            const path = `/story/${userStoryContainer?.stories?.[0]?.id}`;
+            console.log("🚀 Navigating to:", path);
+        } else {
+            // Open full screen profile picture
+            router.push({
+                pathname: `/profile/[username]/profile-picture`,
+                params: {
+                    imageUrl: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+                    username: profile.username
+                }
+            });
+        }
+    };
+
     return (
         <View style={styles.header}>
-            <Image
-                source={{
-                    uri: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-                }}
-                style={styles.profilePicture}
-            />
+            <TouchableOpacity
+                onPress={handleProfilePicPress}
+                activeOpacity={0.8}
+            >
+                <View style={[
+                    styles.profilePictureContainer,
+                    // hasStory && {
+                    //     borderWidth: 10,
+                    //     borderColor: '#E1306C',
+                    //     padding: 2,
+                    // }
+                ]}>
+                    <Image
+                        source={{
+                            uri: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+                        }}
+                        style={styles.profilePicture}
+                    />
+                </View>
+            </TouchableOpacity>
 
             <View style={styles.stats}>
                 <View style={styles.stat}>
@@ -1094,15 +1145,22 @@ const styles = StyleSheet.create({
         padding: width * 0.04,
         alignItems: "center",
     },
-    website: {
-        fontSize: 14 * fontScale,
-        marginTop: 5,
-        textDecorationLine: "underline",
+    profilePictureContainer: {
+        width: profilePicSize,
+        height: profilePicSize,
+        borderRadius: profilePicSize / 2,
+        justifyContent: 'center',
+        alignItems: 'center',
     },
     profilePicture: {
         width: profilePicSize,
         height: profilePicSize,
         borderRadius: profilePicSize / 2,
+    },
+    website: {
+        fontSize: 14 * fontScale,
+        marginTop: 5,
+        textDecorationLine: "underline",
     },
     stats: {
         flexDirection: "row",
