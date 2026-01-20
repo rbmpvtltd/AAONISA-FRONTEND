@@ -421,7 +421,7 @@ export default function ChatListScreen() {
     onSuccess: async () => {
       await queryClient.invalidateQueries({ queryKey: ["admin-videos-feed"] });
       await queryClient.invalidateQueries({ queryKey: ["userProfile"] });
-      await queryClient.invalidateQueries({ queryKey: ["reels"] });
+      // await queryClient.invalidateQueries({ queryKey: ["reels"] });
 
       Toast.show({
         type: "success",
