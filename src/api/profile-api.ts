@@ -461,8 +461,52 @@ const likeDislike = async (storyId: string,) => {
     console.log("like api failed", e);
   }
 }
+
+
+const blockUser = async (username: string,) => {
+  const token = await getToken();
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/users/block-user');
+  // backend update
+  try {
+    await axios.post(apiUrl, { username }, config);
+    console.log('user blocked username', username);
+
+  } catch (e) {
+    console.log("block api failed", e);
+  }
+}
+
+
+const UnblockUser = async (username: string,) => {
+  const token = await getToken();
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+    // withCredentials: true,
+  };
+
+  const apiUrl = createApiUrl('/users/unblock-user');
+  // backend update
+  try {
+    await axios.post(apiUrl, { username }, config);
+    console.log('user unblocked username', username);
+  } catch (e) {
+    console.log("unblock api failed", e);
+  }
+}
+
+
 export {
-  followUser, GetCurrentUser, GetProfileUsername, likeDislike, markViewed, SearchUserProfiel,
-  UnfollowUser, updateProfile
+  blockUser, followUser, GetCurrentUser, GetProfileUsername, likeDislike, markViewed, SearchUserProfiel, UnblockUser, UnfollowUser, updateProfile
 };
 

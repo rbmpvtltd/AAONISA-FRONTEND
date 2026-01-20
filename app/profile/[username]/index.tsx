@@ -563,17 +563,20 @@ import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-rou
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
+    Alert,
     Dimensions,
     FlatList,
     Image,
     Linking,
+    Modal,
+    Pressable,
     StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
+import { blockUser, followUser, GetCurrentUser, GetProfileUsername, UnblockUser, UnfollowUser } from "../../../src/api/profile-api";
 import { MentionedScreen } from "./mantionScreen";
 
 const { width, height } = Dimensions.get("window");
@@ -588,21 +591,146 @@ const POST_SPACING = 2; // Instagram uses very small gaps
 const POST_SIZE = (width - (POST_SPACING * (POSTS_PER_ROW + 1))) / POSTS_PER_ROW;
 
 
-export const TopHeader: React.FC<{ userName: string; theme: any; isOwnProfile: boolean }> = ({ userName, theme, isOwnProfile }) => {
-    const navigation = useNavigation();
+// interface ProfileActionsModalProps {
+//     visible: boolean;
+//     onClose: () => void;
+//     userId: string;
+//     isBlocked: boolean;
+// }
 
+interface ProfileActionsModalProps {
+    visible: boolean;
+    onClose: () => void;
+    username: string;
+    isBlocked: boolean;
+}
+
+const ProfileActionsModal: React.FC<ProfileActionsModalProps> = ({
+    visible,
+    onClose,
+    username,
+    isBlocked,
+}) => {
+    const theme = useAppTheme();
+    const queryClient = useQueryClient();
+
+    const blockMutation = useMutation({
+        mutationFn: (username: string) => blockUser(username),
+        onSuccess: async () => {
+            console.log("✅ Block successful, invalidating queries...");
+            await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+            await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
+            console.log("✅ Queries invalidated");
+            onClose();
+        },
+        onError: (error) => {
+            console.error("❌ Block failed:", error);
+        }
+    });
+
+    const unblockMutation = useMutation({
+        mutationFn: (username: string) => UnblockUser(username),
+        onSuccess: async () => {
+            console.log("✅ Unblock successful, invalidating queries...");
+            await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
+            await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
+            console.log("✅ Queries invalidated");
+            onClose();
+        },
+        onError: (error) => {
+            console.error("❌ Unblock failed:", error);
+        }
+    });
+
+    const handleBlockToggle = () => {
+        Alert.alert(
+            isBlocked ? "Unblock User" : "Block User",
+            isBlocked
+                ? "Are you sure you want to unblock this user?"
+                : "Are you sure you want to block this user? You will no longer see their content.",
+            [
+                { text: "Cancel", style: "cancel" },
+                {
+                    text: isBlocked ? "Unblock" : "Block",
+                    style: isBlocked ? "default" : "destructive",
+                    onPress: () => {
+                        console.log(`🎯 ${isBlocked ? 'Unblocking' : 'Blocking'} user:`, username);
+                        if (isBlocked) {
+                            unblockMutation.mutate(username);
+                        } else {
+                            blockMutation.mutate(username);
+                        }
+                    },
+                },
+            ]
+        );
+    };
+
+    return (
+        <Modal
+            visible={visible}
+            transparent
+            animationType="slide"
+            onRequestClose={onClose}
+        >
+            <Pressable style={styles.overlay} onPress={onClose} />
+            <View style={[styles.sheet, { backgroundColor: theme.background }]}>
+                <TouchableOpacity
+                    style={styles.actionBtn}
+                    onPress={handleBlockToggle}
+                    disabled={blockMutation.isPending || unblockMutation.isPending}
+                >
+                    <Text
+                        style={[
+                            styles.blockText,
+                            { color: isBlocked ? theme.text : "red" },
+                        ]}
+                    >
+                        {blockMutation.isPending || unblockMutation.isPending
+                            ? "Loading..."
+                            : isBlocked ? "Unblock User" : "Block User"}
+                    </Text>
+                </TouchableOpacity>
+            </View>
+        </Modal>
+    );
+};
+
+// export default ProfileActionsModal;
+
+export const TopHeader: React.FC<{ userName: string; theme: any; isOwnProfile: boolean, onMorePress: () => void }> = ({ userName, theme, isOwnProfile, onMorePress }) => {
+    const navigation = useNavigation();
     return (
         <View style={styles.topHeader}>
             <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
 
-            {isOwnProfile && (
+            {/* {isOwnProfile && (
                 <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
                     <MaterialIcons name="menu" size={26} color={theme.text} />
                 </TouchableOpacity>
             )}
+
+            {!isOwnProfile && (
+                <TouchableOpacity onPress={() => setShowActions(true)}>
+                    <Ionicons name="ellipsis-vertical" size={26} color={theme.text} />
+                </TouchableOpacity>
+            )}; */}
+
+            {isOwnProfile ? (
+                <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
+                    <MaterialIcons name="menu" size={26} color={theme.text} />
+                </TouchableOpacity>
+            ) : (
+                <TouchableOpacity onPress={onMorePress}>
+                    <Ionicons name="ellipsis-vertical" size={26} color={theme.text} />
+                </TouchableOpacity>
+            )}
+
         </View>
     );
 };
+
+
 
 export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, profile }) => {
     if (!profile?.userProfile) return null;
@@ -939,7 +1067,8 @@ export const ProfileScreen: React.FC = () => {
     const [isFollowing, setIsFollowing] = useState(false);
     const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
     const [followsMe, setFollowsMe] = useState(false);
-
+    const [showActions, setShowActions] = useState(false);
+    const [isBlocked, setIsBlocked] = useState(false);
     const {
         data: currentUser,
         isLoading: currentUserLoading,
@@ -948,6 +1077,9 @@ export const ProfileScreen: React.FC = () => {
         queryKey: ["currentUser"],
         queryFn: GetCurrentUser,
     });
+
+
+    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", currentUser);
 
     const {
         data: profile,
@@ -963,6 +1095,40 @@ export const ProfileScreen: React.FC = () => {
         refetchOnMount: true,        // cached UI instantly    // ad
         refetchOnWindowFocus: true,   // background refresh     // ad
     });
+
+    useEffect(() => {
+        if (profile && currentUser) {
+            console.log("🔍 Checking block status...");
+            console.log("Current User ID:", currentUser?.id);
+            console.log("Profile User ID:", profile?.id);
+            console.log("Blocked Users:", currentUser?.blockedUsers);
+
+            // Check if current user has blocked this profile
+            const blocked = currentUser?.blockedUsers?.some(
+                (block: any) => {
+                    console.log("Checking block:", block);
+                    console.log("Blocked User ID:", block?.blockedUser?.id);
+                    return block?.blockedUser?.id === profile?.id;
+                }
+            ) || false;
+
+            console.log("✅ Is Blocked:", blocked);
+            setIsBlocked(blocked);
+        }
+    }, [profile, currentUser]);
+
+    // Add this useEffect to check if user is blocked
+    useEffect(() => {
+        if (profile && currentUser) {
+            // Assuming your profile data has a blockedUsers array
+            // Adjust this based on your actual API response structure
+            const blocked = currentUser?.blockedUsers?.some(
+                (blockedUser: any) => blockedUser.id === profile.id
+            ) || false;
+
+            setIsBlocked(blocked);
+        }
+    }, [profile, currentUser]);
 
     console.log("profile 111111111=======>", profile?.mentionedVideos);
 
@@ -1133,6 +1299,21 @@ export const ProfileScreen: React.FC = () => {
                 userName={username || "Username"}
                 theme={theme}
                 isOwnProfile={isOwnProfile}
+                onMorePress={() => setShowActions(true)}
+            />
+
+            {/* <ProfileActionsModal
+                visible={showActions}
+                onClose={() => setShowActions(false)}
+                userId={profile?.username || ""}
+                isBlocked={profile?.username === currentUser?.username}
+            /> */}
+
+            <ProfileActionsModal
+                visible={showActions}
+                onClose={() => setShowActions(false)}
+                username={profile?.username || ""}
+                isBlocked={isBlocked}
             />
             <ProfileHeader theme={theme} profile={profile} />
             <UserInfo
@@ -1184,6 +1365,30 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         padding: width * 0.04,
         alignItems: "center",
+    },
+    overlay: {
+        flex: 1,
+        // backgroundColor: "rgba(0,0,0,0.4)",
+
+    },
+    sheet: {
+        padding: 20,
+        borderTopLeftRadius: 16,
+        borderTopRightRadius: 16,
+    },
+    actionBtn: {
+        paddingVertical: 14,
+    },
+    actionText: {
+        fontSize: 16,
+        fontWeight: "600",
+        textAlign: "center",
+    },
+    blockText: {
+        fontSize: 16,
+        fontWeight: "600",
+        color: "red",
+        textAlign: "center",
     },
     profilePictureContainer: {
         width: profilePicSize,
