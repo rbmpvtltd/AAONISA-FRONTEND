@@ -774,10 +774,10 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
         } else {
             // Open full screen profile picture
             router.push({
-                pathname: `/profile/[username]/profile-picture`,
+                pathname: "/profile/profile-picture",
                 params: {
-                    imageUrl: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-                    username: profile.username
+                    username: profile.username,
+                    imageUrl: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png"
                 }
             });
         }
@@ -1167,7 +1167,6 @@ export const ProfileScreen: React.FC = () => {
             setFollowsMe(profileFollowsMe);
         }
     }, [profile, currentUser?.id]);
-
     // const followMutation = useMutation({
     //     mutationFn: (id: string) => followUser(id),
     //     onMutate: () => setIsFollowing(true),

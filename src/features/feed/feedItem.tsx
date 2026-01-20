@@ -1121,13 +1121,13 @@ export const FeedItem = React.memo(
                     </View>
 
                     {/* RIGHT SIDE BOOKMARK */}
-                    {/* <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
                         <Icon
                             name="ellipsis-vertical"
                             size={22}
                             color={theme.text}
                         />
-                    </TouchableOpacity> */}
+                    </TouchableOpacity>
                 </View>
 
                 {/* Caption - Always visible */}
@@ -1509,4 +1509,18 @@ const styles = StyleSheet.create({
         fontWeight: "600",
         fontSize: 14,
     },
+
+    handle: {
+        width: 40,
+        height: 4,
+        borderRadius: 2,
+        backgroundColor: "#ccc",
+        marginBottom: 8,
+    },
+    closeBtn: {
+        position: "absolute",
+        right: 16,
+        top: 6,
+    },
+
 });
