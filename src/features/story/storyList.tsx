@@ -357,15 +357,7 @@ export const StoryList = memo(({
   const handleYourStoryPress = useCallback(() => {
     if (hasOwnStories && currentUserStories) {
       const story = currentUserStories.stories.find((s: any) => !s.viewed) || currentUserStories.stories[0];
-      router.push({
-  pathname: "/story/story-viewer",
-  params: {
-    ownerId: currentUserStories.owner,
-    startIndex: currentUserStories.stories.findIndex(
-      (s: any) => s.id === story.id
-    ),
-  },
-});
+      router.push(`/story/${story.id}`);
 
     } else {
       router.push("/(drawer)/(tabs)/createReels?contentType=story");
@@ -378,15 +370,7 @@ export const StoryList = memo(({
     if (!user) return;
 
     const story = user.stories.find((s: any) => !s.viewed) || user.stories[0];
-    router.push({
-  pathname: "/story/story-viewer",
-  params: {
-    ownerId: user.owner,
-    startIndex: user.stories.findIndex(
-      (s: any) => s.id === story.id
-    ),
-  },
-});
+    router.push(`/story/${story.id}`);
 
     console.log('====================================');
     console.log("story is here ", `/story/${story.id}`);
