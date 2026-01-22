@@ -25,7 +25,7 @@ async function addBookmark(reqBody: any) {
 
   const apiUrl = createApiUrl("/bookmarks/createBookmark");
   const { data } = await axios.post(apiUrl, reqBody, config);
-  console.log(data)
+  // console.log(data)
   return data;
 }
 
@@ -102,12 +102,12 @@ async function removeReelFromBookmark(reqBody: any) {
   };
 
   const apiUrl = createApiUrl("/bookmarks/removeReelFromBookmark");
-  const { data } = await axios.post(apiUrl, {reelId:reqBody.reelId, name:reqBody.categoryName}, config);
-  
+  const { data } = await axios.post(apiUrl, { reelId: reqBody.reelId, name: reqBody.categoryName }, config);
+
   return data;
 }
 const getAllBookmarks = async () => {
-    const token = await getToken();
+  const token = await getToken();
   const config = {
     headers: {
       'Content-Type': 'application/json',
@@ -120,7 +120,7 @@ const getAllBookmarks = async () => {
 
   // backend update
   try {
-    const data =  await axios.get(apiUrl, config);
+    const data = await axios.get(apiUrl, config);
     return data.data
   } catch (e) {
     console.log("getting story  failed", e);

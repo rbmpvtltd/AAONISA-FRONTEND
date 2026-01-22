@@ -314,7 +314,7 @@ export default function ChatListScreen() {
     });
 
 
-  console.log("dataaaaaaaa", sessions);
+  // console.log("dataaaaaaaa", sessions);
 
 
   const avatarSize = width < 360 ? 44 : width < 400 ? 50 : 60;

@@ -312,7 +312,7 @@ async function updateProfile(profileData: any, imageChanged: boolean) {
       ProfilePicture: base64Image
     };
 
-    console.log("✅ FINAL PAYLOAD SENDING (image compressed)");
+    // console.log("✅ FINAL PAYLOAD SENDING (image compressed)");
 
     const token = await getToken();
     const apiUrl = createApiUrl("/users/update-profile");
@@ -421,9 +421,9 @@ async function UnfollowUser(followingId: string) {
 
 const markViewed = async (storyId: string) => {
   const token = await getToken();
-  console.log("===========================================");
-  console.log("storyy kjkjkjkjkjkjkjkmkk", storyId);
-  console.log("===========================================");
+  // console.log("===========================================");
+  // console.log("storyy kjkjkjkjkjkjkjkmkk", storyId);
+  // console.log("===========================================");
 
 
   const config = {
@@ -521,7 +521,7 @@ const getblockedUsers = async () => {
 
   try {
     const response = await axios.get(apiUrl, config);
-    console.log('✅ Blocked users fetched:', response.data);
+    // console.log('✅ Blocked users fetched:', response.data);
     return response.data;
   } catch (e) {
     console.log("❌ Get blocked users API failed:", e);

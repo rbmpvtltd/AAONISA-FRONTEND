@@ -652,13 +652,13 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
         data: userStories,
     } = useStoriesQuery();
 
-    console.log(userStories, 'userStories');
+    // console.log(userStories, 'userStories');
 
     const userStoryContainer = userStories?.find((item: any) => item.owner === profile.id);
     const hasStory = userStoryContainer && userStoryContainer.stories?.length > 0;
 
-    console.log("arbaaz chouhan", hasStory, userStoryContainer?.owner, userStories?.length);
-    console.log("story arbaaz chouhan", userStoryContainer ? `/story/${userStoryContainer.owner}` : 'no story');
+    // console.log("arbaaz chouhan", hasStory, userStoryContainer?.owner, userStories?.length);
+    // console.log("story arbaaz chouhan", userStoryContainer ? `/story/${userStoryContainer.owner}` : 'no story');
 
     // ✅ Handle profile pic press
     const handleProfilePicPress = () => {
@@ -670,7 +670,7 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
                 }
             });
             const path = `/story/${userStoryContainer?.stories?.[0]?.id}`;
-            console.log("🚀 Navigating to:", path);
+            // console.log("🚀 Navigating to:", path);
         } else {
             // Open full screen profile picture
             // router.push({
@@ -996,7 +996,7 @@ export const ProfileScreen: React.FC = () => {
     });
 
 
-    console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", currentUser);
+    // console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", currentUser);
 
     const {
         data: profile,
@@ -1014,9 +1014,9 @@ export const ProfileScreen: React.FC = () => {
     });
 
 
-    console.log('====================================');
-    console.log("blockedUsersIds", blockedUsers);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log("blockedUsersIds", blockedUsers);
+    // console.log('====================================');
 
     useEffect(() => {
         if (profile && blockedUsers && Array.isArray(blockedUsers)) {
@@ -1035,7 +1035,7 @@ export const ProfileScreen: React.FC = () => {
         }
     }, [profile?.id, blockedUsers]);
 
-    console.log("profile 111111111=======>", profile?.mentionedVideos);
+    // console.log("profile 111111111=======>", profile?.mentionedVideos);
 
 
     // useEffect(() => {

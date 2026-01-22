@@ -1040,9 +1040,9 @@ const UserReelItem = memo(({
   );
 
   const isOwnProfile = item.userProfile?.id === currentUserId;
-  console.log('====================================');
-  console.log("jjjjjjjjjjjj", item);
-  console.log('====================================');
+  // console.log('====================================');
+  // console.log("jjjjjjjjjjjj", item);
+  // console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
 

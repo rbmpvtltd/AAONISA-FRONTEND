@@ -50,7 +50,7 @@ const NotificationItem = ({ item, theme, width }: any) => {
     switch (item.type) {
 
       case "LIKE":
-        console.log("arbaaz chouhan");
+      // console.log("arbaaz chouhan");
       case "COMMENT":
         console.log('====================================');
         console.log(" pppppppppppppppp", item.referenceId,);

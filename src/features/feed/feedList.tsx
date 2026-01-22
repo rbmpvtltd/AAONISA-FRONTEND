@@ -410,7 +410,7 @@ export const FeedList = () => {
     enabled: isFocused,
 
     queryFn: async ({ pageParam = 1 }) => {
-      console.log("FETCH admin feed page:", pageParam);
+      // console.log("FETCH admin feed page:", pageParam);
 
       const useRandom = pageParam === 1;
       const res = await getAdminVideosFeed(pageParam, 10, useRandom);
@@ -427,7 +427,7 @@ export const FeedList = () => {
           isLiked: item.isLiked || false,
         }));
 
-      console.log(` Parsed ${parsed.length} admin reels (random: ${useRandom})`);
+      // console.log(` Parsed ${parsed.length} admin reels (random: ${useRandom})`);
 
       return {
         reels: parsed,
@@ -472,7 +472,7 @@ export const FeedList = () => {
   // Refresh data when tab becomes focused
   useEffect(() => {
     if (isFocused) {
-      console.log("🔄 Home tab focused - Refreshing feed");
+      // console.log("🔄 Home tab focused - Refreshing feed");
       setRandomSeed(Date.now());
       refetch();
     }

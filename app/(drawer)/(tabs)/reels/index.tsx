@@ -1004,7 +1004,7 @@ const ReelItem = ({
     };
   }, []);
 
-  console.log("REEL id:", item.id || item.uuid);
+  // console.log("REEL id:", item.id || item.uuid);
   // 🎯 Only create player for current and adjacent videos (preload ±2)
   const shouldLoadVideo = Math.abs(currentIndex - index) <= 2;
 
@@ -1501,7 +1501,7 @@ const ReelsFeed = () => {
 
   const apiReels = data?.pages.flatMap((p: any) => p.reels) || [];
   const storeReels = useReelsStore(state => state.reels);
-  console.log(redirectedFromShare, 'redirectedFromShare');
+  // console.log(redirectedFromShare, 'redirectedFromShare');
   const reels = redirectedFromShare
     ? storeReels
     : apiReels;
@@ -1527,7 +1527,7 @@ const ReelsFeed = () => {
       animated: true,
     });
 
-    console.log("✅ Refresh complete - new random videos loaded");
+    // console.log("✅ Refresh complete - new random videos loaded");
   }, [activeTab, setCurrentIndex, queryClient, refetch]);
 
 

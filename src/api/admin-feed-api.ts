@@ -27,7 +27,7 @@ export async function getAdminVideosFeed(page: number, limit: number, random: bo
 
   const apiUrl = createApiUrl(`/videos/getAdminVideosFeed?page=${page}&limit=${limit}&random=${random}`);
   const { data } = await axios.get(apiUrl, config);
-  console.log("data", data);
+  // console.log("data", data);
 
   return data;
 

@@ -248,7 +248,7 @@ const HomePage = () => {
     queryFn: async () => {
       try {
         const data = await getAllBookmarks();
-        console.log("a rhe h bookmarks", data);
+        // console.log("a rhe h bookmarks", data);
         return data || [];
       } catch (error) {
         console.error("Bookmarks fetch error:", error);
@@ -299,7 +299,7 @@ const HomePage = () => {
         refetchBookmarks(),
       ]);
 
-      console.log("✅ Refresh complete - new random feed will load");
+      // console.log("✅ Refresh complete - new random feed will load");
     } catch (err) {
       console.error("Refresh error:", err);
     } finally {
