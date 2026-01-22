@@ -503,7 +503,7 @@ import {
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -651,15 +651,24 @@ useFocusEffect(
 
     return () => {
       console.log("⏸ StoryViewer blurred");
+  //     InteractionManager.runAfterInteractions(() => {
+  //   console.log("🧹 Deferred cleanup");
 
-      progressAnim.current?.stop();
+  //   progressAnim.current?.stop();
 
-      safePause(currentPlayer);
+         
+  // });
+      // progressAnim.current?.stop();
+  safePause(currentPlayer);
       safePause(prevPlayer);
       safePause(nextPlayer);
+   
     };
   }, [isVideoReady, paused, showViewers, isMuted])
 );
+  const opacity = useRef(new Animated.Value(1)).current;
+const scale = useRef(new Animated.Value(1)).current;
+const translateY = useRef(new Animated.Value(0)).current;
 
   /** ---------------- CURRENT USER & SOCKET ---------------- */
   const { data: currentUser } = useQuery({
@@ -956,11 +965,32 @@ useFocusEffect(
   });
 
 
+// const handleClose = () => {
+//   if (progressAnim.current) {
+//     progressAnim.current.stop();
+//   }
+//   router.back();
+// };
 const handleClose = () => {
-  if (progressAnim.current) {
-    progressAnim.current.stop();
-  }
-  router.back();
+  Animated.parallel([
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(scale, {
+      toValue: 0.96,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(translateY, {
+      toValue: 20,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+  ]).start(() => {
+    router.back();
+  });
 };
 
 
@@ -980,6 +1010,16 @@ const handleClose = () => {
 
   /** ---------------- UI ---------------- */
   return (
+    <Animated.View
+  style={{
+    flex: 1,
+    opacity,
+    transform: [
+      { scale },
+      { translateY },
+    ],
+  }}
+>
     <View style={styles.container}>
       {/* VIDEO */}
       <VideoView
@@ -1155,6 +1195,7 @@ const handleClose = () => {
         <Ionicons name="close" size={26} color="#fff" />
       </TouchableOpacity>
     </View>
+    </Animated.View>
   );
 }
 
