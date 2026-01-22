@@ -506,7 +506,30 @@ const UnblockUser = async (username: string,) => {
 }
 
 
+
+
+const getblockedUsers = async () => {
+  const token = await getToken();
+  const config = {
+    headers: {
+      'Content-Type': 'application/json',
+      ...(token ? { Authorization: `Bearer ${token}` } : {}),
+    },
+  };
+
+  const apiUrl = createApiUrl('/users/get-blocked-users');
+
+  try {
+    const response = await axios.get(apiUrl, config);
+    console.log('✅ Blocked users fetched:', response.data);
+    return response.data;
+  } catch (e) {
+    console.log("❌ Get blocked users API failed:", e);
+    return [];
+  }
+};
+
 export {
-  blockUser, followUser, GetCurrentUser, GetProfileUsername, likeDislike, markViewed, SearchUserProfiel, UnblockUser, UnfollowUser, updateProfile
+  blockUser, followUser, getblockedUsers, GetCurrentUser, GetProfileUsername, likeDislike, markViewed, SearchUserProfiel, UnblockUser, UnfollowUser, updateProfile
 };
 

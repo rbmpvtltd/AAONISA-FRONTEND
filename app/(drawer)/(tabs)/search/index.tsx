@@ -20,6 +20,7 @@ import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
 import { ExploreSkeleton, SearchUserSkeleton } from "@/src/components/explorePageSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
+import { useReelsStore } from "@/src/store/useReelsStore";
 
 const { width, height } = Dimensions.get("window");
 const numColumns = 3;
@@ -35,6 +36,8 @@ export default function ExploreScreen() {
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+
+
 
   // Debounce search
   useEffect(() => {
@@ -277,10 +280,15 @@ const ThumbnailCard = ({ item, router }: any) => {
   const itemHeight =
     item.height || Math.max(160, Math.round((columnWidth * 16) / 9));
   const theme = useAppTheme();
+  const {
+    setRedirectedFromShare,
+  } = useReelsStore();
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => {
+        setRedirectedFromShare(false);
+
         console.log("Navigating to video:", item.id);
         router.push({
           pathname: "/(drawer)/(tabs)/reels",

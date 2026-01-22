@@ -1,5 +1,6 @@
 import { expoTokenUnassign } from "@/src/api/auth-api";
 import { useAppTheme } from "@/src/constants/themeHelper";
+import { useBlockedUsers } from "@/src/hooks/blockUser-Mutaion";
 import { useReelsStore } from "@/src/store/useReelsStore";
 import { useProfileStore } from "@/src/store/userProfileStore";
 import { useThemeStore } from "@/src/store/useThemeStore";
@@ -20,8 +21,15 @@ export default function CustomDrawer(props: any) {
 
   const [onlineStatus, setOnlineStatus] = useState(true);
   const { autoScroll, setAutoScroll } = useReelsStore();
-
   const router = useRouter();
+
+  const {
+    data: blockedUsers,
+    isLoading,
+    isError,
+  } = useBlockedUsers();
+
+  const blockedCount = blockedUsers?.length ?? 0;
 
   const handleLogout = async () => {
     try {
@@ -216,6 +224,33 @@ export default function CustomDrawer(props: any) {
             </Text>
             <Switch value={autoScroll} onValueChange={setAutoScroll} />
           </View>
+
+
+          <DrawerItem
+            label={() => (
+              <Text style={{ color: theme.text }}>
+                Blocked{" "}
+                {blockedCount > 0 && (
+                  <Text style={{ color: "#ff3b30", fontWeight: "600" }}>
+                    ({blockedCount})
+                  </Text>
+                )}
+              </Text>
+            )}
+            icon={({ size }) => (
+              <Ionicons
+                name="ban-outline"
+                size={size}
+                color={theme.text}
+              />
+            )}
+            onPress={() => {
+              navigateAndClose("/block-user-list");
+            }}
+          />
+
+
+
         </DrawerContentScrollView>
 
         {/* Footer Logout */}
