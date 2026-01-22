@@ -1499,17 +1499,9 @@ const ReelsFeed = () => {
   //   ? storeReels                 // ✅ shared reels
   //   : data?.pages.flatMap((p: any) => p.reels) || [];
 
-  useEffect(() => {
-    if (redirected === 'true') {
-      setRedirectedFromShare(true);
-    } else {
-      setRedirectedFromShare(false);
-    }
-  }, [redirected, setRedirectedFromShare]);
-
   const apiReels = data?.pages.flatMap((p: any) => p.reels) || [];
   const storeReels = useReelsStore(state => state.reels);
-
+  console.log(redirectedFromShare, 'redirectedFromShare');
   const reels = redirectedFromShare
     ? storeReels
     : apiReels;

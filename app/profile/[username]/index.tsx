@@ -552,6 +552,7 @@
 
 // // ==================================================
 
+import { ProfileActionsModal } from "@/src/components/block-modal";
 import { PostGridSkeleton, ProfileHeaderSkeleton, TabsSkeleton, TopHeaderSkeleton, UserInfoSkeleton } from "@/src/components/profilePageSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useStoriesQuery } from "@/src/hooks/storyMutation";
@@ -563,20 +564,17 @@ import { router, useLocalSearchParams, useNavigation, useRouter } from "expo-rou
 import { useEffect, useState } from "react";
 import {
     ActivityIndicator,
-    Alert,
     Dimensions,
     FlatList,
     Image,
     Linking,
-    Modal,
-    Pressable,
     StyleSheet,
     Text,
     TouchableOpacity,
     View
 } from "react-native";
 import { SafeAreaView } from "react-native-safe-area-context";
-import { blockUser, followUser, GetCurrentUser, GetProfileUsername, UnblockUser, UnfollowUser } from "../../../src/api/profile-api";
+import { followUser, getblockedUsers, GetCurrentUser, GetProfileUsername, UnfollowUser } from "../../../src/api/profile-api";
 import { MentionedScreen } from "./mantionScreen";
 
 const { width, height } = Dimensions.get("window");
@@ -597,104 +595,6 @@ const POST_SIZE = (width - (POST_SPACING * (POSTS_PER_ROW + 1))) / POSTS_PER_ROW
 //     userId: string;
 //     isBlocked: boolean;
 // }
-
-interface ProfileActionsModalProps {
-    visible: boolean;
-    onClose: () => void;
-    username: string;
-    isBlocked: boolean;
-}
-
-const ProfileActionsModal: React.FC<ProfileActionsModalProps> = ({
-    visible,
-    onClose,
-    username,
-    isBlocked,
-}) => {
-    const theme = useAppTheme();
-    const queryClient = useQueryClient();
-
-    const blockMutation = useMutation({
-        mutationFn: (username: string) => blockUser(username),
-        onSuccess: async () => {
-            console.log("✅ Block successful, invalidating queries...");
-            await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-            await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
-            console.log("✅ Queries invalidated");
-            onClose();
-        },
-        onError: (error) => {
-            console.error("❌ Block failed:", error);
-        }
-    });
-
-    const unblockMutation = useMutation({
-        mutationFn: (username: string) => UnblockUser(username),
-        onSuccess: async () => {
-            console.log("✅ Unblock successful, invalidating queries...");
-            await queryClient.invalidateQueries({ queryKey: ["currentUser"] });
-            await queryClient.invalidateQueries({ queryKey: ["userProfile", username] });
-            console.log("✅ Queries invalidated");
-            onClose();
-        },
-        onError: (error) => {
-            console.error("❌ Unblock failed:", error);
-        }
-    });
-
-    const handleBlockToggle = () => {
-        Alert.alert(
-            isBlocked ? "Unblock User" : "Block User",
-            isBlocked
-                ? "Are you sure you want to unblock this user?"
-                : "Are you sure you want to block this user? You will no longer see their content.",
-            [
-                { text: "Cancel", style: "cancel" },
-                {
-                    text: isBlocked ? "Unblock" : "Block",
-                    style: isBlocked ? "default" : "destructive",
-                    onPress: () => {
-                        console.log(`🎯 ${isBlocked ? 'Unblocking' : 'Blocking'} user:`, username);
-                        if (isBlocked) {
-                            unblockMutation.mutate(username);
-                        } else {
-                            blockMutation.mutate(username);
-                        }
-                    },
-                },
-            ]
-        );
-    };
-
-    return (
-        <Modal
-            visible={visible}
-            transparent
-            animationType="slide"
-            onRequestClose={onClose}
-        >
-            <Pressable style={styles.overlay} onPress={onClose} />
-            <View style={[styles.sheet, { backgroundColor: theme.background }]}>
-                <TouchableOpacity
-                    style={styles.actionBtn}
-                    onPress={handleBlockToggle}
-                    disabled={blockMutation.isPending || unblockMutation.isPending}
-                >
-                    <Text
-                        style={[
-                            styles.blockText,
-                            { color: isBlocked ? theme.text : "red" },
-                        ]}
-                    >
-                        {blockMutation.isPending || unblockMutation.isPending
-                            ? "Loading..."
-                            : isBlocked ? "Unblock User" : "Block User"}
-                    </Text>
-                </TouchableOpacity>
-            </View>
-        </Modal>
-    );
-};
 
 // export default ProfileActionsModal;
 
@@ -773,8 +673,16 @@ export const ProfileHeader: React.FC<{ theme: any; profile: any }> = ({ theme, p
             console.log("🚀 Navigating to:", path);
         } else {
             // Open full screen profile picture
+            // router.push({
+            //     pathname: "/profile/profile-picture",
+            //     params: {
+            //         username: profile.username,
+            //         imageUrl: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+            //     }
+            // });
+
             router.push({
-                pathname: "/profile/profile-picture",
+                pathname: "/profile/[username]/profile-picture",
                 params: {
                     username: profile.username,
                     imageUrl: profilePicture || "https://cdn-icons-png.flaticon.com/512/847/847969.png"
@@ -1078,6 +986,15 @@ export const ProfileScreen: React.FC = () => {
         queryFn: GetCurrentUser,
     });
 
+    const {
+        data: blockedUsers,
+        isLoading: blockedUsersLoading,
+    } = useQuery({
+        queryKey: ["blockedUsers"],
+        queryFn: getblockedUsers,
+        enabled: !!currentUser?.id,
+    });
+
 
     console.log("aaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaaa", currentUser);
 
@@ -1096,39 +1013,27 @@ export const ProfileScreen: React.FC = () => {
         refetchOnWindowFocus: true,   // background refresh     // ad
     });
 
-    useEffect(() => {
-        if (profile && currentUser) {
-            console.log("🔍 Checking block status...");
-            console.log("Current User ID:", currentUser?.id);
-            console.log("Profile User ID:", profile?.id);
-            console.log("Blocked Users:", currentUser?.blockedUsers);
 
-            // Check if current user has blocked this profile
-            const blocked = currentUser?.blockedUsers?.some(
-                (block: any) => {
-                    console.log("Checking block:", block);
-                    console.log("Blocked User ID:", block?.blockedUser?.id);
-                    return block?.blockedUser?.id === profile?.id;
-                }
-            ) || false;
+    console.log('====================================');
+    console.log("blockedUsersIds", blockedUsers);
+    console.log('====================================');
+
+    useEffect(() => {
+        if (profile && blockedUsers && Array.isArray(blockedUsers)) {
+            console.log("🔍 Checking block status...");
+            console.log("Profile ID:", profile.id);
+            console.log("Blocked Users:", blockedUsers);
+
+            const blocked = blockedUsers.some(
+                (blockedUser: any) => blockedUser.id === profile.id
+            );
 
             console.log("✅ Is Blocked:", blocked);
             setIsBlocked(blocked);
+        } else {
+            setIsBlocked(false);
         }
-    }, [profile, currentUser]);
-
-    // Add this useEffect to check if user is blocked
-    useEffect(() => {
-        if (profile && currentUser) {
-            // Assuming your profile data has a blockedUsers array
-            // Adjust this based on your actual API response structure
-            const blocked = currentUser?.blockedUsers?.some(
-                (blockedUser: any) => blockedUser.id === profile.id
-            ) || false;
-
-            setIsBlocked(blocked);
-        }
-    }, [profile, currentUser]);
+    }, [profile?.id, blockedUsers]);
 
     console.log("profile 111111111=======>", profile?.mentionedVideos);
 
@@ -1291,7 +1196,6 @@ export const ProfileScreen: React.FC = () => {
         currentUser?.username === profile?.username ||
         currentUser?.id === profile?.id;
 
-    console.log('vvvvvvvvvvvvvvvvvvvvvvvv', profile);
     return (
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <TopHeader
@@ -1365,30 +1269,7 @@ const styles = StyleSheet.create({
         padding: width * 0.04,
         alignItems: "center",
     },
-    overlay: {
-        flex: 1,
-        // backgroundColor: "rgba(0,0,0,0.4)",
 
-    },
-    sheet: {
-        padding: 20,
-        borderTopLeftRadius: 16,
-        borderTopRightRadius: 16,
-    },
-    actionBtn: {
-        paddingVertical: 14,
-    },
-    actionText: {
-        fontSize: 16,
-        fontWeight: "600",
-        textAlign: "center",
-    },
-    blockText: {
-        fontSize: 16,
-        fontWeight: "600",
-        color: "red",
-        textAlign: "center",
-    },
     profilePictureContainer: {
         width: profilePicSize,
         height: profilePicSize,

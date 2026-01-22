@@ -13,7 +13,8 @@ import { SafeAreaView } from "react-native-safe-area-context";
 export default function MyProfileScreen() {
   const theme = useAppTheme();
   const [activeTab, setActiveTab] = useState<"posts" | "reels">("posts");
-
+  const [followsMe, setFollowsMe] = useState(false);
+  const [showActions, setShowActions] = useState(false);
   const router = useRouter();
 
   const { data: currentUser, isLoading: currentUserLoading, refetch: refetchCurrentUser, } = useQuery({
@@ -71,13 +72,14 @@ export default function MyProfileScreen() {
         }
         ListHeaderComponent={
           <>
-            <TopHeader userName={profile?.username} theme={theme} isOwnProfile />
+            <TopHeader userName={profile?.username} theme={theme} isOwnProfile onMorePress={() => setShowActions(true)} />
             <ProfileHeader theme={theme} profile={profile} />
             <UserInfo
               theme={theme}
               profile={profile}
               isOwnProfile
               isFollowing={false}
+              followsMe={followsMe}
               onFollowToggle={() => { }}
             />
             <Tabs
