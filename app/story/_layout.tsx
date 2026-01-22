@@ -3,7 +3,7 @@ import { Stack } from "expo-router";
 import { StatusBar } from "react-native";
 
 export default function CommentLayout() {
-  const theme = useAppTheme(); 
+  const theme = useAppTheme();
 
   return (
     <>
@@ -31,7 +31,14 @@ export default function CommentLayout() {
         <Stack.Screen
           name="[id]"
           options={{
-             headerShown: false,
+            headerShown: false,
+          }}
+        />
+
+        <Stack.Screen
+          name="story-viewer"
+          options={{
+            headerShown: false,
           }}
         />
       </Stack>

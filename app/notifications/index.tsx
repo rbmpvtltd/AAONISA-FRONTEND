@@ -55,17 +55,18 @@ const NotificationItem = ({ item, theme, width }: any) => {
         console.log('====================================');
         console.log(" pppppppppppppppp", item.referenceId,);
         console.log('====================================');
-        router.push({
-          pathname: "/(drawer)/(tabs)/reels",
-          params: {
-            // username: item.sender?.username,
-            // id: item.id,
-            videoId: item.referenceId, // Video/Reel ID
-            // id: item.referenceId,      // Same as videoId
-            // tab: "explore",    
-          },
+        router.push(`/(drawer)/(tabs)/reels/${item.referenceId}&redirected=true`)
+        // router.push({
+        //   pathname: "/(drawer)/(tabs)/reels",
+        //   params: {
+        //     // username: item.sender?.username,
+        //     // id: item.id,
+        //     videoId: item.referenceId, // Video/Reel ID
+        //     // id: item.referenceId,      // Same as videoId
+        //     // tab: "explore",    
+        //   },
 
-        });
+        // });
         break;
 
       // case "FOLLOW":
