@@ -187,7 +187,7 @@ export default function RootLayout() {
     const apiUrl = createApiUrl("/tokens/create");
     console.log("Calling URL:", apiUrl);
     const { data } = await axios.post(apiUrl, { token: pushToken }, config);
-    console.log(data);
+    // console.log(data);
   }
   /* -------------------------------------------------
      3. Load token from SecureStore

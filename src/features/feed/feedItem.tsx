@@ -996,9 +996,9 @@ export const FeedItem = React.memo(
         const handleVideoPress = () => {
             setShowControls(true);
         };
-        console.log('====================================');
-        console.log("reeeeeeeeeelllssssssssssssiiiiidiiiididiididiidididididiiddiid", item || item.uuid);
-        console.log('====================================');
+        // console.log('====================================');
+        // console.log("reeeeeeeeeelllssssssssssssiiiiidiiiididiididiidididididiiddiid", item || item.uuid);
+        // console.log('====================================');
 
 
         return (

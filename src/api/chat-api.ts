@@ -24,7 +24,7 @@ async function getAllUsers() {
 
   const apiUrl = createApiUrl('/users/all-users');
   const { data } = await axios.get(apiUrl, config);
-  console.log("data", data);
+  // console.log("data", data);
 
   return data;
 
@@ -48,7 +48,7 @@ async function sendReelToChats(reelId: string, sessionIds: string[]) {
     sessionIds
   }, config);
 
-  console.log("Session data:", data);
+  // console.log("Session data:", data);
 
   return data;
 }
@@ -71,7 +71,7 @@ async function chatSessionId(senderId: string, receiverId: string) {
     receiverId,
   }, config);
 
-  console.log("Session data:", data);
+  // console.log("Session data:", data);
 
   return data;
 }
@@ -91,7 +91,7 @@ async function getUserSessionsWithLatestMessage() {
   // Body mein senderId aur receiverId bhejo
   const { data } = await axios.get(apiUrl, config);
 
-  console.log("Session data:", data);
+  // console.log("Session data:", data);
 
   return data;
 }

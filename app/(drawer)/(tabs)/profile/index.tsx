@@ -28,9 +28,9 @@ export default function MyProfileScreen() {
     enabled: !!currentUser?.username,
   });
 
-  console.log("=============================================");
-  console.log("profile  AAAAAAAA=======>", profile?.mentionedVideos);
-  console.log("=============================================");
+  // console.log("=============================================");
+  // console.log("profile  AAAAAAAA=======>", profile?.mentionedVideos);
+  // console.log("=============================================");
 
   const isOwnProfile =
     currentUser?.username === profile?.username ||

@@ -1028,10 +1028,10 @@ function MessageBubble({
   const handleReelPress = () => {
     if (!reelData) return;
 
-    console.log('====================================');
-    console.log('arbaaz');
-    console.log(`/(drawer)/(tabs)/reel/${reelData.reelId}`);
-    console.log('====================================');
+    // console.log('====================================');
+    // console.log('arbaaz');
+    // console.log(`/(drawer)/(tabs)/reel/${reelData.reelId}`);
+    // console.log('====================================');
 
     router.push({
       pathname: "/(drawer)/(tabs)/reels",
