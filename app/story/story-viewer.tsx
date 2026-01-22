@@ -490,9 +490,9 @@ import { timeAgo } from "@/src/utils/timeAgo";
 import { getCachedVideo } from "@/src/utils/videoCache";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
@@ -555,6 +555,111 @@ export default function StoryViewer() {
   const prevPlayer = useVideoPlayer(EMPTY_VIDEO);
   const currentPlayer = useVideoPlayer(EMPTY_VIDEO);
   const nextPlayer = useVideoPlayer(EMPTY_VIDEO);
+
+// useFocusEffect(
+//   useCallback(() => {
+//     console.log("▶️ StoryViewer focused");
+
+//     // Screen focused → resume
+//     if (currentPlayer && isVideoReady && !paused && !showViewers) {
+//       currentPlayer.volume = isMuted ? 0 : 1;
+//       currentPlayer.play();
+
+//       // Resume progress
+//       if (currentStory) {
+//         progress.stopAnimation((state: any) => {
+//           const currentProgress = state.value;
+//           const remaining = 1 - currentProgress;
+//           const duration = (currentStory.duration ?? 5) * 1000;
+
+//           if (remaining > 0) {
+//             progressAnim.current = Animated.timing(progress, {
+//               toValue: 1,
+//               duration: duration * remaining,
+//               useNativeDriver: false,
+//             });
+
+//             progressAnim.current.start(({ finished }) => {
+//               if (finished) handleNext();
+//             });
+//           }
+//         });
+//       }
+//     }
+
+//     // 🔴 UNFOCUS / BLUR CLEANUP
+//     return () => {
+//       console.log("⏸ StoryViewer blurred");
+
+//       currentPlayer?.pause();
+//       currentPlayer.volume = 0;
+
+//       prevPlayer?.pause();
+//       nextPlayer?.pause();
+
+//       progressAnim.current?.stop();
+//     };
+//   }, [
+//     isVideoReady,
+//     paused,
+//     showViewers,
+//     currentStory,
+//     isMuted,
+//   ])
+// );
+
+const safePause = (player: any) => {
+  try {
+    player?.pause();
+  } catch {}
+};
+const resumeProgress = () => {
+  if (!currentStory) return;
+
+  progress.stopAnimation((state: any) => {
+    const currentProgress = state.value ?? 0;
+    const remaining = 1 - currentProgress;
+
+    if (remaining <= 0) return;
+
+    const duration = (currentStory.duration ?? 5) * 1000;
+
+    progressAnim.current = Animated.timing(progress, {
+      toValue: 1,
+      duration: duration * remaining,
+      useNativeDriver: false,
+    });
+
+    progressAnim.current.start(({ finished }) => {
+      if (finished) handleNext();
+    });
+  });
+};
+
+useFocusEffect(
+  useCallback(() => {
+    console.log("▶️ StoryViewer focused");
+
+    // ▶️ RESUME
+    if (currentPlayer && isVideoReady && !paused && !showViewers) {
+      try {
+        currentPlayer.volume = isMuted ? 0 : 1;
+        currentPlayer.play();
+        resumeProgress();
+      } catch {}
+    }
+
+    return () => {
+      console.log("⏸ StoryViewer blurred");
+
+      progressAnim.current?.stop();
+
+      safePause(currentPlayer);
+      safePause(prevPlayer);
+      safePause(nextPlayer);
+    };
+  }, [isVideoReady, paused, showViewers, isMuted])
+);
 
   /** ---------------- CURRENT USER & SOCKET ---------------- */
   const { data: currentUser } = useQuery({
@@ -757,28 +862,28 @@ export default function StoryViewer() {
 
     setPaused(false);
     currentPlayer.play();
-
+   resumeProgress();
     // Resume progress from where it stopped - Instagram style
-    if (currentStory) {
-      progress.stopAnimation((state: any) => {
-        const currentProgress = state.value;
-        const remainingProgress = 1 - currentProgress;
-        const duration = (currentStory.duration ?? 5) * 1000;
-        const remainingDuration = duration * remainingProgress;
+    // if (currentStory) {
+    //   progress.stopAnimation((state: any) => {
+    //     const currentProgress = state.value;
+    //     const remainingProgress = 1 - currentProgress;
+    //     const duration = (currentStory.duration ?? 5) * 1000;
+    //     const remainingDuration = duration * remainingProgress;
 
-        if (remainingDuration > 0) {
-          progressAnim.current = Animated.timing(progress, {
-            toValue: 1,
-            duration: remainingDuration,
-            useNativeDriver: false,
-          });
+    //     if (remainingDuration > 0) {
+    //       progressAnim.current = Animated.timing(progress, {
+    //         toValue: 1,
+    //         duration: remainingDuration,
+    //         useNativeDriver: false,
+    //       });
 
-          progressAnim.current.start(({ finished }) => {
-            if (finished) handleNext();
-          });
-        }
-      });
-    }
+    //       progressAnim.current.start(({ finished }) => {
+    //         if (finished) handleNext();
+    //       });
+    //     }
+    //   });
+    // }
   };
 
   /** ---------------- DELETE STORY ---------------- */
@@ -820,28 +925,28 @@ export default function StoryViewer() {
       // Resume everything
       setPaused(false);
       currentPlayer.play();
-
+      resumeProgress(); 
       // Resume progress
-      if (currentStory) {
-        progress.stopAnimation((state: any) => {
-          const currentProgress = state.value;
-          const remainingProgress = 1 - currentProgress;
-          const duration = (currentStory.duration ?? 5) * 1000;
-          const remainingDuration = duration * remainingProgress;
+      // if (currentStory) {
+      //   progress.stopAnimation((state: any) => {
+      //     const currentProgress = state.value;
+      //     const remainingProgress = 1 - currentProgress;
+      //     const duration = (currentStory.duration ?? 5) * 1000;
+      //     const remainingDuration = duration * remainingProgress;
 
-          if (remainingDuration > 0) {
-            progressAnim.current = Animated.timing(progress, {
-              toValue: 1,
-              duration: remainingDuration,
-              useNativeDriver: false,
-            });
+      //     if (remainingDuration > 0) {
+      //       progressAnim.current = Animated.timing(progress, {
+      //         toValue: 1,
+      //         duration: remainingDuration,
+      //         useNativeDriver: false,
+      //       });
 
-            progressAnim.current.start(({ finished }) => {
-              if (finished) handleNext();
-            });
-          }
-        });
-      }
+      //       progressAnim.current.start(({ finished }) => {
+      //         if (finished) handleNext();
+      //       });
+      //     }
+      //   });
+      // }
     }
   };
 
@@ -851,11 +956,13 @@ export default function StoryViewer() {
   });
 
 
-  const handleClose = () => {
-    currentPlayer.pause();
-    currentPlayer.volume = 0;
-    router.back();
-  };
+const handleClose = () => {
+  if (progressAnim.current) {
+    progressAnim.current.stop();
+  }
+  router.back();
+};
+
 
   /** ---------------- GUARDS ---------------- */
   if (isLoading || !currentStory) {
@@ -925,6 +1032,7 @@ export default function StoryViewer() {
 
             style={{ flexDirection: "row", alignItems: "center" }}
             onPress={() => {
+
               if (!isOwnStory) {
                 router.push(`/profile/${currentUserStories.username}`);
               } else {
@@ -1043,7 +1151,7 @@ export default function StoryViewer() {
       </TouchableOpacity>
 
       {/* CLOSE BUTTON */}
-      <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <Ionicons name="close" size={26} color="#fff" />
       </TouchableOpacity>
     </View>
