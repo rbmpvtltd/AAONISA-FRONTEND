@@ -18,8 +18,8 @@
       "supportsTablet": true,
       "bundleIdentifier": "com.rbm.HitHoy",
       "infoPlist": {
-        "NSCameraUsageDescription": "Camera access is required so you can record reels and take profile pictures inside the app.",
-        "NSMicrophoneUsageDescription": "Microphone access is required to record audio while creating reels inside the app.",
+        "NSCameraUsageDescription": "The camera is used to capture photos and videos for creating reels and uploading a profile picture inside the app.",
+        "NSMicrophoneUsageDescription": "The microphone is used to record audio while creating reels and voice-based content inside the app.",
         "NSPhotoLibraryUsageDescription": "This app requires access to media files to allow users to select an image for their profile picture.",
         "NSPhotoLibraryAddUsageDescription": "Permission to save photos to your library.",
         "ITSAppUsesNonExemptEncryption": false
@@ -93,19 +93,24 @@
       [
         "expo-camera",
         {
-          "cameraPermission": "Allow $(PRODUCT_NAME) to access your camera",
-          "microphonePermission": "Allow $(PRODUCT_NAME) to access your microphone",
+          "cameraPermission": "Allow $(PRODUCT_NAME) to use your camera to capture photos and videos for reels and profile pictures.",
+          "microphonePermission": "Allow $(PRODUCT_NAME) to use your microphone to record audio while creating reels.",
           "recordAudioAndroid": true
         }
       ],
       [
         "expo-image-picker",
         {
-          "photosPermission": "The app accesses your photos to let you share them with your friends.",
-          "cameraPermission": "The app accesses your camera to let you take profile pictures."
+          "photosPermission": "Allow access to your photos so you can select images and videos for your profile and posts.",
+          "cameraPermission": "Allow camera access to take profile pictures and create posts."
         }
       ],
-      "expo-audio",
+      [
+        "expo-audio",
+        {
+          "microphonePermission": "Allow $(PRODUCT_NAME) to record audio for reels and voice-based content."
+        }
+      ],
       "expo-video"
     ],
     "experiments": {

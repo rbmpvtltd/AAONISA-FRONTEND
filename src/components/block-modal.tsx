@@ -246,7 +246,7 @@ export const ProfileActionsModal = ({
                     {/* Actions List */}
                     <View style={styles.actionsList}>
                         {/* Share Profile */}
-                        <TouchableOpacity
+                        {/* <TouchableOpacity
                             style={styles.actionItem}
                             onPress={handleShare}
                             activeOpacity={0.6}
@@ -262,7 +262,7 @@ export const ProfileActionsModal = ({
                                     Send to friends
                                 </Text>
                             </View>
-                        </TouchableOpacity>
+                        </TouchableOpacity> */}
 
                         <View style={styles.divider} />
 
@@ -456,7 +456,7 @@ const styles = StyleSheet.create({
 
     divider: {
         height: 1,
-        backgroundColor: "#E5E5EA",
+        // backgroundColor: "#E5E5EA",
 
 
         marginLeft: 58,
