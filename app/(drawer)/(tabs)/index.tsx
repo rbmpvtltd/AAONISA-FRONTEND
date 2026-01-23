@@ -314,7 +314,7 @@ const HomePage = () => {
         data={[{ id: "header" }]}
         renderItem={() => <FeedList />}
         keyExtractor={(item) => item.id}
-        ListHeaderComponent={<StoryList theme={theme} stories={stories} />}
+        ListHeaderComponent={<StoryList theme={theme}/>}
 
         showsVerticalScrollIndicator={false}
         style={{ backgroundColor: theme.background }}

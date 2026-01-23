@@ -482,6 +482,7 @@
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { markViewed } from "@/src/api/story-api";
 import { useStoriesQuery } from "@/src/hooks/storyMutation";
+import { useStoriesCache } from "@/src/hooks/useStoryCache";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
 import { useSocketManager } from "@/src/socket/socket";
 import { useViewStore } from "@/src/store/viewStore";
@@ -499,6 +500,7 @@ import {
   Animated,
   Dimensions,
   Image,
+  PanResponder,
   ScrollView,
   StyleSheet,
   Text,
@@ -530,6 +532,24 @@ export default function StoryViewer() {
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [viewedStories, setViewedStories] = useState<Set<string>>(new Set());
+  const { onViewerClose } = useStoriesCache();
+  const SWIPE_THRESHOLD = 80;
+  const cubeAnim = useRef(new Animated.Value(0)).current;
+  const cubeStyle = {
+  transform: [
+    { perspective: 1000 },
+    {
+      rotateY: cubeAnim.interpolate({
+        inputRange: [-1, 0, 1],
+        outputRange: ["-90deg", "0deg", "90deg"],
+      }),
+    },
+  ],
+  opacity: cubeAnim.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [0, 1, 0],
+  }),
+};
 
   /** ---------------- USERS ---------------- */
   useEffect(() => {
@@ -555,59 +575,92 @@ export default function StoryViewer() {
   const prevPlayer = useVideoPlayer(EMPTY_VIDEO);
   const currentPlayer = useVideoPlayer(EMPTY_VIDEO);
   const nextPlayer = useVideoPlayer(EMPTY_VIDEO);
+  const currentUserIndexRef = useRef(currentUserIndex);
+  
+  useEffect(() => {
+  currentUserIndexRef.current = currentUserIndex;
+}, [currentUserIndex]);
+const animateToNextUser = () => {
+  Animated.timing(cubeAnim, {
+    toValue: -1,
+    duration: 260,
+    useNativeDriver: true,
+  }).start(() => {
+    setCurrentUserIndex(i => i + 1);
+    setCurrentIndex(0);
+    cubeAnim.setValue(1);
 
-// useFocusEffect(
-//   useCallback(() => {
-//     console.log("▶️ StoryViewer focused");
+    Animated.timing(cubeAnim, {
+      toValue: 0,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  });
+};
+const animateToPrevUser = () => {
+  Animated.timing(cubeAnim, {
+    toValue: 1,
+    duration: 260,
+    useNativeDriver: true,
+  }).start(() => {
+    setCurrentUserIndex(i => i - 1);
+    setCurrentIndex(0);
+    cubeAnim.setValue(-1);
 
-//     // Screen focused → resume
-//     if (currentPlayer && isVideoReady && !paused && !showViewers) {
-//       currentPlayer.volume = isMuted ? 0 : 1;
-//       currentPlayer.play();
+    Animated.timing(cubeAnim, {
+      toValue: 0,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  });
+};
 
-//       // Resume progress
-//       if (currentStory) {
-//         progress.stopAnimation((state: any) => {
-//           const currentProgress = state.value;
-//           const remaining = 1 - currentProgress;
-//           const duration = (currentStory.duration ?? 5) * 1000;
+const panResponder = useRef(
+  PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => {
+      // HORIZONTAL swipe only
+      return (
+        Math.abs(gesture.dx) > Math.abs(gesture.dy) &&
+        Math.abs(gesture.dx) > 10
+      );
+    },
 
-//           if (remaining > 0) {
-//             progressAnim.current = Animated.timing(progress, {
-//               toValue: 1,
-//               duration: duration * remaining,
-//               useNativeDriver: false,
-//             });
+    onPanResponderGrant: () => {
+      // Insta style pause
+      setPaused(true);
+      safePause(currentPlayer);
+      progressAnim.current?.stop();
+    },
 
-//             progressAnim.current.start(({ finished }) => {
-//               if (finished) handleNext();
-//             });
-//           }
-//         });
-//       }
-//     }
+    onPanResponderRelease: (_, gesture) => {
+  const { dx } = gesture;
+  const index = currentUserIndexRef.current;
 
-//     // 🔴 UNFOCUS / BLUR CLEANUP
-//     return () => {
-//       console.log("⏸ StoryViewer blurred");
+  console.log("SWIPE INDEX:", index);
 
-//       currentPlayer?.pause();
-//       currentPlayer.volume = 0;
+  if (dx < -SWIPE_THRESHOLD) {
+    // ⬅️ NEXT USER
+    if (index < userStories.length - 1) {
+      animateToNextUser();
+    } else {
+      handleClose();
+    }
+  } 
+  else if (dx > SWIPE_THRESHOLD) {
+    // ➡️ PREVIOUS USER
+    if (index > 0) {
+          animateToPrevUser();
+    } else {
+      handleClose();
+    }
+  }
 
-//       prevPlayer?.pause();
-//       nextPlayer?.pause();
-
-//       progressAnim.current?.stop();
-//     };
-//   }, [
-//     isVideoReady,
-//     paused,
-//     showViewers,
-//     currentStory,
-//     isMuted,
-//   ])
-// );
-
+  setPaused(false);
+  currentPlayer.play();
+  resumeProgress();
+},
+  })
+).current;
 const safePause = (player: any) => {
   try {
     player?.pause();
@@ -651,14 +704,6 @@ useFocusEffect(
 
     return () => {
       console.log("⏸ StoryViewer blurred");
-  //     InteractionManager.runAfterInteractions(() => {
-  //   console.log("🧹 Deferred cleanup");
-
-  //   progressAnim.current?.stop();
-
-         
-  // });
-      // progressAnim.current?.stop();
   safePause(currentPlayer);
       safePause(prevPlayer);
       safePause(nextPlayer);
@@ -824,6 +869,31 @@ const translateY = useRef(new Animated.Value(0)).current;
   }, [currentIndex, currentUserIndex, isVideoReady]);
 
   /** ---------------- NAVIGATION ---------------- */
+  const handleClose = () => {
+  Animated.parallel([
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(scale, {
+      toValue: 0.96,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(translateY, {
+      toValue: 20,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+  ]).start(() => {
+    onViewerClose(
+      userStories[currentUserIndex].owner,
+      currentIndex
+    );
+    router.back();
+  });
+};
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
       setCurrentIndex((i) => i + 1);
@@ -837,7 +907,7 @@ const translateY = useRef(new Animated.Value(0)).current;
       return;
     }
 
-    router.back();
+    handleClose();
   };
 
   const handlePrev = () => {
@@ -852,7 +922,7 @@ const translateY = useRef(new Animated.Value(0)).current;
       setCurrentUserIndex((i) => i - 1);
       setCurrentIndex(prevUser.stories.length - 1);
     } else {
-      router.back();
+      handleClose();
     }
   };
 
@@ -872,27 +942,6 @@ const translateY = useRef(new Animated.Value(0)).current;
     setPaused(false);
     currentPlayer.play();
    resumeProgress();
-    // Resume progress from where it stopped - Instagram style
-    // if (currentStory) {
-    //   progress.stopAnimation((state: any) => {
-    //     const currentProgress = state.value;
-    //     const remainingProgress = 1 - currentProgress;
-    //     const duration = (currentStory.duration ?? 5) * 1000;
-    //     const remainingDuration = duration * remainingProgress;
-
-    //     if (remainingDuration > 0) {
-    //       progressAnim.current = Animated.timing(progress, {
-    //         toValue: 1,
-    //         duration: remainingDuration,
-    //         useNativeDriver: false,
-    //       });
-
-    //       progressAnim.current.start(({ finished }) => {
-    //         if (finished) handleNext();
-    //       });
-    //     }
-    //   });
-    // }
   };
 
   /** ---------------- DELETE STORY ---------------- */
@@ -935,27 +984,6 @@ const translateY = useRef(new Animated.Value(0)).current;
       setPaused(false);
       currentPlayer.play();
       resumeProgress(); 
-      // Resume progress
-      // if (currentStory) {
-      //   progress.stopAnimation((state: any) => {
-      //     const currentProgress = state.value;
-      //     const remainingProgress = 1 - currentProgress;
-      //     const duration = (currentStory.duration ?? 5) * 1000;
-      //     const remainingDuration = duration * remainingProgress;
-
-      //     if (remainingDuration > 0) {
-      //       progressAnim.current = Animated.timing(progress, {
-      //         toValue: 1,
-      //         duration: remainingDuration,
-      //         useNativeDriver: false,
-      //       });
-
-      //       progressAnim.current.start(({ finished }) => {
-      //         if (finished) handleNext();
-      //       });
-      //     }
-      //   });
-      // }
     }
   };
 
@@ -963,37 +991,6 @@ const translateY = useRef(new Animated.Value(0)).current;
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
   });
-
-
-// const handleClose = () => {
-//   if (progressAnim.current) {
-//     progressAnim.current.stop();
-//   }
-//   router.back();
-// };
-const handleClose = () => {
-  Animated.parallel([
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-    Animated.timing(scale, {
-      toValue: 0.96,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-    Animated.timing(translateY, {
-      toValue: 20,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-  ]).start(() => {
-    router.back();
-  });
-};
-
-
   /** ---------------- GUARDS ---------------- */
   if (isLoading || !currentStory) {
     return (
@@ -1010,17 +1007,27 @@ const handleClose = () => {
 
   /** ---------------- UI ---------------- */
   return (
-    <Animated.View
-  style={{
-    flex: 1,
-    opacity,
-    transform: [
-      { scale },
-      { translateY },
-    ],
-  }}
+//     <Animated.View
+//   style={{
+//     flex: 1,
+//     opacity,
+//     transform: [
+//       { scale },
+//       { translateY },
+//     ],
+//   }}
+// >
+<Animated.View
+  style={[
+    {
+      flex: 1,
+      opacity,
+      transform: [{ scale }, { translateY }],
+    },
+    cubeStyle,
+  ]}
 >
-    <View style={styles.container}>
+    <View style={styles.container} {...panResponder.panHandlers}>
       {/* VIDEO */}
       <VideoView
         player={currentPlayer}
