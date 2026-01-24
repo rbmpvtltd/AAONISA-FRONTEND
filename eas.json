@@ -9,7 +9,7 @@
       "developmentClient": true,
       "distribution": "internal",
       "android": {
-        "buildType": "apk",
+        "buildType": "app-bundle",
         "autoIncrement": true
       },
       "ios": {
@@ -24,7 +24,7 @@
         "EXPO_PUBLIC_LOCAL_API_URL": "https://testing.hithoy.com/api"
       },
       "android": {
-        "buildType": "apk",
+        "buildType": "app-bundle",
         "autoIncrement": true
       },
       "ios": {
