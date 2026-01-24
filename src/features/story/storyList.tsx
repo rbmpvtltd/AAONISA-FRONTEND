@@ -282,8 +282,8 @@ const StoryItem = memo(
         ? LIGHT_BLUE
         : "transparent"
       : hasUnviewed
-      ? ORANGE
-      : GREY;
+        ? ORANGE
+        : GREY;
 
     return (
       <TouchableOpacity
@@ -297,9 +297,9 @@ const StoryItem = memo(
               uri:
                 isCurrentUser
                   ? currentUserProfilePic ||
-                    "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+                  "https://cdn-icons-png.flaticon.com/512/847/847969.png"
                   : user.profilePic ||
-                    "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+                  "https://cdn-icons-png.flaticon.com/512/847/847969.png",
             }}
             style={styles.storyImage}
           />
@@ -335,13 +335,13 @@ export const StoryList = memo(({ theme }: { theme: any }) => {
   // ✅ TRUST THE CACHE ORDER
   // const currentUserStories = stories[0];
   const currentUserStories =
-  stories.find((u: any) => u.self === true) || {
-    owner: currentUser?.userProfile?.id,
-    username: "Your Story",
-    profilePic: currentUser?.userProfile?.ProfilePicture,
-    stories: [],
-    self: true,
-  };
+    stories.find((u: any) => u.self === true) || {
+      owner: currentUser?.userProfile?.id,
+      username: "Your Story",
+      profilePic: currentUser?.userProfile?.ProfilePicture,
+      stories: [],
+      self: true,
+    };
 
   // const otherUsersStories = stories.slice(1);
   const otherUsersStories = stories.filter((u: any) => u.self !== true);
@@ -349,24 +349,24 @@ export const StoryList = memo(({ theme }: { theme: any }) => {
   // ---------- HANDLERS ----------
 
   const handleYourStoryPress = useCallback(() => {
-  if (currentUserStories.stories.length) {
-    const story =
-      currentUserStories.stories.find((s: any) => !s.viewed) ||
-      currentUserStories.stories[0];
+    if (currentUserStories.stories.length) {
+      const story =
+        currentUserStories.stories.find((s: any) => !s.viewed) ||
+        currentUserStories.stories[0];
 
-    router.push({
-      pathname: "/story/story-viewer",
-      params: {
-        ownerId: currentUserStories.owner,
-        startIndex: currentUserStories.stories.findIndex(
-          (s: any) => s.id === story.id
-        ),
-      },
-    });
-  } else {
-    router.push("/(drawer)/(tabs)/createReels?contentType=story");
-  }
-}, [currentUserStories]);
+      router.push({
+        pathname: "/story/story-viewer",
+        params: {
+          ownerId: currentUserStories.owner,
+          startIndex: currentUserStories.stories.findIndex(
+            (s: any) => s.id === story.id
+          ),
+        },
+      });
+    } else {
+      router.push("/(drawer)/(tabs)/createReels?contentType=story");
+    }
+  }, [currentUserStories]);
 
 
   const handleOtherUserPress = useCallback((user: any) => {
@@ -472,3 +472,5 @@ const styles = StyleSheet.create({
     borderColor: "#fff",
   },
 });
+
+// adnan 
