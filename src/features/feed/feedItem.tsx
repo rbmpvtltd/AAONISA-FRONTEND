@@ -787,6 +787,7 @@ import React, { useCallback, useEffect, useRef, useState } from "react";
 import { Image, Linking, Pressable, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/Ionicons";
+import BookmarkPanel from "../bookmark/bookmarkPanel";
 
 
 export const FeedItem = React.memo(
@@ -1320,7 +1321,7 @@ export const FeedItem = React.memo(
                     }}
                     videoId={item.id || item.uuid}
                 /> */}
-
+    <BookmarkPanel />
             </View >
         );
     }
