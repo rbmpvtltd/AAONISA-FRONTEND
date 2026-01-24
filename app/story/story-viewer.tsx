@@ -536,20 +536,20 @@ export default function StoryViewer() {
   const SWIPE_THRESHOLD = 80;
   const cubeAnim = useRef(new Animated.Value(0)).current;
   const cubeStyle = {
-  transform: [
-    { perspective: 1000 },
-    {
-      rotateY: cubeAnim.interpolate({
-        inputRange: [-1, 0, 1],
-        outputRange: ["-90deg", "0deg", "90deg"],
-      }),
-    },
-  ],
-  opacity: cubeAnim.interpolate({
-    inputRange: [-1, 0, 1],
-    outputRange: [0, 1, 0],
-  }),
-};
+    transform: [
+      { perspective: 1000 },
+      {
+        rotateY: cubeAnim.interpolate({
+          inputRange: [-1, 0, 1],
+          outputRange: ["-90deg", "0deg", "90deg"],
+        }),
+      },
+    ],
+    opacity: cubeAnim.interpolate({
+      inputRange: [-1, 0, 1],
+      outputRange: [0, 1, 0],
+    }),
+  };
 
   /** ---------------- USERS ---------------- */
   useEffect(() => {
@@ -576,144 +576,144 @@ export default function StoryViewer() {
   const currentPlayer = useVideoPlayer(EMPTY_VIDEO);
   const nextPlayer = useVideoPlayer(EMPTY_VIDEO);
   const currentUserIndexRef = useRef(currentUserIndex);
-  
+
   useEffect(() => {
-  currentUserIndexRef.current = currentUserIndex;
-}, [currentUserIndex]);
-const animateToNextUser = () => {
-  Animated.timing(cubeAnim, {
-    toValue: -1,
-    duration: 260,
-    useNativeDriver: true,
-  }).start(() => {
-    setCurrentUserIndex(i => i + 1);
-    setCurrentIndex(0);
-    cubeAnim.setValue(1);
-
+    currentUserIndexRef.current = currentUserIndex;
+  }, [currentUserIndex]);
+  const animateToNextUser = () => {
     Animated.timing(cubeAnim, {
-      toValue: 0,
+      toValue: -1,
       duration: 260,
       useNativeDriver: true,
-    }).start();
-  });
-};
-const animateToPrevUser = () => {
-  Animated.timing(cubeAnim, {
-    toValue: 1,
-    duration: 260,
-    useNativeDriver: true,
-  }).start(() => {
-    setCurrentUserIndex(i => i - 1);
-    setCurrentIndex(0);
-    cubeAnim.setValue(-1);
+    }).start(() => {
+      setCurrentUserIndex(i => i + 1);
+      setCurrentIndex(0);
+      cubeAnim.setValue(1);
 
+      Animated.timing(cubeAnim, {
+        toValue: 0,
+        duration: 260,
+        useNativeDriver: true,
+      }).start();
+    });
+  };
+  const animateToPrevUser = () => {
     Animated.timing(cubeAnim, {
-      toValue: 0,
-      duration: 260,
-      useNativeDriver: true,
-    }).start();
-  });
-};
-
-const panResponder = useRef(
-  PanResponder.create({
-    onMoveShouldSetPanResponder: (_, gesture) => {
-      // HORIZONTAL swipe only
-      return (
-        Math.abs(gesture.dx) > Math.abs(gesture.dy) &&
-        Math.abs(gesture.dx) > 10
-      );
-    },
-
-    onPanResponderGrant: () => {
-      // Insta style pause
-      setPaused(true);
-      safePause(currentPlayer);
-      progressAnim.current?.stop();
-    },
-
-    onPanResponderRelease: (_, gesture) => {
-  const { dx } = gesture;
-  const index = currentUserIndexRef.current;
-
-  console.log("SWIPE INDEX:", index);
-
-  if (dx < -SWIPE_THRESHOLD) {
-    // ⬅️ NEXT USER
-    if (index < userStories.length - 1) {
-      animateToNextUser();
-    } else {
-      handleClose();
-    }
-  } 
-  else if (dx > SWIPE_THRESHOLD) {
-    // ➡️ PREVIOUS USER
-    if (index > 0) {
-          animateToPrevUser();
-    } else {
-      handleClose();
-    }
-  }
-
-  setPaused(false);
-  currentPlayer.play();
-  resumeProgress();
-},
-  })
-).current;
-const safePause = (player: any) => {
-  try {
-    player?.pause();
-  } catch {}
-};
-const resumeProgress = () => {
-  if (!currentStory) return;
-
-  progress.stopAnimation((state: any) => {
-    const currentProgress = state.value ?? 0;
-    const remaining = 1 - currentProgress;
-
-    if (remaining <= 0) return;
-
-    const duration = (currentStory.duration ?? 5) * 1000;
-
-    progressAnim.current = Animated.timing(progress, {
       toValue: 1,
-      duration: duration * remaining,
-      useNativeDriver: false,
+      duration: 260,
+      useNativeDriver: true,
+    }).start(() => {
+      setCurrentUserIndex(i => i - 1);
+      setCurrentIndex(0);
+      cubeAnim.setValue(-1);
+
+      Animated.timing(cubeAnim, {
+        toValue: 0,
+        duration: 260,
+        useNativeDriver: true,
+      }).start();
     });
+  };
 
-    progressAnim.current.start(({ finished }) => {
-      if (finished) handleNext();
-    });
-  });
-};
+  const panResponder = useRef(
+    PanResponder.create({
+      onMoveShouldSetPanResponder: (_, gesture) => {
+        // HORIZONTAL swipe only
+        return (
+          Math.abs(gesture.dx) > Math.abs(gesture.dy) &&
+          Math.abs(gesture.dx) > 10
+        );
+      },
 
-useFocusEffect(
-  useCallback(() => {
-    console.log("▶️ StoryViewer focused");
+      onPanResponderGrant: () => {
+        // Insta style pause
+        setPaused(true);
+        safePause(currentPlayer);
+        progressAnim.current?.stop();
+      },
 
-    // ▶️ RESUME
-    if (currentPlayer && isVideoReady && !paused && !showViewers) {
-      try {
-        currentPlayer.volume = isMuted ? 0 : 1;
+      onPanResponderRelease: (_, gesture) => {
+        const { dx } = gesture;
+        const index = currentUserIndexRef.current;
+
+        console.log("SWIPE INDEX:", index);
+
+        if (dx < -SWIPE_THRESHOLD) {
+          // ⬅️ NEXT USER
+          if (index < userStories.length - 1) {
+            animateToNextUser();
+          } else {
+            handleClose();
+          }
+        }
+        else if (dx > SWIPE_THRESHOLD) {
+          // ➡️ PREVIOUS USER
+          if (index > 0) {
+            animateToPrevUser();
+          } else {
+            handleClose();
+          }
+        }
+
+        setPaused(false);
         currentPlayer.play();
         resumeProgress();
-      } catch {}
-    }
+      },
+    })
+  ).current;
+  const safePause = (player: any) => {
+    try {
+      player?.pause();
+    } catch { }
+  };
+  const resumeProgress = () => {
+    if (!currentStory) return;
 
-    return () => {
-      console.log("⏸ StoryViewer blurred");
-  safePause(currentPlayer);
-      safePause(prevPlayer);
-      safePause(nextPlayer);
-   
-    };
-  }, [isVideoReady, paused, showViewers, isMuted])
-);
+    progress.stopAnimation((state: any) => {
+      const currentProgress = state.value ?? 0;
+      const remaining = 1 - currentProgress;
+
+      if (remaining <= 0) return;
+
+      const duration = (currentStory.duration ?? 5) * 1000;
+
+      progressAnim.current = Animated.timing(progress, {
+        toValue: 1,
+        duration: duration * remaining,
+        useNativeDriver: false,
+      });
+
+      progressAnim.current.start(({ finished }) => {
+        if (finished) handleNext();
+      });
+    });
+  };
+
+  useFocusEffect(
+    useCallback(() => {
+      console.log("▶️ StoryViewer focused");
+
+      // ▶️ RESUME
+      if (currentPlayer && isVideoReady && !paused && !showViewers) {
+        try {
+          currentPlayer.volume = isMuted ? 0 : 1;
+          currentPlayer.play();
+          resumeProgress();
+        } catch { }
+      }
+
+      return () => {
+        console.log("⏸ StoryViewer blurred");
+        safePause(currentPlayer);
+        safePause(prevPlayer);
+        safePause(nextPlayer);
+
+      };
+    }, [isVideoReady, paused, showViewers, isMuted])
+  );
   const opacity = useRef(new Animated.Value(1)).current;
-const scale = useRef(new Animated.Value(1)).current;
-const translateY = useRef(new Animated.Value(0)).current;
+  const scale = useRef(new Animated.Value(1)).current;
+  const translateY = useRef(new Animated.Value(0)).current;
 
   /** ---------------- CURRENT USER & SOCKET ---------------- */
   const { data: currentUser } = useQuery({
@@ -870,30 +870,30 @@ const translateY = useRef(new Animated.Value(0)).current;
 
   /** ---------------- NAVIGATION ---------------- */
   const handleClose = () => {
-  Animated.parallel([
-    Animated.timing(opacity, {
-      toValue: 0,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-    Animated.timing(scale, {
-      toValue: 0.96,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-    Animated.timing(translateY, {
-      toValue: 20,
-      duration: 180,
-      useNativeDriver: true,
-    }),
-  ]).start(() => {
-    onViewerClose(
-      userStories[currentUserIndex].owner,
-      currentIndex
-    );
-    router.back();
-  });
-};
+    Animated.parallel([
+      Animated.timing(opacity, {
+        toValue: 0,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(scale, {
+        toValue: 0.96,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+      Animated.timing(translateY, {
+        toValue: 20,
+        duration: 180,
+        useNativeDriver: true,
+      }),
+    ]).start(() => {
+      onViewerClose(
+        userStories[currentUserIndex].owner,
+        currentIndex
+      );
+      router.back();
+    });
+  };
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
       setCurrentIndex((i) => i + 1);
@@ -941,7 +941,7 @@ const translateY = useRef(new Animated.Value(0)).current;
 
     setPaused(false);
     currentPlayer.play();
-   resumeProgress();
+    resumeProgress();
   };
 
   /** ---------------- DELETE STORY ---------------- */
@@ -983,7 +983,7 @@ const translateY = useRef(new Animated.Value(0)).current;
       // Resume everything
       setPaused(false);
       currentPlayer.play();
-      resumeProgress(); 
+      resumeProgress();
     }
   };
 
@@ -1007,201 +1007,201 @@ const translateY = useRef(new Animated.Value(0)).current;
 
   /** ---------------- UI ---------------- */
   return (
-//     <Animated.View
-//   style={{
-//     flex: 1,
-//     opacity,
-//     transform: [
-//       { scale },
-//       { translateY },
-//     ],
-//   }}
-// >
-<Animated.View
-  style={[
-    {
-      flex: 1,
-      opacity,
-      transform: [{ scale }, { translateY }],
-    },
-    cubeStyle,
-  ]}
->
-    <View style={styles.container} {...panResponder.panHandlers}>
-      {/* VIDEO */}
-      <VideoView
-        player={currentPlayer}
-        style={styles.video}
-        contentFit="cover"
-        allowsFullscreen={false}
-        allowsPictureInPicture={false}
-        nativeControls={false}
-      />
-
-      {/* THUMBNAIL */}
-      {showThumbnail && currentStory.thumbnailUrl && (
-        <Image
-          source={{ uri: currentStory.thumbnailUrl }}
+    //     <Animated.View
+    //   style={{
+    //     flex: 1,
+    //     opacity,
+    //     transform: [
+    //       { scale },
+    //       { translateY },
+    //     ],
+    //   }}
+    // >
+    <Animated.View
+      style={[
+        {
+          flex: 1,
+          opacity,
+          transform: [{ scale }, { translateY }],
+        },
+        cubeStyle,
+      ]}
+    >
+      <View style={styles.container} {...panResponder.panHandlers}>
+        {/* VIDEO */}
+        <VideoView
+          player={currentPlayer}
           style={styles.video}
-          resizeMode="cover"
+          contentFit="cover"
+          allowsFullscreen={false}
+          allowsPictureInPicture={false}
+          nativeControls={false}
         />
-      )}
 
-      {/* LOADING INDICATOR */}
-      {isVideoLoading && !showThumbnail && (
-        <View style={styles.loaderOverlay}>
-          <ActivityIndicator size="large" color="#fff" />
-        </View>
-      )}
+        {/* THUMBNAIL */}
+        {showThumbnail && currentStory.thumbnailUrl && (
+          <Image
+            source={{ uri: currentStory.thumbnailUrl }}
+            style={styles.video}
+            resizeMode="cover"
+          />
+        )}
 
-      {/* TOP BAR WITH PROGRESS */}
-      <View style={styles.topBar}>
-        {/* PROGRESS */}
-        <View style={styles.progressRow}>
-          {storyList.map((_: any, i: number) => (
-            <View key={i} style={styles.progressBg}>
-              <Animated.View
-                style={[
-                  styles.progressFill,
-                  i === currentIndex && { width: progressWidth },
-                  i < currentIndex && { width: "100%" },
-                  i > currentIndex && { width: "0%" },
-                ]}
-              />
-            </View>
-          ))}
-        </View>
-
-
-        {/* USER INFO */}
-        <View style={styles.userRow}>
-          <TouchableOpacity
-
-            style={{ flexDirection: "row", alignItems: "center" }}
-            onPress={() => {
-
-              if (!isOwnStory) {
-                router.push(`/profile/${currentUserStories.username}`);
-              } else {
-                router.push(`/(drawer)/(tabs)/profile`);
-              }
-            }}
-          >
-            <Image
-              source={{
-                uri:
-                  currentUserStories.profilePic ||
-                  "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-              }}
-              style={styles.profileImg}
-            />
-            <Text style={styles.username}>
-              {isOwnStory ? "Your Story" : currentUserStories.username}
-            </Text>
-            <Text style={styles.timeText}>
-              {timeAgo(currentStory.created_at)}
-            </Text>
-          </TouchableOpacity>
-        </View>
-      </View>
-
-      {/* TOUCH LAYER */}
-      <View style={styles.touchLayer}>
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={handlePrev}
-          onLongPress={handleLongPressIn}
-          onPressOut={handleLongPressOut}
-          delayLongPress={150}
-        />
-        <TouchableOpacity
-          style={{ flex: 1 }}
-          onPress={handleNext}
-          onLongPress={handleLongPressIn}
-          onPressOut={handleLongPressOut}
-          delayLongPress={150}
-        />
-      </View>
-
-      {/* OWN STORY CONTROLS */}
-      {isOwnStory && (
-        <>
-          <TouchableOpacity style={styles.viewersButton} onPress={toggleViewers}>
-            <Ionicons name="eye" size={20} color="#fff" />
-            <Text style={styles.viewersText}>{formatCount(views?.length || 0)}</Text>
-          </TouchableOpacity>
-
-          <View style={styles.bottomActions}>
-            <TouchableOpacity
-              style={styles.actionBtn}
-              onPress={handleDelete}
-              disabled={isDeleting}
-            >
-              {isDeleting ? (
-                <ActivityIndicator size="small" color="#fff" />
-              ) : (
-                <Ionicons name="trash-outline" size={24} color="#fff" />
-              )}
-            </TouchableOpacity>
+        {/* LOADING INDICATOR */}
+        {isVideoLoading && !showThumbnail && (
+          <View style={styles.loaderOverlay}>
+            <ActivityIndicator size="large" color="#fff" />
           </View>
-        </>
-      )}
+        )}
 
-      {/* VIEWERS LIST MODAL */}
-      {showViewers && isOwnStory && (
-        <View style={styles.viewersModal}>
-          <View style={styles.viewersHeader}>
-            <Text style={styles.viewersTitle}>Viewers</Text>
-            <TouchableOpacity onPress={toggleViewers}>
-              <Ionicons name="close" size={24} color="#fff" />
-            </TouchableOpacity>
-          </View>
-
-          <ScrollView style={styles.viewersList}>
-            {views.length > 0 ? (
-              views.map((viewer: any, index: any) => (
-                <TouchableOpacity
-                  key={index}
-                  style={styles.viewerItem}
-                  onPress={() => router.push(`/profile/${viewer.username.toLowerCase()}`)}
-                >
-                  <Image
-                    source={{
-                      uri:
-                        viewer.profilePic ||
-                        "https://cdn-icons-png.flaticon.com/512/847/847969.png",
-                    }}
-                    style={styles.viewerImage}
-                  />
-                  <View style={styles.viewerInfo}>
-                    <Text style={styles.viewerName}>{viewer.username}</Text>
-                    <Text style={styles.viewerTime}>{timeAgo(viewer.viewedAt)}</Text>
-                  </View>
-                </TouchableOpacity>
-              ))
-            ) : (
-              <View style={styles.noViewers}>
-                <Ionicons name="eye-off-outline" size={48} color="#666" />
-                <Text style={styles.noViewersText}>No views yet</Text>
+        {/* TOP BAR WITH PROGRESS */}
+        <View style={styles.topBar}>
+          {/* PROGRESS */}
+          <View style={styles.progressRow}>
+            {storyList.map((_: any, i: number) => (
+              <View key={i} style={styles.progressBg}>
+                <Animated.View
+                  style={[
+                    styles.progressFill,
+                    i === currentIndex && { width: progressWidth },
+                    i < currentIndex && { width: "100%" },
+                    i > currentIndex && { width: "0%" },
+                  ]}
+                />
               </View>
-            )}
-          </ScrollView>
+            ))}
+          </View>
+
+
+          {/* USER INFO */}
+          <View style={styles.userRow}>
+            <TouchableOpacity
+
+              style={{ flexDirection: "row", alignItems: "center" }}
+              onPress={() => {
+
+                if (!isOwnStory) {
+                  router.push(`/profile/${currentUserStories.username}`);
+                } else {
+                  router.push(`/(drawer)/(tabs)/profile`);
+                }
+              }}
+            >
+              <Image
+                source={{
+                  uri:
+                    currentUserStories.profilePic ||
+                    "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+                }}
+                style={styles.profileImg}
+              />
+              <Text style={styles.username}>
+                {isOwnStory ? "Your Story" : currentUserStories.username}
+              </Text>
+              <Text style={styles.timeText}>
+                {timeAgo(currentStory.created_at)}
+              </Text>
+            </TouchableOpacity>
+          </View>
         </View>
-      )}
 
-      {/* MUTE/UNMUTE BUTTON */}
-      <TouchableOpacity
-        style={styles.muteButton}
-        onPress={() => setIsMuted(!isMuted)}
-      >
-        <Ionicons name={isMuted ? "volume-mute" : "volume-high"} size={26} color="#fff" />
-      </TouchableOpacity>
+        {/* TOUCH LAYER */}
+        <View style={styles.touchLayer}>
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={handlePrev}
+            onLongPress={handleLongPressIn}
+            onPressOut={handleLongPressOut}
+            delayLongPress={150}
+          />
+          <TouchableOpacity
+            style={{ flex: 1 }}
+            onPress={handleNext}
+            onLongPress={handleLongPressIn}
+            onPressOut={handleLongPressOut}
+            delayLongPress={150}
+          />
+        </View>
 
-      {/* CLOSE BUTTON */}
-      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
-        <Ionicons name="close" size={26} color="#fff" />
-      </TouchableOpacity>
-    </View>
+        {/* OWN STORY CONTROLS */}
+        {isOwnStory && (
+          <>
+            <TouchableOpacity style={styles.viewersButton} onPress={toggleViewers}>
+              <Ionicons name="eye" size={20} color="#fff" />
+              <Text style={styles.viewersText}>{formatCount(views?.length || 0)}</Text>
+            </TouchableOpacity>
+
+            <View style={styles.bottomActions}>
+              <TouchableOpacity
+                style={styles.actionBtn}
+                onPress={handleDelete}
+                disabled={isDeleting}
+              >
+                {isDeleting ? (
+                  <ActivityIndicator size="small" color="#fff" />
+                ) : (
+                  <Ionicons name="trash-outline" size={24} color="#fff" />
+                )}
+              </TouchableOpacity>
+            </View>
+          </>
+        )}
+
+        {/* VIEWERS LIST MODAL */}
+        {showViewers && isOwnStory && (
+          <View style={styles.viewersModal}>
+            <View style={styles.viewersHeader}>
+              <Text style={styles.viewersTitle}>Viewers</Text>
+              <TouchableOpacity onPress={toggleViewers}>
+                <Ionicons name="close" size={24} color="#fff" />
+              </TouchableOpacity>
+            </View>
+
+            <ScrollView style={styles.viewersList}>
+              {views.length > 0 ? (
+                views.map((viewer: any, index: any) => (
+                  <TouchableOpacity
+                    key={index}
+                    style={styles.viewerItem}
+                    onPress={() => router.push(`/profile/${viewer.username.toLowerCase()}`)}
+                  >
+                    <Image
+                      source={{
+                        uri:
+                          viewer.profilePic ||
+                          "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+                      }}
+                      style={styles.viewerImage}
+                    />
+                    <View style={styles.viewerInfo}>
+                      <Text style={styles.viewerName}>{viewer.username}</Text>
+                      <Text style={styles.viewerTime}>{timeAgo(viewer.viewedAt)}</Text>
+                    </View>
+                  </TouchableOpacity>
+                ))
+              ) : (
+                <View style={styles.noViewers}>
+                  <Ionicons name="eye-off-outline" size={48} color="#666" />
+                  <Text style={styles.noViewersText}>No views yet</Text>
+                </View>
+              )}
+            </ScrollView>
+          </View>
+        )}
+
+        {/* MUTE/UNMUTE BUTTON */}
+        <TouchableOpacity
+          style={styles.muteButton}
+          onPress={() => setIsMuted(!isMuted)}
+        >
+          <Ionicons name={isMuted ? "volume-mute" : "volume-high"} size={26} color="#fff" />
+        </TouchableOpacity>
+
+        {/* CLOSE BUTTON */}
+        <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
+          <Ionicons name="close" size={26} color="#fff" />
+        </TouchableOpacity>
+      </View>
     </Animated.View>
   );
 }
@@ -1385,3 +1385,5 @@ const styles = StyleSheet.create({
     zIndex: 100,
   },
 });
+
+// adnan
