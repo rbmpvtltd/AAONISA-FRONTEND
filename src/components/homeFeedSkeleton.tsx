@@ -68,7 +68,9 @@ export const FeedItemSkeleton: React.FC<{ theme: any }> = ({ theme }) => {
     return (
         <View style={[styles.reel, { backgroundColor: theme.background }]}>
             {/* Header Skeleton */}
-            <View style={[styles.header, { backgroundColor: theme.overlay }]}>
+            <View style={[styles.header,
+                // { backgroundColor: theme.overlay }
+            ]}>
                 {/* Profile Picture */}
                 <Skeleton width={40} height={40} radius={20} />
 
@@ -96,7 +98,7 @@ export const FeedItemSkeleton: React.FC<{ theme: any }> = ({ theme }) => {
                 {/* Volume button skeleton */}
                 <View style={styles.volumeBtn}>
                     {/* <Skeleton width={24} height={24} radius={12} /> */}
-                    <Icon name="volume-mute" size={24} color="white" />
+                    <Icon name="volume-mute" size={16} color="white" />
 
                 </View>
             </View>
@@ -180,8 +182,8 @@ const styles = StyleSheet.create({
     },
     volumeBtn: {
         position: "absolute",
-        bottom: 80,
-        right: 10,
+        bottom: 15,
+        right: 15,
         backgroundColor: "rgba(0,0,0,0.5)",
         padding: 8,
         borderRadius: 20,

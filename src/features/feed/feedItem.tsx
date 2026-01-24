@@ -776,8 +776,6 @@
 
 // ================================================
 
-import BottomDrawer from "@/src/components/ui/BottomDrawer";
-import ReportDrawer from "@/src/components/ui/ReportDrawer";
 import { useLike } from "@/src/hooks/useLike";
 import { useMarkViewedMutation } from "@/src/hooks/useMarkViewedMutation";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
@@ -786,9 +784,10 @@ import { formatCount } from "@/src/utils/formatCount";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useRef, useState } from "react";
-import { Image, Pressable, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+import { Image, Linking, Pressable, Share, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 import Icon from "react-native-vector-icons/Ionicons";
+
 
 export const FeedItem = React.memo(
     ({
@@ -1001,12 +1000,54 @@ export const FeedItem = React.memo(
         // console.log('====================================');
 
 
+        // 1. Share function ko FeedItem mein add karein:
+        const handleSharePlatform = async (platform: string) => {
+            const videoUrl = item.videoUrl; // Current playing video URL
+            const reelUrl = item.id || item.uuid; // Reel ID
+            const encodedUrl = encodeURIComponent(`testing.hithoy.com/reels/${reelUrl}&redirected=true`);
+
+            let url = "";
+
+            switch (platform) {
+                case "whatsapp":
+                    url = `whatsapp://send?text=${encodedUrl}`;
+                    break;
+                case "telegram":
+                    url = `tg://msg?text=${encodedUrl}`;
+                    break;
+                case "facebook":
+                    url = `fb://facewebmodal/f?href=https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`;
+                    break;
+                case "instagram":
+                    url = `instagram://share?text=${encodedUrl}`;
+                    break;
+                default:
+                    await Share.share({
+                        message: `testing.hithoy.com/reels/${reelUrl}&redirected=true`,
+                    });
+                    return;
+            }
+
+            try {
+                const supported = await Linking.canOpenURL(url);
+                if (supported) {
+                    await Linking.openURL(url);
+                } else {
+                    alert(`${platform} app is not installed!`);
+                }
+            } catch (error) {
+                console.log("Error opening app:", error);
+            }
+        };
+
         return (
             <View style={[styles.reel, { backgroundColor: theme.background }]}>
                 {/* Header - Always visible */}
                 <Pressable
                     onPress={() => router.push(`/profile/${item.user?.username}`)}
-                    style={[styles.header, { backgroundColor: theme.overlay }]}
+                    style={[styles.header,
+                        // { backgroundColor: theme.overlay }
+                    ]}
                 >
                     <Image
                         source={{ uri: item.user?.profilePic }}
@@ -1052,24 +1093,24 @@ export const FeedItem = React.memo(
                             <View style={styles.centerControls}>
                                 {/* Seek Backward 5s */}
                                 <TouchableOpacity onPress={seekBackward} style={styles.centerControlBtn}>
-                                    <Icon name="play-back" size={30} color="white" />
+                                    <Icon name="play-back" size={20} color="white" />
                                     <Text style={styles.controlText}>5s</Text>
                                 </TouchableOpacity>
 
                                 {/* Play/Pause */}
-                                <TouchableOpacity onPress={togglePlayPause} style={styles.centerPlayBtn}>
+                                <Pressable onPress={togglePlayPause} style={styles.centerPlayBtn}>
                                     <Icon
                                         name={isPlaying ? "pause" : "play"}
-                                        size={40}
+                                        size={30}
                                         color="white"
                                     />
-                                </TouchableOpacity>
+                                </Pressable>
 
                                 {/* Seek Forward 5s */}
-                                <TouchableOpacity onPress={seekForward} style={styles.centerControlBtn}>
-                                    <Icon name="play-forward" size={30} color="white" />
+                                <Pressable onPress={seekForward} style={styles.centerControlBtn}>
+                                    <Icon name="play-forward" size={20} color="white" />
                                     <Text style={styles.controlText}>5s</Text>
-                                </TouchableOpacity>
+                                </Pressable>
                             </View>
 
                             {/* Fullscreen Toggle - Bottom Right */}
@@ -1079,7 +1120,7 @@ export const FeedItem = React.memo(
                             >
                                 <Icon
                                     name={isFullscreen ? "contract" : "expand"}
-                                    size={24}
+                                    size={16}
                                     color="white"
                                 />
                             </Pressable>
@@ -1087,9 +1128,9 @@ export const FeedItem = React.memo(
                     )}
 
                     {/* Volume Button */}
-                    <TouchableOpacity onPress={toggleMute} style={styles.volumeBtn}>
-                        <Icon name={isMuted ? "volume-mute" : "volume-high"} size={24} color="white" />
-                    </TouchableOpacity>
+                    <Pressable onPress={toggleMute} style={styles.volumeBtn}>
+                        <Icon name={isMuted ? "volume-mute" : "volume-high"} size={16} color="white" />
+                    </Pressable>
                 </View>
 
                 {/* Bottom Actions - Always visible */}
@@ -1098,33 +1139,33 @@ export const FeedItem = React.memo(
                         <TouchableOpacity onPress={handleLike} style={styles.actionBtn}>
                             <Icon
                                 name={liked ? "heart" : "heart-outline"}
-                                size={22}
+                                size={20}
                                 color={liked ? "red" : theme.text}
                             />
                             <Text style={[styles.countText, { color: theme.text }]}>{likesCount}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity onPress={() => onComment(item.id)} style={styles.actionBtn}>
-                            <Icon name="chatbubble-outline" size={22} color={theme.text} />
+                            <Icon name="chatbubble-outline" size={20} color={theme.text} />
                             <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.commentsCount)}</Text>
                         </TouchableOpacity>
 
                         <TouchableOpacity style={styles.actionBtn} onPress={handleShare}>
-                            <Icon name="paper-plane-outline" size={22} color={theme.text} />
+                            <Icon name="paper-plane-outline" size={20} color={theme.text} />
                             <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.sharesCount || 0)}</Text>
                         </TouchableOpacity>
 
-                        {/* <TouchableOpacity style={styles.actionBtn} onPress={() => setShowShareDrawer(true)} >
-                            <Icon name="share-social-outline" size={22} color={theme.text} />
+                        <TouchableOpacity style={styles.actionBtn} onPress={() => handleSharePlatform("other")} >
+                            <Icon name="share-social-outline" size={20} color={theme.text} />
                             <Text style={[styles.countText, { color: theme.text }]}>{formatCount(item.shares ?? 0)}</Text>
-                        </TouchableOpacity> */}
+                        </TouchableOpacity>
                     </View>
 
                     {/* RIGHT SIDE BOOKMARK */}
-                    <TouchableOpacity style={styles.actionBtn} onPress={() => setShowBottomDrawer(true)}>
+                    <TouchableOpacity style={styles.actionBtn} onPress={() => openBookmarkPanel(item.id || item.uuid)}>
                         <Icon
-                            name="ellipsis-vertical"
-                            size={22}
+                            name="bookmark-outline"
+                            size={20}
                             color={theme.text}
                         />
                     </TouchableOpacity>
@@ -1247,59 +1288,9 @@ export const FeedItem = React.memo(
                     )}
                 </View>
 
+
+
                 {/* <BottomDrawer
-                    visible={showShareDrawer}
-                    onClose={() => setShowShareDrawer(false)}
-                    onSave={handleBookmark}
-                    onReport={() => {
-                        console.log("Reported:", item.id || item.uuid);
-                        setShowShareDrawer(false);
-                    }}
-                    onDelete={isOwner ? () => {
-                        console.log("Delete video:", item.id || item.uuid);
-                        setShowShareDrawer(false);
-                    } : undefined}
-                    reelId={item.id || item.uuid}
-                    reelUrl={item.videoUrl}
-                    isOwner={isOwner}
-                /> */}
-
-                {/* <View style={styles.drawerContainer} pointerEvents={showBottomDrawer ? "auto" : "none"}>
-
-                    <BottomDrawer
-                        visible={showBottomDrawer}
-                        onClose={() => setShowBottomDrawer(false)}
-                        onSave={() => {
-                            openBookmarkPanel(item.id || item.uuid);
-                            setShowBottomDrawer(false);
-                        }}
-                        onReport={() => {
-                            setShowReportDrawer(true);
-                            setShowBottomDrawer(false);
-                        }}
-                        onDelete={isOwner ? () => {
-                            console.log("Delete video:", item.id || item.uuid);
-                            setShowBottomDrawer(false);
-                        } : undefined}
-                        reelId={item.id || item.uuid}
-                        reelUrl={item.videoUrl}
-                        isOwner={isOwner}
-                    />
-
-                    <ReportDrawer
-                        visible={showReportDrawer}
-                        onClose={() => setShowReportDrawer(false)}
-                        onSelect={(reason: string) => {
-                            console.log("User reported for:", reason);
-                            setShowReportDrawer(false);
-                        }}
-                        videoId={item.id || item.uuid}
-                    />
-                </View> */}
-
-                {/* Replace existing BottomDrawer code with this: */}
-
-                <BottomDrawer
                     visible={showBottomDrawer}
                     onClose={() => setShowBottomDrawer(false)}
                     onSave={() => {
@@ -1318,9 +1309,9 @@ export const FeedItem = React.memo(
                     reelUrl={item.id || item.uuid}
                     reelDownloadUrl={item.videoUrl}
                     isOwner={isOwner}
-                />
+                /> */}
 
-                <ReportDrawer
+                {/* <ReportDrawer
                     visible={showReportDrawer}
                     onClose={() => setShowReportDrawer(false)}
                     onSelect={(reason: string) => {
@@ -1328,7 +1319,7 @@ export const FeedItem = React.memo(
                         setShowReportDrawer(false);
                     }}
                     videoId={item.id || item.uuid}
-                />
+                /> */}
 
             </View >
         );
@@ -1405,7 +1396,7 @@ const styles = StyleSheet.create({
         flexDirection: "row",
         justifyContent: "center",
         alignItems: "center",
-        gap: 40,
+        gap: 25,
     },
     centerControlBtn: {
         alignItems: "center",
@@ -1432,11 +1423,12 @@ const styles = StyleSheet.create({
     },
     fullscreenBtn: {
         position: "absolute",
-        bottom: 20,
+        bottom: 15,
         right: 10,
         backgroundColor: "rgba(0,0,0,0.5)",
         padding: 8,
         borderRadius: 20,
+        marginRight: 50
     },
     controlText: {
         color: "white",
@@ -1471,8 +1463,8 @@ const styles = StyleSheet.create({
     },
     volumeBtn: {
         position: "absolute",
-        bottom: 80,
-        right: 10,
+        bottom: 15,
+        right: 15,
         backgroundColor: "rgba(0,0,0,0.5)",
         padding: 8,
         borderRadius: 20,

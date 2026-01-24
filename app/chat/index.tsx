@@ -187,22 +187,34 @@
 // ==========================================================================
 
 import { getUserSessionsWithLatestMessage, sendReelToChats } from "@/src/api/chat-api";
+import NotificationSkeletonItem from "@/src/components/NotificationSkeletonItem";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
+  SafeAreaView,
   StyleSheet,
   Text,
   TouchableOpacity,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
 import Toast from "react-native-toast-message";
+
+
+const ChatSkeletonList = () => {
+  return (
+    <>
+      {Array.from({ length: 10 }).map((_, i) => (
+        <NotificationSkeletonItem key={i} />
+      ))}
+    </>
+  );
+};
 
 function Avatar({ avatar, size }: { avatar?: string; size: number }) {
   return (
@@ -459,10 +471,13 @@ export default function ChatListScreen() {
 
   if (isLoading)
     return (
-      <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
-        <ActivityIndicator size="large" color={theme.text} />
-        <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
-      </View>
+      // <View style={{ flex: 1, justifyContent: "center", alignItems: "center" }}>
+      //   <ActivityIndicator size="large" color={theme.text} />
+      //   <Text style={{ color: theme.text, marginTop: 10 }}>Loading...</Text>
+      // </View>
+      <SafeAreaView>
+        <ChatSkeletonList />
+      </SafeAreaView>
     );
 
 

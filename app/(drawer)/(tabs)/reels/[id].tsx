@@ -1,8 +1,9 @@
+import ReelsSkeleton from '@/src/components/reelsSkeleton';
 import { useReelsByCategory } from '@/src/hooks/useReelsByCategory';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { router, useLocalSearchParams } from 'expo-router';
 import { useEffect } from 'react';
-import { Text, View } from 'react-native';
+import { View } from 'react-native';
 
 export default function ReelDetailScreen() {
   const params = useLocalSearchParams();
@@ -46,8 +47,9 @@ export default function ReelDetailScreen() {
   }, [redirected, data, reelId, reels, setCurrentIndex, setReels]);
 
   return (
-    <View style={{ flex: 1, justifyContent: 'center', alignItems: 'center' }}>
-      {isLoading && redirected && <Text>Loading Reel...</Text>}
+    <View>
+      {/* {isLoading && redirected && <Text>Loading Reel...</Text>} */}
+      <ReelsSkeleton />
     </View>
   );
 }

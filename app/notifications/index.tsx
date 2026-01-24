@@ -1,9 +1,9 @@
+import NotificationSkeletonItem from "@/src/components/NotificationSkeletonItem";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
 import {
-  ActivityIndicator,
   FlatList,
   Image,
   Pressable,
@@ -11,7 +11,7 @@ import {
   StyleSheet,
   Text,
   useWindowDimensions,
-  View,
+  View
 } from "react-native";
 import { getUserNotifications } from "../../src/api/auth-api";
 
@@ -152,6 +152,17 @@ const NotificationItem = ({ item, theme, width }: any) => {
   );
 };
 
+const NotificationSkeletonList = () => {
+  return (
+    <>
+      {Array.from({ length: 10 }).map((_, i) => (
+        <NotificationSkeletonItem key={i} />
+      ))}
+    </>
+  );
+};
+
+
 const NotificationList = () => {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
@@ -162,8 +173,8 @@ const NotificationList = () => {
   console.log('====================================');
   if (isLoading) {
     return (
-      <SafeAreaView style={[styles.center, { backgroundColor: theme.background }]}>
-        <ActivityIndicator />
+      <SafeAreaView>
+        <NotificationSkeletonList />
       </SafeAreaView>
     );
   }

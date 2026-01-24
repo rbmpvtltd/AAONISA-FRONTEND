@@ -36,7 +36,7 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
   panelVisible: false,
   selectedReel: null,
 
-  openBookmarkPanel: (reel) =>{
+  openBookmarkPanel: (reel) => {
     set({ selectedReel: reel, panelVisible: true })
   },
 
@@ -124,11 +124,11 @@ export const useBookmarkStore = create<BookmarkStore>((set, get) => ({
     return null;
   },
   removeReelFromCategory: (reelId) => {
-  set((state) => ({
-    categories: state.categories.map((cat) => ({
-      ...cat,
-      reels: cat.reels.filter((r) => r.uuid !== reelId),
-    })),
-  }));
-},
+    set((state) => ({
+      categories: state.categories.map((cat) => ({
+        ...cat,
+        reels: cat.reels.filter((r) => r.uuid !== reelId),
+      })),
+    }));
+  },
 }));
