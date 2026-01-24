@@ -215,6 +215,7 @@ const HomePage = () => {
   const { setCategories } = useBookmarkStore();
   const [refreshing, setRefreshing] = useState(false);
 
+
   // useFocusEffect(
   //   useCallback(() => {
   //     // 🔁 Jab bhi Home tab focus ho
@@ -255,7 +256,7 @@ const HomePage = () => {
         return [];
       }
     },
-    staleTime: 0,
+    staleTime: 1000 * 60 * 10,
     refetchOnMount: true,
     retry: 1,
   });

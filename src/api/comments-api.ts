@@ -72,7 +72,7 @@ const addCommentApi = async (reelId: string, comment: string, mentions: string[]
     const data = await axios.post(apiUrl, { content: comment, mentions, postId: reelId, parentId }, config);
     return data
   } catch (e) {
-    console.log("adding comment failed", e);
+    // console.log("adding comment failed", e);
   }
 };
 

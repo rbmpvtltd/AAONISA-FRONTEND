@@ -19,7 +19,8 @@ export const useNotifications = () => {
   return useQuery({
     queryKey: ["notifications"],
     queryFn: getUserNotifications,
-    staleTime: 1000 * 60,
+    staleTime: 1000 * 60 * 3,
+    gcTime: 1000 * 60 * 5,
   });
 };
 
@@ -44,7 +45,7 @@ const NotificationItem = ({ item, theme, width }: any) => {
     }
   };
 
-  console.log("item ==================================>", item);
+  // console.log("item ==================================>", item);
 
   const handleRedirect = () => {
     switch (item.type) {
@@ -56,6 +57,9 @@ const NotificationItem = ({ item, theme, width }: any) => {
         console.log(" pppppppppppppppp", item.referenceId,);
         console.log('====================================');
         router.push(`/(drawer)/(tabs)/reels/${item.referenceId}&redirected=true`)
+        console.log('====================================');
+        console.log("arbaaz chouhan is here", item);
+        console.log('====================================');
         // router.push({
         //   pathname: "/(drawer)/(tabs)/reels",
         //   params: {
