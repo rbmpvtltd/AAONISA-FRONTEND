@@ -438,8 +438,8 @@ export const FeedList = () => {
     initialPageParam: 1,
     getNextPageParam: (lastPage) => lastPage.nextPage,
 
-    staleTime: 0,
-    gcTime: 10000,
+    staleTime: 1000 * 60 * 10,
+    gcTime: 1000 * 60 * 30,
   });
 
   // Feed videos ko pehle declare karo
@@ -470,13 +470,13 @@ export const FeedList = () => {
   }, [scrollToTopHandler, setScrollToTop]);
 
   // Refresh data when tab becomes focused
-  useEffect(() => {
-    if (isFocused) {
-      // console.log("🔄 Home tab focused - Refreshing feed");
-      setRandomSeed(Date.now());
-      refetch();
-    }
-  }, [isFocused]);
+  // useEffect(() => {
+  //   if (isFocused) {
+  //     // console.log("🔄 Home tab focused - Refreshing feed");
+  //     setRandomSeed(Date.now());
+  //     refetch();
+  //   }
+  // }, [isFocused]);
 
   const onViewableItemsChanged = useCallback(
     ({ viewableItems }: any) => {

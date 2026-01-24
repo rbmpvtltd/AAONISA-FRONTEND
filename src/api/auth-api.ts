@@ -40,7 +40,7 @@ async function registerUser(reqBody: any) {
   // console.log(body);
   const apiUrl = createApiUrl('/users/register-check');
   const { data } = await axios.post(apiUrl, body, config);
-  console.log(data)
+  // console.log(data)
   return data;
 }
 
@@ -220,7 +220,7 @@ async function expoTokenUnassign(pushToken: any) {
   };
   const apiUrl = createApiUrl('/tokens/unassign/' + pushToken);
   const { data } = await axios.delete(apiUrl, config);
-  console.log(data)
+  // console.log(data)
   return data;
 }
 

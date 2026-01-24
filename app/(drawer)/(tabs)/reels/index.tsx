@@ -1510,7 +1510,7 @@ const ReelsFeed = () => {
 
   const onRefresh = useCallback(async () => {
     console.log("🔄 Pull to refresh triggered");
-
+    setRedirectedFromShare(false);
     // Reset to top
     setCurrentIndex(0);
 
@@ -1764,6 +1764,11 @@ const ReelsFeed = () => {
 
         // Infinite scroll
         onEndReached={() => {
+          if (redirectedFromShare) {
+            setRedirectedFromShare(false);
+            return;
+          }
+
           if (hasNextPage && !isFetchingNextPage) {
             fetchNextPage();
           }
