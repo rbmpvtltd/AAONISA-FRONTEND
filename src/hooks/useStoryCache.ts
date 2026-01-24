@@ -1,10 +1,8 @@
-// src/queries/storyQuery.ts
-import { getAllStories } from "@/src/api/tab-api";
-import { useQuery } from "@tanstack/react-query";
+import { useQueryClient } from "@tanstack/react-query";
 
-
-export const useStoriesQuery = () => {
-  const sortUsersByStoryState = (users:any[]) => {
+export const useStoriesCache = () => {
+  const queryClient = useQueryClient();
+const sortUsersByStoryState = (users:any[]) => {
   const selfUser = users.find((u) => u.self);
   const others = users.filter((u) => !u.self);
 
@@ -31,15 +29,32 @@ export const useStoriesQuery = () => {
 
   return selfUser ? [selfUser, ...unviewed, ...viewed] : [...unviewed, ...viewed];
 };
-  return useQuery({
-    queryKey: ["stories"],
-    queryFn: getAllStories,
-    staleTime: 1000 * 60 * 5, // ✅ 5 minutes
-    gcTime: 1000 * 60 * 10,
-    // refetchOnMount: false,
-    // refetchOnWindowFocus: false,
-    select: (data) => {
-      return sortUsersByStoryState(data);
-    },
+const markStoriesViewed = (
+  users:any,
+  ownerId:any,
+  lastViewedIndex:any
+) => {
+  return users.map((user:any) => {
+    if (user.owner !== ownerId) return user;
+
+    return {
+      ...user,
+      stories: user.stories.map((story:any, index:any) => ({
+        ...story,
+        viewed: index <= lastViewedIndex ? true : story.viewed,
+      })),
+    };
   });
+};
+
+  const onViewerClose = (ownerId:any, lastViewedIndex:any) => {
+    queryClient.setQueryData(["stories"], (old:any) => {
+      if (!old) return old;
+
+      const updated = markStoriesViewed(old, ownerId, lastViewedIndex);
+      return sortUsersByStoryState(updated);
+    });
+  };
+
+  return { onViewerClose };
 };

@@ -239,145 +239,140 @@
 // });
 
 // features/story/storyList.tsx
+// import { GetCurrentUser } from "@/src/api/profile-api";
+// import { useStoriesQuery } from "@/src/hooks/storyMutation";
+// import { Ionicons } from "@expo/vector-icons";
+// import { useQuery } from "@tanstack/react-query";
+// import { router } from "expo-router";
+// import { memo, useCallback, useMemo } from "react";
+// import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
+// import { ScrollView } from "react-native-gesture-handler";
 import { GetCurrentUser } from "@/src/api/profile-api";
+import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { router } from "expo-router";
-import { memo, useCallback, useMemo } from "react";
+import { memo, useCallback } from "react";
 import { Image, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 import { ScrollView } from "react-native-gesture-handler";
 
+const LIGHT_BLUE = "#4da3ff";
+const ORANGE = "#ff8501";
+const GREY = "#999";
 // Individual Story Item Component - Memoized
-const StoryItem = memo(({
-  user,
-  theme,
-  isCurrentUser = false,
-  onPress,
-  currentUserProfilePic
-}: {
-  user: any;
-  theme: any;
-  isCurrentUser?: boolean;
-  onPress: () => void;
-  currentUserProfilePic?: string;
-}) => {
-  const seen = !user.stories.some((s: any) => !s.viewed);
-  const hasStories = user.stories && user.stories.length > 0;
+const StoryItem = memo(
+  ({
+    user,
+    theme,
+    isCurrentUser = false,
+    onPress,
+    currentUserProfilePic,
+  }: {
+    user: any;
+    theme: any;
+    isCurrentUser?: boolean;
+    onPress: () => void;
+    currentUserProfilePic?: string;
+  }) => {
+    const hasStories = user.stories?.length > 0;
+    const hasUnviewed = user.stories?.some((s: any) => !s.viewed);
 
-  return (
-    <TouchableOpacity
-      style={styles.storyContainer}
-      onPress={onPress}
-      activeOpacity={0.7}
-    >
-      {isCurrentUser ? (
-        <>
-          <View style={[
-            styles.storyBorder,
-            {
-              borderColor: hasStories
-                ? (seen ? "#999" : "#ff8501")
-                : "transparent"
-            },
-          ]}>
-            <Image
-              source={{
-                uri: currentUserProfilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png"
-              }}
-              style={styles.storyImage}
-            />
-            {!hasStories && (
-              <View style={styles.addButton}>
-                <Ionicons name="add" size={16} color="#fff" />
-              </View>
-            )}
-          </View>
-        </>
-      ) : (
-        // Other users' stories
-        <View
-          style={[
-            styles.storyBorder,
-            { borderColor: seen ? "#999" : "#ff8501" },
-          ]}
-        >
+    const borderColor = isCurrentUser
+      ? hasStories
+        ? LIGHT_BLUE
+        : "transparent"
+      : hasUnviewed
+      ? ORANGE
+      : GREY;
+
+    return (
+      <TouchableOpacity
+        style={styles.storyContainer}
+        onPress={onPress}
+        activeOpacity={0.7}
+      >
+        <View style={[styles.storyBorder, { borderColor }]}>
           <Image
-            source={{ uri: user.profilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
+            source={{
+              uri:
+                isCurrentUser
+                  ? currentUserProfilePic ||
+                    "https://cdn-icons-png.flaticon.com/512/847/847969.png"
+                  : user.profilePic ||
+                    "https://cdn-icons-png.flaticon.com/512/847/847969.png",
+            }}
             style={styles.storyImage}
           />
-        </View>
-      )}
 
-      <Text
-        style={[styles.storyUsername, { color: theme.text }]}
-        numberOfLines={1}
-      >
-        {isCurrentUser ? "Your Story" : user.username}
-      </Text>
-    </TouchableOpacity>
-  );
-});
+          {isCurrentUser && !hasStories && (
+            <View style={styles.addButton}>
+              <Ionicons name="add" size={16} color="#fff" />
+            </View>
+          )}
+        </View>
+
+        <Text
+          style={[styles.storyUsername, { color: theme.text }]}
+          numberOfLines={1}
+        >
+          {isCurrentUser ? "Your Story" : user.username}
+        </Text>
+      </TouchableOpacity>
+    );
+  }
+);
 
 StoryItem.displayName = "StoryItem";
 
-export const StoryList = memo(({
-  theme,
-  stories
-}: {
-  theme: any;
-  stories?: any[];
-}) => {
-
-  const userStories = stories;
-  // Get current user for profile picture
+export const StoryList = memo(({ theme }: { theme: any }) => {
+  const { data: stories = [] } = useStoriesQuery();
+  console.log(stories)
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
 
-  // Memoize current user stories using 'self' property
-  const currentUserStories = useMemo(
-    () => userStories?.find((u: any) => u.self === true),
-    [userStories]
-  );
+  // ✅ TRUST THE CACHE ORDER
+  // const currentUserStories = stories[0];
+  const currentUserStories =
+  stories.find((u: any) => u.self === true) || {
+    owner: currentUser?.userProfile?.id,
+    username: "Your Story",
+    profilePic: currentUser?.userProfile?.ProfilePicture,
+    stories: [],
+    self: true,
+  };
 
-  // Memoize has own stories check
-  const hasOwnStories = useMemo(
-    () => currentUserStories && currentUserStories.stories.length > 0,
-    [currentUserStories]
-  );
+  // const otherUsersStories = stories.slice(1);
+  const otherUsersStories = stories.filter((u: any) => u.self !== true);
 
-  // Memoize other users' stories (where self is false)
-  const otherUsersStories = useMemo(
-    () => userStories?.filter((u: any) => u.self === false) || [],
-    [userStories]
-  );
+  // ---------- HANDLERS ----------
 
-  // Handler for your story press
   const handleYourStoryPress = useCallback(() => {
-    if (hasOwnStories && currentUserStories) {
-      const story = currentUserStories.stories.find((s: any) => !s.viewed) || currentUserStories.stories[0];
-      router.push({
-        pathname: "/story/story-viewer",
-        params: {
-          ownerId: currentUserStories.owner,
-          startIndex: currentUserStories.stories.findIndex(
-            (s: any) => s.id === story.id
-          ),
-        },
-      });
+  if (currentUserStories.stories.length) {
+    const story =
+      currentUserStories.stories.find((s: any) => !s.viewed) ||
+      currentUserStories.stories[0];
 
-    } else {
-      router.push("/(drawer)/(tabs)/createReels?contentType=story");
-    }
-  }, [hasOwnStories, currentUserStories]);
+    router.push({
+      pathname: "/story/story-viewer",
+      params: {
+        ownerId: currentUserStories.owner,
+        startIndex: currentUserStories.stories.findIndex(
+          (s: any) => s.id === story.id
+        ),
+      },
+    });
+  } else {
+    router.push("/(drawer)/(tabs)/createReels?contentType=story");
+  }
+}, [currentUserStories]);
 
-  // Handler for other users' story press
-  const handlePress = useCallback((ownerId: string) => {
-    const user = userStories?.find((u: any) => u.owner === ownerId);
-    if (!user) return;
 
-    const story = user.stories.find((s: any) => !s.viewed) || user.stories[0];
+  const handleOtherUserPress = useCallback((user: any) => {
+    const story =
+      user.stories.find((s: any) => !s.viewed) || user.stories[0];
+
     router.push({
       pathname: "/story/story-viewer",
       params: {
@@ -387,29 +382,11 @@ export const StoryList = memo(({
         ),
       },
     });
+  }, []);
 
-    // console.log('====================================');
-    // console.log("story is here ", `/story/${story.id}`);
-    // console.log('====================================');
-  }, [userStories]);
+  // ---------- RENDER ----------
 
-  // Create current user object for StoryItem
-  const currentUserData = useMemo(() => ({
-    profilePic: currentUserStories?.profilePic || currentUser?.userProfile?.ProfilePicture,
-    username: currentUserStories?.username || "Your Story",
-    stories: currentUserStories?.stories || [],
-    owner: currentUserStories?.owner,
-    self: true,
-  }), [currentUserStories, currentUser]);
-
-  // Don't show if no stories at all
-  // if (!userStories || userStories.length > 0) {
-  //   return null;
-  // }
-
-  const hasAnyStories =
-    (userStories && userStories.length > 0) || true;
-
+  if (!stories.length) return null;
 
   return (
     <ScrollView
@@ -418,22 +395,24 @@ export const StoryList = memo(({
       style={styles.container}
       contentContainerStyle={styles.contentContainer}
     >
-      {/* Your Story - Always appears first */}
-      <StoryItem
-        user={currentUserData}
-        theme={theme}
-        isCurrentUser={true}
-        onPress={handleYourStoryPress}
-        currentUserProfilePic={currentUser?.userProfile?.ProfilePicture}
-      />
+      {/* YOUR STORY */}
+      {currentUserStories && (
+        <StoryItem
+          user={currentUserStories}
+          theme={theme}
+          isCurrentUser
+          onPress={handleYourStoryPress}
+          currentUserProfilePic={currentUser?.userProfile?.ProfilePicture}
+        />
+      )}
 
-      {/* Other users' stories */}
+      {/* OTHER USERS */}
       {otherUsersStories.map((user: any) => (
         <StoryItem
           key={user.owner}
           user={user}
           theme={theme}
-          onPress={() => handlePress(user.owner)}
+          onPress={() => handleOtherUserPress(user)}
         />
       ))}
     </ScrollView>

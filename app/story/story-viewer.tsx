@@ -482,6 +482,7 @@
 import { GetCurrentUser } from "@/src/api/profile-api";
 import { markViewed } from "@/src/api/story-api";
 import { useStoriesQuery } from "@/src/hooks/storyMutation";
+import { useStoriesCache } from "@/src/hooks/useStoryCache";
 import { useDeleteVideo } from "@/src/hooks/videosMutation";
 import { useSocketManager } from "@/src/socket/socket";
 import { useViewStore } from "@/src/store/viewStore";
@@ -490,20 +491,21 @@ import { timeAgo } from "@/src/utils/timeAgo";
 import { getCachedVideo } from "@/src/utils/videoCache";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
-import { useLocalSearchParams, useRouter } from "expo-router";
+import { useFocusEffect, useLocalSearchParams, useRouter } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import {
   ActivityIndicator,
   Alert,
   Animated,
   Dimensions,
   Image,
+  PanResponder,
   ScrollView,
   StyleSheet,
   Text,
   TouchableOpacity,
-  View,
+  View
 } from "react-native";
 
 const { width, height } = Dimensions.get("window");
@@ -530,6 +532,24 @@ export default function StoryViewer() {
   const [isVideoLoading, setIsVideoLoading] = useState(true);
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [viewedStories, setViewedStories] = useState<Set<string>>(new Set());
+  const { onViewerClose } = useStoriesCache();
+  const SWIPE_THRESHOLD = 80;
+  const cubeAnim = useRef(new Animated.Value(0)).current;
+  const cubeStyle = {
+  transform: [
+    { perspective: 1000 },
+    {
+      rotateY: cubeAnim.interpolate({
+        inputRange: [-1, 0, 1],
+        outputRange: ["-90deg", "0deg", "90deg"],
+      }),
+    },
+  ],
+  opacity: cubeAnim.interpolate({
+    inputRange: [-1, 0, 1],
+    outputRange: [0, 1, 0],
+  }),
+};
 
   /** ---------------- USERS ---------------- */
   useEffect(() => {
@@ -555,6 +575,145 @@ export default function StoryViewer() {
   const prevPlayer = useVideoPlayer(EMPTY_VIDEO);
   const currentPlayer = useVideoPlayer(EMPTY_VIDEO);
   const nextPlayer = useVideoPlayer(EMPTY_VIDEO);
+  const currentUserIndexRef = useRef(currentUserIndex);
+  
+  useEffect(() => {
+  currentUserIndexRef.current = currentUserIndex;
+}, [currentUserIndex]);
+const animateToNextUser = () => {
+  Animated.timing(cubeAnim, {
+    toValue: -1,
+    duration: 260,
+    useNativeDriver: true,
+  }).start(() => {
+    setCurrentUserIndex(i => i + 1);
+    setCurrentIndex(0);
+    cubeAnim.setValue(1);
+
+    Animated.timing(cubeAnim, {
+      toValue: 0,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  });
+};
+const animateToPrevUser = () => {
+  Animated.timing(cubeAnim, {
+    toValue: 1,
+    duration: 260,
+    useNativeDriver: true,
+  }).start(() => {
+    setCurrentUserIndex(i => i - 1);
+    setCurrentIndex(0);
+    cubeAnim.setValue(-1);
+
+    Animated.timing(cubeAnim, {
+      toValue: 0,
+      duration: 260,
+      useNativeDriver: true,
+    }).start();
+  });
+};
+
+const panResponder = useRef(
+  PanResponder.create({
+    onMoveShouldSetPanResponder: (_, gesture) => {
+      // HORIZONTAL swipe only
+      return (
+        Math.abs(gesture.dx) > Math.abs(gesture.dy) &&
+        Math.abs(gesture.dx) > 10
+      );
+    },
+
+    onPanResponderGrant: () => {
+      // Insta style pause
+      setPaused(true);
+      safePause(currentPlayer);
+      progressAnim.current?.stop();
+    },
+
+    onPanResponderRelease: (_, gesture) => {
+  const { dx } = gesture;
+  const index = currentUserIndexRef.current;
+
+  console.log("SWIPE INDEX:", index);
+
+  if (dx < -SWIPE_THRESHOLD) {
+    // ⬅️ NEXT USER
+    if (index < userStories.length - 1) {
+      animateToNextUser();
+    } else {
+      handleClose();
+    }
+  } 
+  else if (dx > SWIPE_THRESHOLD) {
+    // ➡️ PREVIOUS USER
+    if (index > 0) {
+          animateToPrevUser();
+    } else {
+      handleClose();
+    }
+  }
+
+  setPaused(false);
+  currentPlayer.play();
+  resumeProgress();
+},
+  })
+).current;
+const safePause = (player: any) => {
+  try {
+    player?.pause();
+  } catch {}
+};
+const resumeProgress = () => {
+  if (!currentStory) return;
+
+  progress.stopAnimation((state: any) => {
+    const currentProgress = state.value ?? 0;
+    const remaining = 1 - currentProgress;
+
+    if (remaining <= 0) return;
+
+    const duration = (currentStory.duration ?? 5) * 1000;
+
+    progressAnim.current = Animated.timing(progress, {
+      toValue: 1,
+      duration: duration * remaining,
+      useNativeDriver: false,
+    });
+
+    progressAnim.current.start(({ finished }) => {
+      if (finished) handleNext();
+    });
+  });
+};
+
+useFocusEffect(
+  useCallback(() => {
+    console.log("▶️ StoryViewer focused");
+
+    // ▶️ RESUME
+    if (currentPlayer && isVideoReady && !paused && !showViewers) {
+      try {
+        currentPlayer.volume = isMuted ? 0 : 1;
+        currentPlayer.play();
+        resumeProgress();
+      } catch {}
+    }
+
+    return () => {
+      console.log("⏸ StoryViewer blurred");
+  safePause(currentPlayer);
+      safePause(prevPlayer);
+      safePause(nextPlayer);
+   
+    };
+  }, [isVideoReady, paused, showViewers, isMuted])
+);
+  const opacity = useRef(new Animated.Value(1)).current;
+const scale = useRef(new Animated.Value(1)).current;
+const translateY = useRef(new Animated.Value(0)).current;
 
   /** ---------------- CURRENT USER & SOCKET ---------------- */
   const { data: currentUser } = useQuery({
@@ -710,6 +869,31 @@ export default function StoryViewer() {
   }, [currentIndex, currentUserIndex, isVideoReady]);
 
   /** ---------------- NAVIGATION ---------------- */
+  const handleClose = () => {
+  Animated.parallel([
+    Animated.timing(opacity, {
+      toValue: 0,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(scale, {
+      toValue: 0.96,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+    Animated.timing(translateY, {
+      toValue: 20,
+      duration: 180,
+      useNativeDriver: true,
+    }),
+  ]).start(() => {
+    onViewerClose(
+      userStories[currentUserIndex].owner,
+      currentIndex
+    );
+    router.back();
+  });
+};
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
       setCurrentIndex((i) => i + 1);
@@ -723,7 +907,7 @@ export default function StoryViewer() {
       return;
     }
 
-    router.back();
+    handleClose();
   };
 
   const handlePrev = () => {
@@ -738,7 +922,7 @@ export default function StoryViewer() {
       setCurrentUserIndex((i) => i - 1);
       setCurrentIndex(prevUser.stories.length - 1);
     } else {
-      router.back();
+      handleClose();
     }
   };
 
@@ -757,28 +941,7 @@ export default function StoryViewer() {
 
     setPaused(false);
     currentPlayer.play();
-
-    // Resume progress from where it stopped - Instagram style
-    if (currentStory) {
-      progress.stopAnimation((state: any) => {
-        const currentProgress = state.value;
-        const remainingProgress = 1 - currentProgress;
-        const duration = (currentStory.duration ?? 5) * 1000;
-        const remainingDuration = duration * remainingProgress;
-
-        if (remainingDuration > 0) {
-          progressAnim.current = Animated.timing(progress, {
-            toValue: 1,
-            duration: remainingDuration,
-            useNativeDriver: false,
-          });
-
-          progressAnim.current.start(({ finished }) => {
-            if (finished) handleNext();
-          });
-        }
-      });
-    }
+   resumeProgress();
   };
 
   /** ---------------- DELETE STORY ---------------- */
@@ -820,28 +983,7 @@ export default function StoryViewer() {
       // Resume everything
       setPaused(false);
       currentPlayer.play();
-
-      // Resume progress
-      if (currentStory) {
-        progress.stopAnimation((state: any) => {
-          const currentProgress = state.value;
-          const remainingProgress = 1 - currentProgress;
-          const duration = (currentStory.duration ?? 5) * 1000;
-          const remainingDuration = duration * remainingProgress;
-
-          if (remainingDuration > 0) {
-            progressAnim.current = Animated.timing(progress, {
-              toValue: 1,
-              duration: remainingDuration,
-              useNativeDriver: false,
-            });
-
-            progressAnim.current.start(({ finished }) => {
-              if (finished) handleNext();
-            });
-          }
-        });
-      }
+      resumeProgress(); 
     }
   };
 
@@ -849,14 +991,6 @@ export default function StoryViewer() {
     inputRange: [0, 1],
     outputRange: ["0%", "100%"],
   });
-
-
-  const handleClose = () => {
-    currentPlayer.pause();
-    currentPlayer.volume = 0;
-    router.back();
-  };
-
   /** ---------------- GUARDS ---------------- */
   if (isLoading || !currentStory) {
     return (
@@ -873,7 +1007,27 @@ export default function StoryViewer() {
 
   /** ---------------- UI ---------------- */
   return (
-    <View style={styles.container}>
+//     <Animated.View
+//   style={{
+//     flex: 1,
+//     opacity,
+//     transform: [
+//       { scale },
+//       { translateY },
+//     ],
+//   }}
+// >
+<Animated.View
+  style={[
+    {
+      flex: 1,
+      opacity,
+      transform: [{ scale }, { translateY }],
+    },
+    cubeStyle,
+  ]}
+>
+    <View style={styles.container} {...panResponder.panHandlers}>
       {/* VIDEO */}
       <VideoView
         player={currentPlayer}
@@ -925,6 +1079,7 @@ export default function StoryViewer() {
 
             style={{ flexDirection: "row", alignItems: "center" }}
             onPress={() => {
+
               if (!isOwnStory) {
                 router.push(`/profile/${currentUserStories.username}`);
               } else {
@@ -1043,10 +1198,11 @@ export default function StoryViewer() {
       </TouchableOpacity>
 
       {/* CLOSE BUTTON */}
-      <TouchableOpacity style={styles.closeButton} onPress={() => router.back()}>
+      <TouchableOpacity style={styles.closeButton} onPress={handleClose}>
         <Ionicons name="close" size={26} color="#fff" />
       </TouchableOpacity>
     </View>
+    </Animated.View>
   );
 }
 
