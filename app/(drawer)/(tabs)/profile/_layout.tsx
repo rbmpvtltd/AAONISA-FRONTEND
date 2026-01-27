@@ -64,7 +64,7 @@ export default function ProfileLayout() {
           }}
         />
 
-    <Stack.Screen
+        <Stack.Screen
           name="savedCategories"
           options={{
             title: "savePost",
@@ -72,7 +72,7 @@ export default function ProfileLayout() {
           }}
         />
 
-          <Stack.Screen
+        <Stack.Screen
           name="userReelsFeed"
           options={{
             title: "UserPosts",
@@ -80,10 +80,19 @@ export default function ProfileLayout() {
           }}
         />
 
-         <Stack.Screen
+        <Stack.Screen
           name="bookmark"
           options={{
             title: "savePost",
+            headerShown: true,
+          }}
+        />
+
+
+        <Stack.Screen
+          name="savedScreen"
+          options={{
+            title: "Bookmark categories",
             headerShown: true,
           }}
         />

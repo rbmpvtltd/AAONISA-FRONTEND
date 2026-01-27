@@ -598,11 +598,21 @@ const POST_SIZE = (width - (POST_SPACING * (POSTS_PER_ROW + 1))) / POSTS_PER_ROW
 
 // export default ProfileActionsModal;
 
-export const TopHeader: React.FC<{ userName: string; theme: any; isOwnProfile: boolean, onMorePress: () => void }> = ({ userName, theme, isOwnProfile, onMorePress }) => {
+export const TopHeader: React.FC<{ userName: string; theme: any; userRole: string; isOwnProfile: boolean, onMorePress: () => void }> = ({ userName, userRole, theme, isOwnProfile, onMorePress }) => {
     const navigation = useNavigation();
     return (
         <View style={styles.topHeader}>
-            <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
+            <View style={styles.usernameRow}>
+                <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
+                {userRole === "admin" && (
+                    < MaterialIcons
+                        name="verified"
+                        size={18}
+                        color="#0095F6" // Instagram blue
+                        style={styles.verifiedIcon}
+                    />
+                )}
+            </View>
 
             {/* {isOwnProfile && (
                 <TouchableOpacity onPress={() => navigation.dispatch(DrawerActions.openDrawer())}>
@@ -1200,6 +1210,7 @@ export const ProfileScreen: React.FC = () => {
         <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }}>
             <TopHeader
                 userName={username || "Username"}
+                userRole={profile?.role}
                 theme={theme}
                 isOwnProfile={isOwnProfile}
                 onMorePress={() => setShowActions(true)}
@@ -1269,7 +1280,15 @@ const styles = StyleSheet.create({
         padding: width * 0.04,
         alignItems: "center",
     },
+    usernameRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
 
+    verifiedIcon: {
+        marginLeft: 4,
+        marginTop: 1, // perfect vertical align
+    },
     profilePictureContainer: {
         width: profilePicSize,
         height: profilePicSize,

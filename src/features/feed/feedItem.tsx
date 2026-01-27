@@ -781,6 +781,7 @@ import { useMarkViewedMutation } from "@/src/hooks/useMarkViewedMutation";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { formatCount } from "@/src/utils/formatCount";
+import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -1051,13 +1052,22 @@ export const FeedItem = React.memo(
                     ]}
                 >
                     <Image
-                        source={{ uri: item.user?.profilePic }}
+                        source={{ uri: item.user?.profilePic || "https://cdn-icons-png.flaticon.com/512/847/847969.png" }}
                         style={styles.profileImage}
                     />
                     <View style={styles.userInfo}>
-                        <Text style={[styles.username, { color: "#fff" }]}>
-                            {item.user?.username}
-                        </Text>
+                        <View style={styles.usernameRow}>
+                            <Text style={[styles.username, { color: "#fff" }]}>
+                                {item.user?.username}
+                            </Text>
+
+                            <MaterialIcons
+                                name="verified"
+                                size={18}
+                                color="#0095F6" // Instagram blue
+                                style={styles.verifiedIcon}
+                            />
+                        </View>
                     </View>
                 </Pressable>
 
@@ -1321,7 +1331,7 @@ export const FeedItem = React.memo(
                     }}
                     videoId={item.id || item.uuid}
                 /> */}
-    <BookmarkPanel />
+                <BookmarkPanel />
             </View >
         );
     }
@@ -1355,6 +1365,16 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600"
     },
+    usernameRow: {
+        flexDirection: "row",
+        alignItems: "center",
+    },
+
+    verifiedIcon: {
+        marginLeft: 4,
+        marginTop: 1, // perfect vertical align
+    },
+
     title: {
         padding: 10,
         fontSize: 16

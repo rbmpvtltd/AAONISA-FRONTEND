@@ -1137,7 +1137,7 @@ const ReelItem = ({
       .filter(Boolean);
   };
 
-
+  // console.log("item..................", item);
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <GestureDetector gesture={composedGesture}>
@@ -1634,6 +1634,7 @@ const ReelsFeed = () => {
 
   const currentUserId = currentUser?.userProfile?.id;
 
+
   // Render individual reel item
   const renderItem = useCallback(({ item, index }: any) => {
     if (!item) return null;
@@ -1879,6 +1880,11 @@ const styles = StyleSheet.create({
     color: '#fff',
     fontSize: 16,
     fontWeight: '600'
+  },
+
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
   },
 
   caption: {
