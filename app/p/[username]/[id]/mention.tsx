@@ -303,6 +303,12 @@ const MentionedReelItem = ({
             />
 
             <Text style={styles.username}>{item.user_id?.username}</Text>
+            {/* < MaterialIcons
+              name="verified"
+              size={18}
+              color="#0095F6" // Instagram blue
+            // style={styles.verifiedIcon}
+            /> */}
           </TouchableOpacity>
         </View>
 

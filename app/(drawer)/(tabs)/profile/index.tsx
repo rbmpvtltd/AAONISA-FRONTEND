@@ -28,6 +28,9 @@ export default function MyProfileScreen() {
     enabled: !!currentUser?.username,
   });
 
+
+  console.log("profile  AAAAAAAA=======>", profile);
+
   // console.log("=============================================");
   // console.log("profile  AAAAAAAA=======>", profile?.mentionedVideos);
   // console.log("=============================================");
@@ -60,6 +63,9 @@ export default function MyProfileScreen() {
   };
 
 
+  console.log("profile     njknjk", profile.role)
+
+
   return (
     <SafeAreaView style={{ flex: 1, backgroundColor: theme.background }} edges={["top"]}>
       <FlatList
@@ -72,7 +78,7 @@ export default function MyProfileScreen() {
         }
         ListHeaderComponent={
           <>
-            <TopHeader userName={profile?.username} theme={theme} isOwnProfile onMorePress={() => setShowActions(true)} />
+            <TopHeader userName={profile?.username} userRole={profile?.role} theme={theme} isOwnProfile onMorePress={() => setShowActions(true)} />
             <ProfileHeader theme={theme} profile={profile} />
             <UserInfo
               theme={theme}

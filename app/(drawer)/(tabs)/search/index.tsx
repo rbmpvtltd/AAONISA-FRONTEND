@@ -1,4 +1,4 @@
-import { Ionicons } from "@expo/vector-icons";
+import { Ionicons, MaterialIcons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
@@ -193,9 +193,19 @@ export default function ExploreScreen() {
                   style={styles.avatar}
                 />
                 <View style={styles.textContainer}>
-                  <Text style={[styles.username, { color: theme.text }]}>
-                    {u.username}
-                  </Text>
+                  <View style={styles.usernameRow}>
+                    <Text style={[styles.username, { color: theme.text }]}>
+                      {u.username}
+                    </Text>
+                    {u.role === "admin" && (
+                      < MaterialIcons
+                        name="verified"
+                        size={18}
+                        color="#0095F6"
+                        style={styles.verifiedIcon}
+                      />
+                    )}
+                  </View>
                   {u.name && (
                     <Text style={[styles.name, { color: theme.subtitle }]}>
                       {u.name}
@@ -338,6 +348,14 @@ const styles = StyleSheet.create({
     padding: 12,
     borderRadius: 12,
     marginBottom: 8,
+  },
+  usernameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
   },
   avatar: { width: 50, height: 50, borderRadius: 25 },
   textContainer: { marginLeft: 12 },
