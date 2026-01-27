@@ -488,6 +488,7 @@ import { useSocketManager } from "@/src/socket/socket";
 import { useViewStore } from "@/src/store/viewStore";
 import { formatCount } from "@/src/utils/formatCount";
 import { timeAgo } from "@/src/utils/timeAgo";
+import { useStoryVideoCache } from "@/src/utils/useStoryVideoCache";
 import { getCachedVideo } from "@/src/utils/videoCache";
 import { Ionicons } from "@expo/vector-icons";
 import { useQuery, useQueryClient } from "@tanstack/react-query";
@@ -533,6 +534,10 @@ export default function StoryViewer() {
   const [isVideoReady, setIsVideoReady] = useState(false);
   const [viewedStories, setViewedStories] = useState<Set<string>>(new Set());
   const { onViewerClose } = useStoriesCache();
+  const {
+  onStoryChange,
+  onViewerClose: onVideoViewerClose,
+} = useStoryVideoCache();
   const SWIPE_THRESHOLD = 80;
   const cubeAnim = useRef(new Animated.Value(0)).current;
   const cubeStyle = {
@@ -641,6 +646,10 @@ export default function StoryViewer() {
         if (dx < -SWIPE_THRESHOLD) {
           // ⬅️ NEXT USER
           if (index < userStories.length - 1) {
+            onViewerClose(
+              userStories[currentUserIndex].owner,
+              currentIndex
+            );
             animateToNextUser();
           } else {
             handleClose();
@@ -649,6 +658,10 @@ export default function StoryViewer() {
         else if (dx > SWIPE_THRESHOLD) {
           // ➡️ PREVIOUS USER
           if (index > 0) {
+            onViewerClose(
+              userStories[currentUserIndex].owner,
+              currentIndex
+            );
             animateToPrevUser();
           } else {
             handleClose();
@@ -887,6 +900,11 @@ export default function StoryViewer() {
         useNativeDriver: true,
       }),
     ]).start(() => {
+      onVideoViewerClose({
+        userId: currentUserStories.owner,
+        storyUrls: storyList.map((s: any) => s.videoUrl),
+      });
+
       onViewerClose(
         userStories[currentUserIndex].owner,
         currentIndex
@@ -897,11 +915,25 @@ export default function StoryViewer() {
   const handleNext = () => {
     if (currentIndex < storyList.length - 1) {
       setCurrentIndex((i) => i + 1);
+      onStoryChange({
+        currentUserIndex,
+        currentIndex,
+        totalUsers: userStories.length,
+        userIds: userStories.map(u => u.owner),
+        storyUrlsMap: userStories.reduce((acc, u) => {
+          acc[u.owner] = u.stories.map((s: any) => s.videoUrl);
+          return acc;
+        }, {} as Record<string, string[]>)
+      });
       return;
     }
 
     // Move to next user
     if (currentUserIndex < userStories.length - 1) {
+      onViewerClose(
+        userStories[currentUserIndex].owner,
+        currentIndex
+      );
       setCurrentUserIndex((i) => i + 1);
       setCurrentIndex(0);
       return;
@@ -912,12 +944,28 @@ export default function StoryViewer() {
 
   const handlePrev = () => {
     if (currentIndex > 0) {
+
       setCurrentIndex((i) => i - 1);
+      onStoryChange({
+        currentUserIndex,
+        currentIndex,
+        totalUsers: userStories.length,
+        userIds: userStories.map(u => u.owner),
+        storyUrlsMap: userStories.reduce((acc, u) => {
+          acc[u.owner] = u.stories.map((s: any) => s.videoUrl);
+          return acc;
+        }, {} as Record<string, string[]>)
+      });
+
       return;
     }
 
     // Move to previous user
     if (currentUserIndex > 0) {
+      onViewerClose(
+        userStories[currentUserIndex].owner,
+        currentIndex
+      );
       const prevUser = userStories[currentUserIndex - 1];
       setCurrentUserIndex((i) => i - 1);
       setCurrentIndex(prevUser.stories.length - 1);

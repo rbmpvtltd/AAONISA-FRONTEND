@@ -355,7 +355,7 @@ export const StoryList = memo(({ theme }: { theme: any }) => {
         currentUserStories.stories[0];
 
       router.push({
-        pathname: "/story/story-viewer",
+        pathname: "/story/storyViewerContainer",
         params: {
           ownerId: currentUserStories.owner,
           startIndex: currentUserStories.stories.findIndex(
@@ -374,7 +374,7 @@ export const StoryList = memo(({ theme }: { theme: any }) => {
       user.stories.find((s: any) => !s.viewed) || user.stories[0];
 
     router.push({
-      pathname: "/story/story-viewer",
+      pathname: "/story/storyViewerContainer",
       params: {
         ownerId: user.owner,
         startIndex: user.stories.findIndex(
