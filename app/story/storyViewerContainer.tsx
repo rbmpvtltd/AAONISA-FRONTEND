@@ -2,6 +2,7 @@ import StoryViewer from "@/app/story/story-viewer";
 import { useStoriesQuery } from "@/src/hooks/storyMutation";
 import { useLocalSearchParams, useRouter } from "expo-router";
 import { useEffect, useState } from "react";
+import { Animated } from "react-native";
 export default function StoryViewerContainer() {
   const router = useRouter();
   const { ownerId, startIndex } = useLocalSearchParams();
@@ -37,20 +38,11 @@ export default function StoryViewerContainer() {
   };
 
   return (
-    <>
-      {prevUser && <StoryViewer user={prevUser} isActive={false} />}
-      
-      {currentUser && (
-        <StoryViewer
-          user={currentUser}
-          isActive
-          startIndex={Number(startIndex) || 0}
-          onNextUser={goNextUser}
-          onPrevUser={goPrevUser}
-        />
-      )}
+      <Animated.View style={[styles.row, animatedStyle]}>
+  <StoryViewer user={prevUser} isActive={false} />
+  <StoryViewer user={currentUser} isActive />
+  <StoryViewer user={nextUser} isActive={false} />
+</Animated.View>
 
-      {nextUser && <StoryViewer user={nextUser} isActive={false} />}
-    </>
   );
 }
