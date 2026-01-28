@@ -190,6 +190,7 @@ import { getUserSessionsWithLatestMessage, sendReelToChats } from "@/src/api/cha
 import NotificationSkeletonItem from "@/src/components/NotificationSkeletonItem";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -239,6 +240,7 @@ interface ChatRowProps {
   msgFontSize: number;
   shareMode: boolean;
   selected: boolean;
+  role: string;
 }
 
 
@@ -251,6 +253,7 @@ function ChatRow({
   msgFontSize,
   shareMode,
   selected,
+  role
 }: ChatRowProps) {
   return (
     <TouchableOpacity
@@ -262,9 +265,19 @@ function ChatRow({
       <Avatar avatar={chat.avatar} size={avatarSize} />
 
       <View style={{ flex: 1, marginLeft: 12 }}>
+
         <Text style={[styles.chatName, { color: theme.text, fontSize: nameFontSize }]}>
           {chat.name}
+          {role === "admin" && (
+            < MaterialIcons
+              name="verified"
+              size={18}
+              color="#0095F6"
+              style={styles.verifiedIcon}
+            />
+          )}
         </Text>
+
         <Text
           numberOfLines={1}
           style={[styles.chatLastMsg, { color: theme.subtitle, fontSize: msgFontSize }]}
@@ -398,6 +411,7 @@ export default function ChatListScreen() {
         lastMessage: getLastMessagePreview(latest?.text),
         unread: 0,
         sessionId: session.sessionId,
+        role: session.otherUser.role,
       };
     }) || [];
 
@@ -494,8 +508,11 @@ export default function ChatListScreen() {
         <Text style={{ color: theme.subtitle, fontSize: 16 }}>No chats yet</Text>
       </View>
     );
-
   }
+
+  // console.log("chatList:", chatList);
+
+
   return (
     <View style={[styles.container, { backgroundColor: theme.background }]}>
       <FlatList
@@ -504,6 +521,7 @@ export default function ChatListScreen() {
         renderItem={({ item }: { item: ChatSummary }) => (
           <ChatRow
             chat={item}
+            role={item.role}
             theme={theme}
             avatarSize={avatarSize}
             nameFontSize={nameFontSize}
@@ -523,6 +541,7 @@ export default function ChatListScreen() {
                     username: item.name,
                     avatar: item.avatar || "https://cdn-icons-png.flaticon.com/512/847/847969.png",
                     reelId,
+                    role: item.role
                   },
                 });
               }
@@ -608,6 +627,10 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   chatName: { fontWeight: "600" },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
+  },
   chatLastMsg: { marginTop: 4 },
   unreadBadge: {
     borderRadius: 50,

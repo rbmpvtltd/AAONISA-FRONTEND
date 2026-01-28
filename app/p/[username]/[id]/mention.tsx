@@ -14,6 +14,7 @@ import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
 import { formatCount } from '@/src/utils/formatCount';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -220,6 +221,7 @@ const MentionedReelItem = ({
     onLongPressOut: handleLongPressOut,
   });
 
+  console.log("item mention", item.user_id?.role)
 
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -303,12 +305,14 @@ const MentionedReelItem = ({
             />
 
             <Text style={styles.username}>{item.user_id?.username}</Text>
-            {/* < MaterialIcons
-              name="verified"
-              size={18}
-              color="#0095F6" // Instagram blue
-            // style={styles.verifiedIcon}
-            /> */}
+            {item.user_id?.role === "admin" && (
+              < MaterialIcons
+                name="verified"
+                size={18}
+                color="#0095F6"
+                style={styles.verifiedIcon}
+              />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -788,6 +792,10 @@ const styles = StyleSheet.create({
     fontSize: 16,
     fontWeight: '600',
     marginLeft: 8,
+  },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
   },
   caption: {
     color: '#fff',

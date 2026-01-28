@@ -1064,7 +1064,7 @@ export const FeedItem = React.memo(
                             <MaterialIcons
                                 name="verified"
                                 size={18}
-                                color="#0095F6" // Instagram blue
+                                color="#0095F6"
                                 style={styles.verifiedIcon}
                             />
                         </View>
@@ -1074,7 +1074,8 @@ export const FeedItem = React.memo(
                 {/* Video Container */}
                 <View style={[
                     styles.videoContainer,
-                    isFullscreen && styles.fullscreenVideo
+                    isFullscreen && styles.fullscreenVideo,
+                    { backgroundColor: theme.searchBg }
                 ]}>
                     <TouchableOpacity
                         activeOpacity={1}
@@ -1383,6 +1384,7 @@ const styles = StyleSheet.create({
         width: "100%",
         height: "80%",
         position: "relative",
+
     },
     drawerContainer: {
         position: "absolute",
@@ -1523,17 +1525,17 @@ const styles = StyleSheet.create({
         fontSize: 14,
     },
 
-    handle: {
-        width: 40,
-        height: 4,
-        borderRadius: 2,
-        backgroundColor: "#ccc",
-        marginBottom: 8,
-    },
-    closeBtn: {
-        position: "absolute",
-        right: 16,
-        top: 6,
-    },
+    // handle: {
+    //     width: 40,
+    //     height: 4,
+    //     borderRadius: 2,
+    //     backgroundColor: "#ccc",
+    //     marginBottom: 8,
+    // },
+    // closeBtn: {
+    //     position: "absolute",
+    //     right: 16,
+    //     top: 6,
+    // },
 
 });

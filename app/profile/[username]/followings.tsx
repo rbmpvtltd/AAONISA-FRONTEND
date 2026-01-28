@@ -343,7 +343,7 @@
 
 import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
-import { Ionicons } from '@expo/vector-icons';
+import { Ionicons, MaterialIcons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -366,6 +366,7 @@ interface Following {
   profilepicture: string;
   followedByMe?: boolean;
   followsMe?: boolean;
+  role: string;
 }
 
 const FollowingScreen = () => {
@@ -531,6 +532,8 @@ const FollowingScreen = () => {
       buttonText = 'Follow Back';
     }
 
+
+
     return (
       <TouchableOpacity onPress={() => handleProfilePress(item.username)}>
         <View style={[styles.userRow, { borderBottomColor: theme.inputBorder }]}>
@@ -547,10 +550,18 @@ const FollowingScreen = () => {
           />
           <View style={[styles.userInfo, { marginLeft: 10 }]}>
             <Text style={[styles.name, { color: theme.text }]}>
-              {item.name || 'No Name'}
+              {item.username || 'No Name'}
+              {item.role === "admin" && (
+                < MaterialIcons
+                  name="verified"
+                  size={18}
+                  color="#0095F6"
+                  style={styles.verifiedIcon}
+                />
+              )}
             </Text>
             <Text style={[styles.username, { color: theme.subtitle }]}>
-              @{item.username}
+              {item.name}
             </Text>
           </View>
 
@@ -688,6 +699,10 @@ const styles = StyleSheet.create({
   },
   userInfo: { flex: 1 },
   name: { fontWeight: '600', fontSize: 16 },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
+  },
   username: { fontSize: 14 },
   followButton: {
     paddingVertical: 6,

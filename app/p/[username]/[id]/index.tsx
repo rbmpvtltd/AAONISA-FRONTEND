@@ -853,6 +853,7 @@ import { useDeleteVideo } from '@/src/hooks/videosMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { formatCount } from '@/src/utils/formatCount';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -1041,7 +1042,7 @@ const UserReelItem = memo(({
 
   const isOwnProfile = item.userProfile?.id === currentUserId;
   // console.log('====================================');
-  // console.log("jjjjjjjjjjjj", item);
+  console.log("jjjjjjjjjjjj", item);
   // console.log('====================================');
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
@@ -1116,6 +1117,14 @@ const UserReelItem = memo(({
               }}
             />
             <Text style={styles.username}>{reelUsername}</Text>
+            {item.user_id?.role === "admin" && (
+              < MaterialIcons
+                name="verified"
+                size={18}
+                color="#0095F6"
+                style={styles.verifiedIcon}
+              />
+            )}
           </TouchableOpacity>
         </View>
 
@@ -1601,6 +1610,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
+  },
+
   captionContainer: {
     marginBottom: 8
   },

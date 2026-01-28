@@ -1055,7 +1055,7 @@ function MessageBubble({
         ]}
       >
         {isReelMessage ? (
-          <Pressable onPress={handleReelPress}>
+          <Pressable onPress={handleReelPress} onLongPress={() => onLongPress(m)} >
             <View style={styles.reelContainer}>
               <Image
                 source={{ uri: reelData.thumbnail }}
@@ -1178,9 +1178,9 @@ export default function ChatDetailScreen() {
   const theme = useAppTheme();
   const { width } = useWindowDimensions();
   const route = useRoute<
-    RouteProp<{ params: { id: string; chatName?: string, username?: string, avatar?: string } }, "params">
+    RouteProp<{ params: { id: string; chatName?: string, username?: string, avatar?: string, role?: string } }, "params">
   >();
-  const { id: chatUserId, username, avatar } = route.params;
+  const { id: chatUserId, username, avatar, role } = route.params;
 
   const { data: currentUser } = useQuery({
     queryKey: ["currentUser"],
@@ -1388,6 +1388,14 @@ export default function ChatDetailScreen() {
               <TouchableOpacity onPress={() => router.push(`/profile/${username}`)} >
                 <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
                   {username || 'Chat'}
+                  {role === "admin" && (
+                    < MaterialIcons
+                      name="verified"
+                      size={18}
+                      color="#0095F6"
+                      style={styles.verifiedIcon}
+                    />
+                  )}
                 </Text>
               </TouchableOpacity>
             </View>
@@ -1486,6 +1494,10 @@ const styles = StyleSheet.create({
   },
   bubble: {
     borderRadius: 12,
+  },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
   },
   reelContainer: {
     // width: 200,

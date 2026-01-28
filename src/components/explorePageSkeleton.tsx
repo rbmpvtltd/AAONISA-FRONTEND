@@ -80,19 +80,19 @@ export const SearchUserSkeleton = () => {
     const theme = useAppTheme();
     return (
         <>
-            {Array.from({ length: 7 }).map((_, i) => (
+            {Array.from({ length: 20 }).map((_, i) => (
                 <View
                     key={i}
                     style={{
                         flexDirection: "row",
                         alignItems: "center",
-                        padding: 14,
-                        borderRadius: 14,
-                        marginBottom: 10,
-                        backgroundColor: theme.searchBg,
+                        padding: 8,
+                        // borderRadius: 14,
+                        // marginBottom: 10,
+                        // backgroundColor: theme.searchBg,
                     }}
                 >
-                    <SkeletonBox width={48} height={48} radius={24} />
+                    <SkeletonBox width={35} height={35} radius={24} />
                     <View style={{ marginLeft: 12 }}>
                         <SkeletonBox width={140} height={14} radius={6} />
                         <View style={{ height: 8 }} />

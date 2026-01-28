@@ -386,7 +386,7 @@ export const StoryList = memo(({ theme }: { theme: any }) => {
 
   // ---------- RENDER ----------
 
-  if (!stories.length) return null;
+  // if (!stories.length) return null;
 
   return (
     <ScrollView
