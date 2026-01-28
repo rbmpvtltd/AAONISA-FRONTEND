@@ -38,7 +38,6 @@ export default function ExploreScreen() {
   const [debouncedQuery, setDebouncedQuery] = useState("");
 
 
-
   // Debounce search
   useEffect(() => {
     const t = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
@@ -51,6 +50,8 @@ export default function ExploreScreen() {
     queryFn: GetCurrentUser,
   });
 
+  console.log("currentUser", currentUser);
+
   // Search users API
   const {
     data: searchResults = [],
@@ -60,6 +61,8 @@ export default function ExploreScreen() {
     queryFn: () => (debouncedQuery ? SearchUserProfiel(debouncedQuery) : []),
     enabled: !!debouncedQuery,
   });
+
+  console.log("searchResults", searchResults);
 
   // Filter out current user from search results
   const filteredSearchResults = useMemo(() => {
@@ -185,7 +188,7 @@ export default function ExploreScreen() {
             ) : (filteredSearchResults.map((u: any) => (
               <TouchableOpacity
                 key={u.id}
-                style={[styles.userItem, { backgroundColor: theme.buttonBg }]}
+                style={[styles.userItem]}
                 onPress={() => router.push(`/profile/${u.username}`)}
               >
                 <Image
@@ -206,9 +209,9 @@ export default function ExploreScreen() {
                       />
                     )}
                   </View>
-                  {u.name && (
+                  {u.userProfile?.name && (
                     <Text style={[styles.name, { color: theme.subtitle }]}>
-                      {u.name}
+                      {u.userProfile.name}
                     </Text>
                   )}
                 </View>
@@ -345,9 +348,7 @@ const styles = StyleSheet.create({
   userItem: {
     flexDirection: "row",
     alignItems: "center",
-    padding: 12,
-    borderRadius: 12,
-    marginBottom: 8,
+    padding: 8,
   },
   usernameRow: {
     flexDirection: "row",
@@ -357,10 +358,10 @@ const styles = StyleSheet.create({
     marginLeft: 4,
     marginTop: 1, // perfect vertical align
   },
-  avatar: { width: 50, height: 50, borderRadius: 25 },
+  avatar: { width: 35, height: 35, borderRadius: 25 },
   textContainer: { marginLeft: 12 },
   username: { fontSize: 16, fontWeight: "600" },
-  name: { fontSize: 14, marginTop: 2 },
+  name: { fontSize: 13, marginTop: 2 },
 
   masonryRow: {
     flexDirection: "row",

@@ -23,8 +23,8 @@ export default function UserLayout() {
           },
         }}
       >
-      
-         <Stack.Screen
+
+        <Stack.Screen
           name="index"
           options={{
             title: "index",
@@ -40,11 +40,19 @@ export default function UserLayout() {
           }}
         />
 
-          <Stack.Screen
+        <Stack.Screen
           name="followings"
           options={{
             title: "followings",
             headerShown: true,
+          }}
+        />
+
+        <Stack.Screen
+          name="profile-picture"
+          options={{
+            title: "profile-picture",
+            headerShown: false,
           }}
         />
       </Stack>

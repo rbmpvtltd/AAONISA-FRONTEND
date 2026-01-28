@@ -5,6 +5,7 @@ import { getTimeAgo } from "@/src/hooks/ReelsUploadTime";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { useReelsStore } from "@/src/store/useReelsStore";
 import { formatCount } from "@/src/utils/formatCount";
+import { MaterialIcons } from "@expo/vector-icons";
 import { useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { VideoView, useVideoPlayer } from "expo-video";
@@ -234,7 +235,17 @@ export default function SingleReel({ currentUserId, likeMutation }: any) {
         >
 
           <Image source={{ uri: reel.user?.userProfile ? reel.user?.userProfile : "https://cdn-icons-png.flaticon.com/512/847/847969.png" }} style={styles.avatar} />
-          <Text style={styles.username}>{reel.user?.username}</Text>
+          <Text style={styles.username}>{reel.user?.username}
+            {reel.user.role === "admin" && (
+              < MaterialIcons
+                name="verified"
+                size={18}
+                color="#0095F6"
+                style={styles.verifiedIcon}
+              />
+            )}
+          </Text>
+
         </TouchableOpacity>
 
         {/* CAPTION */}
@@ -516,6 +527,10 @@ const styles = StyleSheet.create({
     width: 40, height: 40, borderRadius: 20, marginRight: 10,
   },
   username: { color: "#fff", fontSize: 16, fontWeight: "600" },
+  verifiedIcon: {
+    marginLeft: 4,
+    marginTop: 1, // perfect vertical align
+  },
   caption: { color: "#fff", fontSize: 14, marginTop: 6 },
   more: { color: "#aaa", marginTop: 4 },
   musicRow: { flexDirection: "row", alignItems: "center", marginTop: 10 },

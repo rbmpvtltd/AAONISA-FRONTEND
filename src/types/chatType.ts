@@ -18,4 +18,5 @@ export type ChatSummary = {
   lastMessage: string;
   unread?: number;
   sessionId: string;
+  role: string;
 };

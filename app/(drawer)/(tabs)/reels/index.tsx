@@ -923,6 +923,7 @@ import { useLikeMutation } from '@/src/hooks/userLikeMutation';
 import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { formatCount } from '@/src/utils/formatCount';
+import { MaterialIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery, useQueryClient } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -1137,7 +1138,7 @@ const ReelItem = ({
       .filter(Boolean);
   };
 
-  // console.log("item..................", item);
+  console.log("item..................", item);
   return (
     <View style={{ width: SCREEN_WIDTH, height: SCREEN_HEIGHT, backgroundColor: 'black' }}>
       <GestureDetector gesture={composedGesture}>
@@ -1221,6 +1222,14 @@ const ReelItem = ({
               }}
             />
             <Text style={styles.username}>{item.user.username}</Text>
+            {item.user.role === "admin" && (
+              < MaterialIcons
+                name="verified"
+                size={18}
+                color="#0095F6"
+                style={styles.verifiedIcon}
+              />
+            )}
           </TouchableOpacity>
         </View>
 
