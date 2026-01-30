@@ -1,9 +1,993 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+// without seach history feature
+// import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+// import { useQuery } from "@tanstack/react-query";
+// import { useRouter } from "expo-router";
+// import { useEffect, useMemo, useState } from "react";
+// import {
+//   ActivityIndicator,
+//   Dimensions,
+//   Image,
+//   RefreshControl,
+//   ScrollView,
+//   StyleSheet,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   View,
+// } from "react-native";
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+// import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
+// import { ExploreSkeleton, SearchUserSkeleton } from "@/src/components/explorePageSkeleton";
+// import { useAppTheme } from "@/src/constants/themeHelper";
+// import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
+// import { useReelsStore } from "@/src/store/useReelsStore";
+// import { useSearchHistoryStore } from "@/src/store/useSearchHistoryStore";
+
+// const { width, height } = Dimensions.get("window");
+// const numColumns = 3;
+// const spacing = 8;
+// const columnWidth = Math.floor((width - spacing * (numColumns + 1)) / numColumns);
+
+// const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+// const BOTTOM_PADDING = 100;
+
+// export default function ExploreScreen() {
+//   const theme = useAppTheme();
+//   const router = useRouter();
+
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [debouncedQuery, setDebouncedQuery] = useState("");
+//   const [isInputFocused, setIsInputFocused] = useState(false);
+
+//   const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistoryStore();
+
+//   // Debounce search
+//   useEffect(() => {
+//     const t = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
+//     return () => clearTimeout(t);
+//   }, [searchQuery]);
+
+
+//   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+//     queryKey: ["currentUser"],
+//     queryFn: GetCurrentUser,
+//   });
+
+//   // console.log("currentUser", currentUser);
+
+//   // Search users API
+//   const {
+//     data: searchResults = [],
+//     isLoading: searchLoading,
+//   } = useQuery({
+//     queryKey: ["searchUsers", debouncedQuery],
+//     queryFn: () => (debouncedQuery ? SearchUserProfiel(debouncedQuery) : []),
+//     enabled: !!debouncedQuery,
+//   });
+
+//   console.log("searchResults", searchResults);
+
+//   // Filter out current user from search results
+//   const filteredSearchResults = useMemo(() => {
+//     if (!currentUser || !searchResults) return [];
+
+//     return searchResults.filter((user: any) =>
+//       user.username !== currentUser.username
+//     );
+//   }, [searchResults, currentUser]);
+
+//   const {
+//     data,
+//     fetchNextPage,
+//     hasNextPage,
+//     isFetchingNextPage,
+//     isLoading: videoLoading,
+//     isError,
+//     refetch,
+//     isRefetching,
+//   } = useReelsByCategory('explore');
+
+//   const videos = data?.pages.flatMap((p: any) => p.reels) || [];
+
+
+//   const handleUserPress = (user: any) => {
+//     addToHistory(user);
+//     setSearchQuery("");
+//     setIsInputFocused(false);
+//     router.push(`/profile/${user.username}`);
+//   };
+
+//   const handleHistoryItemPress = (item: any) => {
+//     setSearchQuery("");
+//     setIsInputFocused(false);
+//     router.push(`/profile/${item.username}`);
+//   };
+
+//   const showSearchHistory = isInputFocused && !debouncedQuery && history.length > 0;
+
+//   // Masonry column distribution
+//   const columns = useMemo(() => {
+//     // Initialize empty columns WITH height tracking
+//     const cols: { items: any[]; height: number }[] = Array.from(
+//       { length: numColumns },
+//       () => ({ items: [], height: 0 })
+//     );
+
+//     videos.forEach((item: any) => {
+//       const aspectHeight =
+//         item.height ||
+//         Math.max(160, Math.round((columnWidth * 16) / 9));
+
+//       // Find shortest column
+//       let shortest = cols[0];
+//       for (let c of cols) {
+//         if (c.height < shortest.height) shortest = c;
+//       }
+
+//       // Push item into shortest column
+//       shortest.items.push(item);
+//       shortest.height += aspectHeight + spacing;
+//     });
+
+//     return cols.map((c) => c.items);
+//   }, [videos]);
+
+
+//   // if (isError) {
+//   //   return (
+//   //     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+//   //       <View style={styles.center}>
+//   //         <Text style={{ color: theme.text, fontSize: 16 }}>
+//   //           Failed to load explore feed.
+//   //         </Text>
+//   //         <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
+//   //           <Text style={{ color: theme.buttonBg }}>Retry</Text>
+//   //         </TouchableOpacity>
+//   //       </View>
+//   //     </SafeAreaView>
+//   //   );
+//   // }
+
+//   if (isError && videos.length === 0) {
+//     return (
+//       <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+//         <View style={styles.center}>
+//           <Text style={{ color: theme.text, fontSize: 16 }}>
+//             Failed to load explore feed.
+//           </Text>
+//           <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
+//             <Text style={{ color: theme.buttonBg }}>Retry</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   return (
+//     <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.background }]}>
+//       <View style={[styles.container, { backgroundColor: theme.background }]}>
+
+//         {/* SEARCH BAR */}
+//         <View style={[styles.searchContainer, { backgroundColor: theme.searchBg }]}>
+//           <Ionicons name="search" size={20} color={theme.text} style={styles.searchIcon} />
+//           <TextInput
+//             style={[styles.input, { color: theme.text }]}
+//             placeholder="Search users"
+//             placeholderTextColor={theme.text}
+//             value={searchQuery}
+//             onChangeText={(text) => setSearchQuery(text.trim().toLocaleLowerCase())}
+//             onFocus={() => setIsInputFocused(true)}
+//             onBlur={() => setTimeout(() => setIsInputFocused(false), 200)}
+//             autoCapitalize="none"
+//           />
+//           {searchQuery ? (
+//             <TouchableOpacity onPress={() => setSearchQuery("")}>
+//               <Ionicons name="close-circle" size={20} color={theme.text} />
+//             </TouchableOpacity>
+//           ) : null}
+
+//           {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
+//         </View>
+
+//         {/* SEARCH HISTORY */}
+//         {showSearchHistory ? (
+//           <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
+//             <View style={styles.historyHeader}>
+//               <Text style={[styles.historyTitle, { color: theme.text }]}>Recent</Text>
+//               <TouchableOpacity onPress={clearHistory}>
+//                 <Text style={[styles.clearText, { color: theme.buttonBg }]}>Clear All</Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             {history.map((item) => (
+//               <View key={item.id} style={styles.historyItemContainer}>
+//                 <TouchableOpacity
+//                   style={styles.historyItem}
+//                   onPress={() => handleHistoryItemPress(item)}
+//                 >
+//                   <Image
+//                     source={{ uri: item.profilePicture || DEFAULT_THUMBNAIL }}
+//                     style={styles.avatar}
+//                   />
+//                   <View style={styles.textContainer}>
+//                     <View style={styles.usernameRow}>
+//                       <Text style={[styles.username, { color: theme.text }]}>
+//                         {item.username}
+//                       </Text>
+//                       {item.role === "admin" && (
+//                         <MaterialIcons
+//                           name="verified"
+//                           size={18}
+//                           color="#0095F6"
+//                           style={styles.verifiedIcon}
+//                         />
+//                       )}
+//                     </View>
+//                     {item.name && (
+//                       <Text style={[styles.name, { color: theme.subtitle }]}>
+//                         {item.name}
+//                       </Text>
+//                     )}
+//                   </View>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity
+//                   onPress={() => removeFromHistory(item.id)}
+//                   style={styles.removeButton}
+//                 >
+//                   <Ionicons name="close" size={20} color={theme.subtitle} />
+//                 </TouchableOpacity>
+//               </View>
+//             ))}
+//           </ScrollView>
+//         ) : null}
+
+//         {/* SEARCH RESULTS */}
+//         {debouncedQuery && !showSearchHistory ? (
+//           <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
+
+//             {/*  NO RESULTS FOUND */}
+//             {!searchLoading && filteredSearchResults.length === 0 ? (
+//               <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+//                 <Ionicons name="search-outline" size={50} color={theme.subtitle} />
+//                 <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
+//                   No results found
+//                 </Text>
+//               </View>
+//             ) : null}
+
+//             {/*  SEARCH RESULTS LIST */}
+//             {searchLoading ? (
+//               <SearchUserSkeleton />
+//             ) : (filteredSearchResults.map((u: any) => (
+//               <TouchableOpacity
+//                 key={u.id}
+//                 style={[styles.userItem]}
+//                 // onPress={() => router.push(`/profile/${u.username}`)}
+//                 onPress={() => handleUserPress(u)}
+//               >
+//                 <Image
+//                   source={{ uri: u.userProfile?.ProfilePicture || DEFAULT_THUMBNAIL }}
+//                   style={styles.avatar}
+//                 />
+//                 <View style={styles.textContainer}>
+//                   <View style={styles.usernameRow}>
+//                     <Text style={[styles.username, { color: theme.text }]}>
+//                       {u.username}
+//                     </Text>
+//                     {u.role === "admin" && (
+//                       < MaterialIcons
+//                         name="verified"
+//                         size={18}
+//                         color="#0095F6"
+//                         style={styles.verifiedIcon}
+//                       />
+//                     )}
+//                   </View>
+//                   {u.userProfile?.name && (
+//                     <Text style={[styles.name, { color: theme.subtitle }]}>
+//                       {u.userProfile.name}
+//                     </Text>
+//                   )}
+//                 </View>
+//               </TouchableOpacity>
+//             )))}
+//           </ScrollView>
+//         ) : null}
+//         {/* ( */}
+//         {/* <> */}
+//         {/* EXPLORE GRID */}
+//         {!debouncedQuery && !showSearchHistory ? (
+//           <ScrollView
+//             contentContainerStyle={{ padding: spacing, paddingBottom: BOTTOM_PADDING }}
+//             refreshControl={
+//               <RefreshControl
+//                 refreshing={isRefetching}
+//                 onRefresh={refetch}
+//                 tintColor={theme.text}      // iOS
+//                 colors={[theme.text]}       // Android
+//               />
+//             }
+//             onScroll={({ nativeEvent }) => {
+//               const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
+//               if (
+//                 hasNextPage && !isFetchingNextPage &&
+//                 contentOffset.y + layoutMeasurement.height + 200 >= contentSize.height
+//               ) {
+//                 fetchNextPage();
+//               }
+//             }}
+//             scrollEventThrottle={100}
+//             showsVerticalScrollIndicator={false}
+//           >
+//             {videoLoading && videos.length === 0 ? (
+//               <ExploreSkeleton />
+//             ) : (
+//               <View style={styles.masonryRow}>
+//                 {columns.map((col, colIndex) => (
+//                   <View key={`col-${colIndex}`} style={styles.column}>
+//                     {col.map((item, itemIndex) => (
+//                       <ThumbnailCard
+//                         key={`${item.id}-${colIndex}-${itemIndex}`}
+//                         item={item}
+//                         router={router}
+//                       />
+//                     ))}
+//                   </View>
+//                 ))}
+
+//               </View>
+//             )}
+//             {isFetchingNextPage && !isRefetching && (
+//               <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+//             )}
+
+//             {isError && videos.length > 0 && !isFetchingNextPage && (
+//               <TouchableOpacity
+//                 onPress={() => fetchNextPage()}
+//                 style={{
+//                   paddingVertical: 16,
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <Text style={{ color: theme.subtitle }}>
+//                   Tap to retry loading more
+//                 </Text>
+//               </TouchableOpacity>
+//             )}
+
+//           </ScrollView>
+//           // </>
+//         ) : null}
+//       </View>
+//     </SafeAreaView >
+//   );
+// }
+
+// // --------------------- THUMBNAIL CARD ---------------------
+
+// const ThumbnailCard = ({ item, router }: any) => {
+//   const itemHeight =
+//     item.height || Math.max(160, Math.round((columnWidth * 16) / 9));
+//   const theme = useAppTheme();
+//   const {
+//     setRedirectedFromShare,
+//   } = useReelsStore();
+//   return (
+//     <TouchableOpacity
+//       activeOpacity={0.85}
+//       onPress={() => {
+//         setRedirectedFromShare(false);
+
+//         console.log("Navigating to video:", item.id);
+//         router.push({
+//           pathname: "/(drawer)/(tabs)/reels",
+//           params: { videoId: item.id || item.uuid, tab: 'Explore' }
+//         });
+//       }}
+//       style={{ marginBottom: spacing }}
+//     >
+//       <Image
+//         source={{ uri: item.thumbnailUrl || DEFAULT_THUMBNAIL }}
+//         style={{
+//           width: columnWidth,
+//           height: itemHeight,
+//           borderRadius: 10,
+//           backgroundColor: theme.searchBg,
+//         }}
+//         resizeMode="cover"
+//       />
+//     </TouchableOpacity>
+//   );
+// };
+
+// // --------------------- STYLES ---------------------
+
+// const styles = StyleSheet.create({
+//   safe: { flex: 1 },
+//   container: { flex: 1 },
+//   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+//   searchContainer: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginHorizontal: 10,
+//     marginTop: 12,
+//     borderRadius: 10,
+//     paddingHorizontal: 12,
+//     height: 44,
+//     marginBottom: 8,
+//   },
+//   searchIcon: { marginRight: 8 },
+//   input: { flex: 1, fontSize: 16 },
+//   loading: { marginLeft: 8 },
+
+//   historyHeader: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     paddingHorizontal: 8,
+//     paddingVertical: 12,
+//   },
+//   historyTitle: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//   },
+//   clearText: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//   },
+//   historyItemContainer: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "space-between",
+//   },
+//   historyItem: {
+//     flex: 1,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     padding: 8,
+//   },
+//   removeButton: {
+//     padding: 8,
+//   },
+
+//   userItem: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     padding: 8,
+//   },
+//   usernameRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+//   verifiedIcon: {
+//     marginLeft: 4,
+//     marginTop: 1, // perfect vertical align
+//   },
+//   avatar: { width: 35, height: 35, borderRadius: 25 },
+//   textContainer: { marginLeft: 12 },
+//   username: { fontSize: 16, fontWeight: "600" },
+//   name: { fontSize: 13, marginTop: 2 },
+
+//   masonryRow: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     gap: spacing,
+//   },
+//   column: {
+//     width: columnWidth,
+//     gap: spacing,
+//   },
+// });
+
+//==========================================
+
+// with seach history feature
+// import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+// import { useQuery } from "@tanstack/react-query";
+// import { useRouter } from "expo-router";
+// import { useEffect, useMemo, useState } from "react";
+// import {
+//   ActivityIndicator,
+//   BackHandler,
+//   Dimensions,
+//   Image,
+//   RefreshControl,
+//   ScrollView,
+//   StyleSheet,
+//   Text,
+//   TextInput,
+//   TouchableOpacity,
+//   View,
+// } from "react-native";
+// import { SafeAreaView } from "react-native-safe-area-context";
+
+// import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
+// import { ExploreSkeleton, SearchUserSkeleton } from "@/src/components/explorePageSkeleton";
+// import { useAppTheme } from "@/src/constants/themeHelper";
+// import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
+// import { useReelsStore } from "@/src/store/useReelsStore";
+// import { useSearchHistoryStore } from "@/src/store/useSearchHistoryStore";
+
+// const { width, height } = Dimensions.get("window");
+// const numColumns = 3;
+// const spacing = 8;
+// const columnWidth = Math.floor((width - spacing * (numColumns + 1)) / numColumns);
+
+// const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
+
+// const BOTTOM_PADDING = 100;
+
+// export default function ExploreScreen() {
+//   const theme = useAppTheme();
+//   const router = useRouter();
+
+//   const [searchQuery, setSearchQuery] = useState("");
+//   const [debouncedQuery, setDebouncedQuery] = useState("");
+//   const [isInputFocused, setIsInputFocused] = useState(false);
+
+//   const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistoryStore();
+
+//   // Debounce search
+//   useEffect(() => {
+//     const t = setTimeout(() => setDebouncedQuery(searchQuery.trim()), 300);
+//     return () => clearTimeout(t);
+//   }, [searchQuery]);
+
+
+//   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
+//     queryKey: ["currentUser"],
+//     queryFn: GetCurrentUser,
+//   });
+
+
+//   // Handle Android back button
+//   useEffect(() => {
+//     const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+//       if (isInputFocused || searchQuery) {
+//         // If search is active, clear it and go back to grid
+//         setSearchQuery("");
+//         setIsInputFocused(false);
+//         return true; // Prevent default back action
+//       }
+//       return false; // Allow default back action
+//     });
+
+//     return () => backHandler.remove();
+//   }, [isInputFocused, searchQuery]);
+
+//   // Search users API
+//   const {
+//     data: searchResults = [],
+//     isLoading: searchLoading,
+//   } = useQuery({
+//     queryKey: ["searchUsers", debouncedQuery],
+//     queryFn: () => (debouncedQuery ? SearchUserProfiel(debouncedQuery) : []),
+//     enabled: !!debouncedQuery,
+//   });
+
+//   console.log("searchResults", searchResults);
+
+//   // Filter out current user from search results
+//   const filteredSearchResults = useMemo(() => {
+//     if (!currentUser || !searchResults) return [];
+
+//     return searchResults.filter((user: any) =>
+//       user.username !== currentUser.username
+//     );
+//   }, [searchResults, currentUser]);
+
+//   const {
+//     data,
+//     fetchNextPage,
+//     hasNextPage,
+//     isFetchingNextPage,
+//     isLoading: videoLoading,
+//     isError,
+//     refetch,
+//     isRefetching,
+//   } = useReelsByCategory('explore');
+
+//   const videos = data?.pages.flatMap((p: any) => p.reels) || [];
+
+
+//   const handleUserPress = (user: any) => {
+//     addToHistory(user);
+//     setSearchQuery("");
+//     setIsInputFocused(false);
+//     router.push(`/profile/${user.username}`);
+//   };
+
+//   const handleHistoryItemPress = (item: any) => {
+//     setSearchQuery("");
+//     setIsInputFocused(false);
+//     router.push(`/profile/${item.username}`);
+//   };
+
+//   const showSearchHistory = isInputFocused && !debouncedQuery && history.length > 0;
+
+//   // Masonry column distribution
+//   const columns = useMemo(() => {
+//     // Initialize empty columns WITH height tracking
+//     const cols: { items: any[]; height: number }[] = Array.from(
+//       { length: numColumns },
+//       () => ({ items: [], height: 0 })
+//     );
+
+//     videos.forEach((item: any) => {
+//       const aspectHeight =
+//         item.height ||
+//         Math.max(160, Math.round((columnWidth * 16) / 9));
+
+//       // Find shortest column
+//       let shortest = cols[0];
+//       for (let c of cols) {
+//         if (c.height < shortest.height) shortest = c;
+//       }
+
+//       // Push item into shortest column
+//       shortest.items.push(item);
+//       shortest.height += aspectHeight + spacing;
+//     });
+
+//     return cols.map((c) => c.items);
+//   }, [videos]);
+
+
+//   if (isError && videos.length === 0) {
+//     return (
+//       <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
+//         <View style={styles.center}>
+//           <Text style={{ color: theme.text, fontSize: 16 }}>
+//             Failed to load explore feed.
+//           </Text>
+//           <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
+//             <Text style={{ color: theme.buttonBg }}>Retry</Text>
+//           </TouchableOpacity>
+//         </View>
+//       </SafeAreaView>
+//     );
+//   }
+
+//   return (
+//     <SafeAreaView edges={['top']} style={[styles.safe, { backgroundColor: theme.background }]}>
+//       <View style={[styles.container, { backgroundColor: theme.background }]}>
+
+//         {/* SEARCH BAR */}
+//         <View style={[styles.searchContainer, { backgroundColor: theme.searchBg }]}>
+//           <Ionicons name="search" size={20} color={theme.text} style={styles.searchIcon} />
+//           <TextInput
+//             style={[styles.input, { color: theme.text }]}
+//             placeholder="Search users"
+//             placeholderTextColor={theme.text}
+//             value={searchQuery}
+//             onChangeText={(text) => setSearchQuery(text.trim().toLocaleLowerCase())}
+//             onFocus={() => setIsInputFocused(true)}
+//             onBlur={() => {
+//               // Remove the timeout - let it blur immediately
+//               // The TouchableOpacity will handle the press before blur
+//             }}
+//             autoCapitalize="none"
+//           />
+//           {searchQuery ? (
+//             <TouchableOpacity onPress={() => setSearchQuery("")}>
+//               <Ionicons name="close-circle" size={20} color={theme.text} />
+//             </TouchableOpacity>
+//           ) : null}
+
+//           {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
+//         </View>
+
+//         {/* SEARCH HISTORY */}
+//         {showSearchHistory ? (
+//           <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
+//             <View style={styles.historyHeader}>
+//               <Text style={[styles.historyTitle, { color: theme.text }]}>Recent</Text>
+//               <TouchableOpacity
+//                 activeOpacity={0.7}
+//                 onPress={() => {
+//                   clearHistory();
+//                 }}
+//               >
+//                 <Text style={[styles.clearText, { color: theme.buttonBg }]}>Clear All</Text>
+//               </TouchableOpacity>
+//             </View>
+
+//             {history.map((item) => (
+//               <View key={item.id} style={styles.historyItemContainer}>
+//                 <TouchableOpacity
+//                   activeOpacity={0.7}
+//                   style={styles.historyItem}
+//                   onPress={() => handleHistoryItemPress(item)}
+//                 >
+//                   <Image
+//                     source={{ uri: item.profilePicture || DEFAULT_THUMBNAIL }}
+//                     style={styles.avatar}
+//                   />
+//                   <View style={styles.textContainer}>
+//                     <View style={styles.usernameRow}>
+//                       <Text style={[styles.username, { color: theme.text }]}>
+//                         {item.username}
+//                       </Text>
+//                       {item.role === "admin" && (
+//                         <MaterialIcons
+//                           name="verified"
+//                           size={18}
+//                           color="#0095F6"
+//                           style={styles.verifiedIcon}
+//                         />
+//                       )}
+//                     </View>
+//                     {item.name && (
+//                       <Text style={[styles.name, { color: theme.subtitle }]}>
+//                         {item.name}
+//                       </Text>
+//                     )}
+//                   </View>
+//                 </TouchableOpacity>
+//                 <TouchableOpacity
+//                   activeOpacity={0.7}
+//                   onPress={() => {
+//                     removeFromHistory(item.id);
+//                   }}
+//                   style={styles.removeButton}
+//                   hitSlop={{ top: 10, bottom: 10, left: 10, right: 10 }}
+//                 >
+//                   <Ionicons name="close" size={20} color={theme.subtitle} />
+//                 </TouchableOpacity>
+//               </View>
+//             ))}
+//           </ScrollView>
+//         ) : null}
+
+//         {/* SEARCH RESULTS */}
+//         {debouncedQuery && !showSearchHistory ? (
+//           <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
+
+//             {/*  NO RESULTS FOUND */}
+//             {!searchLoading && filteredSearchResults.length === 0 ? (
+//               <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
+//                 <Ionicons name="search-outline" size={50} color={theme.subtitle} />
+//                 <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
+//                   No results found
+//                 </Text>
+//               </View>
+//             ) : null}
+
+//             {/*  SEARCH RESULTS LIST */}
+//             {searchLoading ? (
+//               <SearchUserSkeleton />
+//             ) : (filteredSearchResults.map((u: any) => (
+//               <TouchableOpacity
+//                 key={u.id}
+//                 style={[styles.userItem]}
+//                 onPress={() => handleUserPress(u)}
+//               >
+//                 <Image
+//                   source={{ uri: u.userProfile?.ProfilePicture || DEFAULT_THUMBNAIL }}
+//                   style={styles.avatar}
+//                 />
+//                 <View style={styles.textContainer}>
+//                   <View style={styles.usernameRow}>
+//                     <Text style={[styles.username, { color: theme.text }]}>
+//                       {u.username}
+//                     </Text>
+//                     {u.role === "admin" && (
+//                       < MaterialIcons
+//                         name="verified"
+//                         size={18}
+//                         color="#0095F6"
+//                         style={styles.verifiedIcon}
+//                       />
+//                     )}
+//                   </View>
+//                   {u.userProfile?.name && (
+//                     <Text style={[styles.name, { color: theme.subtitle }]}>
+//                       {u.userProfile.name}
+//                     </Text>
+//                   )}
+//                 </View>
+//               </TouchableOpacity>
+//             )))}
+//           </ScrollView>
+//         ) : null}
+
+//         {/* EXPLORE GRID */}
+//         {!debouncedQuery && !showSearchHistory ? (
+//           <ScrollView
+//             contentContainerStyle={{ padding: spacing, paddingBottom: BOTTOM_PADDING }}
+//             refreshControl={
+//               <RefreshControl
+//                 refreshing={isRefetching}
+//                 onRefresh={refetch}
+//                 tintColor={theme.text}      // iOS
+//                 colors={[theme.text]}       // Android
+//               />
+//             }
+//             onScroll={({ nativeEvent }) => {
+//               const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
+//               if (
+//                 hasNextPage && !isFetchingNextPage &&
+//                 contentOffset.y + layoutMeasurement.height + 200 >= contentSize.height
+//               ) {
+//                 fetchNextPage();
+//               }
+//             }}
+//             scrollEventThrottle={100}
+//             showsVerticalScrollIndicator={false}
+//           >
+//             {videoLoading && videos.length === 0 ? (
+//               <ExploreSkeleton />
+//             ) : (
+//               <View style={styles.masonryRow}>
+//                 {columns.map((col, colIndex) => (
+//                   <View key={`col-${colIndex}`} style={styles.column}>
+//                     {col.map((item, itemIndex) => (
+//                       <ThumbnailCard
+//                         key={`${item.id}-${colIndex}-${itemIndex}`}
+//                         item={item}
+//                         router={router}
+//                       />
+//                     ))}
+//                   </View>
+//                 ))}
+
+//               </View>
+//             )}
+//             {isFetchingNextPage && !isRefetching && (
+//               <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+//             )}
+
+//             {isError && videos.length > 0 && !isFetchingNextPage && (
+//               <TouchableOpacity
+//                 onPress={() => fetchNextPage()}
+//                 style={{
+//                   paddingVertical: 16,
+//                   alignItems: "center",
+//                 }}
+//               >
+//                 <Text style={{ color: theme.subtitle }}>
+//                   Tap to retry loading more
+//                 </Text>
+//               </TouchableOpacity>
+//             )}
+
+//           </ScrollView>
+//         ) : null}
+//       </View>
+//     </SafeAreaView >
+//   );
+// }
+
+// // --------------------- THUMBNAIL CARD ---------------------
+
+// const ThumbnailCard = ({ item, router }: any) => {
+//   const itemHeight =
+//     item.height || Math.max(160, Math.round((columnWidth * 16) / 9));
+//   const theme = useAppTheme();
+//   const {
+//     setRedirectedFromShare,
+//   } = useReelsStore();
+//   return (
+//     <TouchableOpacity
+//       activeOpacity={0.85}
+//       onPress={() => {
+//         setRedirectedFromShare(false);
+
+//         console.log("Navigating to video:", item.id);
+//         router.push({
+//           pathname: "/(drawer)/(tabs)/reels",
+//           params: { videoId: item.id || item.uuid, tab: 'Explore' }
+//         });
+//       }}
+//       style={{ marginBottom: spacing }}
+//     >
+//       <Image
+//         source={{ uri: item.thumbnailUrl || DEFAULT_THUMBNAIL }}
+//         style={{
+//           width: columnWidth,
+//           height: itemHeight,
+//           borderRadius: 10,
+//           backgroundColor: theme.searchBg,
+//         }}
+//         resizeMode="cover"
+//       />
+//     </TouchableOpacity>
+//   );
+// };
+
+// // --------------------- STYLES ---------------------
+
+// const styles = StyleSheet.create({
+//   safe: { flex: 1 },
+//   container: { flex: 1 },
+//   center: { flex: 1, justifyContent: "center", alignItems: "center" },
+
+//   searchContainer: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     marginHorizontal: 10,
+//     marginTop: 12,
+//     borderRadius: 10,
+//     paddingHorizontal: 12,
+//     height: 44,
+//     marginBottom: 8,
+//   },
+//   searchIcon: { marginRight: 8 },
+//   input: { flex: 1, fontSize: 16 },
+//   loading: { marginLeft: 8 },
+
+//   historyHeader: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     alignItems: "center",
+//     paddingHorizontal: 8,
+//     paddingVertical: 12,
+//   },
+//   historyTitle: {
+//     fontSize: 16,
+//     fontWeight: "600",
+//   },
+//   clearText: {
+//     fontSize: 14,
+//     fontWeight: "500",
+//   },
+//   historyItemContainer: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     justifyContent: "space-between",
+//   },
+//   historyItem: {
+//     flex: 1,
+//     flexDirection: "row",
+//     alignItems: "center",
+//     padding: 8,
+//   },
+//   removeButton: {
+//     padding: 8,
+//   },
+
+//   userItem: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//     padding: 8,
+//   },
+//   usernameRow: {
+//     flexDirection: "row",
+//     alignItems: "center",
+//   },
+//   verifiedIcon: {
+//     marginLeft: 4,
+//     marginTop: 1, // perfect vertical align
+//   },
+//   avatar: { width: 35, height: 35, borderRadius: 25 },
+//   textContainer: { marginLeft: 12 },
+//   username: { fontSize: 16, fontWeight: "600" },
+//   name: { fontSize: 13, marginTop: 2 },
+
+//   masonryRow: {
+//     flexDirection: "row",
+//     justifyContent: "space-between",
+//     gap: spacing,
+//   },
+//   column: {
+//     width: columnWidth,
+//     gap: spacing,
+//   },
+// });
+
+// =====================================================
+
+
+import { Ionicons } from "@expo/vector-icons";
 import { useQuery } from "@tanstack/react-query";
 import { useRouter } from "expo-router";
 import { useEffect, useMemo, useState } from "react";
 import {
   ActivityIndicator,
+  BackHandler,
   Dimensions,
   Image,
   RefreshControl,
@@ -17,10 +1001,13 @@ import {
 import { SafeAreaView } from "react-native-safe-area-context";
 
 import { GetCurrentUser, SearchUserProfiel } from "@/src/api/profile-api";
-import { ExploreSkeleton, SearchUserSkeleton } from "@/src/components/explorePageSkeleton";
+import { ExploreSkeleton } from "@/src/components/explorePageSkeleton";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { useReelsByCategory } from "@/src/hooks/useReelsByCategory";
 import { useReelsStore } from "@/src/store/useReelsStore";
+import { useSearchHistoryStore } from "@/src/store/useSearchHistoryStore";
+import { SearchHistory } from "./Searchhistory";
+import { SearchResults } from "./Searchresults";
 
 const { width, height } = Dimensions.get("window");
 const numColumns = 3;
@@ -30,13 +1017,16 @@ const columnWidth = Math.floor((width - spacing * (numColumns + 1)) / numColumns
 const DEFAULT_THUMBNAIL = "https://cdn-icons-png.flaticon.com/512/847/847969.png";
 
 const BOTTOM_PADDING = 100;
+
 export default function ExploreScreen() {
   const theme = useAppTheme();
   const router = useRouter();
 
   const [searchQuery, setSearchQuery] = useState("");
   const [debouncedQuery, setDebouncedQuery] = useState("");
+  const [isInputFocused, setIsInputFocused] = useState(false);
 
+  const { history, addToHistory, removeFromHistory, clearHistory } = useSearchHistoryStore();
 
   // Debounce search
   useEffect(() => {
@@ -44,13 +1034,24 @@ export default function ExploreScreen() {
     return () => clearTimeout(t);
   }, [searchQuery]);
 
-
   const { data: currentUser, isLoading: currentUserLoading } = useQuery({
     queryKey: ["currentUser"],
     queryFn: GetCurrentUser,
   });
 
-  console.log("currentUser", currentUser);
+  // Handle Android back button
+  useEffect(() => {
+    const backHandler = BackHandler.addEventListener('hardwareBackPress', () => {
+      if (isInputFocused || searchQuery) {
+        setSearchQuery("");
+        setIsInputFocused(false);
+        return true;
+      }
+      return false;
+    });
+
+    return () => backHandler.remove();
+  }, [isInputFocused, searchQuery]);
 
   // Search users API
   const {
@@ -62,12 +1063,9 @@ export default function ExploreScreen() {
     enabled: !!debouncedQuery,
   });
 
-  console.log("searchResults", searchResults);
-
   // Filter out current user from search results
   const filteredSearchResults = useMemo(() => {
     if (!currentUser || !searchResults) return [];
-
     return searchResults.filter((user: any) =>
       user.username !== currentUser.username
     );
@@ -86,9 +1084,25 @@ export default function ExploreScreen() {
 
   const videos = data?.pages.flatMap((p: any) => p.reels) || [];
 
+  // Handlers
+  const handleUserPress = (user: any) => {
+    addToHistory(user);
+    setSearchQuery("");
+    setIsInputFocused(false);
+    router.push(`/profile/${user.username}`);
+  };
+
+  const handleHistoryItemPress = (item: any) => {
+    setSearchQuery("");
+    setIsInputFocused(false);
+    router.push(`/profile/${item.username}`);
+  };
+
+  const showSearchHistory = isInputFocused && !debouncedQuery && history.length > 0;
+  const showSearchResults = debouncedQuery && !showSearchHistory;
+
   // Masonry column distribution
   const columns = useMemo(() => {
-    // Initialize empty columns WITH height tracking
     const cols: { items: any[]; height: number }[] = Array.from(
       { length: numColumns },
       () => ({ items: [], height: 0 })
@@ -99,35 +1113,17 @@ export default function ExploreScreen() {
         item.height ||
         Math.max(160, Math.round((columnWidth * 16) / 9));
 
-      // Find shortest column
       let shortest = cols[0];
       for (let c of cols) {
         if (c.height < shortest.height) shortest = c;
       }
 
-      // Push item into shortest column
       shortest.items.push(item);
       shortest.height += aspectHeight + spacing;
     });
 
     return cols.map((c) => c.items);
   }, [videos]);
-
-
-  // if (isError) {
-  //   return (
-  //     <SafeAreaView style={[styles.safe, { backgroundColor: theme.background }]}>
-  //       <View style={styles.center}>
-  //         <Text style={{ color: theme.text, fontSize: 16 }}>
-  //           Failed to load explore feed.
-  //         </Text>
-  //         <TouchableOpacity onPress={() => refetch()} style={{ marginTop: 10 }}>
-  //           <Text style={{ color: theme.buttonBg }}>Retry</Text>
-  //         </TouchableOpacity>
-  //       </View>
-  //     </SafeAreaView>
-  //   );
-  // }
 
   if (isError && videos.length === 0) {
     return (
@@ -156,131 +1152,97 @@ export default function ExploreScreen() {
             placeholder="Search users"
             placeholderTextColor={theme.text}
             value={searchQuery}
-            onChangeText={(text) => setSearchQuery(text.trim().toLocaleLowerCase())}
+            onChangeText={(text) => setSearchQuery(text.trim().toLowerCase())}
+            onFocus={() => setIsInputFocused(true)}
+            onBlur={() => { }}
             autoCapitalize="none"
           />
-          {searchQuery ? (
+          {searchQuery && (
             <TouchableOpacity onPress={() => setSearchQuery("")}>
               <Ionicons name="close-circle" size={20} color={theme.text} />
             </TouchableOpacity>
-          ) : null}
-
+          )}
           {searchLoading && <ActivityIndicator size="small" color={theme.text} style={styles.loading} />}
         </View>
 
+        {/* SEARCH HISTORY */}
+        {showSearchHistory && (
+          <SearchHistory
+            history={history}
+            onItemPress={handleHistoryItemPress}
+            onRemove={removeFromHistory}
+            onClearAll={clearHistory}
+          />
+        )}
+
         {/* SEARCH RESULTS */}
-        {debouncedQuery ? (
-          <ScrollView contentContainerStyle={{ flexGrow: 1, paddingHorizontal: 12, paddingBottom: BOTTOM_PADDING }}>
+        {showSearchResults && (
+          <SearchResults
+            results={filteredSearchResults}
+            isLoading={searchLoading}
+            onUserPress={handleUserPress}
+          />
+        )}
 
-            {/*  NO RESULTS FOUND */}
-            {!searchLoading && filteredSearchResults.length === 0 ? (
-              <View style={{ flex: 1, alignItems: "center", justifyContent: "center" }}>
-                <Ionicons name="search-outline" size={50} color={theme.subtitle} />
-                <Text style={{ color: theme.subtitle, marginTop: 10, fontSize: 16 }}>
-                  No results found
-                </Text>
-              </View>
-            ) : null}
-
-            {/*  SEARCH RESULTS LIST */}
-            {searchLoading ? (
-              <SearchUserSkeleton />
-            ) : (filteredSearchResults.map((u: any) => (
-              <TouchableOpacity
-                key={u.id}
-                style={[styles.userItem]}
-                onPress={() => router.push(`/profile/${u.username}`)}
-              >
-                <Image
-                  source={{ uri: u.userProfile?.ProfilePicture || DEFAULT_THUMBNAIL }}
-                  style={styles.avatar}
-                />
-                <View style={styles.textContainer}>
-                  <View style={styles.usernameRow}>
-                    <Text style={[styles.username, { color: theme.text }]}>
-                      {u.username}
-                    </Text>
-                    {u.role === "admin" && (
-                      < MaterialIcons
-                        name="verified"
-                        size={18}
-                        color="#0095F6"
-                        style={styles.verifiedIcon}
-                      />
-                    )}
-                  </View>
-                  {u.userProfile?.name && (
-                    <Text style={[styles.name, { color: theme.subtitle }]}>
-                      {u.userProfile.name}
-                    </Text>
-                  )}
-                </View>
-              </TouchableOpacity>
-            )))}
-          </ScrollView>
-        ) : (
-          <>
-            {/* EXPLORE GRID */}
-            <ScrollView
-              contentContainerStyle={{ padding: spacing, paddingBottom: BOTTOM_PADDING }}
-              refreshControl={
-                <RefreshControl
-                  refreshing={isRefetching}
-                  onRefresh={refetch}
-                  tintColor={theme.text}      // iOS
-                  colors={[theme.text]}       // Android
-                />
+        {/* EXPLORE GRID */}
+        {!debouncedQuery && !showSearchHistory && (
+          <ScrollView
+            contentContainerStyle={{ padding: spacing, paddingBottom: BOTTOM_PADDING }}
+            refreshControl={
+              <RefreshControl
+                refreshing={isRefetching}
+                onRefresh={refetch}
+                tintColor={theme.text}
+                colors={[theme.text]}
+              />
+            }
+            onScroll={({ nativeEvent }) => {
+              const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
+              if (
+                hasNextPage && !isFetchingNextPage &&
+                contentOffset.y + layoutMeasurement.height + 200 >= contentSize.height
+              ) {
+                fetchNextPage();
               }
-              onScroll={({ nativeEvent }) => {
-                const { contentSize, contentOffset, layoutMeasurement } = nativeEvent;
-                if (
-                  hasNextPage && !isFetchingNextPage &&
-                  contentOffset.y + layoutMeasurement.height + 200 >= contentSize.height
-                ) {
-                  fetchNextPage();
-                }
-              }}
-              scrollEventThrottle={100}
-              showsVerticalScrollIndicator={false}
-            >
-              {videoLoading && videos.length === 0 ? (
-                <ExploreSkeleton />
-              ) : (
-                <View style={styles.masonryRow}>
-                  {columns.map((col, colIndex) => (
-                    <View key={`col-${colIndex}`} style={styles.column}>
-                      {col.map((item, itemIndex) => (
-                        <ThumbnailCard
-                          key={`${item.id}-${colIndex}-${itemIndex}`}
-                          item={item}
-                          router={router}
-                        />
-                      ))}
-                    </View>
-                  ))}
+            }}
+            scrollEventThrottle={100}
+            showsVerticalScrollIndicator={false}
+          >
+            {videoLoading && videos.length === 0 ? (
+              <ExploreSkeleton />
+            ) : (
+              <View style={styles.masonryRow}>
+                {columns.map((col, colIndex) => (
+                  <View key={`col-${colIndex}`} style={styles.column}>
+                    {col.map((item, itemIndex) => (
+                      <ThumbnailCard
+                        key={`${item.id}-${colIndex}-${itemIndex}`}
+                        item={item}
+                        router={router}
+                      />
+                    ))}
+                  </View>
+                ))}
+              </View>
+            )}
+            {isFetchingNextPage && !isRefetching && (
+              <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
+            )}
 
-                </View>
-              )}
-              {isFetchingNextPage && !isRefetching && (
-                <ActivityIndicator size="large" color={theme.text} style={{ padding: 12 }} />
-              )}
-
-              {isError && videos.length > 0 && !isFetchingNextPage && (
-                <TouchableOpacity
-                  onPress={() => fetchNextPage()}
-                  style={{
-                    paddingVertical: 16,
-                    alignItems: "center",
-                  }}
-                >
-                  <Text style={{ color: theme.subtitle }}>
-                    Tap to retry loading more
-                  </Text>
-                </TouchableOpacity>
-              )}
-
-            </ScrollView>
-          </>
+            {isError && videos.length > 0 && !isFetchingNextPage && (
+              <TouchableOpacity
+                onPress={() => fetchNextPage()}
+                style={{
+                  paddingVertical: 16,
+                  alignItems: "center",
+                }}
+              >
+                <Text style={{ color: theme.subtitle }}>
+                  Tap to retry loading more
+                </Text>
+              </TouchableOpacity>
+            )}
+          </ScrollView>
         )}
       </View>
     </SafeAreaView>
@@ -293,16 +1255,13 @@ const ThumbnailCard = ({ item, router }: any) => {
   const itemHeight =
     item.height || Math.max(160, Math.round((columnWidth * 16) / 9));
   const theme = useAppTheme();
-  const {
-    setRedirectedFromShare,
-  } = useReelsStore();
+  const { setRedirectedFromShare } = useReelsStore();
+
   return (
     <TouchableOpacity
       activeOpacity={0.85}
       onPress={() => {
         setRedirectedFromShare(false);
-
-        console.log("Navigating to video:", item.id);
         router.push({
           pathname: "/(drawer)/(tabs)/reels",
           params: { videoId: item.id || item.uuid, tab: 'Explore' }
@@ -345,24 +1304,6 @@ const styles = StyleSheet.create({
   input: { flex: 1, fontSize: 16 },
   loading: { marginLeft: 8 },
 
-  userItem: {
-    flexDirection: "row",
-    alignItems: "center",
-    padding: 8,
-  },
-  usernameRow: {
-    flexDirection: "row",
-    alignItems: "center",
-  },
-  verifiedIcon: {
-    marginLeft: 4,
-    marginTop: 1, // perfect vertical align
-  },
-  avatar: { width: 35, height: 35, borderRadius: 25 },
-  textContainer: { marginLeft: 12 },
-  username: { fontSize: 16, fontWeight: "600" },
-  name: { fontSize: 13, marginTop: 2 },
-
   masonryRow: {
     flexDirection: "row",
     justifyContent: "space-between",
@@ -373,4 +1314,3 @@ const styles = StyleSheet.create({
     gap: spacing,
   },
 });
-
