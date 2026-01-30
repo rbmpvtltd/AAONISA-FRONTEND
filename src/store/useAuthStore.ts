@@ -230,14 +230,14 @@ export const useAuthStore = create<AuthState>((set) => ({
     }
   },
   resetOtpFlow: () =>
-  set({
-    otpSent: false,
-    emailOtpSent: false,
-    phoneOtpSent: false,
-    otp: ["", "", "", "", "", ""],
-    verifyingEmail: false,
-    verifyingPhone: false,
-  }),
+    set({
+      otpSent: false,
+      emailOtpSent: false,
+      phoneOtpSent: false,
+      otp: ["", "", "", "", "", ""],
+      verifyingEmail: false,
+      verifyingPhone: false,
+    }),
 
   resetAuth: () =>
     set({

@@ -199,7 +199,7 @@ const Login = () => {
           onPress={() => router.push("/auth/forgot-password")}
         >
           <Text style={[styles.forgotText, { color: theme.forgot }]}>
-            Forgot Password?
+            Forgot Password ?
           </Text>
         </TouchableOpacity>
 
@@ -253,3 +253,4 @@ const styles = StyleSheet.create({
   link: { marginTop: 15, textAlign: "center" },
 });
 
+//  comment ..........

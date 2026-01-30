@@ -39,6 +39,10 @@ const Register = () => {
   const [acceptTerms, setAcceptTerms] = React.useState(false);
   const [usernameAvailable, setUsernameAvailable] = React.useState(null);
   const [otpTimer, setOtpTimer] = React.useState(0);
+  const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
+  // const isPhone = (value: string) => /^[0-9]{10}$/.test(value);
+  const [otpEndTime, setOtpEndTime] = React.useState<number | null>(null);
+
 
 
   const {
@@ -59,19 +63,38 @@ const Register = () => {
 
   // declare refs (same file where TextInput is imported from 'react-native')
   const otpRefs = React.useRef<(TextInput | null)[]>([]);
+  // const startOtpTimer = () => {
+  //   setOtpTimer(60);
+  // };
+
   const startOtpTimer = () => {
-    setOtpTimer(60);
+    const endTime = Date.now() + 60000; // 60s
+    setOtpEndTime(endTime);
   };
 
+  // useEffect(() => {
+  //   if (otpTimer === 0) return;
+
+  //   const interval = setInterval(() => {
+  //     setOtpTimer((prev) => prev - 1);
+  //   }, 1000);
+
+  //   return () => clearInterval(interval);
+  // }, [otpTimer]);
+
+
   useEffect(() => {
-    if (otpTimer === 0) return;
+    if (!otpEndTime) return;
 
     const interval = setInterval(() => {
-      setOtpTimer((prev) => prev - 1);
-    }, 1000);
+      const remaining = Math.max(0, Math.ceil((otpEndTime - Date.now()) / 1000));
+      setOtpTimer(remaining);
+
+      if (remaining === 0) clearInterval(interval);
+    }, 500);
 
     return () => clearInterval(interval);
-  }, [otpTimer]);
+  }, [otpEndTime]);
 
   useEffect(() => {
     if (Platform.OS === "web") return;
@@ -127,13 +150,20 @@ const Register = () => {
       const data = await registerUser({ emailOrPhone, username });
       if (data.success) {
         setOtpSent(true);
+
+        const message = isEmail(emailOrPhone)
+          ? "Check your email"
+          : "Check your phone";
+
         Toast.show({
           type: "success",
           text1: "OTP Sent",
-          text2: "Check your email/phone",
+          text2: message,
         });
+
         startOtpTimer(); // ⏱ timer start
-      }else{
+
+      } else {
         Toast.show({
           type: "error",
           text1: "Error",
@@ -141,8 +171,8 @@ const Register = () => {
         });
       }
     } catch (err: any) {
-      resetOtpFlow(); // 🔥 IMPORTANT
-      
+      resetOtpFlow(); // IMPORTANT
+
       const msg =
         err?.response?.data?.message ||
         "Email / Phone / Username already in use";
@@ -208,14 +238,14 @@ const Register = () => {
     // setOtpTimer(0);
   };
   const getPasswordStrength = (password: string) => {
-  let score = 0;
-  if (password.length >= 6) score++;
-  if (/[A-Z]/.test(password)) score++;
-  if (/[0-9]/.test(password)) score++;
-  if (/[^A-Za-z0-9]/.test(password)) score++;
+    let score = 0;
+    if (password.length >= 6) score++;
+    if (/[A-Z]/.test(password)) score++;
+    if (/[0-9]/.test(password)) score++;
+    if (/[^A-Za-z0-9]/.test(password)) score++;
 
-  return score;
-};
+    return score;
+  };
 
 
   // FIX: Password input handler
@@ -368,32 +398,32 @@ const Register = () => {
             </TouchableOpacity>
           </View>
           {password.length > 0 && (
-  <View style={{ marginBottom: 10 }}>
-    <View style={{ flexDirection: "row", height: 6 }}>
-      {[1, 2, 3, 4].map((i) => (
-        <View
-          key={i}
-          style={{
-            flex: 1,
-            marginRight: 4,
-            backgroundColor:
-              getPasswordStrength(password) >= i
-                ? i <= 2
-                  ? "red"
-                  : i === 3
-                  ? "orange"
-                  : "green"
-                : "#ddd",
-          }}
-        />
-      ))}
-    </View>
-    <Text style={{ fontSize: 12, marginTop: 4 }}>
-      {["Weak", "Okay", "Good", "Strong"][getPasswordStrength(password) - 1] ||
-        "Weak"}
-    </Text>
-  </View>
-)}
+            <View style={{ marginBottom: 10 }}>
+              <View style={{ flexDirection: "row", height: 6 }}>
+                {[1, 2, 3, 4].map((i) => (
+                  <View
+                    key={i}
+                    style={{
+                      flex: 1,
+                      marginRight: 4,
+                      backgroundColor:
+                        getPasswordStrength(password) >= i
+                          ? i <= 2
+                            ? "red"
+                            : i === 3
+                              ? "orange"
+                              : "green"
+                          : "#ddd",
+                    }}
+                  />
+                ))}
+              </View>
+              <Text style={{ fontSize: 12, marginTop: 4 }}>
+                {["Weak", "Okay", "Good", "Strong"][getPasswordStrength(password) - 1] ||
+                  "Weak"}
+              </Text>
+            </View>
+          )}
 
 
 
