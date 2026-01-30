@@ -34,6 +34,7 @@ const ForgotPassword = () => {
   const router = useRouter();
   const theme = useAppTheme();
   const [showNewPassword, setShowNewPassword] = React.useState(false);
+  const isEmail = (value: string) => /\S+@\S+\.\S+/.test(value);
 
   const {
     emailOrPhone,
@@ -86,9 +87,18 @@ const ForgotPassword = () => {
         // Alert.alert("Error", data.message || "Failed to send OTP");
         Toast.show({ type: "error", text1: "Error", text2: data.message || "Failed to send OTP" })
       }
-    } catch (error) {
+    } catch (error: any) {
       // Alert.alert("Error", "Failed to send OTP");
-      Toast.show({ type: "error", text1: "Error", text2: "Failed to send OTP" })
+      // Toast.show({ type: "error", text1: "Error", text2: "Failed to send OTP" })
+      const message = isEmail(emailOrPhone)
+        ? "No account found with this email address"
+        : "No account found with this phone number";
+
+      Toast.show({
+        type: "error",
+        text1: "Account not found",
+        text2: message,
+      });
     }
   };
 
