@@ -26,6 +26,7 @@
       }
     },
     "android": {
+      "versionCode": 25,
       "useNextNotificationsApi": true,
       "googleServicesFile": "./google-services.json",
       "permissions": [
