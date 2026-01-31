@@ -1,12 +1,12 @@
 function createApiUrl(url: string) {
   // __DEV__ is true if we using localhost and false on production
   if (__DEV__) {
-    console.log(`https://api.hithoy.com/api${url}`);
+    console.log(`${process.env.EXPO_PUBLIC_LOCAL_API_URL}${url}`);
 
-    return `https://api.hithoy.com/api${url}`;
+    return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}/api${url}`;
 
   }
-  return `https://api.hithoy.com/api${url}`;
+  return `${process.env.EXPO_PUBLIC_LOCAL_API_URL}/api${url}`;
 }
 
 import AsyncStorage from "@react-native-async-storage/async-storage";

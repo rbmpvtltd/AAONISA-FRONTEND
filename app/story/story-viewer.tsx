@@ -721,6 +721,8 @@ export default function StoryViewer() {
     queryFn: GetCurrentUser,
   });
 
+  console.log("currentStory", currentUser);
+
   const socket = useSocketManager(currentUser?.id);
   const storyId = currentStory?.id;
   const { setViews, resetViews, setNewStory, views, addSingleView } = useViewStore() as any;
@@ -1098,6 +1100,13 @@ export default function StoryViewer() {
               <Text style={styles.username}>
                 {isOwnStory ? "Your Story" : currentUserStories.username}
               </Text>
+              {currentUser?.role === "admin" && (
+                <Image
+                  source={require("@/assets/images/blue-tick.png")}
+                  style={styles.verifiedBadge}
+                  resizeMode="contain"
+                />
+              )}
               <Text style={styles.timeText}>
                 {timeAgo(currentStory.created_at)}
               </Text>
@@ -1270,7 +1279,14 @@ const styles = StyleSheet.create({
     color: "#fff",
     fontSize: 16,
     fontWeight: "600",
-    marginRight: 6,
+  },
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    marginLeft: 2,
+    marginTop: 2,
+    marginRight: 3,
+
   },
   timeText: {
     color: "#ccc",

@@ -1386,23 +1386,26 @@ export default function ChatDetailScreen() {
                 />
               )}
               <TouchableOpacity onPress={() => router.push(`/profile/${username}`)} >
-                <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
-                  {username || 'Chat'}
+                <View style={styles.nameRow}>
+
+                  <Text style={{ color: theme.text, fontSize: 16, fontWeight: '600' }}>
+                    {username || 'Chat'}
+                  </Text>
+
                   {role === "admin" && (
-                    < MaterialIcons
-                      name="verified"
-                      size={18}
-                      color="#0095F6"
-                      style={styles.verifiedIcon}
+                    <Image
+                      source={require("@/assets/images/blue-tick.png")}
+                      style={styles.verifiedBadge}
+                      resizeMode="contain"
                     />
                   )}
-                </Text>
+                </View>
               </TouchableOpacity>
-            </View>
+            </View >
           ),
         }}
       />
-      <KeyboardAvoidingView
+      < KeyboardAvoidingView
         style={{ flex: 1, backgroundColor: theme.background }}
         behavior={Platform.OS === "ios" ? "padding" : "height"}
         keyboardVerticalOffset={Platform.OS === "ios" ? 90 : 80}
@@ -1483,7 +1486,7 @@ export default function ChatDetailScreen() {
           </Modal>
         </>
 
-      </KeyboardAvoidingView>
+      </KeyboardAvoidingView >
     </>
   );
 }
@@ -1495,9 +1498,15 @@ const styles = StyleSheet.create({
   bubble: {
     borderRadius: 12,
   },
-  verifiedIcon: {
-    marginLeft: 4,
-    marginTop: 1, // perfect vertical align
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    marginLeft: 2,
+    marginTop: 2,
   },
   reelContainer: {
     // width: 200,

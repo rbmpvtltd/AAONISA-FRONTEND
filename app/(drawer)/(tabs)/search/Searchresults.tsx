@@ -1,4 +1,4 @@
-import { Ionicons, MaterialIcons } from "@expo/vector-icons";
+import { Ionicons } from "@expo/vector-icons";
 import { Image, ScrollView, StyleSheet, Text, TouchableOpacity, View } from "react-native";
 
 import { SearchUserSkeleton } from "@/src/components/explorePageSkeleton";
@@ -74,11 +74,16 @@ export const SearchResults = ({
                                     {user.username}
                                 </Text>
                                 {user.role === "admin" && (
-                                    <MaterialIcons
-                                        name="verified"
-                                        size={18}
-                                        color="#0095F6"
-                                        style={styles.verifiedIcon}
+                                    // <MaterialIcons
+                                    //     name="verified"
+                                    //     size={18}
+                                    //     color="#0095F6"
+                                    //     style={styles.verifiedIcon}
+                                    // />
+                                    <Image
+                                        source={require("@/assets/images/blue-tick.png")}
+                                        style={styles.verifiedBadge}
+                                        resizeMode="contain"
                                     />
                                 )}
                             </View>
@@ -125,9 +130,15 @@ const styles = StyleSheet.create({
         fontSize: 16,
         fontWeight: "600",
     },
-    verifiedIcon: {
-        marginLeft: 4,
-        marginTop: 1,
+    // verifiedIcon: {
+    //     marginLeft: 4,
+    //     marginTop: 1,
+    // },
+    verifiedBadge: {
+        width: 18,
+        height: 18,
+        marginLeft: 2,
+        marginTop: 2,
     },
     name: {
         fontSize: 13,

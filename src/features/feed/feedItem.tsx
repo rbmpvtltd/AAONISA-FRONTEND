@@ -781,7 +781,6 @@ import { useMarkViewedMutation } from "@/src/hooks/useMarkViewedMutation";
 import { useLikeMutation } from "@/src/hooks/userLikeMutation";
 import { useBookmarkStore } from "@/src/store/useBookmarkStore";
 import { formatCount } from "@/src/utils/formatCount";
-import { MaterialIcons } from "@expo/vector-icons";
 import { router } from "expo-router";
 import { useVideoPlayer, VideoView } from "expo-video";
 import React, { useCallback, useEffect, useRef, useState } from "react";
@@ -1060,13 +1059,12 @@ export const FeedItem = React.memo(
                             <Text style={[styles.username, { color: "#fff" }]}>
                                 {item.user?.username}
                             </Text>
-
-                            <MaterialIcons
-                                name="verified"
-                                size={18}
-                                color="#0095F6"
-                                style={styles.verifiedIcon}
+                            <Image
+                                source={require("@/assets/images/blue-tick.png")}
+                                style={styles.verifiedBadge}
+                                resizeMode="contain"
                             />
+
                         </View>
                     </View>
                 </Pressable>
@@ -1371,11 +1369,12 @@ const styles = StyleSheet.create({
         alignItems: "center",
     },
 
-    verifiedIcon: {
-        marginLeft: 4,
-        marginTop: 1, // perfect vertical align
+    verifiedBadge: {
+        width: 18,
+        height: 18,
+        marginLeft: 2,
+        marginTop: 2,
     },
-
     title: {
         padding: 10,
         fontSize: 16
