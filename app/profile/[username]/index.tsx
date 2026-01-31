@@ -605,13 +605,19 @@ export const TopHeader: React.FC<{ userName: string; theme: any; userRole: strin
             <View style={styles.usernameRow}>
                 <Text style={[styles.topHeaderText, { color: theme.text }]}>{userName}</Text>
                 {userRole === "admin" && (
-                    < MaterialIcons
-                        name="verified"
-                        size={18}
-                        color="#0095F6" // Instagram blue
-                        style={styles.verifiedIcon}
+                    // < MaterialIcons
+                    //     name="verified"
+                    //     size={18}
+                    //     color="#0095F6" // Instagram blue
+                    //     style={styles.verifiedIcon}
+                    // />
+                    <Image
+                        source={require("@/assets/images/blue-tick.png")}
+                        style={styles.verifiedBadge}
+                        resizeMode="contain"
                     />
                 )}
+
             </View>
 
             {/* {isOwnProfile && (
@@ -1274,6 +1280,12 @@ const styles = StyleSheet.create({
     topHeaderText: {
         fontSize: 18 * fontScale,
         fontWeight: "bold",
+    },
+    verifiedBadge: {
+        width: 18,
+        height: 18,
+        marginLeft: 2,
+        marginTop: 2,
     },
     header: {
         flexDirection: "row",

@@ -14,7 +14,6 @@ import { useBookmarkStore } from '@/src/store/useBookmarkStore';
 import { useReelsStore } from '@/src/store/useReelsStore';
 import { useProfileStore } from '@/src/store/userProfileStore';
 import { formatCount } from '@/src/utils/formatCount';
-import { MaterialIcons } from '@expo/vector-icons';
 import { useIsFocused } from '@react-navigation/native';
 import { useQuery } from '@tanstack/react-query';
 import { router, useLocalSearchParams } from "expo-router";
@@ -306,11 +305,10 @@ const MentionedReelItem = ({
 
             <Text style={styles.username}>{item.user_id?.username}</Text>
             {item.user_id?.role === "admin" && (
-              < MaterialIcons
-                name="verified"
-                size={18}
-                color="#0095F6"
-                style={styles.verifiedIcon}
+              <Image
+                source={require("@/assets/images/blue-tick.png")}
+                style={styles.verifiedBadge}
+                resizeMode="contain"
               />
             )}
           </TouchableOpacity>
@@ -793,9 +791,11 @@ const styles = StyleSheet.create({
     fontWeight: '600',
     marginLeft: 8,
   },
-  verifiedIcon: {
-    marginLeft: 4,
-    marginTop: 1, // perfect vertical align
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    marginLeft: 2,
+    marginTop: 2,
   },
   caption: {
     color: '#fff',

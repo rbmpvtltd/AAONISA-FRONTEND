@@ -190,7 +190,6 @@ import { getUserSessionsWithLatestMessage, sendReelToChats } from "@/src/api/cha
 import NotificationSkeletonItem from "@/src/components/NotificationSkeletonItem";
 import { useAppTheme } from "@/src/constants/themeHelper";
 import { ChatSummary } from "@/src/types/chatType";
-import { MaterialIcons } from "@expo/vector-icons";
 import { useMutation, useQuery, useQueryClient } from "@tanstack/react-query";
 import { router, useLocalSearchParams } from "expo-router";
 import { useState } from "react";
@@ -265,18 +264,19 @@ function ChatRow({
       <Avatar avatar={chat.avatar} size={avatarSize} />
 
       <View style={{ flex: 1, marginLeft: 12 }}>
+        <View style={styles.nameRow}>
+          <Text style={[styles.chatName, { color: theme.text, fontSize: nameFontSize }]}>
+            {chat.name}
+          </Text>
 
-        <Text style={[styles.chatName, { color: theme.text, fontSize: nameFontSize }]}>
-          {chat.name}
           {role === "admin" && (
-            < MaterialIcons
-              name="verified"
-              size={18}
-              color="#0095F6"
-              style={styles.verifiedIcon}
+            <Image
+              source={require("@/assets/images/blue-tick.png")}
+              style={styles.verifiedBadge}
+              resizeMode="contain"
             />
           )}
-        </Text>
+        </View>
 
         <Text
           numberOfLines={1}
@@ -626,7 +626,17 @@ const styles = StyleSheet.create({
     paddingVertical: 12,
     borderBottomWidth: 0.5,
   },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   chatName: { fontWeight: "600" },
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    marginLeft: 2,
+    marginTop: 2,
+  },
   verifiedIcon: {
     marginLeft: 4,
     marginTop: 1, // perfect vertical align

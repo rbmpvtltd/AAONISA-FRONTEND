@@ -343,7 +343,7 @@
 
 import { followUser, GetCurrentUser, GetProfileUsername, UnfollowUser } from '@/src/api/profile-api';
 import { useAppTheme } from '@/src/constants/themeHelper';
-import { Ionicons, MaterialIcons } from '@expo/vector-icons';
+import { Ionicons } from '@expo/vector-icons';
 import { useMutation, useQuery, useQueryClient } from '@tanstack/react-query';
 import { Stack, useLocalSearchParams, useRouter } from 'expo-router';
 import { useMemo, useState } from 'react';
@@ -549,17 +549,20 @@ const FollowingScreen = () => {
             }}
           />
           <View style={[styles.userInfo, { marginLeft: 10 }]}>
-            <Text style={[styles.name, { color: theme.text }]}>
-              {item.username || 'No Name'}
+            <View style={styles.nameRow}>
+              <Text style={[styles.name, { color: theme.text }]}>
+                {item.username || 'No Name'}
+              </Text>
+
               {item.role === "admin" && (
-                < MaterialIcons
-                  name="verified"
-                  size={18}
-                  color="#0095F6"
-                  style={styles.verifiedIcon}
+                <Image
+                  source={require("@/assets/images/blue-tick.png")}
+                  style={styles.verifiedBadge}
+                  resizeMode="contain"
                 />
               )}
-            </Text>
+            </View>
+
             <Text style={[styles.username, { color: theme.subtitle }]}>
               {item.name}
             </Text>
@@ -698,10 +701,16 @@ const styles = StyleSheet.create({
     borderBottomWidth: 0.5,
   },
   userInfo: { flex: 1 },
+  nameRow: {
+    flexDirection: "row",
+    alignItems: "center",
+  },
   name: { fontWeight: '600', fontSize: 16 },
-  verifiedIcon: {
-    marginLeft: 4,
-    marginTop: 1, // perfect vertical align
+  verifiedBadge: {
+    width: 18,
+    height: 18,
+    marginLeft: 2,
+    marginTop: 2,
   },
   username: { fontSize: 14 },
   followButton: {
